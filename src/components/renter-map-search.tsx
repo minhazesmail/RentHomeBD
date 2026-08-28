@@ -15,6 +15,7 @@ const LeafletMap = dynamic(() => import("@/components/leaflet-map"), { ssr: fals
 const DHAKA_CENTER: [number, number] = [23.8103, 90.4125];
 const RADIUS_OPTIONS = ["2", "5", "10", "15", "25", "50", "100"];
 const MAX_RENT_FILTER = 10_000_000;
+const PUBLIC_MEDIA_TTL_SECONDS = 300;
 
 type InitialSearch = {
   centerLat?: number;
@@ -120,7 +121,7 @@ export function RenterMapSearch({
     const rows = (data ?? []) as MapListing[];
     const hydrated = await Promise.all(rows.map(async (listing) => {
       if (!listing.cover_media_path) return listing;
-      const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(listing.cover_media_path, 1800);
+      const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(listing.cover_media_path, PUBLIC_MEDIA_TTL_SECONDS);
       return { ...listing, cover_url: signed?.signedUrl ?? null };
     }));
 
