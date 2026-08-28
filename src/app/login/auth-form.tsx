@@ -105,9 +105,8 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
     router.refresh();
   }
 
-  async function sendPhoneOtp(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (cooldown > 0) return;
+  async function requestPhoneOtp() {
+    if (cooldown > 0 || busy) return;
 
     const normalizedPhone = normalizeBangladeshPhone(phone);
     if (!normalizedPhone) {
@@ -144,6 +143,11 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
     setOtpSent(true);
     setCooldown(OTP_COOLDOWN_SECONDS);
     setMessage("OTP sent. Enter the 6-digit code to continue.");
+  }
+
+  async function sendPhoneOtp(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await requestPhoneOtp();
   }
 
   async function verifyPhoneOtp(event: React.FormEvent<HTMLFormElement>) {
@@ -222,7 +226,7 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
           <label>6-digit OTP<input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={token} onChange={(e) => setToken(e.target.value.replace(/\D/g, ""))} required /></label>
           <button className="primary-button" disabled={busy} type="submit">{busy ? "Verifying…" : "Verify OTP"}</button>
           <button className="text-button" onClick={() => { setOtpSent(false); setToken(""); setMessage(null); }} type="button">Use a different number</button>
-          <button className="text-button" onClick={(event) => void sendPhoneOtp(event as unknown as React.FormEvent<HTMLFormElement>)} type="button" disabled={busy || cooldown > 0}>
+          <button className="text-button" onClick={() => void requestPhoneOtp()} type="button" disabled={busy || cooldown > 0}>
             {cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}
           </button>
         </form>
