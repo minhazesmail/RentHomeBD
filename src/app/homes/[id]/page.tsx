@@ -21,6 +21,8 @@ type PublicProperty = {
   owner_role_verified_role: string | null; tenant_types: string[]; amenities: Amenity[]; media: MediaItem[];
 };
 
+const PUBLIC_MEDIA_TTL_SECONDS = 300;
+
 export const dynamic = "force-dynamic";
 
 function label(value: string | null | undefined) { return value ? value.replaceAll("_", " ") : "—"; }
@@ -37,7 +39,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
   const [{ data: savedRow }, media] = await Promise.all([
     auth ? supabase.from("saved_properties").select("property_id").eq("user_id", auth.userId).eq("property_id", property.id).maybeSingle() : Promise.resolve({ data: null }),
     Promise.all((property.media ?? []).map(async (item) => {
-      const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(item.storage_path, 1800);
+      const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(item.storage_path, PUBLIC_MEDIA_TTL_SECONDS);
       return { ...item, signed_url: signed?.signedUrl ?? null };
     })),
   ]);
