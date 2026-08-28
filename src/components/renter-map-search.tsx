@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -111,7 +112,13 @@ export function RenterMapSearch() {
         <div className="renter-results-list">
           {!busy && listings.length === 0 && <div className="renter-empty">No available homes match these filters yet.</div>}
           {listings.map((listing) => (
-            <button className={`renter-result-card${selectedId === listing.id ? " active" : ""}`} type="button" key={listing.id} onClick={() => setSelectedId(listing.id)}>
+            <Link
+              className={`renter-result-card${selectedId === listing.id ? " active" : ""}`}
+              href={`/homes/${listing.id}`}
+              key={listing.id}
+              onMouseEnter={() => setSelectedId(listing.id)}
+              onFocus={() => setSelectedId(listing.id)}
+            >
               <div className="renter-result-image">{listing.cover_url ? <img src={listing.cover_url} alt="" /> : <span>⌂</span>}</div>
               <div className="renter-result-copy">
                 <strong>{listing.title || "Rental property"}</strong>
@@ -119,7 +126,7 @@ export function RenterMapSearch() {
                 <div className="renter-result-meta"><b>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</b><small>{listing.bedrooms ?? "—"} bed · {listing.bathrooms ?? "—"} bath</small></div>
                 {listing.distance_meters !== null && <small>{listing.distance_meters < 1000 ? `${Math.round(listing.distance_meters)} m away` : `${(listing.distance_meters / 1000).toFixed(1)} km away`}</small>}
               </div>
-            </button>
+            </Link>
           ))}
         </div>
       </aside>
