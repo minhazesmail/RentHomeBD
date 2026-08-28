@@ -6,6 +6,20 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 
+function friendlyConversationError(message: string) {
+  const lower = message.toLowerCase();
+  if (lower.includes("conversation start limit reached")) {
+    return "You’ve opened many new conversations recently. Please try again later.";
+  }
+  if (lower.includes("not currently available")) {
+    return "This home is no longer available for new conversations.";
+  }
+  if (lower.includes("own listing")) {
+    return "You can’t start a renter conversation on your own listing.";
+  }
+  return "Could not open this conversation. Please try again.";
+}
+
 export function StartConversationButton({ propertyId, userId }: { propertyId: string; userId: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -24,7 +38,7 @@ export function StartConversationButton({ propertyId, userId }: { propertyId: st
       .maybeSingle();
 
     if (existingError) {
-      setMessage(existingError.message);
+      setMessage("Could not check your existing conversations. Please try again.");
       setBusy(false);
       return;
     }
@@ -53,7 +67,7 @@ export function StartConversationButton({ propertyId, userId }: { propertyId: st
         return;
       }
 
-      setMessage(error.message);
+      setMessage(friendlyConversationError(error.message));
       setBusy(false);
       return;
     }
