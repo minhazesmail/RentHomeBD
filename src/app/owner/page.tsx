@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ListingFreshnessActions } from "@/components/listing-freshness-actions";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import "./freshness.css";
 
 export const dynamic = "force-dynamic";
 
