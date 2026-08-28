@@ -10,11 +10,17 @@
 .renter-filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 13px; }
 .renter-filter-grid .field:last-child { grid-column: 1 / -1; }
 .renter-filter-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin: 16px 0 11px; }
+.save-search-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin: 12px 0; }
+.save-search-row input { min-width: 0; min-height: 42px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 9px; background: white; color: var(--foreground); outline: none; }
+.save-search-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(22,121,75,.1); }
+.compact-message { margin: 10px 0 0; }
 .renter-results-header { display: flex; justify-content: space-between; gap: 14px; margin: 24px 2px 10px; color: var(--muted); font-size: .85rem; }
 .renter-results-header strong { color: var(--foreground); }
 .renter-results-list { display: grid; gap: 10px; padding-bottom: 24px; }
-.renter-result-card { width: 100%; display: grid; grid-template-columns: 108px 1fr; gap: 13px; padding: 10px; border: 1px solid var(--border); border-radius: 14px; background: white; color: inherit; text-align: left; cursor: pointer; }
-.renter-result-card:hover, .renter-result-card.active { border-color: #9bc8ad; box-shadow: 0 0 0 2px rgba(22,121,75,.08); }
+.renter-result-card-wrap { position: relative; border-radius: 14px; }
+.renter-result-card-wrap.active .renter-result-card { border-color: #9bc8ad; box-shadow: 0 0 0 2px rgba(22,121,75,.08); }
+.renter-result-card { width: 100%; display: grid; grid-template-columns: 108px 1fr; gap: 13px; padding: 10px 48px 10px 10px; border: 1px solid var(--border); border-radius: 14px; background: white; color: inherit; text-align: left; cursor: pointer; text-decoration: none; }
+.renter-result-card:hover { border-color: #9bc8ad; box-shadow: 0 0 0 2px rgba(22,121,75,.08); }
 .renter-result-image { height: 104px; overflow: hidden; display: grid; place-items: center; border-radius: 10px; background: #edf3ef; color: var(--accent); font-size: 2rem; }
 .renter-result-image img { width: 100%; height: 100%; object-fit: cover; }
 .renter-result-copy { min-width: 0; display: grid; align-content: center; gap: 5px; }
@@ -24,6 +30,12 @@
 .renter-result-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 4px; }
 .renter-result-meta b { color: var(--accent-dark); }
 .renter-result-meta small { color: var(--muted); }
+.renter-result-card-wrap .save-home-wrap.compact { position: absolute; top: 13px; right: 13px; z-index: 3; }
+.save-home-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 999px; background: white; color: var(--foreground); cursor: pointer; font-weight: 800; }
+.save-home-button span { color: var(--accent); font-size: 1.15rem; line-height: 1; }
+.save-home-button.saved { border-color: #9fd0b4; background: #edf8f1; color: var(--accent-dark); }
+.save-home-wrap.compact .save-home-button { width: 34px; min-height: 34px; padding: 0; box-shadow: 0 5px 16px rgba(20,32,25,.08); }
+.save-home-error { display: block; margin-top: 6px; color: var(--danger); }
 .renter-empty { padding: 34px 18px; border: 1px dashed var(--border); border-radius: 14px; color: var(--muted); text-align: center; line-height: 1.5; }
 .renter-map-panel { min-width: 0; height: calc(100vh - 66px); position: sticky; top: 66px; }
 .renter-map-canvas { width: 100%; height: 100%; min-height: 560px; background: #e7ece8; }
@@ -43,10 +55,11 @@
 
 @media (max-width: 560px) {
   .homes-topbar { padding: 0 15px; }
+  .homes-topbar-actions { gap: 10px; }
   .renter-search-sidebar { padding: 17px; }
   .renter-filter-grid { grid-template-columns: 1fr; }
   .renter-filter-grid .field:last-child { grid-column: auto; }
-  .renter-filter-actions { grid-template-columns: 1fr; }
+  .renter-filter-actions, .save-search-row { grid-template-columns: 1fr; }
   .renter-result-card { grid-template-columns: 88px 1fr; }
   .renter-result-image { height: 92px; }
 }
