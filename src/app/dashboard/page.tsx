@@ -47,6 +47,9 @@ export default async function DashboardPage({
             <span>{trustProfile?.phone_verified_at ? "Phone verified" : "Phone not verified"}</span>
             {canList && <span>{roleVerified ? `Verified ${auth.profile.primary_role}` : `${auth.profile.primary_role} badge not issued`}</span>}
           </div>
+          <div className="dashboard-actions" style={{ marginTop: 18 }}>
+            <Link className="secondary-button link-button" href="/account/phone">{trustProfile?.phone_verified_at ? "Manage verified phone" : "Verify phone"}</Link>
+          </div>
           {canList && <p className="section-copy">A verified owner/agent badge means a RentHomeBD moderator reviewed the account. It does not prove government identity or legal ownership of a property.</p>}
         </section>
 
