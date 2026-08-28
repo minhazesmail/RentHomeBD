@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import "./design-system.css";
 import "./brand.css";
+import "./ui-refresh.css";
 import "./auth-polish.css";
 
 export const metadata: Metadata = {
