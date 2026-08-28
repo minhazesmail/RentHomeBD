@@ -76,6 +76,61 @@ function storageFilename(path: string) {
   return path.split("/").pop() ?? path;
 }
 
+function rawErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+  return "";
+}
+
+function friendlyListingError(error: unknown) {
+  const raw = rawErrorMessage(error);
+  const message = raw.toLowerCase();
+
+  if (message.includes("title of at least 5 characters") || message.includes("properties_title_length")) {
+    return "Add a listing title with at least 5 characters.";
+  }
+  if (message.includes("property type is required")) {
+    return "Choose a property type before submitting for review.";
+  }
+  if (message.includes("monthly rent is required") || message.includes("properties_rent_positive")) {
+    return "Enter a valid monthly rent greater than ৳0.";
+  }
+  if (message.includes("availability date is required")) {
+    return "Choose the date when the property will be available.";
+  }
+  if (message.includes("exact map coordinates are required")) {
+    return "Add the exact property location using the map coordinates.";
+  }
+  if (message.includes("preferred tenant type")) {
+    return "Choose at least one preferred tenant type.";
+  }
+  if (message.includes("property photo")) {
+    return "Upload at least one property photo before submitting for review.";
+  }
+  if (message.includes("properties_deposit_nonnegative")) {
+    return "Security deposit cannot be negative.";
+  }
+  if (message.includes("properties_floor_within_building")) {
+    return "Floor number cannot be higher than the building's total floors.";
+  }
+  if (message.includes("properties_size_positive")) {
+    return "Property size must be greater than 0 sq ft.";
+  }
+  if (message.includes("row-level security") || message.includes("permission denied")) {
+    return "You do not have permission to change this listing. Refresh the page and sign in again if needed.";
+  }
+  if (message.includes("violates check constraint")) {
+    return "One or more listing values are outside the allowed range. Check the numbers and try again.";
+  }
+  if (raw) {
+    return "We couldn't save this listing. Check the details and try again.";
+  }
+  return "Could not save this listing. Please try again.";
+}
+
 export function PropertyListingForm({ userId, amenities, property }: Props) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -115,6 +170,70 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
 
   function toggle(value: string, values: string[], setter: (next: string[]) => void) {
     setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
+  }
+
+  function validateNumericFields() {
+    const numericFields = [
+      [deposit, "Security deposit must be a valid number."],
+      [size, "Property size must be a valid number."],
+      [bedrooms, "Bedrooms must be a valid number."],
+      [bathrooms, "Bathrooms must be a valid number."],
+      [floorNumber, "Floor number must be a valid number."],
+      [totalFloors, "Total floors must be a valid number."],
+    ] as const;
+
+    for (const [value, errorMessage] of numericFields) {
+      if (value.trim() && optionalNumber(value) === null) return errorMessage;
+    }
+
+    const depositNumber = optionalNumber(deposit);
+    if (depositNumber !== null && depositNumber < 0) return "Security deposit cannot be negative.";
+
+    const sizeNumber = optionalNumber(size);
+    if (sizeNumber !== null && sizeNumber <= 0) return "Property size must be greater than 0 sq ft.";
+
+    const bedroomsNumber = optionalNumber(bedrooms);
+    if (bedroomsNumber !== null && bedroomsNumber < 0) return "Bedrooms cannot be negative.";
+
+    const bathroomsNumber = optionalNumber(bathrooms);
+    if (bathroomsNumber !== null && bathroomsNumber < 0) return "Bathrooms cannot be negative.";
+
+    const floor = optionalNumber(floorNumber);
+    if (floor !== null && floor < 0) return "Floor number cannot be negative.";
+
+    const floors = optionalNumber(totalFloors);
+    if (floors !== null && floors <= 0) return "Total floors must be greater than 0.";
+    if (floor !== null && floors !== null && floor > floors) {
+      return "Floor number cannot be higher than the building's total floors.";
+    }
+
+    return null;
+  }
+
+  function validateForReview() {
+    const numericError = validateNumericFields();
+    if (numericError) return numericError;
+
+    if (title.trim().length < 5) return "Add a listing title with at least 5 characters.";
+    if (!propertyType) return "Choose a property type before submitting for review.";
+
+    const rentNumber = optionalNumber(rent);
+    if (rentNumber === null || rentNumber <= 0) return "Enter a valid monthly rent greater than ৳0.";
+    if (!availableFrom) return "Choose the date when the property will be available.";
+
+    if (latitude.trim() && latNumber === null) return "Latitude must be a valid number.";
+    if (longitude.trim() && lngNumber === null) return "Longitude must be a valid number.";
+    if (latNumber === null || lngNumber === null) return "Add the exact property location before submitting for review.";
+    if (latNumber < -90 || latNumber > 90) return "Latitude must be between -90 and 90.";
+    if (lngNumber < -180 || lngNumber > 180) return "Longitude must be between -180 and 180.";
+
+    if (!tenantTypes.length) return "Choose at least one preferred tenant type.";
+
+    const hasPhoto = existingMedia.some((media) => media.media_type === "photo")
+      || files.some((file) => file.type.startsWith("image/"));
+    if (!hasPhoto) return "Upload at least one property photo before submitting for review.";
+
+    return null;
   }
 
   function useCurrentLocation() {
@@ -196,6 +315,13 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
 
   async function save(submitForReview: boolean) {
     if (locked) return;
+
+    const validationMessage = submitForReview ? validateForReview() : validateNumericFields();
+    if (validationMessage) {
+      setMessage(validationMessage);
+      return;
+    }
+
     setBusy(true);
     setMessage(null);
 
@@ -255,7 +381,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       router.push(`/owner?notice=${submitForReview ? "submitted" : "saved"}`);
       router.refresh();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not save this listing. Please try again.");
+      setMessage(friendlyListingError(error));
       setBusy(false);
     }
   }
@@ -322,7 +448,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
         <p className="form-hint">Current media count: {mediaCount}/10</p>
       </section>
 
-      {message && <div className="auth-message">{message}</div>}
+      {message && <div className="auth-message" role="status" aria-live="polite">{message}</div>}
 
       {!locked && <div className="listing-actions"><button className="secondary-button" type="submit" disabled={busy}>{busy ? "Saving…" : "Save draft"}</button><button className="primary-button" type="button" disabled={busy} onClick={() => void save(true)}>{busy ? "Working…" : "Submit for review"}</button></div>}
     </form>
