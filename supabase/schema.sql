@@ -258,6 +258,14 @@ using (
   exists (
     select 1 from public.properties p
     where p.id = property_id
+      and (
+        p.owner_id = (select auth.uid())
+        or (
+          p.status = 'available'
+          and p.published_at is not null
+          and (p.expires_at is null or p.expires_at > now())
+        )
+      )
   )
 );
 
@@ -322,6 +330,14 @@ using (
   exists (
     select 1 from public.properties p
     where p.id = property_id
+      and (
+        p.owner_id = (select auth.uid())
+        or (
+          p.status = 'available'
+          and p.published_at is not null
+          and (p.expires_at is null or p.expires_at > now())
+        )
+      )
   )
 );
 
@@ -381,6 +397,14 @@ using (
   exists (
     select 1 from public.properties p
     where p.id = property_id
+      and (
+        p.owner_id = (select auth.uid())
+        or (
+          p.status = 'available'
+          and p.published_at is not null
+          and (p.expires_at is null or p.expires_at > now())
+        )
+      )
   )
 );
 
