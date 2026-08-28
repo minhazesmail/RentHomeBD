@@ -2,7 +2,19 @@ import Link from "next/link";
 
 import { AuthForm } from "./auth-form";
 
-export default function LoginPage() {
+function safeNext(value: string | string[] | undefined) {
+  const candidate = Array.isArray(value) ? value[0] : value;
+  return candidate?.startsWith("/") && !candidate.startsWith("//") ? candidate : "/dashboard";
+}
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const nextPath = safeNext(params.next);
+
   return (
     <main className="shell auth-shell">
       <section className="auth-layout">
@@ -19,7 +31,7 @@ export default function LoginPage() {
             <span>Moderated, freshness-aware listings</span>
           </div>
         </div>
-        <AuthForm />
+        <AuthForm nextPath={nextPath} />
       </section>
     </main>
   );
