@@ -1,11 +1,13 @@
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/brand-logo";
+
 export default function HomePage() {
   return (
     <main className="landing-shell">
       <div className="landing-frame">
         <nav className="landing-nav">
-          <Link className="brand" href="/">RentHomeBD</Link>
+          <BrandLogo />
           <div className="landing-nav-actions">
             <Link className="text-link" href="/homes">Browse homes</Link>
             <Link className="secondary-button link-button" href="/login">Sign in</Link>
@@ -24,7 +26,7 @@ export default function HomePage() {
               <Link className="primary-button link-button" href="/homes">Explore the live map →</Link>
               <Link className="secondary-button link-button" href="/login">List a property</Link>
             </div>
-            <div className="landing-trust" aria-label="RentHomeBD benefits">
+            <div className="landing-trust" aria-label="NearBasha benefits">
               <span>Exact map pins</span>
               <span>Moderated listings</span>
               <span>Freshness checks</span>
@@ -57,7 +59,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="landing-strip" aria-label="How RentHomeBD is different">
+        <section className="landing-strip" aria-label="How NearBasha is different">
           <div className="landing-feature">
             <strong>Search spatially, not administratively.</strong>
             <span>See what is actually near work, university, transport, or family—not just what shares a thana name.</span>
