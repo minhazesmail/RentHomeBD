@@ -221,7 +221,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       };
 
       let propertyId = property?.id;
-      if (propertyId) {
+      if (propertyId && property) {
         const currentStatus = property.status === "pending_review" ? "draft" : property.status;
         const result = await supabase
           .from("properties")
