@@ -21,9 +21,9 @@ export default async function ModerationQueuePage({ searchParams }: { searchPara
           <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
           <p className="eyebrow">Moderation</p>
           <h1 className="owner-title">Review queue</h1>
-          <p className="intro">Listings stay private until a moderator approves them. User safety reports are handled in a separate trust queue.</p>
+          <p className="intro">Listings stay private until a moderator approves them. Safety reports and account trust reviews have separate queues.</p>
         </div>
-        <div className="owner-header-actions"><Link className="secondary-button link-button" href="/moderation/reports">Reports{openReportCount ? ` (${openReportCount})` : ""}</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
+        <div className="owner-header-actions"><Link className="secondary-button link-button" href="/moderation/accounts">Account trust</Link><Link className="secondary-button link-button" href="/moderation/reports">Reports{openReportCount ? ` (${openReportCount})` : ""}</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
       </header>
 
       {params.notice === "approved" && <div className="success-message">Listing approved and published for 14 days.</div>}
