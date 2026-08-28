@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
 import { getAuthContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -31,10 +32,14 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
   const property = (data?.[0] ?? null) as PublicProperty | null;
   if (!property) notFound();
 
-  const media = await Promise.all((property.media ?? []).map(async (item) => {
-    const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(item.storage_path, 1800);
-    return { ...item, signed_url: signed?.signedUrl ?? null };
-  }));
+  const [{ data: savedRow }, media] = await Promise.all([
+    auth ? supabase.from("saved_properties").select("property_id").eq("user_id", auth.userId).eq("property_id", property.id).maybeSingle() : Promise.resolve({ data: null }),
+    Promise.all((property.media ?? []).map(async (item) => {
+      const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(item.storage_path, 1800);
+      return { ...item, signed_url: signed?.signedUrl ?? null };
+    })),
+  ]);
+
   const photos = media.filter((item) => item.media_type === "photo" && item.signed_url);
   const videos = media.filter((item) => item.media_type === "video" && item.signed_url);
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`;
@@ -44,7 +49,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
     <main className="property-detail-page">
       <header className="property-detail-topbar">
         <Link className="homes-brand" href="/">RentHomeBD</Link>
-        <div className="property-detail-nav"><Link className="text-link" href="/homes">Back to map</Link><Link className="text-link" href={auth ? "/messages" : "/login"}>{auth ? "Messages" : "Sign in"}</Link></div>
+        <div className="property-detail-nav"><Link className="text-link" href="/homes">Back to map</Link>{auth && <Link className="text-link" href="/saved">Saved</Link>}<Link className="text-link" href={auth ? "/messages" : "/login"}>{auth ? "Messages" : "Sign in"}</Link></div>
       </header>
       <div className="property-detail-shell">
         <section className="property-detail-hero">
@@ -67,6 +72,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
           </div>
 
           <aside className="property-contact-card" id="contact">
+            <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} />
             <div className="owner-badge">{property.owner_display_name?.slice(0, 1).toUpperCase() || "O"}</div>
             <p className="eyebrow">Listed by {label(property.owner_role)}</p><h2>{property.owner_display_name || "Property owner"}</h2>
             <p>Contact details stay private. Conversations happen inside RentHomeBD so neither side has to expose a phone number publicly.</p>
