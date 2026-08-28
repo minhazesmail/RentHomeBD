@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireModerator } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -8,9 +9,10 @@ export const dynamic = "force-dynamic";
 export default async function ModerationQueuePage({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
   await requireModerator();
   const params = await searchParams;
-  const supabase = await createClient();
+  const typedSupabase = await createClient();
+  const supabase = typedSupabase as unknown as SupabaseClient;
   const [{ data: listings }, { count: openReportCount }] = await Promise.all([
-    supabase.from("properties").select("id, title, address_text, property_type, rent_bdt, updated_at").eq("status", "pending_review").order("updated_at", { ascending: true }),
+    typedSupabase.from("properties").select("id, title, address_text, property_type, rent_bdt, updated_at").eq("status", "pending_review").order("updated_at", { ascending: true }),
     supabase.from("listing_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
   ]);
 
