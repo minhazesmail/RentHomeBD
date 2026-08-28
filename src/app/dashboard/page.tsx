@@ -16,7 +16,13 @@ export default async function DashboardPage({
   const identity = auth.email ?? auth.phone ?? auth.userId;
   const canList = auth.profile.primary_role === "owner" || auth.profile.primary_role === "agent";
   const supabase = (await createClient()) as unknown as SupabaseClient;
-  const { data: moderatorMembership } = await supabase.from("moderators").select("user_id").eq("user_id", auth.userId).maybeSingle();
+  const [{ data: moderatorMembership }, { data: trustProfile }] = await Promise.all([
+    supabase.from("moderators").select("user_id").eq("user_id", auth.userId).maybeSingle(),
+    supabase.from("profiles").select("phone_verified_at, role_verified_at, role_verified_role").eq("id", auth.userId).maybeSingle(),
+  ]);
+  const roleVerified = Boolean(
+    trustProfile?.role_verified_at && trustProfile?.role_verified_role === auth.profile.primary_role,
+  );
 
   return (
     <main className="shell dashboard-shell">
@@ -34,6 +40,15 @@ export default async function DashboardPage({
 
         {params.error === "owner-role-required" && <p className="auth-message">Property management is available to owner and agent accounts.</p>}
         {params.error === "moderator-role-required" && <p className="auth-message">Moderation access is limited to explicitly assigned reviewer accounts.</p>}
+
+        <section className="listing-section" style={{ marginTop: 24 }}>
+          <div className="section-heading"><span>✓</span><div><h2>Trust status</h2><p>These signals are tied to your authenticated account and moderator review history.</p></div></div>
+          <div className="property-tags">
+            <span>{trustProfile?.phone_verified_at ? "Phone verified" : "Phone not verified"}</span>
+            {canList && <span>{roleVerified ? `Verified ${auth.profile.primary_role}` : `${auth.profile.primary_role} badge not issued`}</span>}
+          </div>
+          {canList && <p className="section-copy">A verified owner/agent badge means a RentHomeBD moderator reviewed the account. It does not prove government identity or legal ownership of a property.</p>}
+        </section>
 
         <div className="dashboard-actions">
           <Link className="primary-button link-button" href="/messages">Messages</Link>
