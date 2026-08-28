@@ -5,25 +5,52 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { SaveHomeButton } from "@/components/save-home-button";
 import { createClient } from "@/lib/supabase/client";
 import type { MapListing } from "@/components/leaflet-map";
 
 const LeafletMap = dynamic(() => import("@/components/leaflet-map"), { ssr: false });
 const DHAKA_CENTER: [number, number] = [23.8103, 90.4125];
 
-export function RenterMapSearch() {
+type InitialSearch = {
+  centerLat?: number;
+  centerLong?: number;
+  radiusKm?: string;
+  minRent?: string;
+  maxRent?: string;
+  tenantType?: string;
+  bedrooms?: string;
+};
+
+export function RenterMapSearch({
+  userId,
+  initialSavedPropertyIds = [],
+  initialSearch = {},
+}: {
+  userId: string | null;
+  initialSavedPropertyIds?: string[];
+  initialSearch?: InitialSearch;
+}) {
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
+  const initialCenter: [number, number] = [
+    initialSearch.centerLat ?? DHAKA_CENTER[0],
+    initialSearch.centerLong ?? DHAKA_CENTER[1],
+  ];
   const [listings, setListings] = useState<MapListing[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [center, setCenter] = useState<[number, number]>(DHAKA_CENTER);
-  const [radiusKm, setRadiusKm] = useState("15");
-  const [minRent, setMinRent] = useState("");
-  const [maxRent, setMaxRent] = useState("");
-  const [tenantType, setTenantType] = useState("");
-  const [bedrooms, setBedrooms] = useState("");
+  const [center, setCenter] = useState<[number, number]>(initialCenter);
+  const [radiusKm, setRadiusKm] = useState(initialSearch.radiusKm ?? "15");
+  const [minRent, setMinRent] = useState(initialSearch.minRent ?? "");
+  const [maxRent, setMaxRent] = useState(initialSearch.maxRent ?? "");
+  const [tenantType, setTenantType] = useState(initialSearch.tenantType ?? "");
+  const [bedrooms, setBedrooms] = useState(initialSearch.bedrooms ?? "");
+  const [searchName, setSearchName] = useState("");
   const [busy, setBusy] = useState(true);
+  const [savingSearch, setSavingSearch] = useState(false);
   const [locating, setLocating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  const savedSet = useMemo(() => new Set(initialSavedPropertyIds), [initialSavedPropertyIds]);
 
   const runSearch = useCallback(async (searchCenter = center) => {
     setBusy(true);
@@ -58,8 +85,8 @@ export function RenterMapSearch() {
   }, [bedrooms, center, maxRent, minRent, radiusKm, supabase, tenantType]);
 
   useEffect(() => {
-    void runSearch(DHAKA_CENTER);
-  }, []); // Initial MVP search is centered on Dhaka.
+    void runSearch(initialCenter);
+  }, []);
 
   function useMyLocation() {
     if (!navigator.geolocation) {
@@ -77,10 +104,43 @@ export function RenterMapSearch() {
       },
       () => {
         setLocating(false);
-        setMessage("Could not access your location. The search is still centered on Dhaka.");
+        setMessage("Could not access your location. The search center was not changed.");
       },
       { enableHighAccuracy: true, timeout: 12000 }
     );
+  }
+
+  async function saveSearch() {
+    if (!userId) {
+      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+      return;
+    }
+    if (!searchName.trim()) {
+      setMessage("Give this search a short name before saving it.");
+      return;
+    }
+
+    setSavingSearch(true);
+    setMessage(null);
+    const { error } = await supabase.from("saved_searches").insert({
+      user_id: userId,
+      name: searchName.trim(),
+      center_lat: center[0],
+      center_long: center[1],
+      radius_km: radiusKm ? Number(radiusKm) : null,
+      min_rent: minRent ? Number(minRent) : null,
+      max_rent: maxRent ? Number(maxRent) : null,
+      tenant_type: tenantType || null,
+      min_bedrooms: bedrooms ? Number(bedrooms) : null,
+    });
+
+    if (error) {
+      setMessage(error.message);
+    } else {
+      setSearchName("");
+      setMessage("Search saved. You can reopen it from Saved.");
+    }
+    setSavingSearch(false);
   }
 
   return (
@@ -104,29 +164,30 @@ export function RenterMapSearch() {
             <button className="secondary-button" type="button" onClick={useMyLocation} disabled={locating || busy}>{locating ? "Locating…" : "Use my location"}</button>
             <button className="primary-button" type="button" onClick={() => void runSearch()} disabled={busy}>{busy ? "Searching…" : "Search map"}</button>
           </div>
+          <div className="save-search-row">
+            <input value={searchName} onChange={(e) => setSearchName(e.target.value)} maxLength={80} placeholder="Name this search, e.g. Dhanmondi family" />
+            <button className="secondary-button" type="button" onClick={() => void saveSearch()} disabled={savingSearch}>{savingSearch ? "Saving…" : "Save search"}</button>
+          </div>
           <p className="form-hint">Search center: {center[0].toFixed(4)}, {center[1].toFixed(4)}</p>
-          {message && <div className="auth-message">{message}</div>}
+          {message && <div className={message.startsWith("Search saved") ? "success-message compact-message" : "auth-message"}>{message}</div>}
         </div>
 
         <div className="renter-results-header"><strong>{busy ? "Searching…" : `${listings.length} home${listings.length === 1 ? "" : "s"}`}</strong><span>Closest first</span></div>
         <div className="renter-results-list">
           {!busy && listings.length === 0 && <div className="renter-empty">No available homes match these filters yet.</div>}
           {listings.map((listing) => (
-            <Link
-              className={`renter-result-card${selectedId === listing.id ? " active" : ""}`}
-              href={`/homes/${listing.id}`}
-              key={listing.id}
-              onMouseEnter={() => setSelectedId(listing.id)}
-              onFocus={() => setSelectedId(listing.id)}
-            >
-              <div className="renter-result-image">{listing.cover_url ? <img src={listing.cover_url} alt="" /> : <span>⌂</span>}</div>
-              <div className="renter-result-copy">
-                <strong>{listing.title || "Rental property"}</strong>
-                <span>{listing.address_text || "Location available on map"}</span>
-                <div className="renter-result-meta"><b>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</b><small>{listing.bedrooms ?? "—"} bed · {listing.bathrooms ?? "—"} bath</small></div>
-                {listing.distance_meters !== null && <small>{listing.distance_meters < 1000 ? `${Math.round(listing.distance_meters)} m away` : `${(listing.distance_meters / 1000).toFixed(1)} km away`}</small>}
-              </div>
-            </Link>
+            <div className={`renter-result-card-wrap${selectedId === listing.id ? " active" : ""}`} key={listing.id} onMouseEnter={() => setSelectedId(listing.id)}>
+              <Link className="renter-result-card" href={`/homes/${listing.id}`} onFocus={() => setSelectedId(listing.id)}>
+                <div className="renter-result-image">{listing.cover_url ? <img src={listing.cover_url} alt="" /> : <span>⌂</span>}</div>
+                <div className="renter-result-copy">
+                  <strong>{listing.title || "Rental property"}</strong>
+                  <span>{listing.address_text || "Location available on map"}</span>
+                  <div className="renter-result-meta"><b>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</b><small>{listing.bedrooms ?? "—"} bed · {listing.bathrooms ?? "—"} bath</small></div>
+                  {listing.distance_meters !== null && <small>{listing.distance_meters < 1000 ? `${Math.round(listing.distance_meters)} m away` : `${(listing.distance_meters / 1000).toFixed(1)} km away`}</small>}
+                </div>
+              </Link>
+              <SaveHomeButton propertyId={listing.id} userId={userId} initialSaved={savedSet.has(listing.id)} compact />
+            </div>
           ))}
         </div>
       </aside>
