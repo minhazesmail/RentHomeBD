@@ -1,7 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -31,6 +33,7 @@ export function RenterMapSearch({
   initialSavedPropertyIds?: string[];
   initialSearch?: InitialSearch;
 }) {
+  const router = useRouter();
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const initialCenter: [number, number] = [
     initialSearch.centerLat ?? DHAKA_CENTER[0],
@@ -117,7 +120,7 @@ export function RenterMapSearch({
 
   async function saveSearch() {
     if (!userId) {
-      window.location.href = `/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+      router.push(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
     if (!searchName.trim()) {
@@ -183,7 +186,7 @@ export function RenterMapSearch({
           {listings.map((listing) => (
             <div className={`renter-result-card-wrap${selectedId === listing.id ? " active" : ""}`} key={listing.id} onMouseEnter={() => setSelectedId(listing.id)}>
               <Link className="renter-result-card" href={`/homes/${listing.id}`} onFocus={() => setSelectedId(listing.id)}>
-                <div className="renter-result-image">{listing.cover_url ? <img src={listing.cover_url} alt="" /> : <span>⌂</span>}</div>
+                <div className="renter-result-image">{listing.cover_url ? <Image src={listing.cover_url} alt="" width={320} height={220} sizes="(max-width: 900px) 40vw, 220px" /> : <span>⌂</span>}</div>
                 <div className="renter-result-copy">
                   <strong>{listing.title || "Rental property"}</strong>
                   <span>{listing.address_text || "Location available on map"}</span>
