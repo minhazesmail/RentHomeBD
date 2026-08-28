@@ -69,7 +69,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
   const photos = media.filter((item) => item.media_type === "photo" && item.signed_url);
   const videos = media.filter((item) => item.media_type === "video" && item.signed_url);
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`;
-  const contactHref = auth ? `/dashboard?contactProperty=${property.id}` : `/login?next=/homes/${property.id}%23contact`;
+  const signInHref = `/login?next=${encodeURIComponent(`/homes/${property.id}#contact`)}`;
 
   return (
     <main className="property-detail-page">
@@ -156,10 +156,14 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
             <p className="eyebrow">Listed by {label(property.owner_role)}</p>
             <h2>{property.owner_display_name || "Property owner"}</h2>
             <p>Contact details stay private. RentHomeBD will route conversations through in-app messaging rather than exposing phone numbers by default.</p>
-            <Link className="primary-button link-button property-contact-button" href={contactHref}>
-              {auth ? "Contact owner" : "Sign in to contact owner"}
-            </Link>
-            {auth && <p className="contact-note">The full in-app conversation flow is the next messaging task.</p>}
+            {auth ? (
+              <div className="contact-coming-soon" role="status">
+                <strong>Ready for messaging</strong>
+                <span>Your account is signed in. The conversation flow is the next product task.</span>
+              </div>
+            ) : (
+              <Link className="primary-button link-button property-contact-button" href={signInHref}>Sign in to contact owner</Link>
+            )}
             <div className="freshness-note"><strong>Fresh listing</strong><span>Published {new Date(property.published_at).toLocaleDateString("en-BD")}{property.expires_at ? ` · reconfirmation due ${new Date(property.expires_at).toLocaleDateString("en-BD")}` : ""}</span></div>
           </aside>
         </div>
