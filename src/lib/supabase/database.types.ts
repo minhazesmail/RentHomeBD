@@ -8,7 +8,7 @@ export type Json =
 
 export type Database = {
   __InternalSupabase: {
-    PostgrestVersion: "14.17"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -47,7 +47,8 @@ export type Database = {
       }
       properties: {
         Row: {
-          available_from: string
+          address_text: string | null
+          available_from: string | null
           bathrooms: number | null
           bedrooms: number | null
           created_at: string
@@ -59,23 +60,24 @@ export type Database = {
           gender_preference: Database["public"]["Enums"]["gender_preference"]
           id: string
           last_confirmed_at: string | null
-          latitude: number
+          latitude: number | null
           location: unknown
-          longitude: number
+          longitude: number | null
           moderation_notes: string | null
           owner_id: string
-          property_type: Database["public"]["Enums"]["property_type"]
+          property_type: Database["public"]["Enums"]["property_type"] | null
           published_at: string | null
-          rent_bdt: number
+          rent_bdt: number | null
           size_sqft: number | null
           status: Database["public"]["Enums"]["listing_status"]
-          title: string
+          title: string | null
           total_floors: number | null
           updated_at: string
           utilities_included: string[]
         }
         Insert: {
-          available_from: string
+          address_text?: string | null
+          available_from?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
           created_at?: string
@@ -87,23 +89,24 @@ export type Database = {
           gender_preference?: Database["public"]["Enums"]["gender_preference"]
           id?: string
           last_confirmed_at?: string | null
-          latitude: number
+          latitude?: number | null
           location?: unknown
-          longitude: number
+          longitude?: number | null
           moderation_notes?: string | null
           owner_id: string
-          property_type: Database["public"]["Enums"]["property_type"]
+          property_type?: Database["public"]["Enums"]["property_type"] | null
           published_at?: string | null
-          rent_bdt: number
+          rent_bdt?: number | null
           size_sqft?: number | null
           status?: Database["public"]["Enums"]["listing_status"]
-          title: string
+          title?: string | null
           total_floors?: number | null
           updated_at?: string
           utilities_included?: string[]
         }
         Update: {
-          available_from?: string
+          address_text?: string | null
+          available_from?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
           created_at?: string
@@ -115,17 +118,17 @@ export type Database = {
           gender_preference?: Database["public"]["Enums"]["gender_preference"]
           id?: string
           last_confirmed_at?: string | null
-          latitude?: number
+          latitude?: number | null
           location?: unknown
-          longitude?: number
+          longitude?: number | null
           moderation_notes?: string | null
           owner_id?: string
-          property_type?: Database["public"]["Enums"]["property_type"]
+          property_type?: Database["public"]["Enums"]["property_type"] | null
           published_at?: string | null
-          rent_bdt?: number
+          rent_bdt?: number | null
           size_sqft?: number | null
           status?: Database["public"]["Enums"]["listing_status"]
-          title?: string
+          title?: string | null
           total_floors?: number | null
           updated_at?: string
           utilities_included?: string[]
