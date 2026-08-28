@@ -12,12 +12,13 @@ export default function HomePage() {
           tenant preferences, and fresher listings built into the experience.
         </p>
         <div className="hero-actions">
-          <Link className="primary-button link-button" href="/login">Sign in or create account</Link>
+          <Link className="primary-button link-button" href="/homes">Explore homes on the map</Link>
+          <Link className="secondary-button link-button" href="/login">Sign in or create account</Link>
           <Link className="text-link" href="/dashboard">Open dashboard</Link>
         </div>
         <div className="status-card">
           <span className="status-dot" aria-hidden="true" />
-          <span>Authentication foundation is ready. Listing features are next.</span>
+          <span>Live renter map search is available for moderated listings.</span>
         </div>
       </section>
     </main>
