@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +17,7 @@ export function SaveHomeButton({
   initialSaved?: boolean;
   compact?: boolean;
 }) {
+  const router = useRouter();
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [saved, setSaved] = useState(initialSaved);
   const [busy, setBusy] = useState(false);
@@ -23,7 +25,7 @@ export function SaveHomeButton({
 
   async function toggle() {
     if (!userId) {
-      window.location.href = `/login?next=${encodeURIComponent(`/homes/${propertyId}`)}`;
+      router.push(`/login?next=${encodeURIComponent(`/homes/${propertyId}`)}`);
       return;
     }
 
