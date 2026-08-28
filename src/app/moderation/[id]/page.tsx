@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -83,7 +84,7 @@ export default async function ModerationDetailPage({ params }: { params: Promise
             <div className="section-heading"><span>4</span><div><h2>Media</h2><p>Check that photos clearly represent the property.</p></div></div>
             <div className="moderation-media-grid">
               {media.map((item) => item.signedUrl ? (
-                item.media_type === "photo" ? <img key={item.id} src={item.signedUrl} alt="Submitted property" /> : <video key={item.id} controls src={item.signedUrl} />
+                item.media_type === "photo" ? <Image key={item.id} src={item.signedUrl} alt="Submitted property" width={960} height={720} sizes="(max-width: 900px) 100vw, 50vw" /> : <video key={item.id} controls src={item.signedUrl} />
               ) : <div className="media-placeholder" key={item.id}>Media unavailable</div>)}
             </div>
           </section>
