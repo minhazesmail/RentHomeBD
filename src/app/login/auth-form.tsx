@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
@@ -9,9 +9,45 @@ type Mode = "signin" | "signup";
 type Method = "email" | "phone";
 type Role = "renter" | "owner" | "agent";
 
+const OTP_COOLDOWN_SECONDS = 60;
+
+function friendlyAuthError(error: unknown, context: "signin" | "signup" | "otp-send" | "otp-verify") {
+  const raw = error instanceof Error
+    ? error.message
+    : typeof error === "object" && error !== null && "message" in error && typeof (error as { message?: unknown }).message === "string"
+      ? (error as { message: string }).message
+      : "";
+  const message = raw.toLowerCase();
+
+  if (message.includes("rate limit") || message.includes("too many") || message.includes("over_request_rate_limit")) {
+    return "Too many attempts. Please wait a little before trying again.";
+  }
+  if (context === "otp-verify" && (message.includes("expired") || message.includes("invalid") || message.includes("token"))) {
+    return "That OTP is invalid or expired. Request a new code and try again.";
+  }
+  if (context === "otp-send") {
+    return "We couldn't send an OTP to that number. Check the number and try again.";
+  }
+  if (context === "signin") {
+    return "We couldn't sign you in with those credentials.";
+  }
+  if (context === "signup") {
+    return "We couldn't create the account. Check the details or try signing in if you already registered.";
+  }
+  return "Authentication failed. Please try again.";
+}
+
+function normalizeBangladeshPhone(value: string) {
+  const compact = value.replace(/[\s()-]/g, "");
+  if (/^01[3-9]\d{8}$/.test(compact)) return `+88${compact}`;
+  if (/^8801[3-9]\d{8}$/.test(compact)) return `+${compact}`;
+  if (/^\+8801[3-9]\d{8}$/.test(compact)) return compact;
+  return null;
+}
+
 export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [method, setMethod] = useState<Method>("email");
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
@@ -21,35 +57,47 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
   const [phone, setPhone] = useState("+880");
   const [token, setToken] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = window.setInterval(() => setCooldown((value) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [cooldown]);
+
   async function submitEmail(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (mode === "signup" && displayName.trim().length < 2) {
+      setMessage("Enter a display name with at least 2 characters.");
+      return;
+    }
+
     setBusy(true);
     setMessage(null);
 
     const result =
       mode === "signup"
         ? await supabase.auth.signUp({
-            email,
+            email: email.trim().toLowerCase(),
             password,
             options: {
               data: { display_name: displayName.trim(), role },
               emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(nextPath)}`,
             },
           })
-        : await supabase.auth.signInWithPassword({ email, password });
+        : await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
 
     setBusy(false);
 
     if (result.error) {
-      setMessage(result.error.message);
+      setMessage(friendlyAuthError(result.error, mode));
       return;
     }
 
     if (mode === "signup" && !result.data.session) {
-      setMessage("Account created. Check your email to confirm your address, then sign in.");
+      setMessage("If this email can be registered, a confirmation message will arrive shortly. Check your inbox and spam folder.");
       return;
     }
 
@@ -59,29 +107,52 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
 
   async function sendPhoneOtp(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (cooldown > 0) return;
+
+    const normalizedPhone = normalizeBangladeshPhone(phone);
+    if (!normalizedPhone) {
+      setMessage("Enter a valid Bangladesh mobile number, for example +8801XXXXXXXXX.");
+      return;
+    }
+    if (mode === "signup" && displayName.trim().length < 2) {
+      setMessage("Enter a display name with at least 2 characters.");
+      return;
+    }
+
     setBusy(true);
     setMessage(null);
 
     const { error } = await supabase.auth.signInWithOtp({
-      phone,
-      options: {
-        data: { display_name: displayName.trim(), role },
-        shouldCreateUser: true,
-      },
+      phone: normalizedPhone,
+      options: mode === "signup"
+        ? {
+            data: { display_name: displayName.trim(), role },
+            shouldCreateUser: true,
+          }
+        : {
+            shouldCreateUser: false,
+          },
     });
 
     setBusy(false);
     if (error) {
-      setMessage(error.message);
+      setMessage(friendlyAuthError(error, "otp-send"));
       return;
     }
 
+    setPhone(normalizedPhone);
     setOtpSent(true);
+    setCooldown(OTP_COOLDOWN_SECONDS);
     setMessage("OTP sent. Enter the 6-digit code to continue.");
   }
 
   async function verifyPhoneOtp(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!/^\d{6}$/.test(token)) {
+      setMessage("Enter the complete 6-digit OTP.");
+      return;
+    }
+
     setBusy(true);
     setMessage(null);
 
@@ -89,7 +160,7 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
     setBusy(false);
 
     if (error) {
-      setMessage(error.message);
+      setMessage(friendlyAuthError(error, "otp-verify"));
       return;
     }
 
@@ -97,27 +168,41 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
     router.refresh();
   }
 
+  function switchMethod(nextMethod: Method) {
+    setMethod(nextMethod);
+    setOtpSent(false);
+    setToken("");
+    setMessage(null);
+  }
+
+  function switchMode(nextMode: Mode) {
+    setMode(nextMode);
+    setOtpSent(false);
+    setToken("");
+    setMessage(null);
+  }
+
   return (
     <div className="auth-card">
       <div className="auth-tabs" aria-label="Authentication method">
-        <button className={method === "email" ? "active" : ""} onClick={() => setMethod("email")} type="button">
+        <button className={method === "email" ? "active" : ""} onClick={() => switchMethod("email")} type="button">
           Email
         </button>
-        <button className={method === "phone" ? "active" : ""} onClick={() => setMethod("phone")} type="button">
+        <button className={method === "phone" ? "active" : ""} onClick={() => switchMethod("phone")} type="button">
           Phone OTP
         </button>
       </div>
 
+      <div className="auth-tabs compact" aria-label="Account mode">
+        <button className={mode === "signin" ? "active" : ""} onClick={() => switchMode("signin")} type="button">Sign in</button>
+        <button className={mode === "signup" ? "active" : ""} onClick={() => switchMode("signup")} type="button">Create account</button>
+      </div>
+
       {method === "email" ? (
         <form className="auth-form" onSubmit={submitEmail}>
-          <div className="auth-tabs compact" aria-label="Email mode">
-            <button className={mode === "signin" ? "active" : ""} onClick={() => setMode("signin")} type="button">Sign in</button>
-            <button className={mode === "signup" ? "active" : ""} onClick={() => setMode("signup")} type="button">Create account</button>
-          </div>
-
           {mode === "signup" && (
             <>
-              <label>Display name<input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={80} required /></label>
+              <label>Display name<input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={80} autoComplete="name" required /></label>
               <label>I am a
                 <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
                   <option value="renter">Renter</option>
@@ -134,27 +219,34 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
         </form>
       ) : otpSent ? (
         <form className="auth-form" onSubmit={verifyPhoneOtp}>
-          <label>6-digit OTP<input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={token} onChange={(e) => setToken(e.target.value.replace(/\D/g, ""))} required /></label>
+          <label>6-digit OTP<input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={token} onChange={(e) => setToken(e.target.value.replace(/\D/g, ""))} required /></label>
           <button className="primary-button" disabled={busy} type="submit">{busy ? "Verifying…" : "Verify OTP"}</button>
-          <button className="text-button" onClick={() => setOtpSent(false)} type="button">Use a different number</button>
+          <button className="text-button" onClick={() => { setOtpSent(false); setToken(""); setMessage(null); }} type="button">Use a different number</button>
+          <button className="text-button" onClick={(event) => void sendPhoneOtp(event as unknown as React.FormEvent<HTMLFormElement>)} type="button" disabled={busy || cooldown > 0}>
+            {cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}
+          </button>
         </form>
       ) : (
         <form className="auth-form" onSubmit={sendPhoneOtp}>
-          <label>Display name<input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={80} required /></label>
-          <label>I am a
-            <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
-              <option value="renter">Renter</option>
-              <option value="owner">Owner / Landlord</option>
-              <option value="agent">Agent / Agency</option>
-            </select>
-          </label>
+          {mode === "signup" && (
+            <>
+              <label>Display name<input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={80} autoComplete="name" required /></label>
+              <label>I am a
+                <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
+                  <option value="renter">Renter</option>
+                  <option value="owner">Owner / Landlord</option>
+                  <option value="agent">Agent / Agency</option>
+                </select>
+              </label>
+            </>
+          )}
           <label>Mobile number<input type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+8801XXXXXXXXX" required /></label>
-          <p className="form-hint">Phone OTP requires an SMS provider to be enabled in the Supabase project.</p>
-          <button className="primary-button" disabled={busy} type="submit">{busy ? "Sending…" : "Send OTP"}</button>
+          <p className="form-hint">Bangladesh mobile numbers only. OTP delivery and abuse limits are also enforced by the authentication provider.</p>
+          <button className="primary-button" disabled={busy || cooldown > 0} type="submit">{busy ? "Sending…" : cooldown > 0 ? `Try again in ${cooldown}s` : mode === "signin" ? "Send sign-in OTP" : "Create account with OTP"}</button>
         </form>
       )}
 
-      {message && <p className="auth-message" role="status">{message}</p>}
+      {message && <p className="auth-message" role="status" aria-live="polite">{message}</p>}
     </div>
   );
 }
