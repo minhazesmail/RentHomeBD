@@ -6,6 +6,20 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 
+function friendlyMessageError(message: string) {
+  const lower = message.toLowerCase();
+  if (lower.includes("message rate limit reached")) {
+    return "You’re sending messages very quickly. Wait a moment and try again.";
+  }
+  if (lower.includes("hourly message limit reached")) {
+    return "You’ve reached the hourly messaging limit. Please try again later.";
+  }
+  if (lower.includes("not a participant") || lower.includes("sender mismatch")) {
+    return "You no longer have permission to send messages in this conversation.";
+  }
+  return "Could not send your message. Please try again.";
+}
+
 export function MessageComposer({ conversationId, userId }: { conversationId: string; userId: string }) {
   const router = useRouter();
   const [body, setBody] = useState("");
@@ -26,7 +40,7 @@ export function MessageComposer({ conversationId, userId }: { conversationId: st
     });
 
     if (error) {
-      setMessage(error.message);
+      setMessage(friendlyMessageError(error.message));
       setBusy(false);
       return;
     }
