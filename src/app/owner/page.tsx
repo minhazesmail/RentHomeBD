@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { ListingFreshnessActions } from "@/components/listing-freshness-actions";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -42,7 +43,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
     <main className="owner-shell">
       <header className="owner-header">
         <div>
-          <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
+          <BrandLogo />
           <p className="eyebrow">Owner workspace</p>
           <h1 className="owner-title">Your properties</h1>
           <p className="intro">Available listings must be reconfirmed every 14 days. Stale listings are automatically removed from public search until you confirm them again.</p>
