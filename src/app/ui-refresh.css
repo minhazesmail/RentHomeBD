@@ -1,0 +1,300 @@
+:root {
+  --nb-ink: #0b1f17;
+  --nb-green: #0d5f43;
+  --nb-green-2: #087a52;
+  --nb-lime: #b9f227;
+  --nb-lime-soft: #efffd1;
+  --nb-bg: #f5f8f5;
+  --nb-card: rgba(255,255,255,.9);
+  --nb-line: rgba(28,63,47,.11);
+  --nb-muted: #617269;
+  --nb-shadow: 0 18px 55px rgba(10,38,26,.09);
+  --nb-shadow-hover: 0 24px 70px rgba(10,38,26,.14);
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% -10%, rgba(185,242,39,.18), transparent 30rem),
+    radial-gradient(circle at 90% 0%, rgba(13,95,67,.08), transparent 30rem),
+    var(--nb-bg);
+}
+
+.primary-button {
+  background: linear-gradient(135deg, var(--nb-green), #073d2c);
+  box-shadow: 0 10px 24px rgba(13,95,67,.22);
+}
+.primary-button:hover {
+  background: linear-gradient(135deg, var(--nb-green-2), var(--nb-green));
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(13,95,67,.28);
+}
+.secondary-button {
+  border-color: rgba(13,95,67,.16);
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(14px);
+}
+.secondary-button:hover {
+  border-color: rgba(13,95,67,.32);
+  background: white;
+}
+
+/* Global premium surfaces */
+.auth-card,
+.dashboard-card,
+.property-list-panel,
+.listing-section,
+.renter-filter-panel,
+.property-detail-section,
+.property-contact-card {
+  border: 1px solid var(--nb-line);
+  background: var(--nb-card);
+  box-shadow: var(--nb-shadow);
+  backdrop-filter: blur(18px);
+}
+
+/* Brand */
+.brand-logo img,
+.homes-brand-logo img,
+.auth-brand-logo img,
+.property-brand-logo img {
+  filter: drop-shadow(0 6px 14px rgba(13,95,67,.08));
+}
+
+/* Landing */
+.landing-shell { padding: 16px; }
+.landing-frame {
+  max-width: 1500px;
+  border-radius: 32px;
+  border-color: rgba(13,95,67,.1);
+  background: rgba(250,252,250,.82);
+  box-shadow: 0 28px 90px rgba(10,38,26,.1);
+}
+.landing-nav {
+  min-height: 82px;
+  padding: 0 clamp(22px, 4vw, 52px);
+  background: rgba(255,255,255,.7);
+  backdrop-filter: blur(20px);
+}
+.landing-nav-actions { gap: 10px; }
+.landing-nav-actions .secondary-button { padding-inline: 20px; }
+.landing-hero {
+  grid-template-columns: minmax(0,.9fr) minmax(460px,1.1fr);
+  min-height: 690px;
+}
+.landing-copy { padding: clamp(58px,7vw,110px) clamp(30px,6vw,86px); }
+.landing-copy .eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 8px 12px;
+  border: 1px solid rgba(13,95,67,.12);
+  border-radius: 999px;
+  background: rgba(239,255,209,.78);
+  color: var(--nb-green);
+  letter-spacing: .08em;
+}
+.landing-copy h1 {
+  margin-top: 22px;
+  font-size: clamp(4rem,7.4vw,7.4rem);
+  line-height: .88;
+  letter-spacing: -.075em;
+}
+.landing-copy .intro { font-size: 1.12rem; max-width: 580px; }
+.landing-actions { margin-top: 38px; }
+.landing-trust {
+  padding-top: 22px;
+  border-top: 1px solid var(--nb-line);
+}
+.landing-visual {
+  margin: 18px 18px 18px 0;
+  min-height: 654px;
+  border-radius: 28px;
+  background: #dce8df;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.7), 0 18px 60px rgba(10,38,26,.08);
+}
+.landing-visual::before {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+    radial-gradient(circle at 74% 18%, rgba(185,242,39,.82), transparent 17%),
+    radial-gradient(circle at 20% 82%, rgba(13,95,67,.13), transparent 25%),
+    linear-gradient(145deg,#dce9df,#bfd4c5);
+  background-size: 44px 44px,44px 44px,auto,auto,auto;
+}
+.map-pin-demo { background: var(--nb-green); }
+.map-pin-demo::after { background: var(--nb-lime); }
+.demo-card {
+  padding: 24px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 24px 55px rgba(10,38,26,.13);
+}
+.demo-price { color: var(--nb-green); }
+.landing-strip { background: rgba(255,255,255,.46); }
+.landing-feature { padding: 32px clamp(24px,3vw,42px); }
+.landing-feature strong { font-size: .98rem; }
+.landing-feature span { font-size: .88rem; }
+
+/* Live map experience */
+.homes-page { background: #eef3ef; }
+.homes-topbar {
+  height: 78px;
+  padding: 0 28px;
+  border-bottom: 1px solid rgba(13,95,67,.1);
+  background: rgba(249,252,249,.9);
+  box-shadow: 0 8px 28px rgba(10,38,26,.05);
+}
+.homes-topbar-actions > span {
+  background: var(--nb-lime-soft);
+  color: var(--nb-green);
+}
+.renter-search-shell { min-height: calc(100vh - 78px); grid-template-columns: minmax(390px, 470px) 1fr; }
+.renter-search-sidebar {
+  max-height: calc(100vh - 78px);
+  padding: 32px 28px 40px;
+  border-right: 1px solid rgba(13,95,67,.1);
+  background: rgba(248,251,248,.98);
+}
+.renter-search-heading .eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: var(--nb-lime-soft);
+}
+.renter-search-heading h1 {
+  margin-top: 12px;
+  font-size: clamp(2.7rem,4.4vw,4rem);
+  line-height: .92;
+}
+.renter-filter-panel {
+  margin-top: 24px;
+  padding: 22px;
+  border-radius: 24px;
+}
+.renter-filter-panel .field input,
+.renter-filter-panel .field select,
+.save-search-row input {
+  background: #fbfdfb;
+  border-color: rgba(13,95,67,.12);
+}
+.renter-filter-panel .field input:focus,
+.renter-filter-panel .field select:focus,
+.save-search-row input:focus {
+  border-color: rgba(13,95,67,.45);
+  box-shadow: 0 0 0 4px rgba(13,95,67,.08);
+}
+.renter-filter-actions { gap: 10px; }
+.renter-results-header { margin-top: 32px; }
+.renter-results-list { gap: 14px; }
+.renter-result-card-wrap { border-radius: 22px; }
+.renter-result-card {
+  grid-template-columns: 124px 1fr;
+  gap: 16px;
+  padding: 12px 52px 12px 12px;
+  border-color: rgba(13,95,67,.1);
+  border-radius: 22px;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 8px 24px rgba(10,38,26,.045);
+}
+.renter-result-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(13,95,67,.26);
+  box-shadow: var(--nb-shadow);
+}
+.renter-result-card-wrap.active .renter-result-card {
+  border-color: rgba(13,95,67,.44);
+  box-shadow: 0 0 0 3px rgba(185,242,39,.3), var(--nb-shadow);
+}
+.renter-result-image { height: 116px; border-radius: 17px; }
+.renter-result-copy > strong { font-size: 1.02rem; }
+.renter-result-meta b { color: var(--nb-green); font-size: 1rem; }
+.renter-map-panel {
+  height: calc(100vh - 78px);
+  top: 78px;
+  padding: 14px;
+  background: linear-gradient(145deg,#dce7df,#cbd9cf);
+}
+.renter-map-canvas {
+  border-radius: 30px;
+  border-color: rgba(13,95,67,.13);
+  box-shadow: 0 22px 60px rgba(10,38,26,.13);
+}
+.leaflet-control-zoom {
+  border-radius: 16px !important;
+  border-color: rgba(13,95,67,.14) !important;
+}
+.leaflet-popup-content-wrapper { border-radius: 18px; }
+
+/* Dashboard / owner / form hierarchy */
+.dashboard-shell,
+.owner-shell,
+.listing-shell { padding-bottom: 64px; }
+.dashboard-card { border-radius: 30px; }
+.dashboard-header { gap: 24px; }
+.dashboard-actions { gap: 10px; flex-wrap: wrap; }
+.owner-header,
+.listing-page-header {
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--nb-line);
+}
+.property-list-panel { border-radius: 26px; }
+.property-row { padding: 24px 26px; }
+.property-row:hover { background: rgba(239,255,209,.22); }
+.listing-section { border-radius: 26px; }
+.choice-chip { border-radius: 999px; }
+.choice-chip:has(input:checked) {
+  border-color: rgba(13,95,67,.34);
+  background: var(--nb-lime-soft);
+  color: var(--nb-green);
+}
+
+/* Property detail */
+.property-detail-topbar {
+  background: rgba(250,252,250,.9);
+  backdrop-filter: blur(18px);
+  border-bottom-color: rgba(13,95,67,.1);
+}
+.property-detail-hero h1 { letter-spacing: -.06em; }
+.property-detail-section,
+.property-contact-card { border-radius: 26px; }
+.property-contact-card { box-shadow: 0 20px 55px rgba(10,38,26,.12); }
+
+/* Auth */
+.auth-layout { align-items: center; }
+.auth-card { border-radius: 28px; }
+.auth-tabs { background: #edf3ef; }
+.auth-tabs button.active { box-shadow: 0 8px 20px rgba(10,38,26,.07); }
+
+@media (max-width: 960px) {
+  .landing-shell { padding: 0; }
+  .landing-frame { border-radius: 0; }
+  .landing-hero { grid-template-columns: 1fr; }
+  .landing-visual { margin: 0 18px 18px; min-height: 520px; }
+  .renter-search-shell { grid-template-columns: 1fr; }
+  .renter-map-panel { order: -1; height: min(60vh, 620px); min-height: 420px; }
+  .renter-search-sidebar { padding-top: 24px; }
+}
+
+@media (max-width: 640px) {
+  .landing-nav { min-height: 70px; }
+  .landing-copy { padding: 48px 22px 40px; }
+  .landing-copy h1 { font-size: clamp(3.2rem,16vw,5rem); }
+  .landing-actions { display: grid; grid-template-columns: 1fr; }
+  .landing-actions a { width: 100%; justify-content: center; text-align: center; }
+  .landing-trust { gap: 10px 14px; }
+  .landing-visual { margin: 0; border-radius: 0; }
+  .homes-topbar { height: 68px; padding: 0 14px; }
+  .renter-search-sidebar { padding: 18px 14px 30px; }
+  .renter-search-heading h1 { font-size: 2.7rem; }
+  .renter-filter-panel { padding: 16px; border-radius: 20px; }
+  .renter-filter-actions .primary-button,
+  .renter-filter-actions .secondary-button,
+  .save-search-row .secondary-button { width: 100%; }
+  .renter-result-card { grid-template-columns: 96px 1fr; padding-right: 46px; }
+  .renter-result-image { height: 98px; }
+  .renter-map-panel { height: 48vh; min-height: 350px; padding: 8px; }
+  .renter-map-canvas { border-radius: 22px; }
+  .dashboard-card,
+  .listing-section,
+  .auth-card { border-radius: 22px; }
+}
