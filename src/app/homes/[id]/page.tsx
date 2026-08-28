@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { ReportListingButton } from "@/components/report-listing-button";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
 import { getAuthContext } from "@/lib/auth";
@@ -69,6 +70,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
             <section className="property-detail-section"><h2>Amenities & included utilities</h2><div className="property-tag-groups"><div><h3>Amenities</h3><div className="property-tags">{property.amenities.length ? property.amenities.map((amenity) => <span key={amenity.slug}>{amenity.name}</span>) : <span>None listed</span>}</div></div><div><h3>Utilities included</h3><div className="property-tags">{property.utilities_included.length ? property.utilities_included.map((utility) => <span key={utility}>{label(utility)}</span>) : <span>None listed</span>}</div></div></div></section>
             {videos.length > 0 && <section className="property-detail-section"><h2>Property video</h2><div className="property-video-grid">{videos.map((item) => <video key={item.id} src={item.signed_url!} controls preload="metadata" />)}</div></section>}
             <section className="property-detail-section"><h2>Exact location</h2><p className="section-copy">The owner pinned this exact location when creating the listing.</p><div className="property-map"><iframe title="Exact property location" src={mapUrl} loading="lazy" /></div></section>
+            <section className="property-detail-section" id="trust"><h2>Trust & safety</h2><p className="section-copy">This listing passed moderator review, includes an exact owner-pinned location, and is subject to RentHomeBD's recurring availability checks.</p><div className="property-tags"><span>Moderator reviewed</span><span>Exact pin</span><span>Freshness checked</span><span>Private in-app contact</span></div><ReportListingButton propertyId={property.id} userId={auth?.userId ?? null} /></section>
           </div>
 
           <aside className="property-contact-card" id="contact">
