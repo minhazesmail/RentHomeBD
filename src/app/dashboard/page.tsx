@@ -36,7 +36,8 @@ export default async function DashboardPage({
         {params.error === "moderator-role-required" && <p className="auth-message">Moderation access is limited to explicitly assigned reviewer accounts.</p>}
 
         <div className="dashboard-actions">
-          {canList ? <Link className="primary-button link-button" href="/owner">Open owner workspace</Link> : <p className="form-hint">Renter search and saved homes will be added in the upcoming marketplace tasks.</p>}
+          <Link className="primary-button link-button" href="/messages">Messages</Link>
+          {canList ? <Link className="secondary-button link-button" href="/owner">Open owner workspace</Link> : <Link className="secondary-button link-button" href="/homes">Browse homes</Link>}
           {moderatorMembership && <Link className="secondary-button link-button" href="/moderation">Open moderation queue</Link>}
           <Link className="text-link" href="/">Back to home</Link>
         </div>
