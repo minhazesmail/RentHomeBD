@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/supabase/database.types";
@@ -46,5 +47,18 @@ export async function requireOwnerOrAgent() {
   if (auth.profile.primary_role !== "owner" && auth.profile.primary_role !== "agent") {
     redirect("/dashboard?error=owner-role-required");
   }
+  return auth;
+}
+
+export async function requireModerator() {
+  const auth = await requireUser();
+  const supabase = (await createClient()) as unknown as SupabaseClient;
+  const { data: membership } = await supabase
+    .from("moderators")
+    .select("user_id")
+    .eq("user_id", auth.userId)
+    .maybeSingle();
+
+  if (!membership) redirect("/dashboard?error=moderator-role-required");
   return auth;
 }
