@@ -9,7 +9,7 @@ type Mode = "signin" | "signup";
 type Method = "email" | "phone";
 type Role = "renter" | "owner" | "agent";
 
-export function AuthForm() {
+export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
   const router = useRouter();
   const supabase = createClient();
   const [method, setMethod] = useState<Method>("email");
@@ -36,7 +36,7 @@ export function AuthForm() {
             password,
             options: {
               data: { display_name: displayName.trim(), role },
-              emailRedirectTo: `${window.location.origin}/auth/confirm?next=/dashboard`,
+              emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(nextPath)}`,
             },
           })
         : await supabase.auth.signInWithPassword({ email, password });
@@ -53,7 +53,7 @@ export function AuthForm() {
       return;
     }
 
-    router.replace("/dashboard");
+    router.replace(nextPath);
     router.refresh();
   }
 
@@ -93,7 +93,7 @@ export function AuthForm() {
       return;
     }
 
-    router.replace("/dashboard");
+    router.replace(nextPath);
     router.refresh();
   }
 
