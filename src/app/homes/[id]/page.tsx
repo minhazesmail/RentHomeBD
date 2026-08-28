@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { ReportListingButton } from "@/components/report-listing-button";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
@@ -53,7 +54,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
   return (
     <main className="property-detail-page">
       <header className="property-detail-topbar">
-        <Link className="homes-brand" href="/">RentHomeBD</Link>
+        <BrandLogo className="property-brand-logo" />
         <div className="property-detail-nav"><Link className="text-link" href="/homes">Back to map</Link>{auth && <Link className="text-link" href="/saved">Saved</Link>}<Link className="text-link" href={auth ? "/messages" : "/login"}>{auth ? "Messages" : "Sign in"}</Link></div>
       </header>
       <div className="property-detail-shell">
@@ -74,7 +75,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
             <section className="property-detail-section"><h2>Amenities & included utilities</h2><div className="property-tag-groups"><div><h3>Amenities</h3><div className="property-tags">{property.amenities.length ? property.amenities.map((amenity) => <span key={amenity.slug}>{amenity.name}</span>) : <span>None listed</span>}</div></div><div><h3>Utilities included</h3><div className="property-tags">{property.utilities_included.length ? property.utilities_included.map((utility) => <span key={utility}>{label(utility)}</span>) : <span>None listed</span>}</div></div></div></section>
             {videos.length > 0 && <section className="property-detail-section"><h2>Property video</h2><div className="property-video-grid">{videos.map((item) => <video key={item.id} src={item.signed_url!} controls preload="metadata" />)}</div></section>}
             <section className="property-detail-section"><h2>Exact location</h2><p className="section-copy">The owner pinned this exact location when creating the listing.</p><div className="property-map"><iframe title="Exact property location" src={mapUrl} loading="lazy" /></div></section>
-            <section className="property-detail-section" id="trust"><h2>Trust & safety</h2><p className="section-copy">Trust signals describe checks completed by RentHomeBD. A verified owner/agent badge is an account-review signal, not proof of legal identity or ownership of this property.</p><div className="property-tags"><span>Moderator reviewed listing</span><span>Exact pin</span><span>Freshness checked</span><span>Private in-app contact</span>{property.owner_phone_verified_at && <span>Owner phone verified</span>}{roleVerified && <span>Verified {label(property.owner_role)}</span>}</div><ReportListingButton propertyId={property.id} userId={auth?.userId ?? null} /></section>
+            <section className="property-detail-section" id="trust"><h2>Trust & safety</h2><p className="section-copy">Trust signals describe checks completed by NearBasha. A verified owner/agent badge is an account-review signal, not proof of legal identity or ownership of this property.</p><div className="property-tags"><span>Moderator reviewed listing</span><span>Exact pin</span><span>Freshness checked</span><span>Private in-app contact</span>{property.owner_phone_verified_at && <span>Owner phone verified</span>}{roleVerified && <span>Verified {label(property.owner_role)}</span>}</div><ReportListingButton propertyId={property.id} userId={auth?.userId ?? null} /></section>
           </div>
 
           <aside className="property-contact-card" id="contact">
@@ -82,7 +83,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
             <div className="owner-badge">{property.owner_display_name?.slice(0, 1).toUpperCase() || "O"}</div>
             <p className="eyebrow">Listed by {label(property.owner_role)}</p><h2>{property.owner_display_name || "Property owner"}</h2>
             <div className="property-tags">{property.owner_phone_verified_at && <span>Phone verified</span>}{roleVerified && <span>Verified {label(property.owner_role)}</span>}</div>
-            <p>Contact details stay private. Conversations happen inside RentHomeBD so neither side has to expose a phone number publicly.</p>
+            <p>Contact details stay private. Conversations happen inside NearBasha so neither side has to expose a phone number publicly.</p>
             {auth ? <StartConversationButton propertyId={property.id} userId={auth.userId} /> : <Link className="primary-button link-button property-contact-button" href={signInHref}>Sign in to contact owner</Link>}
             <div className="freshness-note"><strong>Fresh listing</strong><span>Published {new Date(property.published_at).toLocaleDateString("en-BD")}{property.expires_at ? ` · reconfirmation due ${new Date(property.expires_at).toLocaleDateString("en-BD")}` : ""}</span></div>
           </aside>
