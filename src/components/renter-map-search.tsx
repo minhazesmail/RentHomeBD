@@ -4,18 +4,20 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { SaveHomeButton } from "@/components/save-home-button";
 import { createClient } from "@/lib/supabase/client";
-import type { MapListing } from "@/components/leaflet-map";
+import type { MapListing, UserMapLocation } from "@/components/leaflet-map";
 
 const LeafletMap = dynamic(() => import("@/components/leaflet-map"), { ssr: false });
 const DHAKA_CENTER: [number, number] = [23.8103, 90.4125];
 const RADIUS_OPTIONS = ["2", "5", "10", "15", "25", "50", "100"];
 const MAX_RENT_FILTER = 10_000_000;
 const PUBLIC_MEDIA_TTL_SECONDS = 300;
+const LIVE_SEARCH_MIN_DISTANCE_METERS = 100;
+const LIVE_SEARCH_MAX_INTERVAL_MS = 20_000;
 
 type InitialSearch = {
   centerLat?: number;
@@ -48,6 +50,18 @@ function friendlySearchError(error: unknown) {
   return "We couldn't run this search. Check the filters and try again.";
 }
 
+function distanceMeters(a: [number, number], b: [number, number]) {
+  const earthRadius = 6_371_000;
+  const toRadians = (degrees: number) => degrees * Math.PI / 180;
+  const lat1 = toRadians(a[0]);
+  const lat2 = toRadians(b[0]);
+  const deltaLat = toRadians(b[0] - a[0]);
+  const deltaLong = toRadians(b[1] - a[1]);
+  const value = Math.sin(deltaLat / 2) ** 2
+    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLong / 2) ** 2;
+  return earthRadius * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
 export function RenterMapSearch({
   userId,
   initialSavedPropertyIds = [],
@@ -75,7 +89,14 @@ export function RenterMapSearch({
   const [busy, setBusy] = useState(true);
   const [savingSearch, setSavingSearch] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [liveTracking, setLiveTracking] = useState(false);
+  const [userLocation, setUserLocation] = useState<UserMapLocation | null>(null);
+  const [locationStatus, setLocationStatus] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const watchIdRef = useRef<number | null>(null);
+  const lastLiveSearchLocationRef = useRef<[number, number] | null>(null);
+  const lastLiveSearchAtRef = useRef(0);
+  const runSearchRef = useRef<(searchCenter?: [number, number]) => Promise<void>>(async () => {});
 
   const savedSet = useMemo(() => new Set(initialSavedPropertyIds), [initialSavedPropertyIds]);
 
@@ -131,6 +152,10 @@ export function RenterMapSearch({
   }, [bedrooms, center, maxRent, minRent, radiusKm, supabase, tenantType, validateFilters]);
 
   useEffect(() => {
+    runSearchRef.current = runSearch;
+  }, [runSearch]);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => {
       void runSearch(initialCenter);
     }, 0);
@@ -139,25 +164,80 @@ export function RenterMapSearch({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function useMyLocation() {
+  useEffect(() => () => {
+    if (watchIdRef.current !== null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+    }
+  }, []);
+
+  function stopLiveLocation() {
+    if (watchIdRef.current !== null && navigator.geolocation) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    setLiveTracking(false);
+    setLocating(false);
+    setLocationStatus("Live location paused. Your last position remains on the map.");
+  }
+
+  function startLiveLocation() {
     if (!navigator.geolocation) {
       setMessage("Location access is not supported by this browser.");
       return;
     }
 
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
+    setMessage(null);
+    setLocationStatus("Requesting precise location…");
+    lastLiveSearchLocationRef.current = null;
+    lastLiveSearchAtRef.current = 0;
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
       ({ coords }) => {
         const next: [number, number] = [coords.latitude, coords.longitude];
+        const nextUserLocation: UserMapLocation = {
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          accuracy: coords.accuracy,
+        };
+        const now = Date.now();
+        const lastSearchLocation = lastLiveSearchLocationRef.current;
+        const movedEnough = !lastSearchLocation
+          || distanceMeters(lastSearchLocation, next) >= LIVE_SEARCH_MIN_DISTANCE_METERS;
+        const enoughTimePassed = now - lastLiveSearchAtRef.current >= LIVE_SEARCH_MAX_INTERVAL_MS;
+
+        setUserLocation(nextUserLocation);
         setCenter(next);
         setLocating(false);
-        void runSearch(next);
+        setLiveTracking(true);
+        setLocationStatus(`Live GPS on · accuracy ±${Math.round(coords.accuracy)} m · nearby homes update as you move.`);
+
+        if (movedEnough || enoughTimePassed) {
+          lastLiveSearchLocationRef.current = next;
+          lastLiveSearchAtRef.current = now;
+          void runSearchRef.current(next);
+        }
       },
-      () => {
+      (error) => {
         setLocating(false);
-        setMessage("Could not access your location. The search center was not changed.");
+        setLiveTracking(false);
+        if (watchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(watchIdRef.current);
+          watchIdRef.current = null;
+        }
+        if (error.code === error.PERMISSION_DENIED) {
+          setMessage("Location permission was denied. Enable location access for RentHomeBD in your browser settings and try again.");
+        } else {
+          setMessage("Could not keep track of your location. Check GPS/network access and try again.");
+        }
+        setLocationStatus(null);
       },
-      { enableHighAccuracy: true, timeout: 12000 }
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 }
     );
   }
 
@@ -206,7 +286,7 @@ export function RenterMapSearch({
         <div className="renter-search-heading">
           <p className="eyebrow">Live map search</p>
           <h1>Find a home around you.</h1>
-          <p>Only moderated, currently available listings appear here.</p>
+          <p>Use live GPS to move through the map with nearby, moderated rental pins around your current position.</p>
         </div>
 
         <div className="renter-filter-panel">
@@ -218,9 +298,14 @@ export function RenterMapSearch({
             <label className="field">Radius<select value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)}><option value="2">2 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="15">15 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select></label>
           </div>
           <div className="renter-filter-actions">
-            <button className="secondary-button" type="button" onClick={useMyLocation} disabled={locating || busy}>{locating ? "Locating…" : "Use my location"}</button>
+            {liveTracking ? (
+              <button className="secondary-button" type="button" onClick={stopLiveLocation}>Stop live location</button>
+            ) : (
+              <button className="secondary-button" type="button" onClick={startLiveLocation} disabled={locating}>{locating ? "Finding you…" : "◎ My live location"}</button>
+            )}
             <button className="primary-button" type="button" onClick={() => void runSearch()} disabled={busy}>{busy ? "Searching…" : "Search map"}</button>
           </div>
+          {locationStatus && <div className="success-message compact-message" role="status" aria-live="polite">{locationStatus}</div>}
           <div className="save-search-row">
             <input value={searchName} onChange={(e) => setSearchName(e.target.value)} maxLength={80} placeholder="Name this search, e.g. Dhanmondi family" />
             <button className="secondary-button" type="button" onClick={() => void saveSearch()} disabled={savingSearch}>{savingSearch ? "Saving…" : "Save search"}</button>
@@ -250,7 +335,15 @@ export function RenterMapSearch({
       </aside>
 
       <section className="renter-map-panel">
-        <LeafletMap listings={listings} center={center} radiusKm={Number(radiusKm)} selectedId={selectedId} onSelect={setSelectedId} />
+        <LeafletMap
+          listings={listings}
+          center={center}
+          radiusKm={Number(radiusKm)}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          userLocation={userLocation}
+          liveTracking={liveTracking}
+        />
       </section>
     </div>
   );
