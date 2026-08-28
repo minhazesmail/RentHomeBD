@@ -13,6 +13,8 @@ import type { MapListing } from "@/components/leaflet-map";
 
 const LeafletMap = dynamic(() => import("@/components/leaflet-map"), { ssr: false });
 const DHAKA_CENTER: [number, number] = [23.8103, 90.4125];
+const RADIUS_OPTIONS = ["2", "5", "10", "15", "25", "50", "100"];
+const MAX_RENT_FILTER = 10_000_000;
 
 type InitialSearch = {
   centerLat?: number;
@@ -23,6 +25,27 @@ type InitialSearch = {
   tenantType?: string;
   bedrooms?: string;
 };
+
+function initialRadius(value?: string) {
+  return value && RADIUS_OPTIONS.includes(value) ? value : "15";
+}
+
+function friendlySearchError(error: unknown) {
+  const raw = error instanceof Error
+    ? error.message
+    : typeof error === "object" && error !== null && "message" in error && typeof (error as { message?: unknown }).message === "string"
+      ? (error as { message: string }).message
+      : "";
+  const message = raw.toLowerCase();
+
+  if (message.includes("search radius")) return "Choose a search radius between 0.5 and 100 km.";
+  if (message.includes("minimum rent cannot")) return "Minimum rent cannot be higher than maximum rent.";
+  if (message.includes("rent is outside")) return "Rent filters must be between ৳0 and ৳10,000,000.";
+  if (message.includes("search center") || message.includes("latitude") || message.includes("longitude")) return "Choose a valid map location and try again.";
+  if (message.includes("bedroom filter")) return "Choose a valid bedroom filter.";
+  if (message.includes("violates check constraint")) return "One or more saved-search filters are outside the allowed range.";
+  return "We couldn't run this search. Check the filters and try again.";
+}
 
 export function RenterMapSearch({
   userId,
@@ -42,7 +65,7 @@ export function RenterMapSearch({
   const [listings, setListings] = useState<MapListing[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [center, setCenter] = useState<[number, number]>(initialCenter);
-  const [radiusKm, setRadiusKm] = useState(initialSearch.radiusKm ?? "15");
+  const [radiusKm, setRadiusKm] = useState(initialRadius(initialSearch.radiusKm));
   const [minRent, setMinRent] = useState(initialSearch.minRent ?? "");
   const [maxRent, setMaxRent] = useState(initialSearch.maxRent ?? "");
   const [tenantType, setTenantType] = useState(initialSearch.tenantType ?? "");
@@ -55,14 +78,33 @@ export function RenterMapSearch({
 
   const savedSet = useMemo(() => new Set(initialSavedPropertyIds), [initialSavedPropertyIds]);
 
+  const validateFilters = useCallback(() => {
+    const radius = Number(radiusKm);
+    const minimum = minRent ? Number(minRent) : null;
+    const maximum = maxRent ? Number(maxRent) : null;
+
+    if (!Number.isFinite(radius) || radius < 0.5 || radius > 100) return "Choose a search radius between 0.5 and 100 km.";
+    if (minimum !== null && (!Number.isFinite(minimum) || minimum < 0 || minimum > MAX_RENT_FILTER)) return "Minimum rent must be between ৳0 and ৳10,000,000.";
+    if (maximum !== null && (!Number.isFinite(maximum) || maximum < 0 || maximum > MAX_RENT_FILTER)) return "Maximum rent must be between ৳0 and ৳10,000,000.";
+    if (minimum !== null && maximum !== null && minimum > maximum) return "Minimum rent cannot be higher than maximum rent.";
+    return null;
+  }, [maxRent, minRent, radiusKm]);
+
   const runSearch = useCallback(async (searchCenter = center) => {
+    const validationMessage = validateFilters();
+    if (validationMessage) {
+      setMessage(validationMessage);
+      setBusy(false);
+      return;
+    }
+
     setBusy(true);
     setMessage(null);
 
     const { data, error } = await supabase.rpc("search_available_properties", {
       center_lat: searchCenter[0],
       center_long: searchCenter[1],
-      radius_km: radiusKm ? Number(radiusKm) : null,
+      radius_km: Number(radiusKm),
       min_rent: minRent ? Number(minRent) : null,
       max_rent: maxRent ? Number(maxRent) : null,
       renter_tenant_type: tenantType || null,
@@ -70,7 +112,7 @@ export function RenterMapSearch({
     });
 
     if (error) {
-      setMessage(error.message);
+      setMessage(friendlySearchError(error));
       setBusy(false);
       return;
     }
@@ -85,7 +127,7 @@ export function RenterMapSearch({
     setListings(hydrated);
     setSelectedId(hydrated[0]?.id ?? null);
     setBusy(false);
-  }, [bedrooms, center, maxRent, minRent, radiusKm, supabase, tenantType]);
+  }, [bedrooms, center, maxRent, minRent, radiusKm, supabase, tenantType, validateFilters]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -128,6 +170,12 @@ export function RenterMapSearch({
       return;
     }
 
+    const validationMessage = validateFilters();
+    if (validationMessage) {
+      setMessage(validationMessage);
+      return;
+    }
+
     setSavingSearch(true);
     setMessage(null);
     const { error } = await supabase.from("saved_searches").insert({
@@ -135,7 +183,7 @@ export function RenterMapSearch({
       name: searchName.trim(),
       center_lat: center[0],
       center_long: center[1],
-      radius_km: radiusKm ? Number(radiusKm) : null,
+      radius_km: Number(radiusKm),
       min_rent: minRent ? Number(minRent) : null,
       max_rent: maxRent ? Number(maxRent) : null,
       tenant_type: tenantType || null,
@@ -143,7 +191,7 @@ export function RenterMapSearch({
     });
 
     if (error) {
-      setMessage(error.message);
+      setMessage(friendlySearchError(error));
     } else {
       setSearchName("");
       setMessage("Search saved. You can reopen it from Saved.");
@@ -162,11 +210,11 @@ export function RenterMapSearch({
 
         <div className="renter-filter-panel">
           <div className="renter-filter-grid">
-            <label className="field">Minimum rent (৳)<input inputMode="numeric" value={minRent} onChange={(e) => setMinRent(e.target.value)} placeholder="10000" /></label>
-            <label className="field">Maximum rent (৳)<input inputMode="numeric" value={maxRent} onChange={(e) => setMaxRent(e.target.value)} placeholder="40000" /></label>
+            <label className="field">Minimum rent (৳)<input inputMode="numeric" value={minRent} onChange={(e) => setMinRent(e.target.value.replace(/\D/g, ""))} placeholder="10000" /></label>
+            <label className="field">Maximum rent (৳)<input inputMode="numeric" value={maxRent} onChange={(e) => setMaxRent(e.target.value.replace(/\D/g, ""))} placeholder="40000" /></label>
             <label className="field">Tenant type<select value={tenantType} onChange={(e) => setTenantType(e.target.value)}><option value="">Any tenant type</option><option value="family">Family</option><option value="bachelor">Bachelor</option><option value="student">Student</option><option value="job_holder">Job holder</option></select></label>
             <label className="field">Bedrooms<select value={bedrooms} onChange={(e) => setBedrooms(e.target.value)}><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></label>
-            <label className="field">Radius<select value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)}><option value="2">2 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="15">15 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="">No radius limit</option></select></label>
+            <label className="field">Radius<select value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)}><option value="2">2 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="15">15 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select></label>
           </div>
           <div className="renter-filter-actions">
             <button className="secondary-button" type="button" onClick={useMyLocation} disabled={locating || busy}>{locating ? "Locating…" : "Use my location"}</button>
@@ -176,8 +224,8 @@ export function RenterMapSearch({
             <input value={searchName} onChange={(e) => setSearchName(e.target.value)} maxLength={80} placeholder="Name this search, e.g. Dhanmondi family" />
             <button className="secondary-button" type="button" onClick={() => void saveSearch()} disabled={savingSearch}>{savingSearch ? "Saving…" : "Save search"}</button>
           </div>
-          <p className="form-hint">Search center: {center[0].toFixed(4)}, {center[1].toFixed(4)}</p>
-          {message && <div className={message.startsWith("Search saved") ? "success-message compact-message" : "auth-message"}>{message}</div>}
+          <p className="form-hint">Search center: {center[0].toFixed(4)}, {center[1].toFixed(4)} · Radius capped at 100 km for fast results.</p>
+          {message && <div className={message.startsWith("Search saved") ? "success-message compact-message" : "auth-message"} role="status" aria-live="polite">{message}</div>}
         </div>
 
         <div className="renter-results-header"><strong>{busy ? "Searching…" : `${listings.length} home${listings.length === 1 ? "" : "s"}`}</strong><span>Closest first</span></div>
@@ -201,7 +249,7 @@ export function RenterMapSearch({
       </aside>
 
       <section className="renter-map-panel">
-        <LeafletMap listings={listings} center={center} radiusKm={radiusKm ? Number(radiusKm) : null} selectedId={selectedId} onSelect={setSelectedId} />
+        <LeafletMap listings={listings} center={center} radiusKm={Number(radiusKm)} selectedId={selectedId} onSelect={setSelectedId} />
       </section>
     </div>
   );
