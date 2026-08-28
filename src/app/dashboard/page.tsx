@@ -50,7 +50,7 @@ export default async function DashboardPage({
           <div className="dashboard-actions" style={{ marginTop: 18 }}>
             <Link className="secondary-button link-button" href="/account/phone">{trustProfile?.phone_verified_at ? "Manage verified phone" : "Verify phone"}</Link>
           </div>
-          {canList && <p className="section-copy">A verified owner/agent badge means a RentHomeBD moderator reviewed the account. It does not prove government identity or legal ownership of a property.</p>}
+          {canList && <p className="section-copy">A verified owner/agent badge means a NearBasha moderator reviewed the account. It does not prove government identity or legal ownership of a property.</p>}
         </section>
 
         <div className="dashboard-actions">
