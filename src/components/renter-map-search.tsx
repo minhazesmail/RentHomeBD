@@ -85,7 +85,12 @@ export function RenterMapSearch({
   }, [bedrooms, center, maxRent, minRent, radiusKm, supabase, tenantType]);
 
   useEffect(() => {
-    void runSearch(initialCenter);
+    const timer = window.setTimeout(() => {
+      void runSearch(initialCenter);
+    }, 0);
+    return () => window.clearTimeout(timer);
+    // The initial search intentionally runs once with the URL-derived starting filters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function useMyLocation() {
