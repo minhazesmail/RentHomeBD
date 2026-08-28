@@ -9,11 +9,10 @@ export default async function ModerationQueuePage({ searchParams }: { searchPara
   await requireModerator();
   const params = await searchParams;
   const supabase = await createClient();
-  const { data: listings } = await supabase
-    .from("properties")
-    .select("id, title, address_text, property_type, rent_bdt, updated_at")
-    .eq("status", "pending_review")
-    .order("updated_at", { ascending: true });
+  const [{ data: listings }, { count: openReportCount }] = await Promise.all([
+    supabase.from("properties").select("id, title, address_text, property_type, rent_bdt, updated_at").eq("status", "pending_review").order("updated_at", { ascending: true }),
+    supabase.from("listing_reports").select("id", { count: "exact", head: true }).eq("status", "open"),
+  ]);
 
   return (
     <main className="owner-shell">
@@ -22,9 +21,9 @@ export default async function ModerationQueuePage({ searchParams }: { searchPara
           <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
           <p className="eyebrow">Moderation</p>
           <h1 className="owner-title">Review queue</h1>
-          <p className="intro">Listings stay private until a moderator approves them.</p>
+          <p className="intro">Listings stay private until a moderator approves them. User safety reports are handled in a separate trust queue.</p>
         </div>
-        <Link className="secondary-button link-button" href="/dashboard">Dashboard</Link>
+        <div className="owner-header-actions"><Link className="secondary-button link-button" href="/moderation/reports">Reports{openReportCount ? ` (${openReportCount})` : ""}</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
       </header>
 
       {params.notice === "approved" && <div className="success-message">Listing approved and published for 14 days.</div>}
@@ -37,10 +36,7 @@ export default async function ModerationQueuePage({ searchParams }: { searchPara
           <div className="property-list">
             {listings.map((listing) => (
               <Link className="property-row" href={`/moderation/${listing.id}`} key={listing.id}>
-                <div className="property-row-main">
-                  <strong>{listing.title || "Untitled listing"}</strong>
-                  <span>{listing.address_text || "No address"} · {listing.property_type?.replaceAll("_", " ") || "Type missing"}</span>
-                </div>
+                <div className="property-row-main"><strong>{listing.title || "Untitled listing"}</strong><span>{listing.address_text || "No address"} · {listing.property_type?.replaceAll("_", " ") || "Type missing"}</span></div>
                 <div className="property-row-meta"><span className="status-pill status-pending_review">Needs review</span><span>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}/mo` : "Rent missing"}</span></div>
               </Link>
             ))}
