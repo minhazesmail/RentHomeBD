@@ -1,0 +1,33 @@
+.brand-logo,
+.homes-brand-logo,
+.auth-brand-logo,
+.property-brand-logo {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  line-height: 0;
+  text-decoration: none;
+}
+
+.brand-logo img,
+.homes-brand-logo img,
+.auth-brand-logo img,
+.property-brand-logo img {
+  display: block;
+  width: auto;
+  height: 50px;
+  object-fit: contain;
+}
+
+.landing-nav .brand-logo img { height: 54px; }
+.homes-brand-logo img { height: 46px; }
+.auth-brand-logo { margin-bottom: 28px; }
+.auth-brand-logo img { height: 64px; }
+.property-brand-logo img { height: 44px; }
+
+@media (max-width: 640px) {
+  .landing-nav .brand-logo img { height: 44px; }
+  .homes-brand-logo img { height: 39px; }
+  .auth-brand-logo img { height: 52px; }
+  .property-brand-logo img { height: 38px; }
+}
