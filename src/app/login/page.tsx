@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { BrandLogo } from "@/components/brand-logo";
 import { AuthForm } from "./auth-form";
 
 function safeNext(value: string | string[] | undefined) {
@@ -19,7 +18,7 @@ export default async function LoginPage({
     <main className="shell auth-shell">
       <section className="auth-layout">
         <div className="auth-intro-panel">
-          <Link className="brand-link" href="/">RentHomeBD</Link>
+          <BrandLogo className="auth-brand-logo" />
           <p className="eyebrow">One account, every side of renting</p>
           <h1 className="auth-title">A calmer way to find and manage a home.</h1>
           <p className="intro">
