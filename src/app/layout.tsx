@@ -6,10 +6,10 @@ import "./auth-polish.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "RentHomeBD",
-    template: "%s | RentHomeBD",
+    default: "NearBasha",
+    template: "%s | NearBasha",
   },
-  description: "Find verified homes and apartments on a map across Bangladesh.",
+  description: "Find verified homes and apartments near you on a live map across Bangladesh.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
