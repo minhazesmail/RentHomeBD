@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { RenterMapSearch } from "@/components/renter-map-search";
 import { getAuthContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -42,7 +43,7 @@ export default async function HomesPage({
   return (
     <main className="homes-page">
       <header className="homes-topbar">
-        <Link className="homes-brand" href="/">RentHomeBD</Link>
+        <BrandLogo className="homes-brand-logo" />
         <div className="homes-topbar-actions">
           <span>Verified availability · exact pins</span>
           {auth ? <Link className="text-link" href="/saved">Saved</Link> : null}
