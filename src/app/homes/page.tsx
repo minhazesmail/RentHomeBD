@@ -7,6 +7,7 @@ import { getAuthContext } from "@/lib/auth";
 import { resolveLocationPreset } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/server";
 import "./homes.css";
+import "./mobile-map-sheet.css";
 
 export const dynamic = "force-dynamic";
 
