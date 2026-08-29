@@ -2,6 +2,67 @@ import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { LandingMapPreview } from "@/components/landing-map-preview";
+import type { MapListing } from "@/components/leaflet-map";
+
+const featuredListings: MapListing[] = [
+  {
+    id: "featured-dhanmondi",
+    title: "Bright 3-bedroom in Dhanmondi",
+    address_text: "Road 8, Dhanmondi, Dhaka",
+    property_type: "apartment",
+    rent_bdt: 32000,
+    bedrooms: 3,
+    bathrooms: 3,
+    furnishing: "semi_furnished",
+    available_from: null,
+    latitude: 23.7465,
+    longitude: 90.376,
+    distance_meters: null,
+    cover_media_path: null,
+  },
+  {
+    id: "featured-banani",
+    title: "Modern 2-bedroom near Banani 11",
+    address_text: "Banani, Dhaka",
+    property_type: "apartment",
+    rent_bdt: 42000,
+    bedrooms: 2,
+    bathrooms: 2,
+    furnishing: "furnished",
+    available_from: null,
+    latitude: 23.7937,
+    longitude: 90.4066,
+    distance_meters: null,
+    cover_media_path: null,
+  },
+  {
+    id: "featured-bashundhara",
+    title: "Family apartment in Bashundhara",
+    address_text: "Bashundhara R/A, Dhaka",
+    property_type: "apartment",
+    rent_bdt: 28000,
+    bedrooms: 3,
+    bathrooms: 2,
+    furnishing: "unfurnished",
+    available_from: null,
+    latitude: 23.8133,
+    longitude: 90.4315,
+    distance_meters: null,
+    cover_media_path: null,
+  },
+];
+
+const renterSteps = [
+  ["Search the map", "Choose the area that matters to you and see homes at their real pinned locations."],
+  ["See who it fits", "Check tenant type, rent, bedrooms, and key details before making contact."],
+  ["Message the owner", "Open the listing and contact the owner directly when the home looks right."],
+];
+
+const ownerSteps = [
+  ["Pin your property", "Place the home on the map and add the structured details renters need."],
+  ["Set who it is for", "Choose the tenant types that fit the property so expectations are clear upfront."],
+  ["Reach matched renters", "Publish a moderated listing that renters can discover through map search."],
+];
 
 // TODO(i18n): Treat each major marketing copy block on this page as a future translation target.
 export default function HomePage() {
@@ -45,18 +106,96 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* TODO: wire verified-listing and city counts to live marketplace data. */}
+        <section className="landing-stats" aria-label="NearBasha trust signals">
+          <div><strong>Live count</strong><span>Verified listings</span></div>
+          <div><strong>Bangladesh</strong><span>Built for the local rental market</span></div>
+          <div><strong>Phone OTP</strong><span>Account verification</span></div>
+          <div><strong>Moderated</strong><span>Listings reviewed before going live</span></div>
+        </section>
+
+        <section className="landing-content-section landing-how" aria-labelledby="how-heading">
+          <div className="landing-section-intro">
+            <p className="eyebrow">How it works</p>
+            <h2 id="how-heading">A clearer path for both sides of the rental.</h2>
+            <p>Renters get location and fit upfront. Owners publish the details that help the right renters find them.</p>
+          </div>
+          <div className="landing-how-grid">
+            <article className="landing-how-card">
+              <div className="landing-persona-heading"><span>R</span><div><small>For renters</small><h3>Find a home that actually fits.</h3></div></div>
+              <ol className="landing-steps">
+                {renterSteps.map(([title, description], index) => (
+                  <li key={title}>
+                    <span className="landing-step-number">{index + 1}</span>
+                    <div><strong>{title}</strong><p>{description}</p></div>
+                  </li>
+                ))}
+              </ol>
+              <Link className="text-link" href="/homes">Start searching →</Link>
+            </article>
+            <article className="landing-how-card">
+              <div className="landing-persona-heading"><span>O</span><div><small>For owners</small><h3>Publish once, match more clearly.</h3></div></div>
+              <ol className="landing-steps">
+                {ownerSteps.map(([title, description], index) => (
+                  <li key={title}>
+                    <span className="landing-step-number">{index + 1}</span>
+                    <div><strong>{title}</strong><p>{description}</p></div>
+                  </li>
+                ))}
+              </ol>
+              <Link className="text-link" href="/login">List your property →</Link>
+            </article>
+          </div>
+        </section>
+
+        <section className="landing-content-section landing-featured" aria-labelledby="featured-heading">
+          <div className="landing-section-intro landing-section-intro-row">
+            <div>
+              <p className="eyebrow">Sample homes</p>
+              <h2 id="featured-heading">See the kind of detail you get before you visit.</h2>
+            </div>
+            <p>Representative examples for the marketing page. Browse the live map for current inventory.</p>
+          </div>
+          <div className="landing-listings-grid">
+            {featuredListings.map((listing, index) => (
+              <article className="landing-listing-card" key={listing.id}>
+                <div className={`landing-listing-visual visual-${index + 1}`} aria-hidden="true">
+                  <span>Exact pin</span>
+                </div>
+                <div className="landing-listing-copy">
+                  <div className="landing-listing-title-row">
+                    <div>
+                      <h3>{listing.title}</h3>
+                      <p>{listing.address_text}</p>
+                    </div>
+                    <strong>৳{listing.rent_bdt?.toLocaleString("en-BD")}/mo</strong>
+                  </div>
+                  <div className="demo-meta">
+                    <span>{listing.bedrooms} bedrooms</span>
+                    <span>{listing.bathrooms} bathrooms</span>
+                    <span>{listing.furnishing.replaceAll("_", " ")}</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="landing-featured-action">
+            <Link className="secondary-button link-button" href="/homes">Browse homes on the map</Link>
+          </div>
+        </section>
+
         <section className="landing-strip" aria-label="How NearBasha is different">
           <div className="landing-feature">
-            <strong>Search spatially, not administratively.</strong>
-            <span>See what is actually near work, university, transport, or family—not just what shares a thana name.</span>
+            <strong>Search by real location.</strong>
+            <span>See what is actually near work, university, transport, or family—not just what shares an area name.</span>
           </div>
           <div className="landing-feature">
-            <strong>Know the fit before you call.</strong>
-            <span>Tenant preferences are structured into every listing, reducing awkward and wasted conversations.</span>
+            <strong>Know who the home suits.</strong>
+            <span>Tenant preferences are structured into each listing so both sides waste less time.</span>
           </div>
           <div className="landing-feature">
-            <strong>Designed to age out stale inventory.</strong>
-            <span>Published homes have freshness controls so the marketplace does not quietly fill with dead listings.</span>
+            <strong>Keep listings fresh.</strong>
+            <span>Freshness controls are designed to stop old, unavailable homes from quietly filling the marketplace.</span>
           </div>
         </section>
       </div>
