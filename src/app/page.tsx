@@ -1,3 +1,5 @@
+import "./landing.css";
+
 import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
