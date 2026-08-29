@@ -127,7 +127,7 @@ body {
   background: rgba(255,255,255,.94);
   box-shadow: 0 24px 55px rgba(10,38,26,.13);
 }
-.demo-price { color: var(--accent-warm); }
+.demo-price { color: var(--accent-warm-dark); }
 
 .landing-stats {
   display: grid;
@@ -198,7 +198,7 @@ body {
 .landing-listing-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .landing-listing-title-row h3 { margin: 0 0 6px; font-size: 1.04rem; line-height: 1.25; }
 .landing-listing-title-row p { margin: 0; color: var(--muted); font-size: .8rem; line-height: 1.4; }
-.landing-listing-title-row > strong { color: var(--accent-warm); font-size: .93rem; white-space: nowrap; }
+.landing-listing-title-row > strong { color: var(--accent-warm-dark); font-size: .93rem; white-space: nowrap; }
 .landing-listing-card .demo-meta { margin-top: 16px; }
 .landing-listing-card .demo-meta span { font-size: .7rem; text-transform: capitalize; }
 .landing-featured-action { display: flex; justify-content: center; margin-top: 30px; }
@@ -282,7 +282,7 @@ body {
 }
 .renter-result-image { height: 116px; border-radius: 17px; }
 .renter-result-copy > strong { font-size: 1.02rem; }
-.renter-result-meta b { color: var(--accent-warm); font-size: 1rem; }
+.renter-result-meta b { color: var(--accent-warm-dark); font-size: 1rem; }
 .renter-map-panel {
   height: calc(100vh - 78px);
   top: 78px;
