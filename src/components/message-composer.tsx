@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
+
+export type ChatMessage = { id: string; sender_id: string; body: string; created_at: string };
 
 function friendlyMessageError(message: string) {
   const lower = message.toLowerCase();
@@ -20,8 +21,15 @@ function friendlyMessageError(message: string) {
   return "Could not send your message. Please try again.";
 }
 
-export function MessageComposer({ conversationId, userId }: { conversationId: string; userId: string }) {
-  const router = useRouter();
+export function MessageComposer({
+  conversationId,
+  userId,
+  onSent,
+}: {
+  conversationId: string;
+  userId: string;
+  onSent?: (message: ChatMessage) => void;
+}) {
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -33,11 +41,15 @@ export function MessageComposer({ conversationId, userId }: { conversationId: st
     setBusy(true);
     setMessage(null);
     const supabase = createClient() as unknown as SupabaseClient;
-    const { error } = await supabase.from("messages").insert({
-      conversation_id: conversationId,
-      sender_id: userId,
-      body: text,
-    });
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        conversation_id: conversationId,
+        sender_id: userId,
+        body: text,
+      })
+      .select("id, sender_id, body, created_at")
+      .single();
 
     if (error) {
       setMessage(friendlyMessageError(error.message));
@@ -47,7 +59,7 @@ export function MessageComposer({ conversationId, userId }: { conversationId: st
 
     setBody("");
     setBusy(false);
-    router.refresh();
+    onSent?.(data as ChatMessage);
   }
 
   return (
