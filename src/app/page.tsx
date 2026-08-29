@@ -117,10 +117,8 @@ export default function HomePage() {
           <div className="landing-footer-brand"><BrandLogo /><p>Map-first home rental discovery built for Bangladesh.</p><span>Currently focused on making local rental search clearer, fresher, and easier to trust.</span></div>
           <div className="landing-footer-links">
             <div><strong>Product</strong><Link href="/homes">Browse homes</Link><Link href="/login">List a property</Link><Link href="/login">Sign in</Link></div>
-            {/* TODO: replace placeholder company links when dedicated pages exist. */}
-            <div><strong>Company</strong><a href="#about">About</a><a href="#contact">Contact</a></div>
-            {/* TODO: replace placeholder legal links when Terms and Privacy pages exist. */}
-            <div><strong>Legal</strong><a href="#terms">Terms</a><a href="#privacy">Privacy</a></div>
+            <div><strong>Company</strong><Link href="/about">About</Link><Link href="/contact">Contact</Link></div>
+            <div><strong>Legal</strong><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></div>
           </div>
           <div className="landing-footer-bottom"><span>Bangladesh-focused rental marketplace</span><span>© 2026 NearBasha. All rights reserved.</span></div>
         </footer>
