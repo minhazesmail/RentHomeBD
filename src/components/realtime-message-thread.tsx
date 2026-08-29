@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useOptimistic, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { MessageComposer, type ChatMessage } from "@/components/message-composer";
+import { MessageComposer, friendlyMessageError, type ChatMessage } from "@/components/message-composer";
 import { createClient } from "@/lib/supabase/client";
 
 type Props = {
@@ -23,6 +23,7 @@ function mergeMessage(messages: ChatMessage[], next: ChatMessage) {
 export function RealtimeMessageThread({ conversationId, userId, readField, initialMessages }: Props) {
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [messages, setMessages] = useState(initialMessages);
+  const [optimisticMessages, addOptimisticMessage] = useOptimistic(messages, (current, next: ChatMessage) => mergeMessage(current, next));
   const [connectionState, setConnectionState] = useState<ConnectionState>("connecting");
   const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -62,8 +63,46 @@ export function RealtimeMessageThread({ conversationId, userId, readField, initi
   useEffect(() => {
     const node = listRef.current;
     if (!node) return;
-    node.scrollTo({ top: node.scrollHeight, behavior: messages.length > initialMessages.length ? "smooth" : "auto" });
-  }, [initialMessages.length, messages.length]);
+    node.scrollTo({ top: node.scrollHeight, behavior: optimisticMessages.length > initialMessages.length ? "smooth" : "auto" });
+  }, [initialMessages.length, optimisticMessages.length]);
+
+  async function sendMessage(text: string) {
+    let resultError: string | undefined;
+
+    await new Promise<void>((resolve) => {
+      startTransition(async () => {
+        const optimisticMessage: ChatMessage = {
+          id: `optimistic-${crypto.randomUUID()}`,
+          sender_id: userId,
+          body: text,
+          created_at: new Date().toISOString(),
+          pending: true,
+        };
+        addOptimisticMessage(optimisticMessage);
+
+        const { data, error } = await supabase
+          .from("messages")
+          .insert({
+            conversation_id: conversationId,
+            sender_id: userId,
+            body: text,
+          })
+          .select("id, sender_id, body, created_at")
+          .single();
+
+        if (error) {
+          resultError = friendlyMessageError(error.message);
+          resolve();
+          return;
+        }
+
+        setMessages((current) => mergeMessage(current, data as ChatMessage));
+        resolve();
+      });
+    });
+
+    return resultError ? { error: resultError } : {};
+  }
 
   return (
     <section className="thread-panel realtime-thread-panel">
@@ -73,22 +112,18 @@ export function RealtimeMessageThread({ conversationId, userId, readField, initi
       </div>
 
       <div className="message-list" ref={listRef}>
-        {!messages.length && <div className="renter-empty">No messages yet. Send the first message about this property.</div>}
-        {messages.map((message) => (
-          <div className={`message-row${message.sender_id === userId ? " mine" : ""}`} key={message.id}>
+        {!optimisticMessages.length && <div className="renter-empty">No messages yet. Send the first message about this property.</div>}
+        {optimisticMessages.map((message) => (
+          <div className={`message-row${message.sender_id === userId ? " mine" : ""}${message.pending ? " pending" : ""}`} key={message.id}>
             <div className="message-bubble">
               {message.body}
-              <small>{new Date(message.created_at).toLocaleString("en-BD")}</small>
+              <small>{message.pending ? "Sending…" : new Date(message.created_at).toLocaleString("en-BD")}</small>
             </div>
           </div>
         ))}
       </div>
 
-      <MessageComposer
-        conversationId={conversationId}
-        userId={userId}
-        onSent={(message) => setMessages((current) => mergeMessage(current, message))}
-      />
+      <MessageComposer onSend={sendMessage} />
     </section>
   );
 }
