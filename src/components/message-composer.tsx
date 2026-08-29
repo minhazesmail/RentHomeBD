@@ -1,13 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { createClient } from "@/lib/supabase/client";
+export type ChatMessage = { id: string; sender_id: string; body: string; created_at: string; pending?: boolean };
 
-export type ChatMessage = { id: string; sender_id: string; body: string; created_at: string };
-
-function friendlyMessageError(message: string) {
+export function friendlyMessageError(message: string) {
   const lower = message.toLowerCase();
   if (lower.includes("message rate limit reached")) {
     return "You’re sending messages very quickly. Wait a moment and try again.";
@@ -22,13 +19,9 @@ function friendlyMessageError(message: string) {
 }
 
 export function MessageComposer({
-  conversationId,
-  userId,
-  onSent,
+  onSend,
 }: {
-  conversationId: string;
-  userId: string;
-  onSent?: (message: ChatMessage) => void;
+  onSend: (text: string) => Promise<{ error?: string }>;
 }) {
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
@@ -36,30 +29,19 @@ export function MessageComposer({
 
   async function send() {
     const text = body.trim();
-    if (!text) return;
+    if (!text || busy) return;
 
     setBusy(true);
     setMessage(null);
-    const supabase = createClient() as unknown as SupabaseClient;
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({
-        conversation_id: conversationId,
-        sender_id: userId,
-        body: text,
-      })
-      .select("id, sender_id, body, created_at")
-      .single();
+    setBody("");
 
-    if (error) {
-      setMessage(friendlyMessageError(error.message));
-      setBusy(false);
-      return;
+    const result = await onSend(text);
+    if (result.error) {
+      setBody(text);
+      setMessage(result.error);
     }
 
-    setBody("");
     setBusy(false);
-    onSent?.(data as ChatMessage);
   }
 
   return (
