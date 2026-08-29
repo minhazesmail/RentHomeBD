@@ -1,7 +1,10 @@
 "use client";
 
-import LeafletMap, { type MapListing } from "@/components/leaflet-map";
+import dynamic from "next/dynamic";
 
+import type { MapListing } from "@/components/leaflet-map";
+
+const LeafletMap = dynamic(() => import("@/components/leaflet-map"), { ssr: false });
 const DHAKA_CENTER: [number, number] = [23.7808, 90.4073];
 
 const previewListings: MapListing[] = [
