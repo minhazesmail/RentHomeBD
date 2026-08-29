@@ -8,6 +8,7 @@ import "./brand.css";
 import "./auth-polish.css";
 import "./owner-location.css";
 import "./listing-readiness.css";
+import "./messages-realtime.css";
 
 export const metadata: Metadata = {
   title: {
