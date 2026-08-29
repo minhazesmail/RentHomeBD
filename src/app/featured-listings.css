@@ -1,0 +1,255 @@
+.landing-featured {
+  background: linear-gradient(180deg, rgba(255,255,255,.44), rgba(245,248,244,.82));
+}
+
+.landing-listings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 36px;
+}
+
+.landing-listing-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(183,197,187,.72);
+  border-radius: 28px;
+  background: rgba(255,255,255,.94);
+  box-shadow: var(--shadow-md);
+  transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+}
+
+.landing-listing-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(13,95,67,.22);
+  box-shadow: 0 24px 60px rgba(16,34,26,.14);
+}
+
+.landing-listing-visual {
+  position: relative;
+  min-height: 250px;
+  overflow: hidden;
+  background: #dfe7e1;
+}
+
+.landing-listing-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10,22,16,.04) 35%, rgba(10,22,16,.36) 100%);
+  pointer-events: none;
+}
+
+.landing-listing-visual img {
+  object-fit: cover;
+  transition: transform .5s ease;
+}
+
+.landing-listing-card:hover .landing-listing-visual img { transform: scale(1.035); }
+
+.landing-listing-badges {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.listing-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,.78);
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,.9);
+  color: var(--ink);
+  box-shadow: 0 6px 20px rgba(10,22,16,.1);
+  backdrop-filter: blur(12px);
+  font-size: .68rem;
+  font-weight: 850;
+  letter-spacing: .015em;
+}
+
+.listing-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.listing-badge-trust::before { background: var(--highlight); box-shadow: 0 0 0 3px rgba(199,228,107,.22); }
+
+.listing-mini-map {
+  position: absolute;
+  z-index: 3;
+  right: 16px;
+  bottom: 16px;
+  width: 128px;
+  height: 90px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.86);
+  border-radius: 17px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),
+    #cddcd1;
+  background-size: 20px 20px;
+  box-shadow: 0 12px 34px rgba(10,22,16,.22);
+  opacity: .2;
+  transform: translateY(10px) scale(.92);
+  transition: opacity .24s ease, transform .24s ease;
+}
+
+.landing-listing-card:hover .listing-mini-map,
+.landing-listing-card:focus-within .listing-mini-map {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.listing-mini-road {
+  position: absolute;
+  display: block;
+  height: 9px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 1px 4px rgba(16,34,26,.05);
+}
+
+.listing-mini-road.one { width: 110px; top: 24px; left: -8px; transform: rotate(-16deg); }
+.listing-mini-road.two { width: 94px; top: 55px; left: 36px; transform: rotate(34deg); }
+
+.listing-mini-pin {
+  position: absolute;
+  top: 29px;
+  left: 59px;
+  width: 19px;
+  height: 19px;
+  border: 4px solid #fff;
+  border-radius: 50% 50% 50% 6px;
+  transform: rotate(-45deg);
+  background: var(--accent-dark);
+  box-shadow: 0 4px 9px rgba(10,22,16,.28);
+}
+
+.listing-mini-map strong {
+  position: absolute;
+  left: 9px;
+  bottom: 7px;
+  padding: 3px 6px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.88);
+  color: var(--ink);
+  font-size: .58rem;
+  letter-spacing: .02em;
+}
+
+.landing-listing-copy { padding: 21px 22px 22px; }
+
+.landing-listing-kicker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 13px;
+}
+
+.landing-listing-kicker span {
+  padding: 5px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: .66rem;
+  font-weight: 800;
+}
+
+.landing-listing-kicker span + span {
+  background: rgba(201,126,91,.1);
+  color: var(--warm-accent, #8f4c36);
+}
+
+.landing-listing-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.landing-listing-title-row h3 {
+  margin: 0 0 7px;
+  font-size: 1.03rem;
+  line-height: 1.25;
+  letter-spacing: -.025em;
+}
+
+.landing-listing-title-row p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.landing-listing-title-row > strong {
+  color: var(--warm-accent, #8f4c36);
+  font-size: .98rem;
+  white-space: nowrap;
+}
+
+.landing-listing-title-row > strong small {
+  color: var(--muted);
+  font-size: .65rem;
+  font-weight: 650;
+}
+
+.landing-listing-copy .demo-meta { margin-top: 16px; }
+
+.landing-listing-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 17px;
+  border-top: 1px solid rgba(183,197,187,.58);
+  color: var(--accent-dark);
+  font-size: .78rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.landing-listing-link span { transition: transform .18s ease; }
+.landing-listing-link:hover span { transform: translateX(3px); }
+
+.landing-featured-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+@media (max-width: 1050px) {
+  .landing-listings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .landing-listing-card:last-child { grid-column: 1 / -1; width: min(100%, 520px); justify-self: center; }
+}
+
+@media (max-width: 700px) {
+  .landing-listings-grid { grid-template-columns: 1fr; margin-top: 28px; }
+  .landing-listing-card:last-child { grid-column: auto; width: auto; }
+  .landing-listing-visual { min-height: 230px; }
+  .landing-listing-title-row { flex-direction: column; gap: 11px; }
+  .landing-listing-title-row > strong { font-size: 1.06rem; }
+  .listing-mini-map { opacity: 1; transform: none; width: 112px; height: 78px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-listing-card,
+  .landing-listing-visual img,
+  .listing-mini-map,
+  .landing-listing-link span { transition: none; }
+  .landing-listing-card:hover { transform: none; }
+  .landing-listing-card:hover .landing-listing-visual img { transform: none; }
+}
