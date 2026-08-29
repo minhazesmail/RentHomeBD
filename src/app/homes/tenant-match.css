@@ -1,0 +1,93 @@
+.tenant-match-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5eae6;
+}
+
+.tenant-legend-chip,
+.tenant-match-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+.tenant-legend-chip {
+  padding: 6px 9px;
+  color: #59655e;
+  background: #f5f7f5;
+  font-size: .69rem;
+}
+
+.tenant-legend-chip i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.8);
+}
+
+.tenant-match-badge {
+  max-width: 100%;
+  padding: 4px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .66rem;
+}
+
+.tenant-family {
+  color: #17663e;
+  border-color: #b8dac6;
+  background: #eaf6ee;
+}
+
+.tenant-bachelor {
+  color: #315f9d;
+  border-color: #bfd0e6;
+  background: #edf3fa;
+}
+
+.tenant-student {
+  color: #7452a3;
+  border-color: #d6c7e8;
+  background: #f3eef9;
+}
+
+.tenant-everyone {
+  color: #506d55;
+  border-color: #c9d8cb;
+  background: #f0f5f0;
+}
+
+.tenant-neutral {
+  color: #69746d;
+  border-color: #d8dfda;
+  background: #f5f7f5;
+}
+
+.renter-result-copy .tenant-match-badge {
+  margin-bottom: 1px;
+}
+
+.mobile-map-sheet-copy .tenant-match-badge {
+  margin-bottom: 2px;
+}
+
+@media (max-width: 560px) {
+  .tenant-match-legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tenant-legend-chip {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
