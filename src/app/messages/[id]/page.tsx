@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { MessageComposer } from "@/components/message-composer";
+import { RealtimeMessageThread } from "@/components/realtime-message-thread";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -54,17 +54,12 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
           <Link className="secondary-button link-button thread-property-link" href={`/homes/${conversation.property_id}`}>View property</Link>
         </header>
 
-        <section className="thread-panel">
-          <div className="message-list">
-            {!messages.length && <div className="renter-empty">No messages yet. Send the first message about this property.</div>}
-            {messages.map((message) => (
-              <div className={`message-row${message.sender_id === auth.userId ? " mine" : ""}`} key={message.id}>
-                <div className="message-bubble">{message.body}<small>{new Date(message.created_at).toLocaleString("en-BD")}</small></div>
-              </div>
-            ))}
-          </div>
-          <MessageComposer conversationId={conversation.id} userId={auth.userId} />
-        </section>
+        <RealtimeMessageThread
+          conversationId={conversation.id}
+          userId={auth.userId}
+          readField={readField}
+          initialMessages={messages}
+        />
       </div>
     </main>
   );
