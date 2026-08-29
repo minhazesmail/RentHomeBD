@@ -99,6 +99,10 @@ export function RenterMapSearch({
   const runSearchRef = useRef<(searchCenter?: [number, number]) => Promise<void>>(async () => {});
 
   const savedSet = useMemo(() => new Set(initialSavedPropertyIds), [initialSavedPropertyIds]);
+  const selectedListing = useMemo(
+    () => listings.find((listing) => listing.id === selectedId) ?? null,
+    [listings, selectedId]
+  );
 
   const validateFilters = useCallback(() => {
     const radius = Number(radiusKm);
@@ -344,6 +348,35 @@ export function RenterMapSearch({
           userLocation={userLocation}
           liveTracking={liveTracking}
         />
+
+        {selectedListing && (
+          <article className="mobile-map-sheet" aria-live="polite">
+            <button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close property preview">×</button>
+            <div className="mobile-map-sheet-handle" aria-hidden="true" />
+            <div className="mobile-map-sheet-content">
+              <div className="mobile-map-sheet-image">
+                {selectedListing.cover_url ? (
+                  <Image src={selectedListing.cover_url} alt="" fill sizes="118px" />
+                ) : (
+                  <span aria-hidden="true">⌂</span>
+                )}
+              </div>
+              <div className="mobile-map-sheet-copy">
+                <span className="mobile-map-sheet-kicker">Selected on map</span>
+                <h2>{selectedListing.title || "Rental property"}</h2>
+                <p>{selectedListing.address_text || "Location available on map"}</p>
+                <div className="mobile-map-sheet-meta">
+                  <strong>{selectedListing.rent_bdt ? `৳${selectedListing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong>
+                  <span>{selectedListing.bedrooms ?? "—"} bed · {selectedListing.bathrooms ?? "—"} bath</span>
+                </div>
+              </div>
+            </div>
+            <div className="mobile-map-sheet-actions">
+              <SaveHomeButton propertyId={selectedListing.id} userId={userId} initialSaved={savedSet.has(selectedListing.id)} compact />
+              <Link className="primary-button link-button" href={`/homes/${selectedListing.id}`}>View full listing</Link>
+            </div>
+          </article>
+        )}
       </section>
     </div>
   );
