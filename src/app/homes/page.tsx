@@ -30,9 +30,16 @@ export default async function HomesPage({
   const areaPreset = resolveLocationPreset(params.area);
 
   let savedPropertyIds: string[] = [];
+  let preferredTenantType: string | undefined;
   if (auth) {
-    const { data } = await supabase.from("saved_properties").select("property_id").eq("user_id", auth.userId);
-    savedPropertyIds = (data ?? []).map((row) => row.property_id as string);
+    const [{ data: savedRows }, { data: profilePreference }] = await Promise.all([
+      supabase.from("saved_properties").select("property_id").eq("user_id", auth.userId),
+      supabase.from("profiles").select("preferred_tenant_type").eq("id", auth.userId).maybeSingle(),
+    ]);
+    savedPropertyIds = (savedRows ?? []).map((row) => row.property_id as string);
+    preferredTenantType = typeof profilePreference?.preferred_tenant_type === "string"
+      ? profilePreference.preferred_tenant_type
+      : undefined;
   }
 
   const initialSearch = {
@@ -41,7 +48,7 @@ export default async function HomesPage({
     radiusKm: params.radius,
     minRent: params.minRent,
     maxRent: params.maxRent,
-    tenantType: params.tenant,
+    tenantType: params.tenant ?? preferredTenantType,
     bedrooms: params.bedrooms,
   };
 
