@@ -138,10 +138,55 @@
 }
 
 @media (max-width: 640px) {
+  .landing-nav {
+    gap: 10px;
+    padding-inline: 12px;
+  }
+
+  .landing-nav > .brand-logo {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .landing-nav > .brand-logo img {
+    width: clamp(112px, 34vw, 148px);
+    height: auto;
+  }
+
+  .landing-nav-actions {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  .landing-nav-actions .text-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 4px;
+    font-size: .76rem;
+    white-space: nowrap;
+  }
+
+  .landing-nav-actions .secondary-button {
+    min-height: 40px;
+    padding: 9px 12px;
+    font-size: .78rem;
+    white-space: nowrap;
+  }
+
   .landing-faq-item summary { padding: 19px 18px; }
   .landing-faq-item p { padding: 0 18px 20px; }
   .landing-footer { padding: 46px 22px 24px; }
   .landing-footer-links { grid-template-columns: 1fr 1fr; }
   .landing-footer-links > div:first-child { grid-column: 1 / -1; }
   .landing-footer-bottom { flex-direction: column; gap: 8px; }
+}
+
+@media (max-width: 360px) {
+  .landing-nav-actions .text-link { font-size: .72rem; }
+  .landing-nav-actions .secondary-button { padding-inline: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-faq-item summary span { transition: none; }
 }
