@@ -8,8 +8,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { SaveHomeButton } from "@/components/save-home-button";
-import { createClient } from "@/lib/supabase/client";
 import type { MapListing, UserMapLocation } from "@/components/leaflet-map";
+import { tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
+import { createClient } from "@/lib/supabase/client";
 
 const LeafletMap = dynamic(() => import("@/components/leaflet-map"), { ssr: false });
 const DHAKA_CENTER: [number, number] = [23.8103, 90.4125];
@@ -27,6 +28,11 @@ type InitialSearch = {
   maxRent?: string;
   tenantType?: string;
   bedrooms?: string;
+};
+
+type TenantTypeRow = {
+  property_id: string;
+  tenant_type: TenantType;
 };
 
 function initialRadius(value?: string) {
@@ -123,11 +129,24 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       center_lat: searchCenter[0], center_long: searchCenter[1], radius_km: Number(radiusKm), min_rent: minRent ? Number(minRent) : null, max_rent: maxRent ? Number(maxRent) : null, renter_tenant_type: tenantType || null, min_bedrooms: bedrooms ? Number(bedrooms) : null,
     });
     if (error) { setMessage(friendlySearchError(error)); setBusy(false); return; }
+
     const rows = (data ?? []) as MapListing[];
+    const propertyIds = rows.map((listing) => listing.id);
+    const tenantRows = propertyIds.length > 0
+      ? (await supabase.from("property_tenant_types").select("property_id, tenant_type").in("property_id", propertyIds)).data as TenantTypeRow[] | null
+      : [];
+    const tenantTypesByProperty = new Map<string, TenantType[]>();
+    for (const row of tenantRows ?? []) {
+      const current = tenantTypesByProperty.get(row.property_id) ?? [];
+      current.push(row.tenant_type);
+      tenantTypesByProperty.set(row.property_id, current);
+    }
+
     const hydrated = await Promise.all(rows.map(async (listing) => {
-      if (!listing.cover_media_path) return listing;
+      const tenant_types = tenantTypesByProperty.get(listing.id) ?? [];
+      if (!listing.cover_media_path) return { ...listing, tenant_types };
       const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(listing.cover_media_path, PUBLIC_MEDIA_TTL_SECONDS);
-      return { ...listing, cover_url: signed?.signedUrl ?? null };
+      return { ...listing, tenant_types, cover_url: signed?.signedUrl ?? null };
     }));
     setListings(hydrated);
     setSelectedId(hydrated[0]?.id ?? null);
@@ -203,6 +222,12 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
             <label className="field">Bedrooms<select value={bedrooms} onChange={(e) => setBedrooms(e.target.value)}><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></label>
             <label className="field">Radius<select value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)}><option value="2">2 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="15">15 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select></label>
           </div>
+          <div className="tenant-match-legend" aria-label="Tenant fit map colors">
+            <span className="tenant-legend-chip tenant-family"><i />Family</span>
+            <span className="tenant-legend-chip tenant-bachelor"><i />Bachelor / professional</span>
+            <span className="tenant-legend-chip tenant-student"><i />Student</span>
+            <span className="tenant-legend-chip tenant-everyone"><i />Everyone</span>
+          </div>
           <div className="renter-filter-actions">{liveTracking ? <button className="secondary-button" type="button" onClick={stopLiveLocation}>Stop live location</button> : <button className="secondary-button" type="button" onClick={startLiveLocation} disabled={locating}>{locating ? "Finding you…" : "◎ My live location"}</button>}<button className="primary-button" type="button" onClick={() => void runSearch()} disabled={busy}>{busy ? "Searching…" : "Search map"}</button></div>
           <div className="custom-area-controls">
             {!drawingCustomArea && customArea.length < 3 && <button className="secondary-button" type="button" onClick={startCustomArea}>◇ Draw custom area</button>}
@@ -218,14 +243,17 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
         <div className="renter-results-header"><strong>{busy ? "Searching…" : `${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"}`}</strong><span>{customArea.length >= 3 ? "Inside custom area" : "Closest first"}</span></div>
         <div className="renter-results-list">
           {!busy && visibleListings.length === 0 && <div className="renter-empty">{customArea.length >= 3 ? "No available homes fall inside this custom area. Try expanding the shape or radius." : "No available homes match these filters yet."}</div>}
-          {visibleListings.map((listing) => <div className={`renter-result-card-wrap${selectedId === listing.id ? " active" : ""}`} key={listing.id} onMouseEnter={() => setSelectedId(listing.id)}><Link className="renter-result-card" href={`/homes/${listing.id}`} onFocus={() => setSelectedId(listing.id)}><div className="renter-result-image">{listing.cover_url ? <Image src={listing.cover_url} alt="" width={320} height={220} sizes="(max-width: 900px) 40vw, 220px" /> : <span>⌂</span>}</div><div className="renter-result-copy"><strong>{listing.title || "Rental property"}</strong><span>{listing.address_text || "Location available on map"}</span><div className="renter-result-meta"><b>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</b><small>{listing.bedrooms ?? "—"} bed · {listing.bathrooms ?? "—"} bath</small></div>{listing.distance_meters !== null && <small>{listing.distance_meters < 1000 ? `${Math.round(listing.distance_meters)} m away` : `${(listing.distance_meters / 1000).toFixed(1)} km away`}</small>}</div></Link><SaveHomeButton propertyId={listing.id} userId={userId} initialSaved={savedSet.has(listing.id)} compact /></div>)}
+          {visibleListings.map((listing) => {
+            const tone = tenantTone(listing.tenant_types ?? []);
+            return <div className={`renter-result-card-wrap${selectedId === listing.id ? " active" : ""}`} key={listing.id} onMouseEnter={() => setSelectedId(listing.id)}><Link className="renter-result-card" href={`/homes/${listing.id}`} onFocus={() => setSelectedId(listing.id)}><div className="renter-result-image">{listing.cover_url ? <Image src={listing.cover_url} alt="" width={320} height={220} sizes="(max-width: 900px) 40vw, 220px" /> : <span>⌂</span>}</div><div className="renter-result-copy"><span className={`tenant-match-badge tenant-${tone}`}>{tenantSummary(listing.tenant_types ?? [])}</span><strong>{listing.title || "Rental property"}</strong><span>{listing.address_text || "Location available on map"}</span><div className="renter-result-meta"><b>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</b><small>{listing.bedrooms ?? "—"} bed · {listing.bathrooms ?? "—"} bath</small></div>{listing.distance_meters !== null && <small>{listing.distance_meters < 1000 ? `${Math.round(listing.distance_meters)} m away` : `${(listing.distance_meters / 1000).toFixed(1)} km away`}</small>}</div></Link><SaveHomeButton propertyId={listing.id} userId={userId} initialSaved={savedSet.has(listing.id)} compact /></div>;
+          })}
         </div>
       </aside>
 
       <section className="renter-map-panel">
         <LeafletMap listings={visibleListings} center={center} radiusKm={Number(radiusKm)} selectedId={selectedId} onSelect={setSelectedId} userLocation={userLocation} liveTracking={liveTracking} customArea={customArea} drawingCustomArea={drawingCustomArea} onCustomAreaChange={setCustomArea} />
         {drawingCustomArea && <div className="custom-area-map-hint" role="status"><strong>Draw your search area</strong><span>Tap corners on the map · {customArea.length}/3 minimum</span></div>}
-        {selectedListing && <article className="mobile-map-sheet" aria-live="polite"><button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close property preview">×</button><div className="mobile-map-sheet-handle" aria-hidden="true" /><div className="mobile-map-sheet-content"><div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div><div className="mobile-map-sheet-copy"><span className="mobile-map-sheet-kicker">Selected on map</span><h2>{selectedListing.title || "Rental property"}</h2><p>{selectedListing.address_text || "Location available on map"}</p><div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? `৳${selectedListing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>{selectedListing.bedrooms ?? "—"} bed · {selectedListing.bathrooms ?? "—"} bath</span></div></div></div><div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} initialSaved={savedSet.has(selectedListing.id)} compact /><Link className="primary-button link-button" href={`/homes/${selectedListing.id}`}>View full listing</Link></div></article>}
+        {selectedListing && <article className="mobile-map-sheet" aria-live="polite"><button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close property preview">×</button><div className="mobile-map-sheet-handle" aria-hidden="true" /><div className="mobile-map-sheet-content"><div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div><div className="mobile-map-sheet-copy"><span className={`tenant-match-badge tenant-${tenantTone(selectedListing.tenant_types ?? [])}`}>{tenantSummary(selectedListing.tenant_types ?? [])}</span><h2>{selectedListing.title || "Rental property"}</h2><p>{selectedListing.address_text || "Location available on map"}</p><div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? `৳${selectedListing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>{selectedListing.bedrooms ?? "—"} bed · {selectedListing.bathrooms ?? "—"} bath</span></div></div></div><div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} initialSaved={savedSet.has(selectedListing.id)} compact /><Link className="primary-button link-button" href={`/homes/${selectedListing.id}`}>View full listing</Link></div></article>}
       </section>
     </div>
   );
