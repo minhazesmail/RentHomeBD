@@ -4,6 +4,8 @@ import { Circle, CircleMarker, MapContainer, Polygon, Popup, TileLayer, useMap, 
 import { useEffect, useMemo, useState } from "react";
 import type { LatLngBoundsExpression } from "leaflet";
 
+import { TENANT_COLORS, tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
+
 export type MapListing = {
   id: string;
   title: string | null;
@@ -19,6 +21,7 @@ export type MapListing = {
   distance_meters: number | null;
   cover_media_path: string | null;
   cover_url?: string | null;
+  tenant_types?: TenantType[];
 };
 
 export type UserMapLocation = {
@@ -75,6 +78,11 @@ function clusterCellSize(zoom: number) {
   return 0;
 }
 
+function clusterTone(listings: MapListing[]) {
+  const tones = new Set(listings.map((listing) => tenantTone(listing.tenant_types ?? [])));
+  return tones.size === 1 ? [...tones][0] : "neutral";
+}
+
 function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapListing[]; selectedId: string | null; onSelect: (id: string) => void }) {
   const map = useMap();
   const [zoom, setZoom] = useState(() => map.getZoom());
@@ -106,22 +114,52 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
   }, [listings, zoom]);
 
   return clusters.map((cluster) => {
+    const tone = clusterTone(cluster.listings);
+    const palette = TENANT_COLORS[tone];
+
     if (cluster.listings.length === 1) {
       const listing = cluster.listings[0];
       return (
-        <CircleMarker key={listing.id} center={[listing.latitude, listing.longitude]} radius={selectedId === listing.id ? 11 : 8} pathOptions={{ fillOpacity: 0.92, weight: selectedId === listing.id ? 4 : 2 }} eventHandlers={{ click: () => onSelect(listing.id) }}>
-          <Popup><div className="map-popup"><strong>{listing.title || "Rental property"}</strong><span>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}/month` : "Rent on request"}</span><small>{listing.address_text || "Exact location shown on map"}</small></div></Popup>
+        <CircleMarker
+          key={listing.id}
+          center={[listing.latitude, listing.longitude]}
+          radius={selectedId === listing.id ? 11 : 8}
+          pathOptions={{ color: palette.stroke, fillColor: palette.fill, fillOpacity: 0.92, weight: selectedId === listing.id ? 4 : 2 }}
+          eventHandlers={{ click: () => onSelect(listing.id) }}
+        >
+          <Popup>
+            <div className="map-popup">
+              <strong>{listing.title || "Rental property"}</strong>
+              <span>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}/month` : "Rent on request"}</span>
+              <small>{tenantSummary(listing.tenant_types ?? [])}</small>
+              <small>{listing.address_text || "Exact location shown on map"}</small>
+            </div>
+          </Popup>
         </CircleMarker>
       );
     }
 
     const radius = Math.min(22, 11 + Math.log2(cluster.listings.length) * 3);
     return (
-      <CircleMarker key={cluster.id} center={[cluster.latitude, cluster.longitude]} radius={radius} pathOptions={{ fillOpacity: 0.95, weight: 3 }} eventHandlers={{ click: () => {
-        const bounds = cluster.listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
-        map.fitBounds(bounds, { padding: [70, 70], maxZoom: Math.min(15, zoom + 2), animate: true });
-      } }}>
-        <Popup><div className="map-popup map-cluster-popup"><strong>{cluster.listings.length} homes in this area</strong><span>Tap the cluster to zoom in</span><small>Individual property pins appear as you get closer.</small></div></Popup>
+      <CircleMarker
+        key={cluster.id}
+        center={[cluster.latitude, cluster.longitude]}
+        radius={radius}
+        pathOptions={{ color: palette.stroke, fillColor: palette.fill, fillOpacity: 0.95, weight: 3 }}
+        eventHandlers={{
+          click: () => {
+            const bounds = cluster.listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
+            map.fitBounds(bounds, { padding: [70, 70], maxZoom: Math.min(15, zoom + 2), animate: true });
+          },
+        }}
+      >
+        <Popup>
+          <div className="map-popup map-cluster-popup">
+            <strong>{cluster.listings.length} homes in this area</strong>
+            <span>{tone === "neutral" ? "Mixed tenant fit" : tenantSummary(cluster.listings[0].tenant_types ?? [])}</span>
+            <small>Tap the cluster to zoom in and compare individual matches.</small>
+          </div>
+        </Popup>
       </CircleMarker>
     );
   });
