@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Hind_Siliguri, Inter } from "next/font/google";
 import "leaflet/dist/leaflet.css";
 import "./tokens.css";
 import "./globals.css";
+import "./typography.css";
 import "./design-system.css";
 import "./ui-refresh.css";
 import "./brand.css";
@@ -9,6 +11,19 @@ import "./auth-polish.css";
 import "./owner-location.css";
 import "./listing-readiness.css";
 import "./messages-realtime.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+const hindSiliguri = Hind_Siliguri({
+  subsets: ["bengali", "latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-hind-siliguri",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -20,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${hindSiliguri.variable}`}>
       <body>{children}</body>
     </html>
   );
