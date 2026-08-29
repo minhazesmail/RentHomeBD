@@ -7,6 +7,7 @@ import "./ui-refresh.css";
 import "./brand.css";
 import "./auth-polish.css";
 import "./owner-location.css";
+import "./listing-readiness.css";
 
 export const metadata: Metadata = {
   title: {
