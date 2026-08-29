@@ -1,3 +1,88 @@
+.landing-quick-search {
+  display: grid;
+  gap: 10px;
+  max-width: 680px;
+  margin-top: 32px;
+}
+
+.landing-quick-search > label {
+  color: var(--ink);
+  font-size: .83rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+.landing-search-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 16px;
+  border: 1px solid rgba(13,95,67,.16);
+  border-radius: 22px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 16px 44px rgba(16,34,26,.12), 0 1px 0 rgba(255,255,255,.85) inset;
+  backdrop-filter: blur(18px);
+}
+
+.landing-search-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.landing-search-field input[type="search"] {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 8px 4px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: .96rem;
+}
+
+.landing-search-field input[type="search"]::placeholder {
+  color: #7b8b82;
+}
+
+.landing-search-field:focus-within {
+  border-color: rgba(13,95,67,.42);
+  box-shadow: 0 0 0 4px rgba(23,107,74,.08), 0 18px 46px rgba(16,34,26,.13);
+}
+
+.landing-search-field .primary-button {
+  min-height: 46px;
+  padding-inline: 20px;
+  white-space: nowrap;
+}
+
+.landing-quick-search > p {
+  margin: 0 4px;
+  color: var(--muted);
+  font-size: .76rem;
+  line-height: 1.5;
+}
+
+.landing-action-path {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing-action-path > span {
+  color: var(--muted);
+  font-size: .74rem;
+  font-weight: 750;
+}
+
 .landing-faq {
   background: rgba(247,250,247,.72);
 }
@@ -173,6 +258,18 @@
     font-size: .78rem;
     white-space: nowrap;
   }
+
+  .landing-quick-search { margin-top: 26px; }
+  .landing-search-field {
+    grid-template-columns: auto minmax(0, 1fr);
+    padding: 8px 12px;
+    border-radius: 20px;
+  }
+  .landing-search-field .primary-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .landing-action-path { width: 100%; justify-content: space-between; }
 
   .landing-faq-item summary { padding: 19px 18px; }
   .landing-faq-item p { padding: 0 18px 20px; }
