@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ListingReadiness } from "@/components/listing-readiness";
 import { createClient } from "@/lib/supabase/client";
 
 const OwnerLocationPicker = dynamic(() => import("@/components/owner-location-picker").then((module) => module.OwnerLocationPicker), { ssr: false });
@@ -36,27 +37,10 @@ type ExistingProperty = {
   media: ExistingMedia[];
 };
 
-type Props = {
-  userId: string;
-  amenities: Amenity[];
-  property?: ExistingProperty;
-};
+type Props = { userId: string; amenities: Amenity[]; property?: ExistingProperty };
 
-const tenantOptions = [
-  ["family", "Family"],
-  ["bachelor", "Bachelor"],
-  ["student", "Student"],
-  ["job_holder", "Job holder"],
-  ["everyone", "Everyone"],
-] as const;
-
-const utilityOptions = [
-  ["water", "Water"],
-  ["gas", "Gas"],
-  ["electricity", "Electricity"],
-  ["internet", "Internet"],
-  ["service_charge", "Service charge"],
-] as const;
+const tenantOptions = [["family", "Family"], ["bachelor", "Bachelor"], ["student", "Student"], ["job_holder", "Job holder"], ["everyone", "Everyone"]] as const;
+const utilityOptions = [["water", "Water"], ["gas", "Gas"], ["electricity", "Electricity"], ["internet", "Internet"], ["service_charge", "Service charge"]] as const;
 
 function optionalNumber(value: string) {
   if (!value.trim()) return null;
@@ -75,10 +59,7 @@ function fileExtension(file: File) {
   return "bin";
 }
 
-function storageFilename(path: string) {
-  return path.split("/").pop() ?? path;
-}
-
+function storageFilename(path: string) { return path.split("/").pop() ?? path; }
 function rawErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   if (typeof error === "object" && error !== null && "message" in error) {
@@ -91,7 +72,6 @@ function rawErrorMessage(error: unknown) {
 function friendlyListingError(error: unknown) {
   const raw = rawErrorMessage(error);
   const message = raw.toLowerCase();
-
   if (message.includes("title of at least 5 characters") || message.includes("properties_title_length")) return "Add a listing title with at least 5 characters.";
   if (message.includes("property type is required")) return "Choose a property type before submitting for review.";
   if (message.includes("monthly rent is required") || message.includes("properties_rent_positive")) return "Enter a valid monthly rent greater than ৳0.";
@@ -112,7 +92,6 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const locked = property ? !["draft", "pending_review", "rejected"].includes(property.status) : false;
-
   const [title, setTitle] = useState(property?.title ?? "");
   const [description, setDescription] = useState(property?.description ?? "");
   const [addressText, setAddressText] = useState(property?.address_text ?? "");
@@ -141,11 +120,9 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
 
   const latNumber = optionalNumber(latitude);
   const lngNumber = optionalNumber(longitude);
+  const hasPhoto = existingMedia.some((media) => media.media_type === "photo") || files.some((file) => file.type.startsWith("image/"));
 
-  function toggle(value: string, values: string[], setter: (next: string[]) => void) {
-    setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
-  }
-
+  function toggle(value: string, values: string[], setter: (next: string[]) => void) { setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]); }
   function setMapLocation(lat: number, lng: number) {
     setLatitude(lat.toFixed(6));
     setLongitude(lng.toFixed(6));
@@ -153,14 +130,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
   }
 
   function validateNumericFields() {
-    const numericFields = [
-      [deposit, "Security deposit must be a valid number."],
-      [size, "Property size must be a valid number."],
-      [bedrooms, "Bedrooms must be a valid number."],
-      [bathrooms, "Bathrooms must be a valid number."],
-      [floorNumber, "Floor number must be a valid number."],
-      [totalFloors, "Total floors must be a valid number."],
-    ] as const;
+    const numericFields = [[deposit, "Security deposit must be a valid number."], [size, "Property size must be a valid number."], [bedrooms, "Bedrooms must be a valid number."], [bathrooms, "Bathrooms must be a valid number."], [floorNumber, "Floor number must be a valid number."], [totalFloors, "Total floors must be a valid number."]] as const;
     for (const [value, errorMessage] of numericFields) if (value.trim() && optionalNumber(value) === null) return errorMessage;
     const depositNumber = optionalNumber(deposit);
     if (depositNumber !== null && depositNumber < 0) return "Security deposit cannot be negative.";
@@ -192,29 +162,21 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
     if (latNumber < -90 || latNumber > 90) return "Latitude must be between -90 and 90.";
     if (lngNumber < -180 || lngNumber > 180) return "Longitude must be between -180 and 180.";
     if (!tenantTypes.length) return "Choose at least one preferred tenant type.";
-    const hasPhoto = existingMedia.some((media) => media.media_type === "photo") || files.some((file) => file.type.startsWith("image/"));
     if (!hasPhoto) return "Upload at least one property photo before submitting for review.";
     return null;
   }
 
   function useCurrentLocation() {
-    if (!navigator.geolocation) {
-      setMessage("This browser does not support location access. Place the pin manually on the map.");
-      return;
-    }
+    if (!navigator.geolocation) { setMessage("This browser does not support location access. Place the pin manually on the map."); return; }
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setMapLocation(coords.latitude, coords.longitude);
-        setLocating(false);
-        setMessage("Current location added. Drag the pin to the exact building entrance if needed.");
-      },
-      () => {
-        setLocating(false);
-        setMessage("Location permission was not available. Click the map to place the property pin manually.");
-      },
-      { enableHighAccuracy: true, timeout: 12000 }
-    );
+    navigator.geolocation.getCurrentPosition(({ coords }) => {
+      setMapLocation(coords.latitude, coords.longitude);
+      setLocating(false);
+      setMessage("Current location added. Drag the pin to the exact building entrance if needed.");
+    }, () => {
+      setLocating(false);
+      setMessage("Location permission was not available. Click the map to place the property pin manually.");
+    }, { enableHighAccuracy: true, timeout: 12000 });
   }
 
   async function syncRelations(propertyId: string) {
@@ -251,10 +213,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       if (upload.error) throw upload.error;
       const mediaType = file.type.startsWith("video/") ? "video" : "photo";
       const metadata = await supabase.from("property_media").insert({ property_id: propertyId, storage_path: path, media_type: mediaType, sort_order: sortOrder } as never);
-      if (metadata.error) {
-        await supabase.storage.from("property-media").remove([path]);
-        throw metadata.error;
-      }
+      if (metadata.error) { await supabase.storage.from("property-media").remove([path]); throw metadata.error; }
       sortOrder += 1;
     }
   }
@@ -263,28 +222,9 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
     if (locked) return;
     const validationMessage = submitForReview ? validateForReview() : validateNumericFields();
     if (validationMessage) { setMessage(validationMessage); return; }
-    setBusy(true);
-    setMessage(null);
+    setBusy(true); setMessage(null);
     try {
-      const payload = {
-        title: title.trim() || null,
-        description: description.trim() || null,
-        address_text: addressText.trim() || null,
-        property_type: propertyType || null,
-        rent_bdt: optionalNumber(rent),
-        deposit_bdt: optionalNumber(deposit) ?? 0,
-        utilities_included: utilities,
-        size_sqft: optionalNumber(size),
-        bedrooms: optionalNumber(bedrooms),
-        bathrooms: optionalNumber(bathrooms),
-        floor_number: optionalNumber(floorNumber),
-        total_floors: optionalNumber(totalFloors),
-        furnishing,
-        gender_preference: genderPreference,
-        available_from: availableFrom || null,
-        latitude: latNumber,
-        longitude: lngNumber,
-      };
+      const payload = { title: title.trim() || null, description: description.trim() || null, address_text: addressText.trim() || null, property_type: propertyType || null, rent_bdt: optionalNumber(rent), deposit_bdt: optionalNumber(deposit) ?? 0, utilities_included: utilities, size_sqft: optionalNumber(size), bedrooms: optionalNumber(bedrooms), bathrooms: optionalNumber(bathrooms), floor_number: optionalNumber(floorNumber), total_floors: optionalNumber(totalFloors), furnishing, gender_preference: genderPreference, available_from: availableFrom || null, latitude: latNumber, longitude: lngNumber };
       let propertyId = property?.id;
       if (propertyId && property) {
         const currentStatus = property.status === "pending_review" ? "draft" : property.status;
@@ -304,10 +244,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       }
       router.push(`/owner?notice=${submitForReview ? "submitted" : "saved"}`);
       router.refresh();
-    } catch (error) {
-      setMessage(friendlyListingError(error));
-      setBusy(false);
-    }
+    } catch (error) { setMessage(friendlyListingError(error)); setBusy(false); }
   }
 
   const mediaCount = existingMedia.length + files.length;
@@ -316,6 +253,8 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
     <form className="listing-form" onSubmit={(event) => { event.preventDefault(); void save(false); }}>
       {property?.moderation_notes && <div className="review-note"><strong>Moderator note:</strong> {property.moderation_notes}</div>}
       {locked && <div className="review-note">This listing is currently {property?.status.replaceAll("_", " ")}. Editing is locked at this stage.</div>}
+
+      {!locked && <ListingReadiness title={title} description={description} addressText={addressText} propertyType={propertyType} rent={rent} availableFrom={availableFrom} floorNumber={floorNumber} bedrooms={bedrooms} bathrooms={bathrooms} tenantTypes={tenantTypes} amenities={selectedAmenities} utilities={utilities} hasExactPin={latNumber !== null && lngNumber !== null} hasPhoto={hasPhoto} />}
 
       <section className="listing-section">
         <div className="section-heading"><span>1</span><div><h2>Property basics</h2><p>Core details renters use to understand the home.</p></div></div>
@@ -356,22 +295,11 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
         <div className="location-grid">
           <div className="location-fields">
             {!locked && <button className="secondary-button" type="button" onClick={useCurrentLocation} disabled={locating}>{locating ? "Getting location…" : "◎ Use my current location"}</button>}
-            <div className="coordinate-readout">
-              <span>Exact coordinates</span>
-              <strong>{latNumber !== null && lngNumber !== null ? `${latNumber.toFixed(6)}, ${lngNumber.toFixed(6)}` : "Pin not placed yet"}</strong>
-            </div>
-            <details className="coordinate-advanced">
-              <summary>Advanced: enter coordinates manually</summary>
-              <div className="coordinate-fields">
-                <label className="field">Latitude<input inputMode="decimal" value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="23.7465" disabled={locked} /></label>
-                <label className="field">Longitude<input inputMode="decimal" value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="90.3760" disabled={locked} /></label>
-              </div>
-            </details>
+            <div className="coordinate-readout"><span>Exact coordinates</span><strong>{latNumber !== null && lngNumber !== null ? `${latNumber.toFixed(6)}, ${lngNumber.toFixed(6)}` : "Pin not placed yet"}</strong></div>
+            <details className="coordinate-advanced"><summary>Advanced: enter coordinates manually</summary><div className="coordinate-fields"><label className="field">Latitude<input inputMode="decimal" value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="23.7465" disabled={locked} /></label><label className="field">Longitude<input inputMode="decimal" value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="90.3760" disabled={locked} /></label></div></details>
             <p className="form-hint">Click anywhere on the map to place the pin. Once placed, drag it for gate-level accuracy.</p>
           </div>
-          <div className="map-preview interactive-map-preview">
-            <OwnerLocationPicker latitude={latNumber} longitude={lngNumber} disabled={locked} onChange={setMapLocation} />
-          </div>
+          <div className="map-preview interactive-map-preview"><OwnerLocationPicker latitude={latNumber} longitude={lngNumber} disabled={locked} onChange={setMapLocation} /></div>
         </div>
       </section>
 
