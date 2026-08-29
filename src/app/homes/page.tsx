@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import "./homes.css";
 import "./mobile-map-sheet.css";
 import "./custom-area.css";
+import "./tenant-match.css";
 
 export const dynamic = "force-dynamic";
 
