@@ -1,0 +1,68 @@
+.custom-area-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5eae6;
+}
+
+.custom-area-controls > span {
+  display: grid;
+  gap: 2px;
+  margin-right: auto;
+  color: var(--muted);
+  font-size: .76rem;
+}
+
+.custom-area-controls > span strong {
+  color: var(--accent-dark);
+  font-size: .82rem;
+}
+
+.custom-area-controls .text-button {
+  border: 0;
+  background: transparent;
+  color: var(--accent-dark);
+  font-weight: 800;
+  cursor: pointer;
+  padding: 9px 4px;
+}
+
+.custom-area-controls .text-button:hover { text-decoration: underline; }
+
+.custom-area-map-hint {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  z-index: 700;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 2px;
+  min-width: 220px;
+  padding: 10px 14px;
+  border: 1px solid rgba(13,95,67,.18);
+  border-radius: 14px;
+  background: rgba(255,255,255,.94);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(12px);
+  text-align: center;
+  pointer-events: none;
+}
+
+.custom-area-map-hint strong { color: var(--ink); font-size: .82rem; }
+.custom-area-map-hint span { color: var(--muted); font-size: .72rem; }
+.renter-map-canvas.drawing-custom-area { cursor: crosshair; }
+.renter-map-canvas.drawing-custom-area .leaflet-interactive { cursor: crosshair; }
+
+@media (max-width: 560px) {
+  .custom-area-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .custom-area-controls .primary-button,
+  .custom-area-controls .secondary-button,
+  .custom-area-controls .text-button { width: 100%; }
+  .custom-area-controls > span { width: 100%; text-align: center; }
+  .custom-area-map-hint { top: 18px; min-width: 190px; }
+}
