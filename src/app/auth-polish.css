@@ -2,7 +2,7 @@
 .auth-intro-panel .brand-link { margin-bottom: clamp(48px, 8vw, 84px); }
 .auth-benefits { display: grid; gap: 10px; margin-top: 34px; }
 .auth-benefits span { display: flex; align-items: center; gap: 10px; color: #4d6055; font-size: .88rem; font-weight: 650; }
-.auth-benefits span::before { content: ""; width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--accent-lime); box-shadow: 0 0 0 4px rgba(199,228,107,.18); }
+.auth-benefits span::before { content: ""; width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: var(--highlight); box-shadow: 0 0 0 4px rgba(185,242,39,.18); }
 @media (max-width: 800px) {
   .auth-intro-panel .brand-link { margin-bottom: 36px; }
   .auth-benefits { margin-top: 24px; }
