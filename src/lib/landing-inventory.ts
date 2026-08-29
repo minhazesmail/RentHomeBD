@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -8,10 +9,12 @@ type PropertyRow = {
   id: string;
   title: string | null;
   address_text: string | null;
+  property_type: string | null;
   rent_bdt: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
   furnishing: string | null;
+  available_from: string | null;
   latitude: number | null;
   longitude: number | null;
   published_at: string | null;
@@ -23,6 +26,7 @@ type MediaRow = { property_id: string; storage_path: string; sort_order: number;
 export type LandingFeaturedListing = PropertyRow & {
   imageUrl: string | null;
   tenantLabel: string;
+  tenantTypes: TenantType[];
 };
 
 export type LandingInventory = {
@@ -33,7 +37,7 @@ export type LandingInventory = {
 const FEATURED_LIMIT = 3;
 const IMAGE_TTL_SECONDS = 300;
 
-export async function getLandingInventory(): Promise<LandingInventory> {
+export const getLandingInventory = cache(async (): Promise<LandingInventory> => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   }) as unknown as SupabaseClient;
@@ -42,7 +46,7 @@ export async function getLandingInventory(): Promise<LandingInventory> {
     supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "available"),
     supabase
       .from("properties")
-      .select("id, title, address_text, rent_bdt, bedrooms, bathrooms, furnishing, latitude, longitude, published_at")
+      .select("id, title, address_text, property_type, rent_bdt, bedrooms, bathrooms, furnishing, available_from, latitude, longitude, published_at")
       .eq("status", "available")
       .order("published_at", { ascending: false })
       .limit(FEATURED_LIMIT),
@@ -80,6 +84,7 @@ export async function getLandingInventory(): Promise<LandingInventory> {
 
   const featuredListings = await Promise.all(
     properties.map(async (property) => {
+      const propertyTenantTypes = tenantTypes.get(property.id) ?? [];
       const coverPath = coverPaths.get(property.id);
       let imageUrl: string | null = null;
       if (coverPath) {
@@ -90,10 +95,11 @@ export async function getLandingInventory(): Promise<LandingInventory> {
       return {
         ...property,
         imageUrl,
-        tenantLabel: tenantSummary(tenantTypes.get(property.id) ?? []),
+        tenantLabel: tenantSummary(propertyTenantTypes),
+        tenantTypes: propertyTenantTypes,
       };
     }),
   );
 
   return { availableCount: count ?? featuredListings.length, featuredListings };
-}
+});
