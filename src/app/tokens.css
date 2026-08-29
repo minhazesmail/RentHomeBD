@@ -42,5 +42,17 @@
   --nb-shadow-hover: var(--shadow-lg);
 
   /* Typography */
-  --font-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-latin: var(--font-inter), Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-bangla: var(--font-hind-siliguri), "Hind Siliguri", "Noto Sans Bengali", sans-serif;
+  --font-sans: var(--font-latin);
+  --font-display: var(--font-latin);
+  --type-xs: 0.76rem;
+  --type-sm: 0.86rem;
+  --type-base: 1rem;
+  --type-lg: 1.08rem;
+  --type-xl: 1.2rem;
+  --leading-tight: 1.08;
+  --leading-body: 1.65;
+  --tracking-display: -0.045em;
+  --tracking-heading: -0.025em;
 }
