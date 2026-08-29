@@ -40,6 +40,14 @@
   overscroll-behavior: contain;
 }
 
+.message-row.pending .message-bubble {
+  opacity: 0.72;
+}
+
+.message-row.pending .message-bubble small {
+  font-style: italic;
+}
+
 @keyframes realtime-pulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
