@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 type Mode = "signin" | "signup";
 type Method = "email" | "phone";
 type Role = "renter" | "owner" | "agent";
+type TenantType = "family" | "bachelor" | "student" | "job_holder";
 
 const OTP_COOLDOWN_SECONDS = 60;
 
@@ -54,6 +55,7 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<Role>("renter");
+  const [tenantType, setTenantType] = useState<TenantType | "">("");
   const [phone, setPhone] = useState("+880");
   const [token, setToken] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -67,11 +69,28 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
     return () => window.clearInterval(timer);
   }, [cooldown]);
 
+  function validateSignupProfile() {
+    if (displayName.trim().length < 2) return "Enter a display name with at least 2 characters.";
+    if (role === "renter" && !tenantType) return "Choose the renter type that best describes you so we can match suitable homes by default.";
+    return null;
+  }
+
+  function signupMetadata() {
+    return {
+      display_name: displayName.trim(),
+      role,
+      tenant_type: role === "renter" ? tenantType || null : null,
+    };
+  }
+
   async function submitEmail(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (mode === "signup" && displayName.trim().length < 2) {
-      setMessage("Enter a display name with at least 2 characters.");
-      return;
+    if (mode === "signup") {
+      const validationMessage = validateSignupProfile();
+      if (validationMessage) {
+        setMessage(validationMessage);
+        return;
+      }
     }
 
     setBusy(true);
@@ -83,7 +102,7 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
             email: email.trim().toLowerCase(),
             password,
             options: {
-              data: { display_name: displayName.trim(), role },
+              data: signupMetadata(),
               emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(nextPath)}`,
             },
           })
@@ -113,9 +132,12 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
       setMessage("Enter a valid Bangladesh mobile number, for example +8801XXXXXXXXX.");
       return;
     }
-    if (mode === "signup" && displayName.trim().length < 2) {
-      setMessage("Enter a display name with at least 2 characters.");
-      return;
+    if (mode === "signup") {
+      const validationMessage = validateSignupProfile();
+      if (validationMessage) {
+        setMessage(validationMessage);
+        return;
+      }
     }
 
     setBusy(true);
@@ -125,7 +147,7 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
       phone: normalizedPhone,
       options: mode === "signup"
         ? {
-            data: { display_name: displayName.trim(), role },
+            data: signupMetadata(),
             shouldCreateUser: true,
           }
         : {
@@ -186,6 +208,34 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
     setMessage(null);
   }
 
+  function signupProfileFields() {
+    if (mode !== "signup") return null;
+    return (
+      <>
+        <label>Display name<input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={80} autoComplete="name" required /></label>
+        <label>I am a
+          <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
+            <option value="renter">Renter</option>
+            <option value="owner">Owner / Landlord</option>
+            <option value="agent">Agent / Agency</option>
+          </select>
+        </label>
+        {role === "renter" && (
+          <label>My renter type
+            <select value={tenantType} onChange={(e) => setTenantType(e.target.value as TenantType)} required>
+              <option value="">Choose one</option>
+              <option value="family">Family</option>
+              <option value="bachelor">Bachelor</option>
+              <option value="student">Student</option>
+              <option value="job_holder">Job holder</option>
+            </select>
+            <span className="form-hint">We’ll use this as your default map match. You can still change the tenant filter while searching.</span>
+          </label>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="auth-card">
       <div className="auth-tabs" aria-label="Authentication method">
@@ -204,19 +254,7 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
 
       {method === "email" ? (
         <form className="auth-form" onSubmit={submitEmail}>
-          {mode === "signup" && (
-            <>
-              <label>Display name<input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={80} autoComplete="name" required /></label>
-              <label>I am a
-                <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
-                  <option value="renter">Renter</option>
-                  <option value="owner">Owner / Landlord</option>
-                  <option value="agent">Agent / Agency</option>
-                </select>
-              </label>
-            </>
-          )}
-
+          {signupProfileFields()}
           <label>Email<input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
           <label>Password<input type="password" autoComplete={mode === "signin" ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required /></label>
           <button className="primary-button" disabled={busy} type="submit">{busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}</button>
@@ -232,18 +270,7 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
         </form>
       ) : (
         <form className="auth-form" onSubmit={sendPhoneOtp}>
-          {mode === "signup" && (
-            <>
-              <label>Display name<input value={displayName} onChange={(e) => setDisplayName(e.target.value)} minLength={2} maxLength={80} autoComplete="name" required /></label>
-              <label>I am a
-                <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
-                  <option value="renter">Renter</option>
-                  <option value="owner">Owner / Landlord</option>
-                  <option value="agent">Agent / Agency</option>
-                </select>
-              </label>
-            </>
-          )}
+          {signupProfileFields()}
           <label>Mobile number<input type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+8801XXXXXXXXX" required /></label>
           <p className="form-hint">Bangladesh mobile numbers only. OTP delivery and abuse limits are also enforced by the authentication provider.</p>
           <button className="primary-button" disabled={busy || cooldown > 0} type="submit">{busy ? "Sending…" : cooldown > 0 ? `Try again in ${cooldown}s` : mode === "signin" ? "Send sign-in OTP" : "Create account with OTP"}</button>
