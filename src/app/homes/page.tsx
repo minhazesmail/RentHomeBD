@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { BrandLogo } from "@/components/brand-logo";
 import { RenterMapSearch } from "@/components/renter-map-search";
 import { getAuthContext } from "@/lib/auth";
+import { resolveLocationPreset } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/server";
 import "./homes.css";
 
@@ -23,6 +24,7 @@ export default async function HomesPage({
   const params = await searchParams;
   const auth = await getAuthContext();
   const supabase = (await createClient()) as unknown as SupabaseClient;
+  const areaPreset = resolveLocationPreset(params.area);
 
   let savedPropertyIds: string[] = [];
   if (auth) {
@@ -31,8 +33,8 @@ export default async function HomesPage({
   }
 
   const initialSearch = {
-    centerLat: numberParam(params.lat),
-    centerLong: numberParam(params.lng),
+    centerLat: numberParam(params.lat) ?? areaPreset?.latitude,
+    centerLong: numberParam(params.lng) ?? areaPreset?.longitude,
     radiusKm: params.radius,
     minRent: params.minRent,
     maxRent: params.maxRent,
