@@ -3,6 +3,7 @@ import "./landing.css";
 import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { HowItWorksTabs } from "@/components/how-it-works-tabs";
 import { LandingMapPreview } from "@/components/landing-map-preview";
 import type { MapListing } from "@/components/leaflet-map";
 import { LOCATION_PRESETS } from "@/lib/location-presets";
@@ -11,18 +12,6 @@ const featuredListings: MapListing[] = [
   { id: "featured-dhanmondi", title: "Bright 3-bedroom in Dhanmondi", address_text: "Road 8, Dhanmondi, Dhaka", property_type: "apartment", rent_bdt: 32000, bedrooms: 3, bathrooms: 3, furnishing: "semi_furnished", available_from: null, latitude: 23.7465, longitude: 90.376, distance_meters: null, cover_media_path: null },
   { id: "featured-banani", title: "Modern 2-bedroom near Banani 11", address_text: "Banani, Dhaka", property_type: "apartment", rent_bdt: 42000, bedrooms: 2, bathrooms: 2, furnishing: "furnished", available_from: null, latitude: 23.7937, longitude: 90.4066, distance_meters: null, cover_media_path: null },
   { id: "featured-bashundhara", title: "Family apartment in Bashundhara", address_text: "Bashundhara R/A, Dhaka", property_type: "apartment", rent_bdt: 28000, bedrooms: 3, bathrooms: 2, furnishing: "unfurnished", available_from: null, latitude: 23.8133, longitude: 90.4315, distance_meters: null, cover_media_path: null },
-];
-
-const renterSteps = [
-  ["Search the map", "Choose the area that matters to you and see homes at their real pinned locations."],
-  ["See who it fits", "Check tenant type, rent, bedrooms, and key details before making contact."],
-  ["Message the owner", "Open the listing and contact the owner directly when the home looks right."],
-];
-
-const ownerSteps = [
-  ["Pin your property", "Place the home on the map and add the structured details renters need."],
-  ["Set who it is for", "Choose the tenant types that fit the property so expectations are clear upfront."],
-  ["Reach matched renters", "Publish a moderated listing that renters can discover through map search."],
 ];
 
 const faqs = [
@@ -90,19 +79,8 @@ export default function HomePage() {
         </section>
 
         <section className="landing-content-section landing-how" aria-labelledby="how-heading">
-          <div className="landing-section-intro"><p className="eyebrow">How it works</p><h2 id="how-heading">A clearer path for both sides of the rental.</h2><p>Renters get location and fit upfront. Owners publish the details that help the right renters find them.</p></div>
-          <div className="landing-how-grid">
-            <article className="landing-how-card">
-              <div className="landing-persona-heading"><span>R</span><div><small>For renters</small><h3>Find a home that actually fits.</h3></div></div>
-              <ol className="landing-steps">{renterSteps.map(([title, description], index) => <li key={title}><span className="landing-step-number">{index + 1}</span><div><strong>{title}</strong><p>{description}</p></div></li>)}</ol>
-              <Link className="text-link" href="/homes">Start searching →</Link>
-            </article>
-            <article className="landing-how-card">
-              <div className="landing-persona-heading"><span>O</span><div><small>For owners</small><h3>Publish once, match more clearly.</h3></div></div>
-              <ol className="landing-steps">{ownerSteps.map(([title, description], index) => <li key={title}><span className="landing-step-number">{index + 1}</span><div><strong>{title}</strong><p>{description}</p></div></li>)}</ol>
-              <Link className="text-link" href="/login">List your property →</Link>
-            </article>
-          </div>
+          <div className="landing-section-intro"><p className="eyebrow">How it works</p><h2 id="how-heading">A clearer path for both sides of the rental.</h2><p>Choose your side to see only the steps that matter to you.</p></div>
+          <HowItWorksTabs />
         </section>
 
         <section className="landing-content-section landing-featured" aria-labelledby="featured-heading">
