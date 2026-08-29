@@ -2,49 +2,13 @@ import "./landing.css";
 import "./featured-listings.css";
 import "./trust-stats.css";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { HowItWorksTabs } from "@/components/how-it-works-tabs";
+import { LandingFeaturedSection } from "@/components/landing-featured-section";
 import { LandingMapPreview } from "@/components/landing-map-preview";
 import { LOCATION_PRESETS } from "@/lib/location-presets";
-
-const featuredListings = [
-  {
-    id: "featured-dhanmondi",
-    title: "Bright 3-bedroom in Dhanmondi",
-    address_text: "Road 8, Dhanmondi, Dhaka",
-    rent_bdt: 32000,
-    bedrooms: 3,
-    bathrooms: 3,
-    furnishing: "Semi furnished",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=85",
-    tenant: "Family friendly",
-  },
-  {
-    id: "featured-banani",
-    title: "Modern 2-bedroom near Banani 11",
-    address_text: "Banani, Dhaka",
-    rent_bdt: 42000,
-    bedrooms: 2,
-    bathrooms: 2,
-    furnishing: "Furnished",
-    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=85",
-    tenant: "Professionals welcome",
-  },
-  {
-    id: "featured-bashundhara",
-    title: "Family apartment in Bashundhara",
-    address_text: "Bashundhara R/A, Dhaka",
-    rent_bdt: 28000,
-    bedrooms: 3,
-    bathrooms: 2,
-    furnishing: "Unfurnished",
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=85",
-    tenant: "Family friendly",
-  },
-];
 
 const trustSignals = [
   {
@@ -136,7 +100,7 @@ export default function HomePage() {
               </article>
             ))}
           </div>
-          <div className="landing-trust-note"><strong>No inflated marketplace claims.</strong><span>NearBasha will add verified listing counts and real renter/owner stories here as genuine marketplace data becomes available.</span></div>
+          <div className="landing-trust-note"><strong>No inflated marketplace claims.</strong><span>NearBasha uses live marketplace inventory on this page instead of fabricated listing counts or sample property claims.</span></div>
         </section>
 
         <section className="landing-content-section landing-how" aria-labelledby="how-heading">
@@ -144,38 +108,7 @@ export default function HomePage() {
           <HowItWorksTabs />
         </section>
 
-        <section className="landing-content-section landing-featured" aria-labelledby="featured-heading">
-          <div className="landing-section-intro landing-section-intro-row"><div><p className="eyebrow">Sample homes</p><h2 id="featured-heading">See the home, the fit, and the location signal at a glance.</h2></div><p>Representative examples for the marketing page. Live listings show their actual moderation and verification signals.</p></div>
-          <div className="landing-listings-grid">
-            {featuredListings.map((listing) => (
-              <article className="landing-listing-card" key={listing.id}>
-                <div className="landing-listing-visual">
-                  <Image src={listing.image} alt={`Interior preview for ${listing.title}`} fill sizes="(max-width: 760px) 100vw, (max-width: 1200px) 50vw, 33vw" />
-                  <div className="landing-listing-badges" aria-label="Listing trust signals">
-                    <span className="listing-badge listing-badge-trust">Moderated</span>
-                    <span className="listing-badge">Exact location pin</span>
-                  </div>
-                  <div className="listing-mini-map" aria-hidden="true">
-                    <span className="listing-mini-road one" />
-                    <span className="listing-mini-road two" />
-                    <span className="listing-mini-pin" />
-                    <strong>Pin preview</strong>
-                  </div>
-                </div>
-                <div className="landing-listing-copy">
-                  <div className="landing-listing-kicker"><span>{listing.tenant}</span><span>Fresh listing</span></div>
-                  <div className="landing-listing-title-row">
-                    <div><h3>{listing.title}</h3><p>{listing.address_text}</p></div>
-                    <strong>৳{listing.rent_bdt.toLocaleString("en-BD")}<small>/mo</small></strong>
-                  </div>
-                  <div className="demo-meta"><span>{listing.bedrooms} bedrooms</span><span>{listing.bathrooms} bathrooms</span><span>{listing.furnishing}</span></div>
-                  <Link className="landing-listing-link" href="/homes">View homes near this pin <span aria-hidden="true">→</span></Link>
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="landing-featured-action"><Link className="secondary-button link-button" href="/homes">Browse homes on the map</Link></div>
-        </section>
+        <LandingFeaturedSection />
 
         <section className="landing-strip" aria-label="How NearBasha is different">
           <div className="landing-feature"><strong>Search by real location.</strong><span>See what is actually near work, university, transport, or family—not just what shares an area name.</span></div>
