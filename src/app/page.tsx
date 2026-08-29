@@ -1,5 +1,6 @@
 import "./landing.css";
 import "./featured-listings.css";
+import "./trust-stats.css";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -44,6 +45,36 @@ const featuredListings = [
     tenant: "Family friendly",
   },
 ];
+
+const trustSignals = [
+  {
+    title: "Phone OTP verification",
+    description: "Account verification adds a stronger identity signal before people list, save, or contact through the platform.",
+    icon: "phone",
+  },
+  {
+    title: "Moderated before live",
+    description: "Listings can be reviewed before they become discoverable, giving obvious abuse and low-quality submissions another checkpoint.",
+    icon: "shield",
+  },
+  {
+    title: "Exact map pins",
+    description: "Renters can judge the real location around work, university, transport, or family instead of relying only on area names.",
+    icon: "pin",
+  },
+  {
+    title: "Freshness & reporting",
+    description: "Availability checks and reporting tools are designed to reduce stale, misleading, or suspicious listings over time.",
+    icon: "refresh",
+  },
+];
+
+function TrustIcon({ type }: { type: string }) {
+  if (type === "phone") return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10 5h4M11 18.5h2"/></svg>;
+  if (type === "shield") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 4.5-2.8 8.1-7 10-4.2-1.9-7-5.5-7-10V6l7-3Z"/><path d="m9.2 12 1.8 1.8 3.9-4"/></svg>;
+  if (type === "pin") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M18.3 15.6A7.5 7.5 0 1 1 19 8l1 4"/><path d="m9.5 12 1.7 1.7 3.5-3.7"/></svg>;
+}
 
 const faqs = [
   ["Are listings verified?", "NearBasha uses moderation and account-verification signals to improve trust. Verification status can vary by listing, so renters should still review the listing details carefully before making payments or commitments."],
@@ -92,12 +123,20 @@ export default function HomePage() {
           <div className="landing-visual"><LandingMapPreview /></div>
         </section>
 
-        {/* TODO: wire verified-listing and city counts to live marketplace data. */}
-        <section className="landing-stats" aria-label="NearBasha trust signals">
-          <div><strong>Live count</strong><span>Verified listings</span></div>
-          <div><strong>Bangladesh</strong><span>Built for the local rental market</span></div>
-          <div><strong>Phone OTP</strong><span>Account verification</span></div>
-          <div><strong>Moderated</strong><span>Listings reviewed before going live</span></div>
+        <section className="landing-trust-section" aria-labelledby="trust-heading">
+          <div className="landing-trust-heading">
+            <div><p className="eyebrow">Built for higher-trust renting</p><h2 id="trust-heading">Local rental discovery needs more than a list of phone numbers.</h2></div>
+            <p>NearBasha combines identity signals, moderation, precise location, and listing-freshness tools so renters and owners can make better decisions before money or time changes hands.</p>
+          </div>
+          <div className="landing-trust-grid">
+            {trustSignals.map((signal) => (
+              <article className="landing-trust-card" key={signal.title}>
+                <span className="landing-trust-icon"><TrustIcon type={signal.icon} /></span>
+                <div><strong>{signal.title}</strong><p>{signal.description}</p></div>
+              </article>
+            ))}
+          </div>
+          <div className="landing-trust-note"><strong>No inflated marketplace claims.</strong><span>NearBasha will add verified listing counts and real renter/owner stories here as genuine marketplace data becomes available.</span></div>
         </section>
 
         <section className="landing-content-section landing-how" aria-labelledby="how-heading">
