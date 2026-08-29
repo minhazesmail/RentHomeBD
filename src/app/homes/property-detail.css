@@ -6,7 +6,7 @@
 .property-detail-hero h1 { max-width: 800px; margin: 10px 0 14px; font-size: clamp(2.8rem, 6vw, 5.2rem); line-height: .95; letter-spacing: -.06em; }
 .property-detail-address { margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.5; }
 .property-detail-price { display: grid; text-align: right; flex-shrink: 0; padding-bottom: 5px; }
-.property-detail-price strong { color: var(--accent-dark); font-size: clamp(1.9rem, 4vw, 2.8rem); letter-spacing: -.05em; }
+.property-detail-price strong { color: var(--accent-warm); font-size: clamp(1.9rem, 4vw, 2.8rem); letter-spacing: -.05em; }
 .property-detail-price span { color: var(--muted); font-size: .82rem; }
 .property-gallery { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 230px 230px; gap: 8px; overflow: hidden; border: 1px solid rgba(178,193,181,.75); border-radius: 28px; margin-bottom: 30px; background: #dfe7e1; box-shadow: var(--shadow-md); }
 .property-gallery-item { position: relative; min-height: 0; overflow: hidden; background: #e3ebe5; }
@@ -38,7 +38,7 @@
 .property-map { overflow: hidden; min-height: 380px; border-radius: 20px; border: 1px solid var(--border); }
 .property-map iframe { width: 100%; height: 380px; border: 0; }
 .property-contact-card { position: sticky; top: 98px; padding: 26px; box-shadow: var(--shadow-md); }
-.owner-badge { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; margin-bottom: 18px; background: var(--ink); color: var(--accent-lime); font-size: 1.15rem; font-weight: 900; box-shadow: 0 8px 18px rgba(12,23,18,.14); }
+.owner-badge { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; margin-bottom: 18px; background: var(--ink); color: #fff; font-size: 1.15rem; font-weight: 900; box-shadow: 0 8px 18px rgba(12,23,18,.14); }
 .property-contact-card h2 { margin: 7px 0 10px; letter-spacing: -.025em; }
 .property-contact-card > p:not(.eyebrow):not(.contact-note) { color: var(--muted); line-height: 1.6; }
 .property-contact-button { width: 100%; text-align: center; margin-top: 10px; }

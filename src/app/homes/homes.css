@@ -47,7 +47,7 @@
 .renter-result-copy > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); font-size: .79rem; }
 .renter-result-copy > small { color: #738078; font-size: .73rem; }
 .renter-result-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 5px; }
-.renter-result-meta b { color: var(--accent-dark); font-size: .95rem; }
+.renter-result-meta b { color: var(--accent-warm-dark); font-size: .95rem; }
 .renter-result-meta small { color: var(--muted); }
 .renter-result-card-wrap .save-home-wrap.compact { position: absolute; top: 15px; right: 15px; z-index: 3; }
 .save-home-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 999px; background: rgba(255,255,255,.92); color: var(--foreground); cursor: pointer; font-weight: 800; backdrop-filter: blur(8px); }

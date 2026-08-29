@@ -9,7 +9,7 @@
 }
 
 .landing-faq-item {
-  border: 1px solid var(--nb-line);
+  border: 1px solid var(--border);
   border-radius: 20px;
   background: rgba(255,255,255,.88);
   box-shadow: var(--shadow-sm);
@@ -38,7 +38,7 @@
   height: 28px;
   flex: 0 0 28px;
   border-radius: var(--radius-pill);
-  background: var(--nb-lime-soft);
+  background: rgba(239,255,209,.78);
   color: var(--accent-dark);
   font-size: 1.1rem;
   transition: transform .2s ease;
@@ -124,7 +124,7 @@
 }
 
 .landing-footer-links a:hover { color: #fff; }
-.landing-footer-links a:focus-visible { outline: 2px solid var(--nb-lime); outline-offset: 4px; border-radius: 4px; }
+.landing-footer-links a:focus-visible { outline: 2px solid var(--highlight); outline-offset: 4px; border-radius: 4px; }
 
 .landing-footer-bottom {
   display: flex;
