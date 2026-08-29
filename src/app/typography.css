@@ -1,0 +1,77 @@
+html {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-sans);
+  line-height: var(--leading-body);
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+:lang(bn),
+[lang="bn"] {
+  font-family: var(--font-bangla);
+  letter-spacing: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+h1 {
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+}
+
+h2,
+h3,
+h4 {
+  letter-spacing: var(--tracking-heading);
+}
+
+p,
+li,
+dd,
+dt,
+input,
+textarea,
+select,
+button {
+  font-variant-numeric: proportional-nums;
+}
+
+.eyebrow,
+.status-pill,
+.tenant-fit-badge,
+.map-tenant-legend,
+.property-tags,
+.freshness-note,
+.form-hint,
+.contact-note {
+  font-size: var(--type-sm);
+}
+
+.property-detail-price strong,
+.renter-card-price,
+.price-emphasis {
+  font-variant-numeric: tabular-nums;
+}
+
+.bangla-copy,
+[lang="bn"] p,
+[lang="bn"] li,
+[lang="bn"] button,
+[lang="bn"] input,
+[lang="bn"] textarea,
+[lang="bn"] select {
+  font-family: var(--font-bangla);
+  line-height: 1.72;
+}
