@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
         hostname: "naoarepmcfdnxehbdios.supabase.co",
         pathname: "/storage/v1/object/sign/property-media/**",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
     ],
   },
 };
