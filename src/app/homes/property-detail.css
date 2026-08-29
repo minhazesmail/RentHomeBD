@@ -38,7 +38,7 @@
 .property-map { overflow: hidden; min-height: 380px; border-radius: 20px; border: 1px solid var(--border); }
 .property-map iframe { width: 100%; height: 380px; border: 0; }
 .property-contact-card { position: sticky; top: 98px; padding: 26px; box-shadow: var(--shadow-md); }
-.owner-badge { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; margin-bottom: 18px; background: var(--ink); color: var(--accent-lime); font-size: 1.15rem; font-weight: 900; box-shadow: 0 8px 18px rgba(12,23,18,.14); }
+.owner-badge { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; margin-bottom: 18px; background: var(--ink); color: #fff; font-size: 1.15rem; font-weight: 900; box-shadow: 0 8px 18px rgba(12,23,18,.14); }
 .property-contact-card h2 { margin: 7px 0 10px; letter-spacing: -.025em; }
 .property-contact-card > p:not(.eyebrow):not(.contact-note) { color: var(--muted); line-height: 1.6; }
 .property-contact-button { width: 100%; text-align: center; margin-top: 10px; }
