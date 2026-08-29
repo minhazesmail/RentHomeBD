@@ -1,0 +1,51 @@
+.realtime-thread-panel {
+  position: relative;
+}
+
+.thread-live-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  background: #fbfcfb;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.thread-live-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 999px;
+  background: #9aa39d;
+}
+
+.thread-live-dot.live {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(22, 121, 75, 0.1);
+}
+
+.thread-live-dot.connecting {
+  animation: realtime-pulse 1.3s ease-in-out infinite;
+}
+
+.thread-live-dot.offline {
+  background: #a96045;
+}
+
+.realtime-thread-panel .message-list {
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+@keyframes realtime-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thread-live-dot.connecting { animation: none; }
+  .realtime-thread-panel .message-list { scroll-behavior: auto; }
+}
