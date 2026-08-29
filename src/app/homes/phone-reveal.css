@@ -1,0 +1,26 @@
+.phone-reveal-gate { display: grid; gap: 7px; }
+.phone-reveal-button { margin-top: 0; }
+.phone-reveal-result {
+  display: grid;
+  gap: 6px;
+  padding: 14px 15px;
+  border: 1px solid #b9d9c5;
+  border-radius: 14px;
+  background: #eef8f1;
+}
+.phone-reveal-result span {
+  color: var(--accent-dark);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.phone-reveal-result a {
+  color: var(--ink);
+  font-size: 1.15rem;
+  font-weight: 850;
+  letter-spacing: -.02em;
+  text-decoration: none;
+}
+.phone-reveal-result a:hover { text-decoration: underline; }
+.phone-reveal-result small { color: var(--muted); font-size: .73rem; line-height: 1.45; }
