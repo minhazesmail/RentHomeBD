@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { LandingMapPreview } from "@/components/landing-map-preview";
 
+// TODO(i18n): Treat each major marketing copy block on this page as a future translation target.
 export default function HomePage() {
   return (
     <main className="landing-shell">
@@ -17,14 +19,19 @@ export default function HomePage() {
         <section className="landing-hero">
           <div className="landing-copy">
             <p className="eyebrow">A better way to rent in Bangladesh</p>
-            <h1>Home search, finally built around location.</h1>
+            <h1>Find your next home on the map.</h1>
             <p className="intro">
-              Explore moderated rental homes directly on the map, understand who each home is right for,
-              and contact owners without wading through stale classifieds.
+              See real pinned locations, know who each home is meant for, and contact the owner directly before you spend time visiting.
             </p>
-            <div className="landing-actions">
-              <Link className="primary-button link-button" href="/homes">Explore the live map →</Link>
-              <Link className="secondary-button link-button" href="/login">List a property</Link>
+            <div className="landing-actions" aria-label="Choose how you want to use NearBasha">
+              <div className="landing-action-path">
+                <span>For renters</span>
+                <Link className="primary-button link-button" href="/homes">Explore the live map →</Link>
+              </div>
+              <div className="landing-action-path">
+                <span>For owners</span>
+                <Link className="secondary-button link-button" href="/login">List a property</Link>
+              </div>
             </div>
             <div className="landing-trust" aria-label="NearBasha benefits">
               <span>Exact map pins</span>
@@ -33,29 +40,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="landing-visual" aria-hidden="true">
-            <div className="map-demo">
-              <span className="map-road one" />
-              <span className="map-road two" />
-              <span className="map-road three" />
-              <span className="map-pin-demo p1" />
-              <span className="map-pin-demo p2" />
-              <span className="map-pin-demo p3" />
-              <div className="demo-card">
-                <div className="demo-card-top">
-                  <div>
-                    <h3>Bright 3-bedroom in Dhanmondi</h3>
-                    <p>Road 8 · exact location pinned</p>
-                  </div>
-                  <div className="demo-price">৳32,000/mo</div>
-                </div>
-                <div className="demo-meta">
-                  <span>3 bedrooms</span>
-                  <span>Family friendly</span>
-                  <span>Fresh listing</span>
-                </div>
-              </div>
-            </div>
+          <div className="landing-visual">
+            <LandingMapPreview />
           </div>
         </section>
 
