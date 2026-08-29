@@ -1,0 +1,55 @@
+:root {
+  /* Core color system */
+  --background: #f5f8f5;
+  --foreground: #10221a;
+  --muted: #617269;
+  --surface: #ffffff;
+  --surface-soft: #f8faf7;
+  --surface-strong: #ecf1ed;
+  --surface-glass: rgba(255, 255, 255, 0.9);
+  --border: #dbe2dc;
+  --border-strong: #c9d4cc;
+  --accent: #0d5f43;
+  --accent-dark: #073d2c;
+  --accent-hover: #087a52;
+  --accent-soft: #e8f4ed;
+  --highlight: #b9f227;
+  --highlight-soft: #efffd1;
+  --ink: #0b1f17;
+  --danger-bg: #fff1ef;
+  --danger: #9a342d;
+  --success-bg: #edf8f1;
+  --success: #155e39;
+  --warning-bg: #fff9e9;
+  --warning: #6f5516;
+
+  /* Backwards-compatible brand aliases while page styles are consolidated. */
+  --nb-ink: var(--ink);
+  --nb-green: var(--accent);
+  --nb-green-2: var(--accent-hover);
+  --nb-lime: var(--highlight);
+  --nb-lime-soft: var(--highlight-soft);
+  --nb-bg: var(--background);
+  --nb-card: var(--surface-glass);
+  --nb-line: rgba(28, 63, 47, 0.11);
+  --nb-muted: var(--muted);
+
+  /* Radius scale */
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
+  --radius-pill: 999px;
+
+  /* Shadow scale */
+  --shadow-sm: 0 1px 2px rgba(16, 34, 26, 0.04), 0 8px 24px rgba(16, 34, 26, 0.05);
+  --shadow-md: 0 18px 55px rgba(10, 38, 26, 0.09);
+  --shadow-lg: 0 24px 70px rgba(10, 38, 26, 0.14);
+  --shadow-button: 0 10px 24px rgba(13, 95, 67, 0.22);
+  --shadow-button-hover: 0 16px 34px rgba(13, 95, 67, 0.28);
+  --nb-shadow: var(--shadow-md);
+  --nb-shadow-hover: var(--shadow-lg);
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
