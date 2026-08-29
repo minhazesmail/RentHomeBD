@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { LandingMapPreview } from "@/components/landing-map-preview";
 import type { MapListing } from "@/components/leaflet-map";
+import { LOCATION_PRESETS } from "@/lib/location-presets";
 
 const featuredListings: MapListing[] = [
   { id: "featured-dhanmondi", title: "Bright 3-bedroom in Dhanmondi", address_text: "Road 8, Dhanmondi, Dhaka", property_type: "apartment", rent_bdt: 32000, bedrooms: 3, bathrooms: 3, furnishing: "semi_furnished", available_from: null, latitude: 23.7465, longitude: 90.376, distance_meters: null, cover_media_path: null },
@@ -49,8 +50,30 @@ export default function HomePage() {
             <p className="eyebrow">A better way to rent in Bangladesh</p>
             <h1>Find your next home on the map.</h1>
             <p className="intro">See real pinned locations, know who each home is meant for, and contact the owner directly before you spend time visiting.</p>
+
+            <form className="landing-quick-search" action="/homes" method="get" role="search">
+              <label htmlFor="landing-area-search">Where do you want to live?</label>
+              <div className="landing-search-field">
+                <span className="landing-search-icon" aria-hidden="true">⌖</span>
+                <input
+                  id="landing-area-search"
+                  name="area"
+                  type="search"
+                  list="landing-location-options"
+                  placeholder="Search area, university, or neighborhood"
+                  autoComplete="off"
+                />
+                <input type="hidden" name="radius" value="5" />
+                <button className="primary-button" type="submit">Search map</button>
+              </div>
+              <datalist id="landing-location-options">
+                {LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label} />)}
+              </datalist>
+              <p>Try Dhanmondi, Banani, Uttara, BUET, or North South University.</p>
+            </form>
+
             <div className="landing-actions" aria-label="Choose how you want to use NearBasha">
-              <div className="landing-action-path"><span>For renters</span><Link className="primary-button link-button" href="/homes">Explore the live map →</Link></div>
+              <div className="landing-action-path"><span>For renters</span><Link className="text-link" href="/homes">Explore the full live map →</Link></div>
               <div className="landing-action-path"><span>For owners</span><Link className="secondary-button link-button" href="/login">List a property</Link></div>
             </div>
             <div className="landing-trust" aria-label="NearBasha benefits"><span>Exact map pins</span><span>Moderated listings</span><span>Freshness checks</span></div>
