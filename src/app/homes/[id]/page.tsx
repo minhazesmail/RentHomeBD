@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { PhoneRevealButton } from "@/components/phone-reveal-button";
 import { ReportListingButton } from "@/components/report-listing-button";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
 import { getAuthContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import "../property-detail.css";
+import "../phone-reveal.css";
 
 type Amenity = { slug: string; name: string };
 type MediaItem = { id: string; storage_path: string; media_type: "photo" | "video"; sort_order: number; signed_url?: string | null };
@@ -37,8 +39,9 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
   const property = (data?.[0] ?? null) as PublicProperty | null;
   if (!property) notFound();
 
-  const [{ data: savedRow }, media] = await Promise.all([
+  const [{ data: savedRow }, { data: viewerTrust }, media] = await Promise.all([
     auth ? supabase.from("saved_properties").select("property_id").eq("user_id", auth.userId).eq("property_id", property.id).maybeSingle() : Promise.resolve({ data: null }),
+    auth ? supabase.from("profiles").select("phone_verified_at").eq("id", auth.userId).maybeSingle() : Promise.resolve({ data: null }),
     Promise.all((property.media ?? []).map(async (item) => {
       const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(item.storage_path, PUBLIC_MEDIA_TTL_SECONDS);
       return { ...item, signed_url: signed?.signedUrl ?? null };
@@ -50,6 +53,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`;
   const signInHref = `/login?next=${encodeURIComponent(`/homes/${property.id}#contact`)}`;
   const roleVerified = Boolean(property.owner_role_verified_at && property.owner_role_verified_role === property.owner_role);
+  const viewerPhoneVerified = Boolean(viewerTrust?.phone_verified_at);
 
   return (
     <main className="property-detail-page">
@@ -83,8 +87,17 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
             <div className="owner-badge">{property.owner_display_name?.slice(0, 1).toUpperCase() || "O"}</div>
             <p className="eyebrow">Listed by {label(property.owner_role)}</p><h2>{property.owner_display_name || "Property owner"}</h2>
             <div className="property-tags">{property.owner_phone_verified_at && <span>Phone verified</span>}{roleVerified && <span>Verified {label(property.owner_role)}</span>}</div>
-            <p>Contact details stay private. Conversations happen inside NearBasha so neither side has to expose a phone number publicly.</p>
-            {auth ? <StartConversationButton propertyId={property.id} userId={auth.userId} /> : <Link className="primary-button link-button property-contact-button" href={signInHref}>Sign in to contact owner</Link>}
+            <p>Start with private NearBasha chat. If both sides have verified phones, you can also reveal the owner’s number only when you explicitly request it.</p>
+            <div className="contact-action-stack">
+              {auth ? <StartConversationButton propertyId={property.id} userId={auth.userId} /> : <Link className="primary-button link-button property-contact-button" href={signInHref}>Sign in to contact owner</Link>}
+              <PhoneRevealButton
+                propertyId={property.id}
+                signedIn={Boolean(auth)}
+                viewerPhoneVerified={viewerPhoneVerified}
+                ownerPhoneVerified={Boolean(property.owner_phone_verified_at)}
+                signInHref={signInHref}
+              />
+            </div>
             <div className="freshness-note"><strong>Fresh listing</strong><span>Published {new Date(property.published_at).toLocaleDateString("en-BD")}{property.expires_at ? ` · reconfirmation due ${new Date(property.expires_at).toLocaleDateString("en-BD")}` : ""}</span></div>
           </aside>
         </div>
