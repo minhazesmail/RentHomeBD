@@ -10,6 +10,8 @@ type Props = {
   conversationId: string;
   userId: string;
   readField: "renter_last_read_at" | "owner_last_read_at";
+  otherReadField: "renter_last_read_at" | "owner_last_read_at";
+  initialOtherReadAt: string | null;
   initialMessages: ChatMessage[];
 };
 
@@ -20,15 +22,16 @@ function mergeMessage(messages: ChatMessage[], next: ChatMessage) {
   return [...messages, next].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 }
 
-export function RealtimeMessageThread({ conversationId, userId, readField, initialMessages }: Props) {
+export function RealtimeMessageThread({ conversationId, userId, readField, otherReadField, initialOtherReadAt, initialMessages }: Props) {
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [messages, setMessages] = useState(initialMessages);
   const [optimisticMessages, addOptimisticMessage] = useOptimistic(messages, (current, next: ChatMessage) => mergeMessage(current, next));
   const [connectionState, setConnectionState] = useState<ConnectionState>("connecting");
+  const [otherReadAt, setOtherReadAt] = useState(initialOtherReadAt);
   const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const channel = supabase
+    const messageChannel = supabase
       .channel(`messages-${conversationId}`)
       .on(
         "postgres_changes",
@@ -55,10 +58,29 @@ export function RealtimeMessageThread({ conversationId, userId, readField, initi
         if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") setConnectionState("offline");
       });
 
+    const readChannel = supabase
+      .channel(`conversation-read-${conversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "conversations",
+          filter: `id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const next = payload.new as Record<string, unknown>;
+          const value = next[otherReadField];
+          if (typeof value === "string") setOtherReadAt(value);
+        }
+      )
+      .subscribe();
+
     return () => {
-      void supabase.removeChannel(channel);
+      void supabase.removeChannel(messageChannel);
+      void supabase.removeChannel(readChannel);
     };
-  }, [conversationId, readField, supabase, userId]);
+  }, [conversationId, otherReadField, readField, supabase, userId]);
 
   useEffect(() => {
     const node = listRef.current;
@@ -112,15 +134,22 @@ export function RealtimeMessageThread({ conversationId, userId, readField, initi
       </div>
 
       <div className="message-list" ref={listRef}>
-        {!optimisticMessages.length && <div className="renter-empty">No messages yet. Send the first message about this property.</div>}
-        {optimisticMessages.map((message) => (
-          <div className={`message-row${message.sender_id === userId ? " mine" : ""}${message.pending ? " pending" : ""}`} key={message.id}>
-            <div className="message-bubble">
-              {message.body}
-              <small>{message.pending ? "Sending…" : new Date(message.created_at).toLocaleString("en-BD")}</small>
+        {!optimisticMessages.length && <div className="renter-empty">No messages yet. Use a quick inquiry below or write your own message.</div>}
+        {optimisticMessages.map((message) => {
+          const mine = message.sender_id === userId;
+          const read = mine && !message.pending && Boolean(otherReadAt && new Date(message.created_at) <= new Date(otherReadAt));
+          return (
+            <div className={`message-row${mine ? " mine" : ""}${message.pending ? " pending" : ""}`} key={message.id}>
+              <div className="message-bubble">
+                <div>{message.body}</div>
+                <small className="message-status">
+                  <span>{message.pending ? "Sending…" : new Date(message.created_at).toLocaleString("en-BD", { dateStyle: "medium", timeStyle: "short" })}</span>
+                  {mine && !message.pending && <span className={read ? "read-receipt read" : "read-receipt"}>{read ? "✓✓ Read" : "✓ Sent"}</span>}
+                </small>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <MessageComposer onSend={sendMessage} />
