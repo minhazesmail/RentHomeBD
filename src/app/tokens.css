@@ -119,11 +119,11 @@
   --color-high-demand: var(--high-demand);
   --color-high-demand-soft: var(--high-demand-soft);
 
-  --font-sans: var(--font-latin);
-  --font-bangla: var(--font-bangla);
+  --font-ui: var(--font-latin);
+  --font-bengali: var(--font-bangla);
 
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
+  --radius-control: var(--radius-sm);
+  --radius-card: var(--radius-md);
+  --radius-panel: var(--radius-lg);
+  --radius-shell: var(--radius-xl);
 }
