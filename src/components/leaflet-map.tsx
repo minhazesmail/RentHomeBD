@@ -1,10 +1,11 @@
 "use client";
 
-import { Circle, CircleMarker, MapContainer, Polygon, Popup, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { Circle, CircleMarker, MapContainer, Marker, Polygon, Popup, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { useEffect, useMemo, useState } from "react";
+import { divIcon } from "leaflet";
 import type { LatLngBoundsExpression } from "leaflet";
 
-import { TENANT_COLORS, tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
+import { tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
 
 export type MapListing = {
   id: string;
@@ -83,6 +84,23 @@ function clusterTone(listings: MapListing[]) {
   return tones.size === 1 ? [...tones][0] : "neutral";
 }
 
+function compactRent(rent: number | null) {
+  if (!rent) return "Home";
+  if (rent >= 100_000) return `৳${(rent / 100_000).toFixed(rent % 100_000 === 0 ? 0 : 1)}L`;
+  if (rent >= 1_000) return `৳${Math.round(rent / 1_000)}k`;
+  return `৳${rent}`;
+}
+
+function markerIcon(label: string, tone: ReturnType<typeof tenantTone>, selected = false, cluster = false) {
+  return divIcon({
+    className: "renthome-marker-shell",
+    html: `<span class="renthome-marker tenant-tone-${tone}${selected ? " is-selected" : ""}${cluster ? " cluster" : ""}">${label}</span>`,
+    iconSize: cluster ? [40, 40] : [58, 40],
+    iconAnchor: cluster ? [20, 20] : [14, 38],
+    popupAnchor: cluster ? [0, -18] : [10, -34],
+  });
+}
+
 function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapListing[]; selectedId: string | null; onSelect: (id: string) => void }) {
   const map = useMap();
   const [zoom, setZoom] = useState(() => map.getZoom());
@@ -115,17 +133,21 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
 
   return clusters.map((cluster) => {
     const tone = clusterTone(cluster.listings);
-    const palette = TENANT_COLORS[tone];
 
     if (cluster.listings.length === 1) {
       const listing = cluster.listings[0];
+      const selected = selectedId === listing.id;
       return (
-        <CircleMarker
+        <Marker
           key={listing.id}
-          center={[listing.latitude, listing.longitude]}
-          radius={selectedId === listing.id ? 11 : 8}
-          pathOptions={{ color: palette.stroke, fillColor: palette.fill, fillOpacity: 0.92, weight: selectedId === listing.id ? 4 : 2 }}
-          eventHandlers={{ click: () => onSelect(listing.id) }}
+          position={[listing.latitude, listing.longitude]}
+          icon={markerIcon(compactRent(listing.rent_bdt), tone, selected)}
+          riseOnHover
+          zIndexOffset={selected ? 1000 : 0}
+          eventHandlers={{
+            click: () => onSelect(listing.id),
+            mouseover: () => onSelect(listing.id),
+          }}
         >
           <Popup>
             <div className="map-popup">
@@ -135,17 +157,16 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
               <small>{listing.address_text || "Exact location shown on map"}</small>
             </div>
           </Popup>
-        </CircleMarker>
+        </Marker>
       );
     }
 
-    const radius = Math.min(22, 11 + Math.log2(cluster.listings.length) * 3);
     return (
-      <CircleMarker
+      <Marker
         key={cluster.id}
-        center={[cluster.latitude, cluster.longitude]}
-        radius={radius}
-        pathOptions={{ color: palette.stroke, fillColor: palette.fill, fillOpacity: 0.95, weight: 3 }}
+        position={[cluster.latitude, cluster.longitude]}
+        icon={markerIcon(String(cluster.listings.length), tone, false, true)}
+        riseOnHover
         eventHandlers={{
           click: () => {
             const bounds = cluster.listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
@@ -160,7 +181,7 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
             <small>Tap the cluster to zoom in and compare individual matches.</small>
           </div>
         </Popup>
-      </CircleMarker>
+      </Marker>
     );
   });
 }
@@ -184,10 +205,10 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, onS
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <FitToResults listings={listings} center={center} liveTracking={liveTracking} />
       <CustomAreaDrawing active={drawingCustomArea} points={customArea} onChange={onCustomAreaChange ?? (() => {})} />
-      {radiusKm !== null && customArea.length < 3 && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ fillOpacity: 0.04, weight: 1 }} />}
-      {customArea.length >= 2 && <Polygon positions={customArea} pathOptions={{ fillOpacity: customArea.length >= 3 ? 0.12 : 0.04, weight: 3 }} />}
-      {customArea.map((point, index) => <CircleMarker key={`custom-area-${index}`} center={point} radius={5} pathOptions={{ fillOpacity: 1, weight: 2 }} />)}
-      {userCenter && <><Circle center={userCenter} radius={Math.max(userLocation?.accuracy ?? 0, 5)} pathOptions={{ fillOpacity: 0.08, weight: 1 }} /><CircleMarker center={userCenter} radius={9} pathOptions={{ fillOpacity: 1, weight: 4 }}><Popup><div className="map-popup"><strong>Your live location</strong><small>Accuracy ±{Math.round(userLocation?.accuracy ?? 0)} m</small></div></Popup></CircleMarker></>}
+      {radiusKm !== null && customArea.length < 3 && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: "#126b4d", fillColor: "#126b4d", fillOpacity: 0.04, weight: 1 }} />}
+      {customArea.length >= 2 && <Polygon positions={customArea} pathOptions={{ color: "#126b4d", fillColor: "#126b4d", fillOpacity: customArea.length >= 3 ? 0.12 : 0.04, weight: 3 }} />}
+      {customArea.map((point, index) => <CircleMarker key={`custom-area-${index}`} center={point} radius={5} pathOptions={{ color: "#0b3d2e", fillColor: "#126b4d", fillOpacity: 1, weight: 2 }} />)}
+      {userCenter && <><Circle center={userCenter} radius={Math.max(userLocation?.accuracy ?? 0, 5)} pathOptions={{ color: "#167d78", fillColor: "#167d78", fillOpacity: 0.08, weight: 1 }} /><CircleMarker center={userCenter} radius={9} pathOptions={{ color: "#ffffff", fillColor: "#167d78", fillOpacity: 1, weight: 4 }}><Popup><div className="map-popup"><strong>Your live location</strong><small>Accuracy ±{Math.round(userLocation?.accuracy ?? 0)} m</small></div></Popup></CircleMarker></>}
       <ClusteredListings listings={listings} selectedId={selectedId} onSelect={onSelect} />
     </MapContainer>
   );
