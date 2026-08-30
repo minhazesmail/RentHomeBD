@@ -159,7 +159,7 @@
 }
 
 .mobile-map-sheet.tenant-compatibility-mismatch {
-  border-color: color-mix(in srgb, var(--coral) 22%, var(--border));
+  border-color: color-mix(in srgb, var(--high-demand) 22%, var(--border));
 }
 
 .mobile-map-sheet .tenant-preference-note {
