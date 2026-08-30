@@ -7,6 +7,7 @@ import { getAuthContext } from "@/lib/auth";
 import { resolveLocationPreset } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/server";
 import "./homes.css";
+import "./split-pane.css";
 import "./mobile-map-sheet.css";
 import "./custom-area.css";
 import "./tenant-match.css";
