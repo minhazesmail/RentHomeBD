@@ -27,8 +27,8 @@ const hindSiliguri = Hind_Siliguri({
 
 export const metadata: Metadata = {
   title: {
-    default: "NearBasha",
-    template: "%s | NearBasha",
+    default: "RentHomeBD",
+    template: "%s | RentHomeBD",
   },
   description: "Find verified homes and apartments near you on a live map across Bangladesh.",
 };
