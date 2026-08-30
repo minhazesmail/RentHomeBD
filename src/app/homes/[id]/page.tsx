@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CircleCheck, Clock, MapPin, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { BrandLogo } from "@/components/brand-logo";
@@ -11,6 +12,7 @@ import { StartConversationButton } from "@/components/start-conversation-button"
 import { getAuthContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import "../property-detail.css";
+import "../trust-verification.css";
 import "../phone-reveal.css";
 
 type Amenity = { slug: string; name: string };
@@ -53,6 +55,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`;
   const signInHref = `/login?next=${encodeURIComponent(`/homes/${property.id}#contact`)}`;
   const roleVerified = Boolean(property.owner_role_verified_at && property.owner_role_verified_role === property.owner_role);
+  const ownerPhoneVerified = Boolean(property.owner_phone_verified_at);
   const viewerPhoneVerified = Boolean(viewerTrust?.phone_verified_at);
 
   return (
@@ -79,26 +82,42 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
             <section className="property-detail-section"><h2>Amenities & included utilities</h2><div className="property-tag-groups"><div><h3>Amenities</h3><div className="property-tags">{property.amenities.length ? property.amenities.map((amenity) => <span key={amenity.slug}>{amenity.name}</span>) : <span>None listed</span>}</div></div><div><h3>Utilities included</h3><div className="property-tags">{property.utilities_included.length ? property.utilities_included.map((utility) => <span key={utility}>{label(utility)}</span>) : <span>None listed</span>}</div></div></div></section>
             {videos.length > 0 && <section className="property-detail-section"><h2>Property video</h2><div className="property-video-grid">{videos.map((item) => <video key={item.id} src={item.signed_url!} controls preload="metadata" />)}</div></section>}
             <section className="property-detail-section"><h2>Exact location</h2><p className="section-copy">The owner pinned this exact location when creating the listing.</p><div className="property-map"><iframe title="Exact property location" src={mapUrl} loading="lazy" /></div></section>
-            <section className="property-detail-section" id="trust"><h2>Trust & safety</h2><p className="section-copy">Trust signals describe checks completed by NearBasha. A verified owner/agent badge is an account-review signal, not proof of legal identity or ownership of this property.</p><div className="property-tags"><span>Moderator reviewed listing</span><span>Exact pin</span><span>Freshness checked</span><span>Private in-app contact</span>{property.owner_phone_verified_at && <span>Owner phone verified</span>}{roleVerified && <span>Verified {label(property.owner_role)}</span>}</div><ReportListingButton propertyId={property.id} userId={auth?.userId ?? null} /></section>
+            <section className="property-detail-section property-trust-section" id="trust">
+              <div className="trust-section-heading"><div><h2>Trust & safety</h2><p className="section-copy">RentHomeBD surfaces the checks that matter before you contact a landlord, so you can understand what has been verified at a glance.</p></div><div className="trust-shield" aria-hidden="true"><ShieldCheck size={23} /></div></div>
+              <div className="trust-signal-grid">
+                <div className="trust-signal"><div className="trust-signal-icon"><CircleCheck size={17} /></div><div className="trust-signal-copy"><strong>Listing reviewed</strong><span>This listing passed the platform moderation flow before appearing publicly.</span></div></div>
+                <div className="trust-signal"><div className="trust-signal-icon"><MapPin size={17} /></div><div className="trust-signal-copy"><strong>Exact map pin</strong><span>The owner pinned the property location during listing creation.</span></div></div>
+                <div className="trust-signal"><div className="trust-signal-icon"><Clock size={17} /></div><div className="trust-signal-copy"><strong>Freshness tracked</strong><span>Availability has a reconfirmation lifecycle to reduce stale listings.</span></div></div>
+                <div className="trust-signal"><div className="trust-signal-icon"><MessageCircle size={17} /></div><div className="trust-signal-copy"><strong>Private contact first</strong><span>You can start with in-app messaging instead of exposing your phone number immediately.</span></div></div>
+                <div className="trust-signal"><div className="trust-signal-icon"><Phone size={17} /></div><div className="trust-signal-copy"><strong>{ownerPhoneVerified ? "Owner phone verified" : "Phone verification pending"}</strong><span>{ownerPhoneVerified ? "The listing account has completed phone verification." : "This owner has not completed the phone verification signal yet."}</span></div></div>
+                <div className="trust-signal"><div className="trust-signal-icon"><ShieldCheck size={17} /></div><div className="trust-signal-copy"><strong>{roleVerified ? `Verified ${label(property.owner_role)}` : `${label(property.owner_role)} role not verified`}</strong><span>{roleVerified ? "The account role has been reviewed by RentHomeBD." : "No verified owner/agent role signal is currently attached to this account."}</span></div></div>
+              </div>
+              <p className="trust-disclaimer">Verification badges are platform trust signals. They do not prove legal ownership of the property or replace your own viewing, document checks, and rental due diligence.</p>
+              <div className="trust-report-action"><ReportListingButton propertyId={property.id} userId={auth?.userId ?? null} /></div>
+            </section>
           </div>
 
           <aside className="property-contact-card" id="contact">
             <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} />
             <div className="owner-badge">{property.owner_display_name?.slice(0, 1).toUpperCase() || "O"}</div>
             <p className="eyebrow">Listed by {label(property.owner_role)}</p><h2>{property.owner_display_name || "Property owner"}</h2>
-            <div className="property-tags">{property.owner_phone_verified_at && <span>Phone verified</span>}{roleVerified && <span>Verified {label(property.owner_role)}</span>}</div>
-            <p>Start with private NearBasha chat. If both sides have verified phones, you can also reveal the owner’s number only when you explicitly request it.</p>
+            <div className="owner-verification-badges">
+              <span className={`owner-verification-badge${ownerPhoneVerified ? "" : " is-neutral"}`}><Phone size={12} aria-hidden="true" />{ownerPhoneVerified ? "Phone verified" : "Phone unverified"}</span>
+              <span className={`owner-verification-badge${roleVerified ? "" : " is-neutral"}`}><ShieldCheck size={12} aria-hidden="true" />{roleVerified ? `Verified ${label(property.owner_role)}` : "Role unverified"}</span>
+            </div>
+            <div className="owner-trust-summary"><ShieldCheck size={18} aria-hidden="true" /><div><strong>{ownerPhoneVerified || roleVerified ? "Trust signals available" : "Limited verification signals"}</strong><span>Review the trust section below before arranging a viewing or sharing sensitive information.</span></div></div>
+            <p>Start with private RentHomeBD chat. If both sides have verified phones, you can reveal the owner’s number only when you explicitly request it.</p>
             <div className="contact-action-stack">
               {auth ? <StartConversationButton propertyId={property.id} userId={auth.userId} /> : <Link className="primary-button link-button property-contact-button" href={signInHref}>Sign in to contact owner</Link>}
               <PhoneRevealButton
                 propertyId={property.id}
                 signedIn={Boolean(auth)}
                 viewerPhoneVerified={viewerPhoneVerified}
-                ownerPhoneVerified={Boolean(property.owner_phone_verified_at)}
+                ownerPhoneVerified={ownerPhoneVerified}
                 signInHref={signInHref}
               />
             </div>
-            <div className="freshness-note"><strong>Fresh listing</strong><span>Published {new Date(property.published_at).toLocaleDateString("en-BD")}{property.expires_at ? ` · reconfirmation due ${new Date(property.expires_at).toLocaleDateString("en-BD")}` : ""}</span></div>
+            <div className="freshness-note"><Clock size={17} aria-hidden="true" /><strong>Fresh listing</strong><span>Published {new Date(property.published_at).toLocaleDateString("en-BD")}{property.expires_at ? ` · reconfirmation due ${new Date(property.expires_at).toLocaleDateString("en-BD")}` : ""}</span></div>
           </aside>
         </div>
       </div>
