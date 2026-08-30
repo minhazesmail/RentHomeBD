@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import "../../listing-flow-polish.css";
 
 export const dynamic = "force-dynamic";
 
@@ -36,10 +37,18 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
           <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
           <p className="eyebrow">Owner workspace</p>
           <h1 className="listing-page-title">Edit listing</h1>
-          <p className="intro">Changes stay private until the listing passes moderation.</p>
+          <p className="intro">Review the same five renter-facing areas before resubmitting. Changes stay private until the listing passes moderation.</p>
         </div>
         <Link className="text-link" href="/owner">Back to properties</Link>
       </header>
+
+      <nav className="listing-workflow-ribbon" aria-label="Listing editing steps">
+        <span><b>1</b>Basics & rent</span>
+        <span><b>2</b>Home details</span>
+        <span><b>3</b>Tenant fit</span>
+        <span><b>4</b>Exact map pin</span>
+        <span><b>5</b>Photos & video</span>
+      </nav>
 
       <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} property={formProperty} />
     </main>
