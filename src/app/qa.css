@@ -1,0 +1,115 @@
+/* Cross-product accessibility, responsiveness, and rendering safeguards. */
+
+.skip-link {
+  position: fixed;
+  z-index: 10000;
+  top: 10px;
+  left: 10px;
+  padding: 10px 14px;
+  border: 2px solid var(--accent-dark);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-md);
+  font-weight: 800;
+  text-decoration: none;
+  transform: translateY(-180%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+#main-content:focus {
+  outline: none;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Keep important interactive targets usable on touch screens. */
+.text-button,
+.text-link,
+.save-home-button,
+.freshness-rented {
+  min-height: 44px;
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Render heavy below-the-fold marketing/workspace sections lazily where supported. */
+.landing-content-section,
+.saved-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 620px;
+}
+
+/* High contrast mode should retain visible boundaries and state. */
+@media (forced-colors: active) {
+  .primary-button,
+  .secondary-button,
+  .status-pill,
+  .choice-chip,
+  .save-home-button,
+  .tenant-match-badge {
+    border: 1px solid ButtonText;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .primary-button:hover,
+  .secondary-button:hover,
+  .renter-result-card:hover {
+    transform: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .link-button {
+    min-height: 46px;
+  }
+}
