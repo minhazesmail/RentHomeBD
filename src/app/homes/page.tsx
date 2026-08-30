@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import "./homes.css";
 import "./split-pane.css";
 import "./mobile-map-sheet.css";
+import "./map-markers.css";
 import "./custom-area.css";
 import "./tenant-match.css";
 
