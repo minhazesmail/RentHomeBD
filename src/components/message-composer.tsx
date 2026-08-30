@@ -4,6 +4,13 @@ import { useState } from "react";
 
 export type ChatMessage = { id: string; sender_id: string; body: string; created_at: string; pending?: boolean };
 
+const QUICK_INQUIRIES = [
+  "Is this still available?",
+  "Is this suitable for my tenant type?",
+  "Can I visit the property this week?",
+  "What is the earliest move-in date?",
+];
+
 export function friendlyMessageError(message: string) {
   const lower = message.toLowerCase();
   if (lower.includes("message rate limit reached")) {
@@ -46,24 +53,36 @@ export function MessageComposer({
 
   return (
     <div className="message-composer">
-      <textarea
-        value={body}
-        onChange={(event) => setBody(event.target.value)}
-        rows={3}
-        maxLength={4000}
-        placeholder="Write a message…"
-        onKeyDown={(event) => {
-          if (event.key === "Enter" && !event.shiftKey) {
-            event.preventDefault();
-            void send();
-          }
-        }}
-      />
-      <div className="message-composer-footer">
-        <span>{body.length}/4000</span>
-        <button className="primary-button" type="button" disabled={busy || !body.trim()} onClick={() => void send()}>
-          {busy ? "Sending…" : "Send"}
+      <div className="quick-inquiries" aria-label="Quick inquiry suggestions">
+        {QUICK_INQUIRIES.map((inquiry) => (
+          <button key={inquiry} type="button" onClick={() => setBody(inquiry)} disabled={busy}>
+            {inquiry}
+          </button>
+        ))}
+      </div>
+
+      <div className="message-input-shell">
+        <textarea
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          rows={2}
+          maxLength={4000}
+          placeholder="Write a polite message about this property…"
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              void send();
+            }
+          }}
+        />
+        <button className="message-send-button" type="button" disabled={busy || !body.trim()} onClick={() => void send()} aria-label="Send message">
+          {busy ? "…" : "➤"}
         </button>
+      </div>
+
+      <div className="message-composer-footer">
+        <span>Enter to send · Shift + Enter for a new line</span>
+        <span>{body.length}/4000</span>
       </div>
       {message && <div className="auth-message">{message}</div>}
     </div>
