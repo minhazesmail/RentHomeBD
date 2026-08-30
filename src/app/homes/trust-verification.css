@@ -113,7 +113,7 @@
   border-radius: 11px;
   background: white;
   color: var(--verified);
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
 }
 
 .trust-signal-copy {
@@ -135,7 +135,7 @@
 .trust-disclaimer {
   margin: 16px 0 0;
   padding: 12px 14px;
-  border-left: 3px solid var(--sand-400);
+  border-left: 3px solid var(--sand-300);
   border-radius: 0 12px 12px 0;
   background: var(--sand-50);
   color: var(--muted);
