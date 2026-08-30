@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Bath, BedDouble, Building2, CalendarDays, Camera, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, WalletCards, Zap } from "lucide-react";
+import { Bath, BedDouble, Building2, Camera, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { BrandLogo } from "@/components/brand-logo";
