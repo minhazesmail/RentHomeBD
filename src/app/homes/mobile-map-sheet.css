@@ -5,50 +5,72 @@
 @media (max-width: 900px) {
   .renter-map-panel {
     overflow: hidden;
+    height: 54svh;
+    min-height: 430px;
+    padding: 0;
+    background: #dfe6e1;
+  }
+
+  .renter-map-canvas {
+    min-height: 100%;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .mobile-map-sheet {
     position: absolute;
-    left: 18px;
-    right: 18px;
-    bottom: 18px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
     z-index: 700;
     display: grid;
     gap: 12px;
-    max-height: 42%;
-    padding: 10px 14px 14px;
-    border: 1px solid rgba(174,191,179,.82);
-    border-radius: 24px;
-    background: rgba(250,252,249,.96);
-    box-shadow: 0 22px 54px rgba(16,34,26,.2);
-    backdrop-filter: blur(18px);
+    max-height: min(46%, 330px);
+    padding: 9px 14px calc(14px + env(safe-area-inset-bottom));
+    border: 1px solid rgba(174, 191, 179, 0.72);
+    border-radius: 26px;
+    background: rgba(251, 252, 249, 0.97);
+    box-shadow: 0 22px 54px rgba(8, 44, 33, 0.2);
+    backdrop-filter: blur(20px) saturate(1.08);
     animation: mobile-sheet-in .22s ease-out;
+    touch-action: pan-y;
+  }
+
+  .mobile-map-sheet::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: 0 1px 0 rgba(255,255,255,.86) inset;
   }
 
   .mobile-map-sheet-handle {
-    width: 42px;
-    height: 4px;
-    margin: 0 auto;
-    border-radius: 999px;
-    background: #c0ccc4;
+    width: 44px;
+    height: 5px;
+    margin: 0 auto 1px;
+    border-radius: var(--radius-pill);
+    background: #b9c5bd;
   }
 
   .mobile-map-sheet-close {
     position: absolute;
-    top: 10px;
+    top: 12px;
     right: 12px;
     z-index: 2;
     display: grid;
     place-items: center;
-    width: 32px;
-    height: 32px;
-    border: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(217, 224, 220, 0.88);
     border-radius: 50%;
-    background: rgba(238,242,239,.92);
+    background: rgba(255,255,255,.94);
     color: var(--ink);
     cursor: pointer;
     font-size: 1.25rem;
     line-height: 1;
+    box-shadow: var(--shadow-sm);
   }
 
   .mobile-map-sheet-content {
@@ -61,13 +83,13 @@
 
   .mobile-map-sheet-image {
     position: relative;
-    min-height: 96px;
+    min-height: 100px;
     height: 100%;
     overflow: hidden;
     display: grid;
     place-items: center;
-    border-radius: 16px;
-    background: linear-gradient(145deg,#e3ebe5,#d4e1d8);
+    border-radius: 18px;
+    background: linear-gradient(145deg, var(--emerald-50), #dbe8e0);
     color: var(--accent);
     font-size: 2rem;
   }
@@ -78,7 +100,7 @@
 
   .mobile-map-sheet-copy {
     min-width: 0;
-    padding-right: 28px;
+    padding-right: 32px;
   }
 
   .mobile-map-sheet-kicker {
@@ -93,7 +115,7 @@
     margin: 5px 0 4px;
     overflow: hidden;
     color: var(--ink);
-    font-size: 1rem;
+    font-size: 1.02rem;
     line-height: 1.2;
     letter-spacing: -.02em;
     text-overflow: ellipsis;
@@ -118,8 +140,9 @@
   }
 
   .mobile-map-sheet-meta strong {
-    color: var(--accent-warm-dark);
-    font-size: .95rem;
+    color: var(--accent-dark);
+    font-size: .98rem;
+    letter-spacing: -.015em;
   }
 
   .mobile-map-sheet-meta span {
@@ -139,30 +162,41 @@
     position: static;
   }
 
+  .mobile-map-sheet-actions .save-home-button,
+  .mobile-map-sheet-actions .primary-button {
+    min-height: 46px;
+  }
+
   .mobile-map-sheet-actions .primary-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 42px;
     text-align: center;
   }
 }
 
 @media (max-width: 560px) {
+  .renter-map-panel {
+    height: 50svh;
+    min-height: 380px;
+  }
+
   .mobile-map-sheet {
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    max-height: 44%;
-    border-radius: 22px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    max-height: min(48%, 315px);
+    border-radius: 24px;
   }
 
   .mobile-map-sheet-content {
-    grid-template-columns: 92px minmax(0, 1fr);
+    grid-template-columns: 94px minmax(0, 1fr);
+    gap: 12px;
   }
 
   .mobile-map-sheet-image {
-    min-height: 86px;
+    min-height: 90px;
+    border-radius: 16px;
   }
 }
 
