@@ -1,28 +1,57 @@
 :root {
-  /* Core color system */
-  --background: #f5f8f5;
-  --foreground: #10221a;
-  --muted: #617269;
+  /* Brand palette — Bangladesh-inspired, premium and restrained */
+  --emerald-950: #082c21;
+  --emerald-900: #0b3d2e;
+  --emerald-800: #0d513b;
+  --emerald-700: #126b4d;
+  --emerald-600: #16805b;
+  --emerald-100: #dff2e8;
+  --emerald-50: #eef8f3;
+
+  --sand-500: #c7a979;
+  --sand-300: #ddc8a4;
+  --sand-200: #e9dcc5;
+  --sand-100: #f2e9d9;
+  --sand-50: #faf6ee;
+
+  --slate-950: #16201c;
+  --slate-800: #34433c;
+  --slate-600: #63726b;
+  --slate-400: #9ba7a1;
+  --slate-200: #d9e0dc;
+  --slate-100: #e9eeeb;
+  --off-white: #fbfcf9;
+
+  /* Product status colors */
+  --verified: #167d78;
+  --verified-soft: #e6f5f3;
+  --high-demand: #c86d5d;
+  --high-demand-soft: #fff0ec;
+
+  /* Semantic application colors — kept compatible with existing UI */
+  --background: var(--off-white);
+  --foreground: var(--slate-950);
+  --muted: var(--slate-600);
   --surface: #ffffff;
-  --surface-soft: #f8faf7;
-  --surface-strong: #ecf1ed;
+  --surface-soft: var(--sand-50);
+  --surface-strong: var(--slate-100);
   --surface-glass: rgba(255, 255, 255, 0.9);
-  --border: #dbe2dc;
-  --border-strong: #c9d4cc;
-  --accent: #0d5f43;
-  --accent-dark: #0a4632;
-  --accent-warm: #c1682f;
-  --accent-warm-dark: #9c5225;
-  --accent-hover: #087a52;
-  --accent-soft: #e8f4ed;
-  --highlight: #b9f227;
-  --highlight-soft: #efffd1;
-  --ink: #0b1f17;
+  --border: var(--slate-200);
+  --border-strong: #c4cec8;
+  --accent: var(--emerald-700);
+  --accent-dark: var(--emerald-900);
+  --accent-hover: var(--emerald-600);
+  --accent-soft: var(--emerald-50);
+  --accent-warm: var(--sand-500);
+  --accent-warm-dark: #9f7e4f;
+  --highlight: var(--sand-300);
+  --highlight-soft: var(--sand-100);
+  --ink: var(--emerald-950);
   --danger-bg: #fff1ef;
   --danger: #9a342d;
-  --success-bg: #edf8f1;
-  --success: #14623b;
-  --warning-bg: #fff9e9;
+  --success-bg: var(--verified-soft);
+  --success: var(--verified);
+  --warning-bg: #fff8e8;
   --warning: #806314;
 
   /* Radius scale */
@@ -32,12 +61,25 @@
   --radius-xl: 36px;
   --radius-pill: 999px;
 
-  /* Shadow scale */
-  --shadow-sm: 0 1px 2px rgba(16, 34, 26, 0.04), 0 8px 24px rgba(16, 34, 26, 0.05);
-  --shadow-md: 0 18px 55px rgba(10, 38, 26, 0.09);
-  --shadow-lg: 0 24px 70px rgba(10, 38, 26, 0.14);
-  --shadow-button: 0 10px 24px rgba(13, 95, 67, 0.22);
-  --shadow-button-hover: 0 16px 34px rgba(13, 95, 67, 0.28);
+  /* Spacing rhythm */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* Softer premium elevation */
+  --shadow-sm: 0 1px 2px rgba(8, 44, 33, 0.035), 0 8px 24px rgba(8, 44, 33, 0.045);
+  --shadow-md: 0 18px 55px rgba(8, 44, 33, 0.08);
+  --shadow-lg: 0 28px 80px rgba(8, 44, 33, 0.12);
+  --shadow-button: 0 10px 24px rgba(18, 107, 77, 0.2);
+  --shadow-button-hover: 0 16px 34px rgba(18, 107, 77, 0.25);
   --nb-shadow: var(--shadow-md);
   --nb-shadow-hover: var(--shadow-lg);
 
@@ -55,4 +97,33 @@
   --leading-body: 1.65;
   --tracking-display: -0.045em;
   --tracking-heading: -0.025em;
+}
+
+/* Tailwind CSS 4 theme bridge.
+   These names make the brand system available to utility classes while
+   the semantic variables above keep all existing CSS working unchanged. */
+@theme inline {
+  --color-brand: var(--emerald-700);
+  --color-brand-dark: var(--emerald-900);
+  --color-brand-deep: var(--emerald-950);
+  --color-brand-soft: var(--emerald-50);
+  --color-sand: var(--sand-500);
+  --color-sand-soft: var(--sand-50);
+  --color-canvas: var(--background);
+  --color-surface: var(--surface);
+  --color-ink: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-verified: var(--verified);
+  --color-verified-soft: var(--verified-soft);
+  --color-high-demand: var(--high-demand);
+  --color-high-demand-soft: var(--high-demand-soft);
+
+  --font-sans: var(--font-latin);
+  --font-bangla: var(--font-bangla);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
 }
