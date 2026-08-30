@@ -60,12 +60,13 @@ export function SaveHomeButton({
         onClick={toggle}
         disabled={busy}
         aria-pressed={optimisticSaved}
+        aria-busy={busy}
         aria-label={optimisticSaved ? "Remove from saved homes" : "Save this home"}
       >
         <span aria-hidden="true">{optimisticSaved ? "♥" : "♡"}</span>
         {!compact && (busy ? (optimisticSaved ? "Saving…" : "Removing…") : optimisticSaved ? "Saved home" : "Save home")}
       </button>
-      {message && !compact && <small className="save-home-error">{message}</small>}
+      {message && <small className={compact ? "sr-only" : "save-home-error"} role="status">{message}</small>}
     </div>
   );
 }
