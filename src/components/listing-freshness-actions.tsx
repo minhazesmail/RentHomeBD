@@ -26,7 +26,7 @@ export function ListingFreshnessActions({
       .eq("id", propertyId);
 
     if (updateError) {
-      setError(updateError.message);
+      setError("Could not reconfirm this listing. Please try again.");
       setBusy(null);
       return;
     }
@@ -45,7 +45,7 @@ export function ListingFreshnessActions({
       .eq("id", propertyId);
 
     if (updateError) {
-      setError(updateError.message);
+      setError("Could not mark this listing as rented. Please try again.");
       setBusy(null);
       return;
     }
@@ -54,17 +54,17 @@ export function ListingFreshnessActions({
     setBusy(null);
   }
 
-  if (!['available', 'pending_confirmation'].includes(status)) return null;
+  if (!["available", "pending_confirmation"].includes(status)) return null;
 
   return (
-    <div className="freshness-actions" onClick={(event) => event.preventDefault()}>
-      <button className="secondary-button freshness-button" type="button" disabled={busy !== null} onClick={() => void reconfirm()}>
+    <div className="freshness-actions" onClick={(event) => event.preventDefault()} aria-live="polite">
+      <button className="secondary-button freshness-button" type="button" disabled={busy !== null} aria-busy={busy === "confirm"} onClick={() => void reconfirm()}>
         {busy === "confirm" ? "Confirming…" : "Still available"}
       </button>
-      <button className="text-button freshness-rented" type="button" disabled={busy !== null} onClick={() => void markRented()}>
+      <button className="text-button freshness-rented" type="button" disabled={busy !== null} aria-busy={busy === "rented"} onClick={() => void markRented()}>
         {busy === "rented" ? "Updating…" : "Mark rented"}
       </button>
-      {error && <span className="freshness-error">{error}</span>}
+      {error && <span className="freshness-error" role="alert">{error}</span>}
     </div>
   );
 }
