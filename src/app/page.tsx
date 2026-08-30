@@ -1,8 +1,10 @@
 import "./landing.css";
+import "./landing-refinement.css";
 import "./featured-listings.css";
 import "./trust-stats.css";
 
 import Link from "next/link";
+import { BadgeCheck, MapPin, Search, ShieldCheck, UsersRound } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { HowItWorksTabs } from "@/components/how-it-works-tabs";
@@ -41,8 +43,8 @@ function TrustIcon({ type }: { type: string }) {
 }
 
 const faqs = [
-  ["Are listings verified?", "NearBasha uses moderation and account-verification signals to improve trust. Verification status can vary by listing, so renters should still review the listing details carefully before making payments or commitments."],
-  ["How does NearBasha help prevent scams or fake listings?", "The product includes phone OTP, listing moderation, reporting tools, and freshness controls. These reduce risk, but renters should still avoid sending money before they are satisfied with the property and the person they are dealing with."],
+  ["Are listings verified?", "RentHomeBD uses moderation and account-verification signals to improve trust. Verification status can vary by listing, so renters should still review listing details carefully before making payments or commitments."],
+  ["How does RentHomeBD help prevent scams or fake listings?", "The product includes phone OTP, listing moderation, reporting tools, and freshness controls. These reduce risk, but renters should still avoid sending money before they are satisfied with the property and the person they are dealing with."],
   ["Is it free to browse or list a property?", "Pricing is not published on this marketing page yet. Any browsing or listing fees will be shown clearly before a user is asked to pay."],
   ["How does tenant-type matching work?", "Owners specify who a property is suitable for, such as families, bachelors, students, or job holders. Renters can use those structured preferences to avoid listings that are not a good fit."],
 ];
@@ -63,13 +65,20 @@ export default function HomePage() {
         <section className="landing-hero">
           <div className="landing-copy">
             <p className="eyebrow">A better way to rent in Bangladesh</p>
-            <h1>Find your next home on the map.</h1>
-            <p className="intro">See real pinned locations, know who each home is meant for, and contact the owner directly before you spend time visiting.</p>
+            <h1>Find the right home, in the right place.</h1>
+            <p className="intro">Browse exact pinned locations, understand who each home suits, and contact verified rental accounts without wasting days on mismatched listings.</p>
+
+            <div className="landing-proof-row" aria-label="Core RentHomeBD benefits">
+              <span className="landing-proof-chip"><MapPin aria-hidden="true" />Exact location pins</span>
+              <span className="landing-proof-chip"><UsersRound aria-hidden="true" />Tenant-fit matching</span>
+              <span className="landing-proof-chip"><ShieldCheck aria-hidden="true" />Trust signals</span>
+              <span className="landing-proof-chip"><BadgeCheck aria-hidden="true" />Freshness controls</span>
+            </div>
 
             <form className="landing-quick-search" action="/homes" method="get" role="search">
               <label htmlFor="landing-area-search">Where do you want to live?</label>
               <div className="landing-search-field">
-                <span className="landing-search-icon" aria-hidden="true">⌖</span>
+                <span className="landing-search-icon" aria-hidden="true"><Search size={16} /></span>
                 <input id="landing-area-search" name="area" type="search" list="landing-location-options" placeholder="Search area, university, or neighborhood" autoComplete="off" />
                 <input type="hidden" name="radius" value="5" />
                 <button className="primary-button" type="submit">Search map</button>
@@ -78,19 +87,27 @@ export default function HomePage() {
               <p>Try Dhanmondi, Banani, Uttara, BUET, or North South University.</p>
             </form>
 
-            <div className="landing-actions" aria-label="Choose how you want to use NearBasha">
-              <div className="landing-action-path"><span>For renters</span><Link className="text-link" href="/homes">Explore the full live map →</Link></div>
+            <div className="landing-actions" aria-label="Choose how you want to use RentHomeBD">
+              <div className="landing-action-path"><span>For renters</span><Link className="text-link" href="/homes">Explore the live map →</Link></div>
               <div className="landing-action-path"><span>For owners</span><Link className="secondary-button link-button" href="/login">List a property</Link></div>
             </div>
-            <div className="landing-trust" aria-label="NearBasha benefits"><span>Exact map pins</span><span>Moderated listings</span><span>Freshness checks</span></div>
+            <div className="landing-trust" aria-label="RentHomeBD benefits"><span>Exact map pins</span><span>Moderated listings</span><span>Freshness checks</span></div>
+
+            <div className="landing-market-note">
+              <span className="landing-market-note-icon" aria-hidden="true"><MapPin /></span>
+              <div><strong>Built around how people actually search in Bangladesh.</strong><span>Start with the streets, campuses, offices, transport links, and neighborhoods that matter—not only district or thana names.</span></div>
+            </div>
           </div>
-          <div className="landing-visual"><LandingMapPreview /></div>
+          <div className="landing-visual">
+            <div className="landing-visual-label"><MapPin aria-hidden="true" />Live map preview</div>
+            <LandingMapPreview />
+          </div>
         </section>
 
         <section className="landing-trust-section" aria-labelledby="trust-heading">
           <div className="landing-trust-heading">
             <div><p className="eyebrow">Built for higher-trust renting</p><h2 id="trust-heading">Local rental discovery needs more than a list of phone numbers.</h2></div>
-            <p>NearBasha combines identity signals, moderation, precise location, and listing-freshness tools so renters and owners can make better decisions before money or time changes hands.</p>
+            <p>RentHomeBD combines identity signals, moderation, precise location, and listing-freshness tools so renters and owners can make better decisions before money or time changes hands.</p>
           </div>
           <div className="landing-trust-grid">
             {trustSignals.map((signal) => (
@@ -100,7 +117,7 @@ export default function HomePage() {
               </article>
             ))}
           </div>
-          <div className="landing-trust-note"><strong>No inflated marketplace claims.</strong><span>NearBasha uses live marketplace inventory on this page instead of fabricated listing counts or sample property claims.</span></div>
+          <div className="landing-trust-note"><strong>No inflated marketplace claims.</strong><span>RentHomeBD uses live marketplace inventory on this page instead of fabricated listing counts or sample property claims.</span></div>
         </section>
 
         <section className="landing-content-section landing-how" aria-labelledby="how-heading">
@@ -110,19 +127,24 @@ export default function HomePage() {
 
         <LandingFeaturedSection />
 
-        <section className="landing-strip" aria-label="How NearBasha is different">
+        <section className="landing-strip" aria-label="How RentHomeBD is different">
           <div className="landing-feature"><strong>Search by real location.</strong><span>See what is actually near work, university, transport, or family—not just what shares an area name.</span></div>
           <div className="landing-feature"><strong>Know who the home suits.</strong><span>Tenant preferences are structured into each listing so both sides waste less time.</span></div>
           <div className="landing-feature"><strong>Keep listings fresh.</strong><span>Freshness controls are designed to stop old, unavailable homes from quietly filling the marketplace.</span></div>
         </section>
 
         <section className="landing-content-section landing-faq" aria-labelledby="faq-heading">
-          <div className="landing-section-intro"><p className="eyebrow">Questions, answered</p><h2 id="faq-heading">What to know before you start.</h2><p>Clear expectations matter on both sides of a rental. These are the basics behind the NearBasha experience.</p></div>
+          <div className="landing-section-intro"><p className="eyebrow">Questions, answered</p><h2 id="faq-heading">What to know before you start.</h2><p>Clear expectations matter on both sides of a rental. These are the basics behind the RentHomeBD experience.</p></div>
           <div className="landing-faq-list">
             {faqs.map(([question, answer]) => (
               <details key={question} className="landing-faq-item"><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>
             ))}
           </div>
+        </section>
+
+        <section className="landing-cta-band" aria-label="Start using RentHomeBD">
+          <div><p className="eyebrow">Ready when you are</p><h2>Start with the map, not another endless listing feed.</h2><p>Explore homes around the places that matter to you, or publish a property with an exact pin and clear tenant preferences.</p></div>
+          <div className="landing-cta-actions"><Link className="primary-button link-button" href="/homes">Browse the live map</Link><Link className="secondary-button link-button" href="/login">List a property</Link></div>
         </section>
 
         <footer className="landing-footer">
@@ -132,7 +154,7 @@ export default function HomePage() {
             <div><strong>Company</strong><Link href="/about">About</Link><Link href="/contact">Contact</Link></div>
             <div><strong>Legal</strong><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></div>
           </div>
-          <div className="landing-footer-bottom"><span>Bangladesh-focused rental marketplace</span><span>© 2026 NearBasha. All rights reserved.</span></div>
+          <div className="landing-footer-bottom"><span>Bangladesh-focused rental marketplace</span><span>© 2026 RentHomeBD. All rights reserved.</span></div>
         </footer>
       </div>
     </main>
