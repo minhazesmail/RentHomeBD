@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import "../../listing-flow-polish.css";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +19,18 @@ export default async function NewPropertyPage() {
           <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
           <p className="eyebrow">Owner workspace</p>
           <h1 className="listing-page-title">Create a rental listing</h1>
-          <p className="intro">Save an incomplete draft anytime. Submission checks run only when you send the listing for moderation.</p>
+          <p className="intro">Build a trustworthy listing in five guided steps. Save an incomplete draft anytime; review requirements apply only when you submit.</p>
         </div>
         <Link className="text-link" href="/owner">Back to properties</Link>
       </header>
+
+      <nav className="listing-workflow-ribbon" aria-label="Listing creation steps">
+        <span><b>1</b>Basics & rent</span>
+        <span><b>2</b>Home details</span>
+        <span><b>3</b>Tenant fit</span>
+        <span><b>4</b>Exact map pin</span>
+        <span><b>5</b>Photos & video</span>
+      </nav>
 
       <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} />
     </main>
