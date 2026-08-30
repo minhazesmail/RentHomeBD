@@ -11,6 +11,7 @@ import "./auth-polish.css";
 import "./owner-location.css";
 import "./listing-readiness.css";
 import "./messages-realtime.css";
+import "./qa.css";
 
 const inter = Inter({
   subsets: ["latin"],
