@@ -1,3 +1,33 @@
+.tenant-profile-preference {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 12px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--verified) 28%, var(--border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--verified-soft) 76%, white);
+  color: var(--muted);
+  font-size: .76rem;
+  line-height: 1.45;
+}
+
+.tenant-profile-preference svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--verified);
+}
+
+.tenant-profile-preference span {
+  display: grid;
+  gap: 1px;
+}
+
+.tenant-profile-preference strong {
+  color: var(--ink);
+  font-size: .78rem;
+}
+
 .tenant-match-legend {
   display: flex;
   flex-wrap: wrap;
@@ -26,27 +56,34 @@
   font-size: .69rem;
 }
 
-.tenant-legend-chip i {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: currentColor;
-  box-shadow: 0 0 0 3px rgba(255,255,255,.8);
+.tenant-legend-chip svg,
+.tenant-match-badge svg {
+  flex: 0 0 auto;
 }
 
 .tenant-match-badge {
   max-width: 100%;
-  padding: 4px 8px;
+  padding: 5px 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: .66rem;
 }
 
+.tenant-match-badge > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tenant-match-badge.is-profile-match {
+  box-shadow: 0 0 0 2px rgba(37, 138, 108, .07);
+}
+
 .tenant-family {
-  color: #17663e;
-  border-color: #b8dac6;
-  background: #eaf6ee;
+  color: #145c43;
+  border-color: #afd5c3;
+  background: #e8f5ee;
 }
 
 .tenant-bachelor {
@@ -62,9 +99,9 @@
 }
 
 .tenant-everyone {
-  color: #506d55;
-  border-color: #c9d8cb;
-  background: #f0f5f0;
+  color: #3f7467;
+  border-color: #bdd8d0;
+  background: #edf7f4;
 }
 
 .tenant-neutral {
@@ -77,8 +114,63 @@
   margin-bottom: 1px;
 }
 
+.tenant-preference-note {
+  display: block;
+  line-height: 1.35;
+  white-space: normal !important;
+}
+
+.tenant-preference-note.is-match {
+  color: var(--verified) !important;
+  font-weight: 750;
+}
+
+.tenant-preference-note.is-mismatch {
+  color: #8a6857 !important;
+}
+
+.renter-result-card-wrap.tenant-compatibility-match .renter-result-card {
+  border-color: color-mix(in srgb, var(--verified) 34%, var(--border));
+}
+
+.renter-result-card-wrap.tenant-compatibility-match.active .renter-result-card {
+  border-color: var(--verified);
+}
+
+.renter-result-card-wrap.tenant-compatibility-mismatch:not(.active) {
+  opacity: .66;
+}
+
+.renter-result-card-wrap.tenant-compatibility-mismatch:not(.active) .renter-result-image {
+  filter: saturate(.72);
+}
+
+.renter-result-card-wrap.tenant-compatibility-mismatch:hover,
+.renter-result-card-wrap.tenant-compatibility-mismatch:focus-within {
+  opacity: 1;
+}
+
+.renter-result-card-wrap.tenant-compatibility-mismatch .renter-result-card {
+  background: color-mix(in srgb, var(--sand-50) 68%, white);
+}
+
 .mobile-map-sheet-copy .tenant-match-badge {
   margin-bottom: 2px;
+}
+
+.mobile-map-sheet.tenant-compatibility-mismatch {
+  border-color: color-mix(in srgb, var(--coral) 22%, var(--border));
+}
+
+.mobile-map-sheet .tenant-preference-note {
+  margin-top: 6px;
+  font-size: .7rem;
+}
+
+@media (max-width: 900px) {
+  .renter-result-card-wrap.tenant-compatibility-mismatch:not(.active) {
+    opacity: .78;
+  }
 }
 
 @media (max-width: 560px) {
@@ -86,6 +178,7 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
   .tenant-legend-chip {
     width: 100%;
     justify-content: flex-start;
