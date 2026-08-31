@@ -93,7 +93,7 @@ export function PhoneVerificationForm({
 
     setToken("");
     setPendingPhone(null);
-    setSuccess("Phone verified. Your RentHomeBD trust status has been updated.");
+    setSuccess("Phone verified. Your NearBasha trust status has been updated.");
     setBusy(false);
     router.refresh();
   }
@@ -105,7 +105,7 @@ export function PhoneVerificationForm({
           <span>1</span>
           <div>
             <h2>{isVerified ? "Change verified phone" : "Verify your phone"}</h2>
-            <p>Bangladesh mobile numbers are stored by Supabase Auth in international +880 format. RentHomeBD never shows your phone number on public listings.</p>
+            <p>Bangladesh mobile numbers are stored by Supabase Auth in international +880 format. NearBasha never shows your phone number on public listings.</p>
           </div>
         </div>
         <form className="auth-form" onSubmit={requestCode}>
@@ -132,7 +132,7 @@ export function PhoneVerificationForm({
           <span>2</span>
           <div>
             <h2>Enter SMS code</h2>
-            <p>The OTP is checked directly by Supabase Auth. RentHomeBD does not store the code.</p>
+            <p>The OTP is checked directly by Supabase Auth. NearBasha does not store the code.</p>
           </div>
         </div>
         <form className="auth-form" onSubmit={verifyCode}>
