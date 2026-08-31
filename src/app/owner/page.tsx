@@ -68,7 +68,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
           <BrandLogo />
           <p className="eyebrow">Owner workspace</p>
           <h1 className="owner-title">Manage your properties</h1>
-          <p className="intro">See what is live, what needs attention, and what RentHomeBD needs from you next. Available listings are reconfirmed every 14 days to keep renter search fresh.</p>
+          <p className="intro">See what is live, what needs attention, and what NearBasha needs from you next. Available listings are reconfirmed every 14 days to keep renter search fresh.</p>
         </div>
         <div className="owner-header-actions">
           <Link className="secondary-button link-button" href="/messages"><MessageSquareText size={16} aria-hidden="true" /> Messages</Link>
