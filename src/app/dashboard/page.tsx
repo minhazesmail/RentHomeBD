@@ -110,7 +110,7 @@ export default async function DashboardPage({
                 <div className="renter-journey-copy">
                   <span className="renter-journey-kicker">Trust & contact</span>
                   <h2>{phoneVerified ? "Your phone is verified." : "Verify before sharing contact details."}</h2>
-                  <p>{phoneVerified ? "You can use RentHomeBD's protected phone-reveal flow when the property owner is also phone verified." : "Phone verification adds an account trust signal and unlocks protected phone reveal when both sides are verified."}</p>
+                  <p>{phoneVerified ? "You can use NearBasha's protected phone-reveal flow when the property owner is also phone verified." : "Phone verification adds an account trust signal and unlocks protected phone reveal when both sides are verified."}</p>
                 </div>
                 <div className="renter-journey-actions">
                   <Link className="secondary-button link-button" href="/account/phone">{phoneVerified ? "Manage verified phone" : "Verify phone"}</Link>
@@ -131,7 +131,7 @@ export default async function DashboardPage({
             <div className="dashboard-actions dashboard-trust-actions">
               <Link className="secondary-button link-button" href="/account/phone">{phoneVerified ? "Manage verified phone" : "Verify phone"}</Link>
             </div>
-            {canList && <p className="section-copy">A verified owner/agent badge means a RentHomeBD moderator reviewed the account. It does not prove government identity or legal ownership of a property.</p>}
+            {canList && <p className="section-copy">A verified owner/agent badge means a NearBasha moderator reviewed the account. It does not prove government identity or legal ownership of a property.</p>}
           </section>
         )}
 
