@@ -25,7 +25,7 @@ The MVP is being built incrementally, one task at a time. Its core pillars are:
 ```bash
 npm install
 cp .env.example .env.local
-# Fill in the Supabase URL and publishable key in .env.local.
+# Optionally override the default Supabase project values in .env.local.
 npm run dev
 ```
 
