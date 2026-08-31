@@ -40,7 +40,7 @@ export default async function ModerationDetailPage({ params }: { params: Promise
     <main className="listing-shell">
       <header className="listing-page-header">
         <div>
-          <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
+          <Link className="brand-link compact-brand" href="/">NearBasha</Link>
           <p className="eyebrow">Moderation review</p>
           <h1 className="listing-page-title">{property.title || "Untitled listing"}</h1>
           <p className="intro">Submitted by {owner?.display_name || "Unnamed owner"} · {owner?.primary_role || "owner"}</p>
