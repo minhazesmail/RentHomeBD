@@ -200,7 +200,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       if (movedEnough || enoughTimePassed) { lastLiveSearchLocationRef.current = next; lastLiveSearchAtRef.current = now; void runSearchRef.current(next); }
     }, (error) => {
       setLocating(false); setLiveTracking(false); if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
-      setMessage(error.code === error.PERMISSION_DENIED ? "Location permission was denied. Enable location access for RentHomeBD in your browser settings and try again." : "Could not keep track of your location. Check GPS/network access and try again."); setLocationStatus(null);
+      setMessage(error.code === error.PERMISSION_DENIED ? "Location permission was denied. Enable location access for NearBasha in your browser settings and try again." : "Could not keep track of your location. Check GPS/network access and try again."); setLocationStatus(null);
     }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
   }
 
