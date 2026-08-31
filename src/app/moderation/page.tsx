@@ -20,7 +20,7 @@ export default async function ModerationQueuePage({ searchParams }: { searchPara
     <main className="owner-shell">
       <header className="owner-header">
         <div>
-          <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
+          <Link className="brand-link compact-brand" href="/">NearBasha</Link>
           <p className="eyebrow">Moderation</p>
           <h1 className="owner-title">Review queue</h1>
           <p className="intro">Listings stay private until a moderator approves them. Safety reports and account trust reviews have separate queues.</p>
