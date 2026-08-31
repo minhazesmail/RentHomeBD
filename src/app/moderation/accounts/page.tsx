@@ -36,10 +36,10 @@ export default async function AccountVerificationPage({
     <main className="owner-shell">
       <header className="owner-header">
         <div>
-          <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
+          <Link className="brand-link compact-brand" href="/">NearBasha</Link>
           <p className="eyebrow">Trust moderation</p>
           <h1 className="owner-title">Account verification</h1>
-          <p className="intro">Review owner and agent accounts. A verified badge means the account was reviewed by RentHomeBD; it is not proof of legal identity or ownership of any property.</p>
+          <p className="intro">Review owner and agent accounts. A verified badge means the account was reviewed by NearBasha; it is not proof of legal identity or ownership of any property.</p>
         </div>
         <div className="owner-header-actions"><Link className="secondary-button link-button" href="/moderation">Listing queue</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
       </header>
@@ -61,7 +61,7 @@ export default async function AccountVerificationPage({
                     <span>{profile.phone_verified_at ? "Phone verified" : "Phone not verified"}</span>
                     <span>{verified ? `Verified ${profile.primary_role}` : "No role badge"}</span>
                   </div>
-                  <p className="section-copy">The role badge is a RentHomeBD moderation signal only. Do not use it to represent government-ID verification or legal property ownership.</p>
+                  <p className="section-copy">The role badge is a NearBasha moderation signal only. Do not use it to represent government-ID verification or legal property ownership.</p>
                   <ProfileVerificationActions targetUserId={profile.id} reviewerId={auth.userId} verified={verified} />
                 </article>
               );
