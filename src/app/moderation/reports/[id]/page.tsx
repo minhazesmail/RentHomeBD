@@ -26,7 +26,7 @@ export default async function ReportReviewPage({ params }: { params: Promise<{ i
   return (
     <main className="listing-shell">
       <header className="listing-page-header">
-        <div><Link className="brand-link compact-brand" href="/">RentHomeBD</Link><p className="eyebrow">Trust & safety review</p><h1 className="listing-page-title">{property.title || "Reported listing"}</h1><p className="intro">Report from {reporter?.display_name || "a RentHomeBD user"} · {new Date(report.created_at).toLocaleString("en-BD")}</p></div>
+        <div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">Trust & safety review</p><h1 className="listing-page-title">{property.title || "Reported listing"}</h1><p className="intro">Report from {reporter?.display_name || "a NearBasha user"} · {new Date(report.created_at).toLocaleString("en-BD")}</p></div>
         <Link className="text-link" href="/moderation/reports">Back to reports</Link>
       </header>
 
