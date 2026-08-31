@@ -38,7 +38,10 @@ export function SaveHomeButton({
       setOptimisticSaved(nextSaved);
 
       const result = nextSaved
-        ? await supabase.from("saved_properties").insert({ user_id: userId, property_id: propertyId })
+        ? await supabase.from("saved_properties").upsert(
+            { user_id: userId, property_id: propertyId },
+            { onConflict: "user_id,property_id", ignoreDuplicates: true },
+          )
         : await supabase.from("saved_properties").delete().eq("user_id", userId).eq("property_id", propertyId);
 
       if (result.error) {
