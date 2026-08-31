@@ -20,7 +20,7 @@ export default async function PhoneVerificationPage() {
     <main className="listing-shell">
       <header className="listing-page-header">
         <div>
-          <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
+          <Link className="brand-link compact-brand" href="/">NearBasha</Link>
           <p className="eyebrow">Account security</p>
           <h1 className="listing-page-title">Phone verification</h1>
           <p className="intro">Link and verify a Bangladesh mobile number to add a phone-verified trust signal to your account.</p>
