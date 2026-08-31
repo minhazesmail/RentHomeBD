@@ -32,7 +32,7 @@ export default async function ReportQueuePage({ searchParams }: { searchParams: 
   return (
     <main className="owner-shell">
       <header className="owner-header">
-        <div><Link className="brand-link compact-brand" href="/">RentHomeBD</Link><p className="eyebrow">Trust & safety</p><h1 className="owner-title">Listing reports</h1><p className="intro">Review renter-submitted safety and accuracy reports. Hiding a listing removes it from public search immediately.</p></div>
+        <div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">Trust & safety</p><h1 className="owner-title">Listing reports</h1><p className="intro">Review renter-submitted safety and accuracy reports. Hiding a listing removes it from public search immediately.</p></div>
         <div className="owner-header-actions"><Link className="secondary-button link-button" href="/moderation">Listing reviews</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
       </header>
 
