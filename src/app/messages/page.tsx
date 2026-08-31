@@ -47,7 +47,7 @@ export default async function MessagesPage() {
     <main className="messages-page">
       <div className="messages-shell">
         <header className="messages-header">
-          <div><Link className="brand-link compact-brand" href="/">RentHomeBD</Link><p className="eyebrow">Private messaging</p><h1>Messages</h1></div>
+          <div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">Private messaging</p><h1>Messages</h1></div>
           <div className="owner-header-actions"><Link className="secondary-button link-button" href="/homes">Browse homes</Link><Link className="text-link" href="/dashboard">Dashboard</Link></div>
         </header>
 
@@ -61,7 +61,7 @@ export default async function MessagesPage() {
               const otherName = auth.userId === conversation.renter_id ? conversation.owner_display_name : conversation.renter_display_name;
               return (
                 <Link className="conversation-card" href={`/messages/${conversation.id}`} key={conversation.id}>
-                  <div className="conversation-main"><strong>{otherName || "RentHomeBD user"}</strong><span>{conversation.property_title || "Rental property"}</span><small>{lastMessage?.body || "Conversation started — send the first message."}</small></div>
+                  <div className="conversation-main"><strong>{otherName || "NearBasha user"}</strong><span>{conversation.property_title || "Rental property"}</span><small>{lastMessage?.body || "Conversation started — send the first message."}</small></div>
                   <div className="conversation-meta">{unread > 0 && <span className="unread-badge">{unread}</span>}<span>{new Date(conversation.last_message_at || conversation.created_at).toLocaleDateString("en-BD")}</span></div>
                 </Link>
               );
