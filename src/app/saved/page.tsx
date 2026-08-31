@@ -45,7 +45,7 @@ export default async function SavedPage() {
   return (
     <main className="saved-page">
       <header className="saved-topbar">
-        <Link className="homes-brand" href="/">RentHomeBD</Link>
+        <Link className="homes-brand" href="/">NearBasha</Link>
         <nav><Link className="text-link" href="/homes">Map search</Link><Link className="text-link" href="/messages">Messages</Link><Link className="text-link" href="/dashboard">Dashboard</Link></nav>
       </header>
 
