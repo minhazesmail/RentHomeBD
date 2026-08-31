@@ -68,7 +68,7 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
             <div className="thread-avatar" aria-hidden="true">{initial}</div>
             <div className="thread-identity">
               <div className="thread-name-row">
-                <h1>{otherName || "RentHomeBD user"}</h1>
+                <h1>{otherName || "NearBasha user"}</h1>
                 {phoneVerified && <span className="message-verified-badge" title="Phone verified">✓ Verified</span>}
               </div>
               <p>{otherRole} · {conversation.property_title || "Rental property"}</p>
