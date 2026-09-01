@@ -56,17 +56,27 @@ export default function HomePage() {
       <div className="landing-frame">
         <nav className="landing-nav">
           <BrandLogo />
+          <div className="landing-nav-center" aria-label="Primary navigation">
+            <Link href="/homes">Find on map</Link>
+            <Link href="#how-heading">How it works</Link>
+            <Link href="/about">About</Link>
+          </div>
           <div className="landing-nav-actions">
-            <Link className="text-link" href="/homes">Browse homes</Link>
-            <Link className="secondary-button link-button" href="/login">Sign in</Link>
+            <Link className="text-link" href="/login">Sign in</Link>
+            <Link className="primary-button link-button" href="/login">List a property</Link>
           </div>
         </nav>
 
         <section className="landing-hero">
           <div className="landing-copy">
             <p className="eyebrow">A better way to rent in Bangladesh</p>
-            <h1>Find the right home, in the right place.</h1>
+            <h1>Your next home, exactly where life happens.</h1>
             <p className="intro">Browse exact pinned locations, understand who each home suits, and contact verified rental accounts without wasting days on mismatched listings.</p>
+            <div className="landing-hero-metrics" aria-label="NearBasha marketplace safeguards">
+              <div className="landing-hero-metric"><strong>Exact location</strong><span>Map pins, not vague area names</span></div>
+              <div className="landing-hero-metric"><strong>Human moderation</strong><span>Reviewed before discovery</span></div>
+              <div className="landing-hero-metric"><strong>14-day freshness</strong><span>Availability reconfirmed</span></div>
+            </div>
 
             <div className="landing-proof-row" aria-label="Core NearBasha benefits">
               <span className="landing-proof-chip"><MapPin aria-hidden="true" />Exact location pins</span>
