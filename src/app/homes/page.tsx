@@ -14,6 +14,7 @@ import "./map-markers.css";
 import "./custom-area.css";
 import "./tenant-match.css";
 import "../premium-ui.css";
+import "../reference-ui.css";
 
 export const dynamic = "force-dynamic";
 
@@ -58,8 +59,13 @@ export default async function HomesPage({
     <main className="homes-page">
       <header className="homes-topbar">
         <BrandLogo className="homes-brand-logo" />
+        <nav className="homes-topbar-nav" aria-label="Rental workspace">
+          <Link className="is-active" href="/homes">Explore</Link>
+          <Link href="/saved">Saved</Link>
+          <Link href="/messages">Messages</Link>
+        </nav>
         <div className="homes-topbar-actions">
-          <span>Verified availability · exact pins</span>
+          <span className="homes-live-status"><i aria-hidden="true" />Live map · moderated homes</span>
           {auth ? <Link className="text-link" href="/saved">Saved</Link> : null}
           <Link className="text-link" href={auth ? "/dashboard" : "/login"}>{auth ? "Dashboard" : "Sign in"}</Link>
         </div>
