@@ -953,6 +953,10 @@ strong {
   box-shadow: 0 0 0 4px rgba(8,118,83,.1);
 }
 
+.mobile-homes-intro {
+  display: none;
+}
+
 /* Product chrome and working surfaces */
 .homes-page,
 .messages-page,
@@ -1601,8 +1605,17 @@ strong {
     padding: 58px 10px 30px;
   }
 
+  .landing-copy {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
   .landing-copy h1 {
-    font-size: clamp(3rem,15vw,4.7rem);
+    width: 100%;
+    max-width: 100%;
+    font-size: clamp(2.75rem, 13vw, 3.6rem);
+    letter-spacing: -.055em;
   }
 
   .landing-hero-metrics {
@@ -1723,8 +1736,31 @@ strong {
     border-right: 0;
   }
 
+  .mobile-homes-intro {
+    display: grid;
+    gap: 4px;
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    background: var(--nb-ink);
+    color: rgba(255,255,255,.68);
+  }
+
+  .mobile-homes-intro strong {
+    color: white;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.22rem;
+    font-weight: 500;
+  }
+
+  .mobile-homes-intro span {
+    font-size: .78rem;
+    line-height: 1.45;
+  }
+
   .renter-map-panel {
-    min-height: 54vh;
+    order: -1;
+    min-height: 280px;
+    height: 280px;
   }
 
   .owner-shell,
