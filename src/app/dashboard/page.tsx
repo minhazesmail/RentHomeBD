@@ -5,9 +5,6 @@ import { BrandLogo } from "@/components/brand-logo";
 import { RenterPreferenceForm } from "@/components/renter-preference-form";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import "./renter-dashboard.css";
-import "../premium-ui.css";
-
 export const dynamic = "force-dynamic";
 
 const tenantLabels: Record<string, string> = {

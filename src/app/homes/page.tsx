@@ -7,15 +7,6 @@ import { getAuthContext } from "@/lib/auth";
 import { resolveLocationPreset } from "@/lib/location-presets";
 import { normalizeTenantType } from "@/lib/tenant-match";
 import { createClient } from "@/lib/supabase/server";
-import "./homes.css";
-import "./split-pane.css";
-import "./mobile-map-sheet.css";
-import "./map-markers.css";
-import "./custom-area.css";
-import "./tenant-match.css";
-import "../premium-ui.css";
-import "../reference-ui.css";
-
 export const dynamic = "force-dynamic";
 
 function numberParam(value: string | undefined) {

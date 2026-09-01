@@ -5,9 +5,6 @@ import { DeleteSavedSearchButton } from "@/components/delete-saved-search-button
 import { SaveHomeButton } from "@/components/save-home-button";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import "./saved.css";
-import "../premium-ui.css";
-
 export const dynamic = "force-dynamic";
 
 function searchHref(search: {

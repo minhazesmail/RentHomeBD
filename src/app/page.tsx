@@ -1,10 +1,3 @@
-import "./landing.css";
-import "./landing-refinement.css";
-import "./featured-listings.css";
-import "./trust-stats.css";
-import "./premium-ui.css";
-import "./reference-ui.css";
-
 import Link from "next/link";
 import { ArrowRight, BedDouble, Building2, MapPin, Search, ShieldCheck } from "lucide-react";
 
