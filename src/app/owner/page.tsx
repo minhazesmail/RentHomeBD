@@ -7,6 +7,7 @@ import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import "./freshness.css";
 import "./owner-dashboard-refinement.css";
+import "../premium-ui.css";
 
 export const dynamic = "force-dynamic";
 

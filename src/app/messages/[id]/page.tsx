@@ -1,3 +1,4 @@
+import "../../premium-ui.css";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";

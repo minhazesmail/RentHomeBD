@@ -12,7 +12,6 @@ import "./owner-location.css";
 import "./listing-readiness.css";
 import "./messages-realtime.css";
 import "./qa.css";
-import "./premium-ui.css";
 
 const inter = Inter({
   subsets: ["latin"],
