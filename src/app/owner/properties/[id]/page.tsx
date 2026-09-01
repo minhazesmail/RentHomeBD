@@ -5,6 +5,7 @@ import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import "../../listing-flow-polish.css";
+import "../../../premium-ui.css";
 
 export const dynamic = "force-dynamic";
 
