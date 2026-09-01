@@ -3,9 +3,10 @@ import "./landing-refinement.css";
 import "./featured-listings.css";
 import "./trust-stats.css";
 import "./premium-ui.css";
+import "./reference-ui.css";
 
 import Link from "next/link";
-import { BadgeCheck, MapPin, Search, ShieldCheck, UsersRound } from "lucide-react";
+import { ArrowRight, BedDouble, Building2, MapPin, Search, ShieldCheck } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { HowItWorksTabs } from "@/components/how-it-works-tabs";
@@ -68,49 +69,70 @@ export default function HomePage() {
           </div>
         </nav>
 
-        <section className="landing-hero">
+        <section className="landing-hero landing-hero-reference">
           <div className="landing-copy">
-            <p className="eyebrow">A better way to rent in Bangladesh</p>
-            <h1>Your next home, exactly where life happens.</h1>
-            <p className="intro">Browse exact pinned locations, understand who each home suits, and contact verified rental accounts without wasting days on mismatched listings.</p>
-            <div className="landing-hero-metrics" aria-label="NearBasha marketplace safeguards">
-              <div className="landing-hero-metric"><strong>Exact location</strong><span>Map pins, not vague area names</span></div>
-              <div className="landing-hero-metric"><strong>Human moderation</strong><span>Reviewed before discovery</span></div>
-              <div className="landing-hero-metric"><strong>14-day freshness</strong><span>Availability reconfirmed</span></div>
-            </div>
+            <div className="landing-live-kicker"><span aria-hidden="true" />Map-first rental discovery across Dhaka</div>
+            <h1>Find a home close to the life you already live.</h1>
+            <p className="intro">Search around the streets, campuses, offices, and neighborhoods that matter. Compare exact locations and tenant fit before you spend time on a visit.</p>
 
-            <div className="landing-proof-row" aria-label="Core NearBasha benefits">
-              <span className="landing-proof-chip"><MapPin aria-hidden="true" />Exact location pins</span>
-              <span className="landing-proof-chip"><UsersRound aria-hidden="true" />Tenant-fit matching</span>
-              <span className="landing-proof-chip"><ShieldCheck aria-hidden="true" />Trust signals</span>
-              <span className="landing-proof-chip"><BadgeCheck aria-hidden="true" />Freshness controls</span>
-            </div>
-
-            <form className="landing-quick-search" action="/homes" method="get" role="search">
-              <label htmlFor="landing-area-search">Where do you want to live?</label>
-              <div className="landing-search-field">
-                <span className="landing-search-icon" aria-hidden="true"><Search size={16} /></span>
-                <input id="landing-area-search" name="area" type="search" list="landing-location-options" placeholder="Search area, university, or neighborhood" autoComplete="off" />
+            <form className="landing-search-console" action="/homes" method="get" role="search">
+              <div className="landing-search-console-heading">
+                <div><span>Start your search</span><strong>Where should home be?</strong></div>
+                <ShieldCheck aria-label="Moderated listings" />
+              </div>
+              <div className="landing-search-console-fields">
+                <label className="landing-search-console-field landing-search-console-area" htmlFor="landing-area-search">
+                  <MapPin aria-hidden="true" />
+                  <span>Area or landmark</span>
+                  <input id="landing-area-search" name="area" type="search" list="landing-location-options" placeholder="Dhanmondi, BUET, Banani…" autoComplete="off" />
+                </label>
+                <label className="landing-search-console-field">
+                  <Building2 aria-hidden="true" />
+                  <span>Monthly budget</span>
+                  <select name="maxRent" defaultValue="">
+                    <option value="">Any budget</option>
+                    <option value="15000">Up to ৳15,000</option>
+                    <option value="25000">Up to ৳25,000</option>
+                    <option value="40000">Up to ৳40,000</option>
+                    <option value="60000">Up to ৳60,000</option>
+                  </select>
+                </label>
+                <label className="landing-search-console-field">
+                  <BedDouble aria-hidden="true" />
+                  <span>Bedrooms</span>
+                  <select name="bedrooms" defaultValue="">
+                    <option value="">Any size</option>
+                    <option value="1">1+ bedroom</option>
+                    <option value="2">2+ bedrooms</option>
+                    <option value="3">3+ bedrooms</option>
+                  </select>
+                </label>
                 <input type="hidden" name="radius" value="5" />
-                <button className="primary-button" type="submit">Search map</button>
+                <button className="landing-search-submit" type="submit"><Search aria-hidden="true" /><span>Search map</span><ArrowRight aria-hidden="true" /></button>
               </div>
               <datalist id="landing-location-options">{LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label} />)}</datalist>
-              <p>Try Dhanmondi, Banani, Uttara, BUET, or North South University.</p>
             </form>
 
-            <div className="landing-actions" aria-label="Choose how you want to use NearBasha">
-              <div className="landing-action-path"><span>For renters</span><Link className="text-link" href="/homes">Explore the live map →</Link></div>
-              <div className="landing-action-path"><span>For owners</span><Link className="secondary-button link-button" href="/login">List a property</Link></div>
+            <div className="landing-popular-searches">
+              <span>Popular:</span>
+              <Link href="/homes?area=Dhanmondi&radius=5">Dhanmondi</Link>
+              <Link href="/homes?area=Banani&radius=5">Banani</Link>
+              <Link href="/homes?area=Uttara&radius=5">Uttara</Link>
+              <Link href="/homes?area=BUET&radius=5">Near BUET</Link>
             </div>
-            <div className="landing-trust" aria-label="NearBasha benefits"><span>Exact map pins</span><span>Moderated listings</span><span>Freshness checks</span></div>
 
-            <div className="landing-market-note">
-              <span className="landing-market-note-icon" aria-hidden="true"><MapPin /></span>
-              <div><strong>Built around how people actually search in Bangladesh.</strong><span>Start with the streets, campuses, offices, transport links, and neighborhoods that matter—not only district or thana names.</span></div>
+            <div className="landing-confidence-row" aria-label="NearBasha marketplace safeguards">
+              <div><strong>Exact map pins</strong><span>See the real neighborhood</span></div>
+              <div><strong>Tenant-fit signals</strong><span>Know who each home suits</span></div>
+              <div><strong>Freshness checks</strong><span>Less time on stale listings</span></div>
             </div>
           </div>
           <div className="landing-visual">
-            <div className="landing-visual-label"><MapPin aria-hidden="true" />Live map preview</div>
+            <div className="landing-map-caption">
+              <span className="landing-map-caption-dot" aria-hidden="true" />
+              <div><strong>Explore Dhaka visually</strong><small>Move the map, then refine your radius</small></div>
+              <Link href="/homes">Open full map <ArrowRight aria-hidden="true" /></Link>
+            </div>
             <LandingMapPreview />
           </div>
         </section>
