@@ -3,9 +3,6 @@ import Link from "next/link";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import "../../listing-flow-polish.css";
-import "../../../premium-ui.css";
-
 export const dynamic = "force-dynamic";
 
 export default async function NewPropertyPage() {
@@ -17,7 +14,7 @@ export default async function NewPropertyPage() {
     <main className="listing-shell">
       <header className="listing-page-header">
         <div>
-          <Link className="brand-link compact-brand" href="/">RentHomeBD</Link>
+          <Link className="brand-link compact-brand" href="/">NearBasha</Link>
           <p className="eyebrow">Owner workspace</p>
           <h1 className="listing-page-title">Create a rental listing</h1>
           <p className="intro">Build a trustworthy listing in five guided steps. Save an incomplete draft anytime; review requirements apply only when you submit.</p>

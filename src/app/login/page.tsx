@@ -1,4 +1,3 @@
-import "../premium-ui.css";
 import { BrandLogo } from "@/components/brand-logo";
 import { AuthForm } from "./auth-form";
 
