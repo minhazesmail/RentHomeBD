@@ -15,6 +15,7 @@ import "../property-detail.css";
 import "../property-detail-polish.css";
 import "../trust-verification.css";
 import "../phone-reveal.css";
+import "../../premium-ui.css";
 
 type Amenity = { slug: string; name: string };
 type MediaItem = { id: string; storage_path: string; media_type: "photo" | "video"; sort_order: number; signed_url?: string | null };
