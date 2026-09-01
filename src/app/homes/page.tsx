@@ -13,6 +13,7 @@ import "./mobile-map-sheet.css";
 import "./map-markers.css";
 import "./custom-area.css";
 import "./tenant-match.css";
+import "../premium-ui.css";
 
 export const dynamic = "force-dynamic";
 
