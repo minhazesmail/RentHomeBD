@@ -1,3 +1,4 @@
+import "../../premium-ui.css";
 import Link from "next/link";
 
 export default function AuthErrorPage() {
