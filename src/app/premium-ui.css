@@ -292,10 +292,10 @@ strong {
 .landing-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, .88fr) minmax(520px, 1.12fr);
+  grid-template-columns: minmax(0, .96fr) minmax(500px, 1.04fr);
   gap: clamp(40px, 6vw, 94px);
   align-items: center;
-  min-height: min(850px, calc(100vh - 98px));
+  min-height: min(790px, calc(100vh - 98px));
   padding: 70px clamp(20px, 4vw, 64px) 80px;
 }
 
@@ -324,7 +324,7 @@ strong {
   margin: 18px 0 24px;
   color: var(--nb-ink);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(3.35rem, 6.2vw, 6.5rem);
+  font-size: clamp(3.2rem, 5vw, 5.65rem);
   font-weight: 500;
   line-height: .92;
   letter-spacing: -.068em;
