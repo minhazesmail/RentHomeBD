@@ -64,6 +64,10 @@ export default async function HomesPage({
           <Link className="text-link" href={auth ? "/dashboard" : "/login"}>{auth ? "Dashboard" : "Sign in"}</Link>
         </div>
       </header>
+      <div className="mobile-homes-intro">
+        <strong>Search by exact location</strong>
+        <span>Explore the map, then refine results with the filters below.</span>
+      </div>
       <RenterMapSearch
         userId={auth?.userId ?? null}
         initialSavedPropertyIds={savedPropertyIds}
