@@ -2,6 +2,7 @@ import "./landing.css";
 import "./landing-refinement.css";
 import "./featured-listings.css";
 import "./trust-stats.css";
+import "./premium-ui.css";
 
 import Link from "next/link";
 import { BadgeCheck, MapPin, Search, ShieldCheck, UsersRound } from "lucide-react";
