@@ -186,7 +186,8 @@
 }
 
 .landing-nav .brand-logo img {
-  filter: brightness(0) invert(1);
+  content: url("/nearbasha-logo-on-dark.svg");
+  filter: none;
 }
 
 @media (max-width: 760px) {
@@ -196,7 +197,6 @@
     max-width: 150px;
   }
 }
-.landing-nav .brand-logo img{filter:brightness(0) invert(1)}
 .homes-brand-logo img {
   filter: drop-shadow(0 6px 14px rgba(13,95,67,.08));
 }.homes-brand-logo {

@@ -2145,3 +2145,32 @@ main.landing-shell .landing-map-preview{height:calc(100svh - 96px);min-height:49
   color: white;
   backdrop-filter: blur(9px);
 }
+
+/* Keep the hero search usable when its column is narrower than the viewport. */
+.landing-search-console {
+  container-type: inline-size;
+}
+
+.landing-search-console-field > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 761px) {
+  @container (max-width: 520px) {
+    .landing-search-console-fields {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .landing-search-console-field:nth-of-type(3) {
+      display: grid;
+    }
+
+    .landing-search-submit {
+      grid-column: 1 / -1;
+      min-height: 50px;
+    }
+  }
+}
