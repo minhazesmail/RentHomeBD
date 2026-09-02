@@ -5,6 +5,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { HowItWorksTabs } from "@/components/how-it-works-tabs";
 import { LandingFeaturedSection } from "@/components/landing-featured-section";
 import { LandingMapPreview } from "@/components/landing-map-preview";
+import { LandingScrollAtmosphere } from "@/components/landing-scroll-atmosphere";
 import { LOCATION_PRESETS } from "@/lib/location-presets";
 
 const trustSignals = [
@@ -47,7 +48,8 @@ const faqs = [
 // TODO(i18n): Treat each major marketing copy block on this page as a future translation target.
 export default function HomePage() {
   return (
-    <main className="landing-shell">
+    <main className="landing-shell" data-landing-theme="hero">
+      <LandingScrollAtmosphere />
       <div className="landing-frame">
         <nav className="landing-nav">
           <BrandLogo />
@@ -62,7 +64,7 @@ export default function HomePage() {
           </div>
         </nav>
 
-        <section className="landing-hero landing-hero-reference">
+        <section className="landing-hero landing-hero-reference" data-scroll-theme="hero">
           <div className="landing-copy">
             <div className="landing-live-kicker"><span aria-hidden="true" />Map-first rental discovery across Dhaka</div>
             <h1>Find a home close to the life you already live.</h1>
@@ -130,7 +132,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="landing-trust-section" aria-labelledby="trust-heading">
+        <section className="landing-trust-section" data-scroll-theme="trust" aria-labelledby="trust-heading">
           <div className="landing-trust-heading">
             <div><p className="eyebrow">Built for higher-trust renting</p><h2 id="trust-heading">Local rental discovery needs more than a list of phone numbers.</h2></div>
             <p>NearBasha combines identity signals, moderation, precise location, and listing-freshness tools so renters and owners can make better decisions before money or time changes hands.</p>
@@ -146,20 +148,20 @@ export default function HomePage() {
           <div className="landing-trust-note"><strong>No inflated marketplace claims.</strong><span>NearBasha uses live marketplace inventory on this page instead of fabricated listing counts or sample property claims.</span></div>
         </section>
 
-        <section className="landing-content-section landing-how" aria-labelledby="how-heading">
+        <section className="landing-content-section landing-how" data-scroll-theme="journey" aria-labelledby="how-heading">
           <div className="landing-section-intro"><p className="eyebrow">How it works</p><h2 id="how-heading">A clearer path for both sides of the rental.</h2><p>Choose your side to see only the steps that matter to you.</p></div>
           <HowItWorksTabs />
         </section>
 
         <LandingFeaturedSection />
 
-        <section className="landing-strip" aria-label="How NearBasha is different">
+        <section className="landing-strip" data-scroll-theme="local" aria-label="How NearBasha is different">
           <div className="landing-feature"><strong>Search by real location.</strong><span>See what is actually near work, university, transport, or family—not just what shares an area name.</span></div>
           <div className="landing-feature"><strong>Know who the home suits.</strong><span>Tenant preferences are structured into each listing so both sides waste less time.</span></div>
           <div className="landing-feature"><strong>Keep listings fresh.</strong><span>Freshness controls are designed to stop old, unavailable homes from quietly filling the marketplace.</span></div>
         </section>
 
-        <section className="landing-content-section landing-faq" aria-labelledby="faq-heading">
+        <section className="landing-content-section landing-faq" data-scroll-theme="clarity" aria-labelledby="faq-heading">
           <div className="landing-section-intro"><p className="eyebrow">Questions, answered</p><h2 id="faq-heading">What to know before you start.</h2><p>Clear expectations matter on both sides of a rental. These are the basics behind the NearBasha experience.</p></div>
           <div className="landing-faq-list">
             {faqs.map(([question, answer]) => (
@@ -168,12 +170,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="landing-cta-band" aria-label="Start using NearBasha">
+        <section className="landing-cta-band" data-scroll-theme="action" aria-label="Start using NearBasha">
           <div><p className="eyebrow">Ready when you are</p><h2>Start with the map, not another endless listing feed.</h2><p>Explore homes around the places that matter to you, or publish a property with an exact pin and clear tenant preferences.</p></div>
           <div className="landing-cta-actions"><Link className="primary-button link-button" href="/homes">Browse the live map</Link><Link className="secondary-button link-button" href="/login">List a property</Link></div>
         </section>
 
-        <footer className="landing-footer">
+        <footer className="landing-footer" data-scroll-theme="footer">
           <div className="landing-footer-brand"><BrandLogo /><p>Map-first home rental discovery built for Bangladesh.</p><span>Currently focused on making local rental search clearer, fresher, and easier to trust.</span></div>
           <div className="landing-footer-links">
             <div><strong>Product</strong><Link href="/homes">Browse homes</Link><Link href="/login">List a property</Link><Link href="/login">Sign in</Link></div>

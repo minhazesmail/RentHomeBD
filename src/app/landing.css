@@ -2174,3 +2174,141 @@ main.landing-shell .landing-map-preview{height:calc(100svh - 96px);min-height:49
     }
   }
 }
+
+/* Scroll-linked ambient scenes for the landing experience. */
+.landing-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.landing-scroll-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #faf7ef;
+}
+
+.landing-scroll-atmosphere::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: .16;
+  background-image:
+    linear-gradient(rgba(11,35,27,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11,35,27,.07) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 45%, #000, transparent 76%);
+}
+
+.landing-scroll-scene {
+  position: absolute;
+  inset: -12%;
+  opacity: 0;
+  transform: scale(1.04) translate3d(0, 0, 0);
+  transition: opacity 900ms ease, transform 1400ms cubic-bezier(.2,.75,.2,1);
+  will-change: opacity, transform;
+}
+
+.landing-scroll-scene[data-scene="hero"] {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(217,166,63,.30), transparent 29%),
+    radial-gradient(circle at 86% 24%, rgba(62,159,117,.24), transparent 32%),
+    linear-gradient(145deg, #fbf5e8, #e8f0e7);
+}
+
+.landing-scroll-scene[data-scene="trust"] {
+  background:
+    radial-gradient(circle at 78% 18%, rgba(185,242,39,.24), transparent 27%),
+    radial-gradient(circle at 18% 76%, rgba(8,118,83,.22), transparent 34%),
+    linear-gradient(145deg, #edf5e8, #f8f0df);
+}
+
+.landing-scroll-scene[data-scene="journey"] {
+  background:
+    radial-gradient(ellipse at 22% 20%, rgba(22,125,120,.22), transparent 34%),
+    radial-gradient(ellipse at 82% 78%, rgba(217,166,63,.28), transparent 32%),
+    linear-gradient(135deg, #e6f0eb, #fbf2de);
+}
+
+.landing-scroll-scene[data-scene="homes"] {
+  background:
+    radial-gradient(circle at 74% 22%, rgba(67,132,166,.24), transparent 30%),
+    radial-gradient(circle at 14% 68%, rgba(8,118,83,.26), transparent 35%),
+    linear-gradient(150deg, #e3eeea, #f7eddb);
+}
+
+.landing-scroll-scene[data-scene="local"] {
+  background:
+    radial-gradient(circle at 50% 8%, rgba(185,242,39,.26), transparent 27%),
+    radial-gradient(circle at 88% 74%, rgba(217,166,63,.26), transparent 32%),
+    linear-gradient(145deg, #dfece4, #f6ead5);
+}
+
+.landing-scroll-scene[data-scene="clarity"] {
+  background:
+    radial-gradient(circle at 16% 20%, rgba(91,145,175,.22), transparent 31%),
+    radial-gradient(circle at 80% 68%, rgba(85,154,114,.24), transparent 35%),
+    linear-gradient(145deg, #e8f0ed, #f5f0e4);
+}
+
+.landing-scroll-scene[data-scene="action"] {
+  background:
+    radial-gradient(circle at 80% 20%, rgba(217,166,63,.38), transparent 28%),
+    radial-gradient(circle at 12% 74%, rgba(53,143,105,.32), transparent 35%),
+    linear-gradient(145deg, #dce9df, #f0dfbd);
+}
+
+.landing-scroll-scene[data-scene="footer"] {
+  background:
+    radial-gradient(circle at 78% 18%, rgba(217,166,63,.24), transparent 29%),
+    radial-gradient(circle at 18% 72%, rgba(34,123,89,.35), transparent 36%),
+    linear-gradient(145deg, #d6e4db, #ead8b9);
+}
+
+.landing-shell[data-landing-theme="hero"] .landing-scroll-scene[data-scene="hero"],
+.landing-shell[data-landing-theme="trust"] .landing-scroll-scene[data-scene="trust"],
+.landing-shell[data-landing-theme="journey"] .landing-scroll-scene[data-scene="journey"],
+.landing-shell[data-landing-theme="homes"] .landing-scroll-scene[data-scene="homes"],
+.landing-shell[data-landing-theme="local"] .landing-scroll-scene[data-scene="local"],
+.landing-shell[data-landing-theme="clarity"] .landing-scroll-scene[data-scene="clarity"],
+.landing-shell[data-landing-theme="action"] .landing-scroll-scene[data-scene="action"],
+.landing-shell[data-landing-theme="footer"] .landing-scroll-scene[data-scene="footer"] {
+  opacity: 1;
+  transform: scale(1) translate3d(0, 0, 0);
+  animation: landing-atmosphere-drift 16s ease-in-out infinite alternate;
+}
+
+main.landing-shell .landing-frame {
+  position: relative;
+  z-index: 1;
+  background: rgba(250,247,239,.82);
+  backdrop-filter: blur(34px) saturate(1.06);
+}
+
+main.landing-shell .landing-hero-reference {
+  background:
+    radial-gradient(circle at 10% 6%,rgba(217,166,63,.11),transparent 23rem),
+    rgba(250,247,239,.88);
+}
+
+[data-scroll-theme] {
+  scroll-margin-top: 92px;
+}
+
+@keyframes landing-atmosphere-drift {
+  from { transform: scale(1) translate3d(-1.2%, -.8%, 0); }
+  to { transform: scale(1.06) translate3d(1.2%, .8%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-scroll-scene {
+    transition: none;
+  }
+
+  .landing-shell .landing-scroll-scene {
+    animation: none !important;
+    transform: none !important;
+  }
+}

@@ -11,7 +11,7 @@ export async function LandingFeaturedSection() {
   const { availableCount, featuredListings } = await getLandingInventory();
 
   return (
-    <section className="landing-content-section landing-featured" aria-labelledby="featured-heading">
+    <section className="landing-content-section landing-featured" data-scroll-theme="homes" aria-labelledby="featured-heading">
       <div className="landing-section-intro landing-section-intro-row">
         <div>
           <p className="eyebrow">Live homes</p>
