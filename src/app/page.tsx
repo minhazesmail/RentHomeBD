@@ -55,7 +55,7 @@ export default function HomePage() {
           <BrandLogo />
           <div className="landing-nav-center" aria-label="Primary navigation">
             <Link href="/homes">Find on map</Link>
-            <Link href="#how-heading">How it works</Link>
+            <a href="#how-heading">How it works</a>
             <Link href="/about">About</Link>
           </div>
           <div className="landing-nav-actions">

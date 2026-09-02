@@ -2297,6 +2297,10 @@ main.landing-shell .landing-hero-reference {
   scroll-margin-top: 92px;
 }
 
+#how-heading {
+  scroll-margin-top: 104px;
+}
+
 @keyframes landing-atmosphere-drift {
   from { transform: scale(1) translate3d(-1.2%, -.8%, 0); }
   to { transform: scale(1.06) translate3d(1.2%, .8%, 0); }
