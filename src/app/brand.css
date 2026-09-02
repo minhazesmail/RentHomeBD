@@ -174,10 +174,15 @@
 
 .landing-footer-brand .brand-logo {
   display: inline-flex;
-  margin-bottom: 18px;
-  padding: 8px 12px;
-  border-radius: 14px;
-  background: rgba(255,255,255,.96);
+  margin-bottom: 20px;
+  padding: 0;
+  background: transparent;
+}
+
+.landing-footer-brand .brand-logo img,
+.homes-topbar .homes-brand-logo img {
+  content: url("/nearbasha-logo-on-dark.svg");
+  filter: none;
 }
 
 @media (max-width: 640px) {
