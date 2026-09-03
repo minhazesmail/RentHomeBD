@@ -69,6 +69,14 @@
   color: var(--muted);
 }
 
+.ownerPortfolioPolicy {
+  max-width: 680px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
 .ownerPortfolioListingBody {
   display: flex;
   align-items: flex-start;
@@ -94,6 +102,70 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.ownerPortfolioStatusSummary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  max-width: 680px;
+  margin-top: 12px;
+  padding: 10px 11px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .66);
+  color: var(--muted);
+}
+
+.ownerPortfolioStatusSummary > svg {
+  margin-top: 1px;
+}
+
+.ownerPortfolioStatusSummary > div {
+  display: grid;
+  gap: 2px;
+}
+
+.ownerPortfolioStatusSummary strong {
+  color: var(--ink);
+  font-size: .76rem;
+}
+
+.ownerPortfolioStatusSummary span {
+  font-size: .74rem;
+  line-height: 1.45;
+}
+
+.ownerPortfolioStatus_good {
+  border-color: color-mix(in srgb, var(--verified) 24%, var(--border));
+  background: color-mix(in srgb, var(--verified-soft) 70%, white);
+}
+
+.ownerPortfolioStatus_good > svg {
+  color: var(--verified);
+}
+
+.ownerPortfolioStatus_attention {
+  border-color: rgba(217, 166, 63, .3);
+  background: #fff8e8;
+}
+
+.ownerPortfolioStatus_attention > svg {
+  color: #8a6414;
+}
+
+.ownerPortfolioStatus_urgent {
+  border-color: rgba(200, 109, 93, .28);
+  background: var(--high-demand-soft);
+}
+
+.ownerPortfolioStatus_urgent > svg {
+  color: var(--high-demand);
+}
+
+.ownerPortfolioStatus_neutral > svg {
+  color: var(--muted);
 }
 
 @media (max-width: 900px) {
@@ -125,5 +197,9 @@
     height: 68px;
     flex-basis: 88px;
     border-radius: 12px;
+  }
+
+  .ownerPortfolioStatusSummary {
+    margin-top: 10px;
   }
 }
