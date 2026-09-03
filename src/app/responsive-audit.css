@@ -1,0 +1,536 @@
+/* Step 14 — Cross-product responsive audit
+   Loaded last so it can normalize breakpoint behavior without rewriting route logic.
+   The goal is product-specific mobile/tablet composition, not desktop shrinkage. */
+
+/* Global overflow and intrinsic sizing safeguards */
+:where(.nb-shell-content, main, section, article, aside, header, footer, nav, form, fieldset, div) {
+  min-width: 0;
+}
+
+:where(img, video, canvas, iframe, svg) {
+  max-width: 100%;
+}
+
+:where(input, select, textarea, button) {
+  max-width: 100%;
+}
+
+:where(.primary-button, .secondary-button, .link-button, button, [role="button"]) {
+  touch-action: manipulation;
+}
+
+/* Tablet: reduce shell density before switching to mobile composition. */
+@media (max-width: 1100px) {
+  .nb-global-shell {
+    --responsive-page-gutter: clamp(18px, 3vw, 30px);
+  }
+
+  .shell-renter .renter-search-shell {
+    grid-template-columns: minmax(340px, 41vw) minmax(0, 1fr);
+  }
+
+  .shell-renter .renter-search-sidebar {
+    padding-inline: 18px;
+  }
+
+  .landing-frame,
+  .information-frame,
+  .owner-shell,
+  .listing-shell,
+  .dashboard-shell,
+  .messages-shell,
+  .thread-shell,
+  .saved-shell,
+  .moderation-shell {
+    max-width: calc(100vw - 2 * var(--responsive-page-gutter, 24px));
+  }
+
+  .moderation-review-grid,
+  .property-detail-grid,
+  .owner-workspace-grid {
+    gap: clamp(18px, 3vw, 28px);
+  }
+}
+
+/* Compact desktop / tablet landscape */
+@media (max-width: 920px) {
+  .landing-nav-center {
+    display: none;
+  }
+
+  .landing-nav {
+    gap: 14px;
+  }
+
+  .landing-hero,
+  .landing-hero-reference,
+  .landing-trust-heading,
+  .landing-cta-band,
+  .information-hero,
+  .moderation-review-grid,
+  .property-detail-grid,
+  .owner-workspace-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-visual {
+    min-height: min(66vw, 620px);
+  }
+
+  .landing-trust-heading > p,
+  .landing-section-intro > p,
+  .information-hero-copy,
+  .information-prose {
+    max-width: 72ch;
+  }
+
+  .moderation-sidebar,
+  .property-contact-panel,
+  .owner-workflow-rail {
+    position: static !important;
+    top: auto !important;
+  }
+
+  .moderation-sidebar > *,
+  .property-contact-panel > *,
+  .owner-workflow-rail > * {
+    max-width: none;
+  }
+
+  .owner-header,
+  .listing-page-header,
+  .messages-header,
+  .dashboard-header,
+  .saved-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .owner-header-actions,
+  .listing-page-header-actions,
+  .dashboard-header-actions,
+  .saved-header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+/* Mobile product composition */
+@media (max-width: 767px) {
+  :root {
+    --mobile-gutter: 14px;
+    --mobile-radius: 18px;
+  }
+
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  .nb-shell-atmosphere,
+  .nb-shell-grid {
+    opacity: .55;
+  }
+
+  /* Keep tap targets reliable across operational screens. */
+  :where(.primary-button, .secondary-button, .link-button, button, select, input:not([type="checkbox"]):not([type="radio"])) {
+    min-height: 44px;
+  }
+
+  /* Renter search becomes vertically coordinated list/map content. */
+  .shell-renter .homes-topbar {
+    min-height: 64px;
+    height: auto;
+    padding: 10px var(--mobile-gutter);
+    flex-wrap: wrap;
+  }
+
+  .shell-renter .homes-topbar-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+
+  .shell-renter .homes-topbar-nav::-webkit-scrollbar { display: none; }
+  .shell-renter .homes-topbar-nav a { flex: 0 0 auto; }
+
+  .shell-renter .homes-topbar-actions {
+    margin-left: auto;
+  }
+
+  .shell-renter .renter-search-shell {
+    display: block;
+    min-height: 0;
+  }
+
+  .shell-renter .renter-search-sidebar {
+    max-height: none;
+    overflow: visible;
+    padding: 20px var(--mobile-gutter) 24px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(8,44,33,.09);
+  }
+
+  .shell-renter .renter-search-heading h1 {
+    font-size: clamp(2.05rem, 11vw, 3rem);
+  }
+
+  .shell-renter .renter-filter-panel {
+    padding: 14px;
+    border-radius: var(--mobile-radius);
+  }
+
+  .shell-renter .renter-filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .shell-renter .renter-filter-actions,
+  .shell-renter .save-search-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .shell-renter .renter-result-card {
+    grid-template-columns: 92px minmax(0, 1fr);
+    min-height: 112px;
+    padding-right: 42px;
+  }
+
+  .shell-renter .renter-result-image {
+    height: 94px;
+  }
+
+  .shell-renter .renter-result-card-wrap.active .renter-result-card {
+    transform: none;
+  }
+
+  .shell-renter .renter-result-card-wrap.active::before {
+    left: 3px;
+    top: 3px;
+    transform: none;
+  }
+
+  .shell-renter .renter-map-panel {
+    position: relative;
+    top: auto;
+    height: min(62vh, 520px);
+    min-height: 360px;
+    padding: 8px;
+  }
+
+  .shell-renter .renter-map-canvas {
+    border-radius: 18px;
+  }
+
+  /* Property detail: content first, contact action remains accessible. */
+  .property-detail-shell,
+  .listing-shell,
+  .owner-shell,
+  .dashboard-shell,
+  .saved-shell,
+  .messages-page,
+  .information-shell,
+  .moderation-shell {
+    padding-left: var(--mobile-gutter) !important;
+    padding-right: var(--mobile-gutter) !important;
+  }
+
+  .property-gallery,
+  .property-gallery-grid,
+  .moderation-media-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .property-gallery img,
+  .moderation-media-grid img,
+  .moderation-media-grid video {
+    width: 100%;
+    height: auto;
+  }
+
+  .property-facts,
+  .review-facts,
+  .dashboard-metrics,
+  .saved-summary-grid,
+  .owner-summary-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Owner task screens: remove desktop rails and make actions thumb-safe. */
+  .owner-workspace,
+  .owner-management-layout,
+  .listing-workflow,
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .owner-workflow-rail,
+  .listing-workflow-rail {
+    position: static !important;
+    overflow-x: auto;
+    display: flex;
+    gap: 8px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .owner-workflow-rail::-webkit-scrollbar,
+  .listing-workflow-rail::-webkit-scrollbar { display: none; }
+
+  .owner-workflow-rail > *,
+  .listing-workflow-rail > * {
+    flex: 0 0 auto;
+  }
+
+  .listing-form-actions,
+  .owner-bottom-actions,
+  .sticky-action-bar {
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    padding-left: calc(var(--mobile-gutter) + env(safe-area-inset-left));
+    padding-right: calc(var(--mobile-gutter) + env(safe-area-inset-right));
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  /* Messages: list -> thread composition; prevent desktop height assumptions. */
+  .messages-page {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .messages-list {
+    padding: 6px;
+    border-radius: 20px;
+  }
+
+  .conversation-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-right: 12px;
+  }
+
+  .thread-shell {
+    width: 100%;
+    max-width: none;
+    height: calc(100dvh - 20px);
+    min-height: 0;
+    border-radius: 20px;
+  }
+
+  .modern-thread-header {
+    min-height: 72px;
+    padding: 10px;
+  }
+
+  .thread-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .thread-property-link {
+    max-width: 38vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .message-list {
+    padding: 22px 12px;
+  }
+
+  .message-bubble {
+    max-width: 88%;
+  }
+
+  .message-composer {
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  }
+
+  /* Saved homes becomes a readable comparison stack. */
+  .saved-grid,
+  .saved-home-grid,
+  .saved-search-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .saved-card,
+  .saved-home-card {
+    min-width: 0;
+  }
+
+  /* Moderation stays dense but no two-column squeeze. */
+  .moderation-review-grid {
+    display: block !important;
+  }
+
+  .moderation-sidebar {
+    margin-top: 16px;
+  }
+
+  .property-row,
+  .verification-account-list .listing-section {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .property-row {
+    grid-template-columns: 1fr !important;
+    align-items: flex-start !important;
+    gap: 10px;
+  }
+
+  .property-row-meta {
+    width: 100%;
+    align-items: center !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+
+  /* Informational / marketing layouts simplify aggressively. */
+  .information-nav,
+  .landing-nav {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .information-nav-links,
+  .landing-nav-center {
+    display: none !important;
+  }
+
+  .landing-nav-actions .text-link {
+    display: none;
+  }
+
+  .landing-frame,
+  .information-frame {
+    width: min(100%, calc(100vw - 2 * var(--mobile-gutter)));
+  }
+
+  .landing-hero,
+  .landing-content-section,
+  .landing-trust-section,
+  .landing-strip,
+  .landing-cta-band,
+  .landing-footer {
+    border-radius: 22px;
+  }
+
+  .landing-copy h1,
+  .information-hero h1,
+  .owner-title,
+  .listing-page-title,
+  .messages-header h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .landing-search-console-fields,
+  .landing-confidence-row,
+  .landing-trust-grid,
+  .landing-strip,
+  .landing-footer-links,
+  .landing-footer-bottom {
+    grid-template-columns: 1fr !important;
+  }
+
+  .landing-search-console {
+    padding: 12px;
+  }
+
+  .landing-search-console-field,
+  .landing-search-submit {
+    width: 100%;
+  }
+
+  .landing-popular-searches {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  .landing-popular-searches::-webkit-scrollbar { display: none; }
+  .landing-popular-searches > * { flex: 0 0 auto; }
+
+  .landing-visual {
+    min-height: 430px;
+  }
+
+  .landing-map-caption {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .landing-footer-studio,
+  .landing-footer-bottom > * {
+    justify-self: start !important;
+    text-align: left !important;
+  }
+}
+
+/* Small phones: prioritize readable flow over dense comparison. */
+@media (max-width: 480px) {
+  :root { --mobile-gutter: 10px; }
+
+  .shell-renter .homes-topbar-actions > .text-link,
+  .shell-renter .homes-live-status {
+    display: none;
+  }
+
+  .shell-renter .renter-result-card {
+    grid-template-columns: 1fr;
+    padding: 9px 42px 12px 9px;
+  }
+
+  .shell-renter .renter-result-image {
+    width: 100%;
+    height: 180px;
+  }
+
+  .property-facts,
+  .review-facts,
+  .dashboard-metrics,
+  .saved-summary-grid,
+  .owner-summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .conversation-card {
+    grid-template-columns: 1fr;
+    padding-right: 14px;
+  }
+
+  .conversation-meta {
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .thread-property-link {
+    display: none;
+  }
+
+  .message-bubble {
+    max-width: 94%;
+  }
+
+  .landing-nav-actions .primary-button,
+  .information-nav .primary-button {
+    min-height: 40px;
+    padding-inline: 12px;
+    font-size: .76rem;
+  }
+
+  .landing-visual {
+    min-height: 360px;
+  }
+
+  .landing-map-caption {
+    position: relative;
+    inset: auto;
+    margin-bottom: 8px;
+  }
+}
