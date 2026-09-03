@@ -7,6 +7,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { PhoneRevealButton } from "@/components/phone-reveal-button";
 import { PropertyLocationActions } from "@/components/property-location-actions";
 import { PropertyMediaGallery, type PropertyGalleryMedia } from "@/components/property-media-gallery";
+import { PropertyShareButton } from "@/components/property-share-button";
 import { ReportListingButton } from "@/components/report-listing-button";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
@@ -140,6 +141,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
           <aside className="property-contact-card" id="contact">
             <div className="contact-price-summary"><span>Monthly rent</span><strong>{property.rent_bdt ? `৳${property.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><small>{property.deposit_bdt > 0 ? `Deposit ৳${property.deposit_bdt.toLocaleString("en-BD")}` : "Deposit not listed"}</small></div>
             <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} />
+            <PropertyShareButton title={property.title || "Rental property"} />
             <div className="owner-identity-row"><div className="owner-badge">{property.owner_display_name?.slice(0, 1).toUpperCase() || "O"}</div><div className="owner-identity-copy"><p className="eyebrow">Listed by {label(property.owner_role)}</p><h2>{property.owner_display_name || "Property owner"}</h2></div></div>
             <div className="owner-verification-badges">
               <span className={`owner-verification-badge${ownerPhoneVerified ? "" : " is-neutral"}`}><Phone size={12} aria-hidden="true" />{ownerPhoneVerified ? "Phone verified" : "Phone unverified"}</span>
