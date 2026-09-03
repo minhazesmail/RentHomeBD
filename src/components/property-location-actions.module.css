@@ -1,0 +1,36 @@
+.wrapper {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted, #66736d);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .action {
+    width: 100%;
+  }
+}
