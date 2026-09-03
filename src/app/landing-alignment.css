@@ -48,10 +48,11 @@
 .landing-footer-studio-logo {
   display: block;
   width: 30px;
-  height: 33px;
+  height: auto;
+  aspect-ratio: 470 / 510;
   flex: 0 0 auto;
   object-fit: contain;
-  border-radius: 3px;
+  border-radius: 0;
 }
 
 @media (max-width: 700px) {
