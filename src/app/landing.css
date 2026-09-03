@@ -2330,23 +2330,79 @@ main.landing-shell .landing-hero-reference {
 .landing-scroll-atmosphere::before {
   position: absolute;
   inset: -18%;
+  z-index: 10;
   content: "";
   background:
-    repeating-radial-gradient(circle at 14% 18%, transparent 0 52px, rgba(8,118,83,.14) 53px 54px, transparent 55px 86px),
-    repeating-radial-gradient(circle at 86% 76%, transparent 0 72px, rgba(217,166,63,.17) 73px 74px, transparent 75px 112px);
-  opacity: .76;
+    repeating-radial-gradient(circle at 14% 18%, transparent 0 52px, rgba(8,118,83,.3) 53px 55px, transparent 56px 86px),
+    repeating-radial-gradient(circle at 86% 76%, transparent 0 72px, rgba(181,126,24,.32) 73px 75px, transparent 76px 112px);
+  opacity: .92;
   transform: rotate(-4deg);
+  mix-blend-mode: multiply;
 }
 
 .landing-scroll-atmosphere::after {
-  opacity: .18;
+  z-index: 11;
+  opacity: .62;
+  background-image:
+    linear-gradient(rgba(11,35,27,.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11,35,27,.13) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
 .landing-scroll-scene {
   inset: -8%;
+  --scene-line: rgba(8,86,63,.58);
+  --scene-accent: rgba(184,119,16,.82);
+  --scene-angle: 24deg;
+  --scene-art-x: auto;
+  --scene-art-y: 8%;
+  --scene-art-right: 5%;
+}
+
+/* Crisp map-inspired artwork lives inside every scene so it remains above the
+ * opaque color field. The route, nodes, rings, and grid now visibly animate as
+ * the active scroll scene changes. */
+.landing-scroll-scene::before {
+  position: absolute;
+  top: var(--scene-art-y);
+  right: var(--scene-art-right);
+  left: var(--scene-art-x);
+  width: clamp(360px,44vw,720px);
+  aspect-ratio: 1.35;
+  border: 3px solid var(--scene-line);
+  border-radius: 50%;
+  content: "";
+  opacity: .88;
+  box-shadow:
+    0 0 0 34px color-mix(in srgb, var(--scene-line) 34%, transparent),
+    0 0 0 70px color-mix(in srgb, var(--scene-accent) 25%, transparent),
+    0 0 0 108px color-mix(in srgb, var(--scene-line) 18%, transparent);
+  transform: rotate(-12deg);
+  animation: landing-graphic-orbit 11s ease-in-out infinite alternate;
+}
+
+.landing-scroll-scene::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: .96;
+  background:
+    radial-gradient(circle at 12% 28%, var(--scene-accent) 0 6px, #fff 7px 10px, var(--scene-line) 11px 13px, transparent 14px),
+    radial-gradient(circle at 42% 62%, var(--scene-line) 0 6px, #fff 7px 10px, var(--scene-accent) 11px 13px, transparent 14px),
+    radial-gradient(circle at 82% 31%, var(--scene-accent) 0 6px, #fff 7px 10px, var(--scene-line) 11px 13px, transparent 14px),
+    radial-gradient(circle at 72% 82%, var(--scene-line) 0 5px, #fff 6px 9px, var(--scene-accent) 10px 12px, transparent 13px),
+    linear-gradient(var(--scene-angle), transparent 0 47.7%, var(--scene-line) 47.8% 48.1%, transparent 48.2% 51.2%, var(--scene-accent) 51.3% 51.55%, transparent 51.65%),
+    repeating-linear-gradient(calc(var(--scene-angle) + 68deg), transparent 0 142px, color-mix(in srgb, var(--scene-line) 32%, transparent) 143px 145px, transparent 146px 286px);
+  filter: drop-shadow(0 8px 18px rgba(11,35,27,.1));
+  animation: landing-route-shift 13s ease-in-out infinite alternate;
 }
 
 .landing-scroll-scene[data-scene="hero"] {
+  --scene-line: rgba(8,86,63,.64);
+  --scene-accent: rgba(190,124,15,.88);
+  --scene-angle: 22deg;
+  --scene-art-y: 7%;
+  --scene-art-right: 2%;
   background:
     radial-gradient(circle at 7% 12%, rgba(217,166,63,.69), transparent 31%),
     radial-gradient(circle at 90% 24%, rgba(62,159,117,.58), transparent 35%),
@@ -2354,6 +2410,11 @@ main.landing-shell .landing-hero-reference {
 }
 
 .landing-scroll-scene[data-scene="trust"] {
+  --scene-line: rgba(5,105,74,.7);
+  --scene-accent: rgba(113,154,16,.88);
+  --scene-angle: -18deg;
+  --scene-art-y: 18%;
+  --scene-art-right: 48%;
   background:
     radial-gradient(circle at 82% 16%, rgba(185,242,39,.54), transparent 29%),
     radial-gradient(circle at 12% 72%, rgba(8,118,83,.58), transparent 38%),
@@ -2361,6 +2422,11 @@ main.landing-shell .landing-hero-reference {
 }
 
 .landing-scroll-scene[data-scene="journey"] {
+  --scene-line: rgba(8,104,105,.72);
+  --scene-accent: rgba(181,112,9,.9);
+  --scene-angle: 38deg;
+  --scene-art-y: 3%;
+  --scene-art-right: 8%;
   background:
     radial-gradient(ellipse at 18% 18%, rgba(22,125,120,.58), transparent 37%),
     radial-gradient(ellipse at 86% 76%, rgba(217,166,63,.65), transparent 35%),
@@ -2368,6 +2434,11 @@ main.landing-shell .landing-hero-reference {
 }
 
 .landing-scroll-scene[data-scene="homes"] {
+  --scene-line: rgba(35,91,125,.74);
+  --scene-accent: rgba(5,111,77,.88);
+  --scene-angle: -32deg;
+  --scene-art-y: 29%;
+  --scene-art-right: 50%;
   background:
     radial-gradient(circle at 78% 18%, rgba(67,132,166,.62), transparent 33%),
     radial-gradient(circle at 10% 72%, rgba(8,118,83,.66), transparent 38%),
@@ -2375,6 +2446,11 @@ main.landing-shell .landing-hero-reference {
 }
 
 .landing-scroll-scene[data-scene="local"] {
+  --scene-line: rgba(44,112,68,.74);
+  --scene-accent: rgba(170,107,10,.9);
+  --scene-angle: 16deg;
+  --scene-art-y: 6%;
+  --scene-art-right: 9%;
   background:
     radial-gradient(circle at 48% 4%, rgba(185,242,39,.6), transparent 29%),
     radial-gradient(circle at 90% 76%, rgba(217,166,63,.66), transparent 35%),
@@ -2382,6 +2458,11 @@ main.landing-shell .landing-hero-reference {
 }
 
 .landing-scroll-scene[data-scene="clarity"] {
+  --scene-line: rgba(46,93,129,.72);
+  --scene-accent: rgba(24,118,72,.88);
+  --scene-angle: -24deg;
+  --scene-art-y: 24%;
+  --scene-art-right: 46%;
   background:
     radial-gradient(circle at 12% 18%, rgba(91,145,175,.6), transparent 34%),
     radial-gradient(circle at 84% 70%, rgba(85,154,114,.62), transparent 38%),
@@ -2390,6 +2471,11 @@ main.landing-shell .landing-hero-reference {
 
 .landing-scroll-scene[data-scene="action"],
 .landing-scroll-scene[data-scene="footer"] {
+  --scene-line: rgba(4,83,58,.76);
+  --scene-accent: rgba(151,88,4,.92);
+  --scene-angle: 31deg;
+  --scene-art-y: 8%;
+  --scene-art-right: 4%;
   background:
     radial-gradient(circle at 82% 12%, rgba(217,166,63,.78), transparent 32%),
     radial-gradient(circle at 8% 74%, rgba(24,126,87,.72), transparent 39%),
@@ -2477,6 +2563,16 @@ main.landing-shell .landing-hero-reference {
     #08271d;
 }
 
+@keyframes landing-graphic-orbit {
+  from { transform: rotate(-12deg) translate3d(-2%, -1%, 0) scale(.96); }
+  to { transform: rotate(-4deg) translate3d(3%, 2%, 0) scale(1.05); }
+}
+
+@keyframes landing-route-shift {
+  from { transform: translate3d(-1.4%, -1%, 0) scale(1.01); }
+  to { transform: translate3d(1.4%, 1%, 0) scale(1.04); }
+}
+
 @media (max-width: 760px) {
   main.landing-shell .landing-frame {
     background: rgba(250,247,239,.28);
@@ -2487,5 +2583,25 @@ main.landing-shell .landing-hero-reference {
     padding: 34px 20px;
     border-radius: 24px;
     backdrop-filter: blur(10px) saturate(1.06);
+  }
+
+  .landing-scroll-scene::before {
+    width: 78vw;
+    border-width: 2px;
+    box-shadow:
+      0 0 0 22px color-mix(in srgb, var(--scene-line) 34%, transparent),
+      0 0 0 46px color-mix(in srgb, var(--scene-accent) 25%, transparent),
+      0 0 0 72px color-mix(in srgb, var(--scene-line) 18%, transparent);
+  }
+
+  .landing-scroll-scene::after {
+    background-size: auto, auto, auto, auto, auto, 210px 210px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-scroll-scene::before,
+  .landing-scroll-scene::after {
+    animation: none !important;
   }
 }
