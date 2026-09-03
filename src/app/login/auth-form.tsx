@@ -9,6 +9,7 @@ type Mode = "signin" | "signup";
 type Method = "email" | "phone";
 type Role = "renter" | "owner" | "agent";
 type TenantType = "family" | "bachelor" | "student" | "job_holder";
+type AuthIntent = "list-property" | undefined;
 
 const OTP_COOLDOWN_SECONDS = 60;
 
@@ -46,15 +47,16 @@ function normalizeBangladeshPhone(value: string) {
   return null;
 }
 
-export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
+export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: string; intent?: AuthIntent }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
+  const listingIntent = intent === "list-property";
   const [method, setMethod] = useState<Method>("email");
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [role, setRole] = useState<Role>("renter");
+  const [role, setRole] = useState<Role>(listingIntent ? "owner" : "renter");
   const [tenantType, setTenantType] = useState<TenantType | "">("");
   const [phone, setPhone] = useState("+880");
   const [token, setToken] = useState("");
@@ -203,6 +205,7 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
 
   function switchMode(nextMode: Mode) {
     setMode(nextMode);
+    if (nextMode === "signup" && listingIntent) setRole("owner");
     setOtpSent(false);
     setToken("");
     setMessage(null);
@@ -219,6 +222,7 @@ export function AuthForm({ nextPath = "/dashboard" }: { nextPath?: string }) {
             <option value="owner">Owner / Landlord</option>
             <option value="agent">Agent / Agency</option>
           </select>
+          {listingIntent && <span className="form-hint">Owner / Landlord is selected because you chose “List a property.” Change this only if another role describes you better.</span>}
         </label>
         {role === "renter" && (
           <label>My renter type
