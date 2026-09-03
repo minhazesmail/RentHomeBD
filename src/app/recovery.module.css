@@ -1,0 +1,136 @@
+.recoveryShell {
+  min-height: min(760px, calc(100vh - 40px));
+  display: grid;
+  place-items: center;
+  padding: clamp(28px, 7vw, 84px) 24px;
+}
+
+.recoveryCard {
+  position: relative;
+  width: min(760px, 100%);
+  overflow: hidden;
+  padding: clamp(28px, 6vw, 56px);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-2xl);
+  background:
+    radial-gradient(circle at 82% 18%, rgba(157, 216, 76, .15), transparent 28%),
+    linear-gradient(145deg, rgba(6, 39, 29, .98), rgba(10, 58, 43, .95));
+  box-shadow: 0 28px 80px rgba(4, 26, 20, .2);
+  color: var(--emerald-50);
+}
+
+.recoveryCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(237, 248, 243, .045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(237, 248, 243, .045) 1px, transparent 1px);
+  background-size: 30px 30px;
+  mask-image: linear-gradient(to bottom right, black, transparent 74%);
+}
+
+.recoveryContent {
+  position: relative;
+  z-index: 1;
+}
+
+.recoveryLogo {
+  display: inline-flex;
+  width: min(190px, 56vw);
+  margin-bottom: clamp(44px, 8vw, 76px);
+}
+
+.recoveryLogo img {
+  width: 100%;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.recoveryEyebrow {
+  margin: 0 0 12px;
+  color: var(--lime-300);
+  font-size: .76rem;
+  font-weight: 850;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.recoveryTitle {
+  max-width: 640px;
+  margin: 0;
+  color: white;
+  font-size: clamp(2.35rem, 7vw, 5rem);
+  line-height: .98;
+  letter-spacing: -.05em;
+}
+
+.recoveryCopy {
+  max-width: 580px;
+  margin: 20px 0 0;
+  color: rgba(237, 248, 243, .74);
+  font-size: clamp(.98rem, 2vw, 1.08rem);
+  line-height: 1.7;
+}
+
+.recoveryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.recoveryPrimary,
+.recoverySecondary {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.recoveryPrimary {
+  border: 1px solid var(--lime-300);
+  background: var(--lime-300);
+  color: var(--emerald-1000);
+}
+
+.recoverySecondary {
+  border: 1px solid rgba(237, 248, 243, .2);
+  background: rgba(255, 255, 255, .06);
+  color: var(--emerald-50);
+}
+
+button.recoveryPrimary {
+  cursor: pointer;
+  font: inherit;
+}
+
+@media (max-width: 560px) {
+  .recoveryShell {
+    min-height: calc(100vh - 20px);
+    padding: 18px 14px;
+  }
+
+  .recoveryCard {
+    padding: 28px 22px;
+    border-radius: var(--radius-xl);
+  }
+
+  .recoveryLogo {
+    margin-bottom: 48px;
+  }
+
+  .recoveryActions {
+    display: grid;
+  }
+
+  .recoveryPrimary,
+  .recoverySecondary {
+    width: 100%;
+  }
+}
