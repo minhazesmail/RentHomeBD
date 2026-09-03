@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireUser } from "@/lib/auth";
+import { formatExactMessageTime, formatInboxMessageTime } from "@/lib/message-time";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -54,6 +55,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
   const query = (firstValue(resolvedSearchParams.q) || "").trim().slice(0, 120);
   const unreadOnly = firstValue(resolvedSearchParams.filter) === "unread";
   const offset = (page - 1) * INBOX_PAGE_SIZE;
+  const renderedAt = new Date();
 
   const { data, error } = await supabase
     .rpc("get_message_inbox", { search_text: query || null, unread_only: unreadOnly })
@@ -102,10 +104,11 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
               {conversations.map((conversation) => {
                 const unread = Number(conversation.unread_count);
                 const otherName = auth.userId === conversation.renter_id ? conversation.owner_display_name : conversation.renter_display_name;
+                const timestamp = conversation.last_message_at || conversation.created_at;
                 return (
                   <Link className="conversation-card" href={`/messages/${conversation.id}`} key={conversation.id}>
                     <div className="conversation-main"><strong>{otherName || "NearBasha user"}</strong><span>{conversation.property_title || "Rental property"}</span><small>{conversation.last_message_body || "Conversation started — send the first message."}</small></div>
-                    <div className="conversation-meta">{unread > 0 && <span className="unread-badge">{unread}</span>}<span>{new Date(conversation.last_message_at || conversation.created_at).toLocaleDateString("en-BD")}</span></div>
+                    <div className="conversation-meta">{unread > 0 && <span className="unread-badge">{unread}</span>}<time dateTime={timestamp} title={formatExactMessageTime(timestamp)}>{formatInboxMessageTime(timestamp, renderedAt)}</time></div>
                   </Link>
                 );
               })}
