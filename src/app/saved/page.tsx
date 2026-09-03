@@ -40,6 +40,50 @@ function propertyLabel(value: unknown) {
     : "Not listed";
 }
 
+function savedSearchLocation(search: { center_lat: unknown; center_long: unknown }) {
+  return describeMapCenter(Number(search.center_lat), Number(search.center_long));
+}
+
+function savedSearchTitle(search: { name: unknown; center_lat: unknown; center_long: unknown }) {
+  const name = typeof search.name === "string" ? search.name.trim() : "";
+  const location = savedSearchLocation(search);
+  const genericName = !name || /^(my\s+)?(saved\s+)?search(?:\s+\d+)?$/i.test(name);
+  return genericName ? `${location} search` : name;
+}
+
+function savedSearchArea(search: { center_lat: unknown; center_long: unknown; radius_km: unknown }) {
+  const location = savedSearchLocation(search);
+  const radius = search.radius_km == null ? null : Number(search.radius_km);
+  return radius !== null && Number.isFinite(radius)
+    ? `Around ${location} · within ${radius} km`
+    : `Around ${location}`;
+}
+
+function savedSearchFilters(search: {
+  min_rent: unknown;
+  max_rent: unknown;
+  tenant_type: unknown;
+  min_bedrooms: unknown;
+}) {
+  const parts: string[] = [];
+  const minRent = search.min_rent == null ? null : Number(search.min_rent);
+  const maxRent = search.max_rent == null ? null : Number(search.max_rent);
+
+  if (minRent !== null || maxRent !== null) {
+    const minimum = minRent !== null && Number.isFinite(minRent) ? `৳${minRent.toLocaleString("en-BD")}` : "any";
+    const maximum = maxRent !== null && Number.isFinite(maxRent) ? `৳${maxRent.toLocaleString("en-BD")}` : "any";
+    parts.push(`Rent ${minimum}–${maximum}`);
+  }
+
+  const renterType = renterTypeLabel(search.tenant_type);
+  if (renterType) parts.push(`Renter type: ${renterType}`);
+
+  const bedrooms = search.min_bedrooms == null ? null : Number(search.min_bedrooms);
+  if (bedrooms !== null && Number.isFinite(bedrooms)) parts.push(`${bedrooms}+ bedrooms`);
+
+  return parts.length ? parts.join(" · ") : "No extra filters";
+}
+
 export default async function SavedPage() {
   const auth = await requireUser();
   const supabase = (await createClient()) as unknown as SupabaseClient;
@@ -134,19 +178,16 @@ export default async function SavedPage() {
             <div className="saved-empty">No saved searches yet. Name a filter set from the map page and save it.</div>
           ) : (
             <div className="saved-search-list">
-              {searches.map((search) => {
-                const renterType = renterTypeLabel(search.tenant_type);
-                return (
-                  <div className="saved-search-card" key={search.id as string}>
-                    <div>
-                      <strong>{search.name as string}</strong>
-                      <span>{search.radius_km ? `${search.radius_km} km radius` : "Any distance"}{search.min_rent || search.max_rent ? ` · ৳${search.min_rent ?? 0}–${search.max_rent ?? "any"}` : ""}{renterType ? ` · ${renterType}` : ""}{search.min_bedrooms ? ` · ${search.min_bedrooms}+ bed` : ""}</span>
-                      <small>{describeMapCenter(Number(search.center_lat), Number(search.center_long))}</small>
-                    </div>
-                    <div className="saved-search-actions"><Link className="primary-button link-button" href={searchHref(search as never)}>Run search</Link><DeleteSavedSearchButton searchId={search.id as string} userId={auth.userId} /></div>
+              {searches.map((search) => (
+                <div className="saved-search-card" key={search.id as string}>
+                  <div>
+                    <strong>{savedSearchTitle(search)}</strong>
+                    <span>{savedSearchArea(search)}</span>
+                    <small>{savedSearchFilters(search)}</small>
                   </div>
-                );
-              })}
+                  <div className="saved-search-actions"><Link className="primary-button link-button" href={searchHref(search as never)}>Run search</Link><DeleteSavedSearchButton searchId={search.id as string} userId={auth.userId} /></div>
+                </div>
+              ))}
             </div>
           )}
         </section>
