@@ -76,10 +76,13 @@ export default function HomePage() {
                 <ShieldCheck aria-label="Moderated listings" />
               </div>
               <div className="landing-search-console-fields">
-                <label className="landing-search-console-field landing-search-console-area" htmlFor="landing-area-search">
+                <label className="landing-search-console-field landing-search-console-area">
                   <MapPin aria-hidden="true" />
-                  <span>Area or landmark</span>
-                  <input id="landing-area-search" name="area" type="search" list="landing-location-options" placeholder="Dhanmondi, BUET, Banani…" autoComplete="off" />
+                  <span>Supported area or landmark</span>
+                  <select name="area" defaultValue="" required aria-describedby="landing-area-help">
+                    <option value="" disabled>Choose a Dhaka location</option>
+                    {LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label}>{location.label}</option>)}
+                  </select>
                 </label>
                 <label className="landing-search-console-field">
                   <Building2 aria-hidden="true" />
@@ -105,7 +108,7 @@ export default function HomePage() {
                 <input type="hidden" name="radius" value="5" />
                 <button className="landing-search-submit" type="submit"><Search aria-hidden="true" /><span>Search map</span><ArrowRight aria-hidden="true" /></button>
               </div>
-              <datalist id="landing-location-options">{LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label} />)}</datalist>
+              <p className="form-hint" id="landing-area-help">Location search currently supports the Dhaka areas and landmarks listed here. You can move the full map manually to search somewhere else.</p>
             </form>
 
             <div className="landing-popular-searches">
