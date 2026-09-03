@@ -11,6 +11,8 @@ type Step = {
   icon: "map" | "match" | "message" | "pin" | "people" | "publish";
 };
 
+const LIST_PROPERTY_HREF = "/login?intent=list-property&next=%2Fowner%2Fproperties%2Fnew";
+
 const renterSteps: Step[] = [
   { title: "Search the map", description: "Choose the area that matters to you and see homes at their real pinned locations.", icon: "map" },
   { title: "See who it fits", description: "Check tenant type, rent, bedrooms, and key details before making contact.", icon: "match" },
@@ -50,7 +52,7 @@ export function HowItWorksTabs() {
             <span className="landing-persona-kicker">{isRenter ? "Find with confidence" : "List with clarity"}</span>
             <h3>{isRenter ? "Find a home that actually fits." : "Publish once, match more clearly."}</h3>
           </div>
-          <Link className="text-link" href={isRenter ? "/homes" : "/login"}>{isRenter ? "Start searching →" : "List your property →"}</Link>
+          <Link className="text-link" href={isRenter ? "/homes" : LIST_PROPERTY_HREF}>{isRenter ? "Start searching →" : "List your property →"}</Link>
         </div>
 
         <ol className="landing-step-cards">
