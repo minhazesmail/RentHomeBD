@@ -102,17 +102,16 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
     setBusy(true);
     setMessage(null);
 
-    const result =
-      mode === "signup"
-        ? await supabase.auth.signUp({
-            email: email.trim().toLowerCase(),
-            password,
-            options: {
-              data: signupMetadata(),
-              emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(nextPath)}`,
-            },
-          })
-        : await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+    const result = mode === "signup"
+      ? await supabase.auth.signUp({
+          email: email.trim().toLowerCase(),
+          password,
+          options: {
+            data: signupMetadata(),
+            emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(nextPath)}`,
+          },
+        })
+      : await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
 
     setBusy(false);
 
@@ -176,13 +175,8 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
     const { error } = await supabase.auth.signInWithOtp({
       phone: normalizedPhone,
       options: mode === "signup"
-        ? {
-            data: signupMetadata(),
-            shouldCreateUser: true,
-          }
-        : {
-            shouldCreateUser: false,
-          },
+        ? { data: signupMetadata(), shouldCreateUser: true }
+        : { shouldCreateUser: false },
     });
 
     setBusy(false);
@@ -211,7 +205,6 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
 
     setBusy(true);
     setMessage(null);
-
     const { error } = await supabase.auth.verifyOtp({ phone, token, type: "sms" });
     setBusy(false);
 
@@ -273,17 +266,15 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
   return (
     <div className="auth-card">
       {!recoveringPassword && (
-        <>
+        <div className="auth-flow-heading">
+          <p className="eyebrow">{mode === "signin" ? "Welcome back" : listingIntent ? "Owner account setup" : "Join NearBasha"}</p>
+          <h2>{mode === "signin" ? "Sign in to continue" : "Create your account"}</h2>
+          <p className="form-hint">{mode === "signin" ? "Choose how you want to sign in." : "Choose how you want to create and verify your account."}</p>
           <div className="auth-tabs" aria-label="Authentication method">
-            <button className={method === "email" ? "active" : ""} onClick={() => switchMethod("email")} type="button">Email</button>
+            <button className={method === "email" ? "active" : ""} onClick={() => switchMethod("email")} type="button">Email & password</button>
             <button className={method === "phone" ? "active" : ""} onClick={() => switchMethod("phone")} type="button">Phone OTP</button>
           </div>
-
-          <div className="auth-tabs compact" aria-label="Account mode">
-            <button className={mode === "signin" ? "active" : ""} onClick={() => switchMode("signin")} type="button">Sign in</button>
-            <button className={mode === "signup" ? "active" : ""} onClick={() => switchMode("signup")} type="button">Create account</button>
-          </div>
-        </>
+        </div>
       )}
 
       {recoveringPassword ? (
@@ -319,6 +310,15 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
           <p className="form-hint">Bangladesh mobile numbers only. OTP delivery and abuse limits are also enforced by the authentication provider.</p>
           <button className="primary-button" disabled={busy || cooldown > 0} type="submit">{busy ? "Sending…" : cooldown > 0 ? `Try again in ${cooldown}s` : mode === "signin" ? "Send sign-in OTP" : "Create account with OTP"}</button>
         </form>
+      )}
+
+      {!recoveringPassword && (
+        <div className="auth-mode-switch">
+          <span>{mode === "signin" ? "New to NearBasha?" : "Already have an account?"}</span>
+          <button className="text-button" type="button" onClick={() => switchMode(mode === "signin" ? "signup" : "signin")}>
+            {mode === "signin" ? "Create an account" : "Sign in instead"}
+          </button>
+        </div>
       )}
 
       {message && <p className="auth-message" role="status" aria-live="polite">{message}</p>}
