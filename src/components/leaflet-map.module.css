@@ -1,0 +1,31 @@
+.customAreaVertexIcon {
+  display: grid;
+  place-items: center;
+  width: 44px !important;
+  height: 44px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.customAreaVertexIcon span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+  background: #126b4d;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(11, 61, 46, 0.28);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: grab;
+  user-select: none;
+}
+
+.customAreaVertexIcon:active span {
+  cursor: grabbing;
+  transform: scale(1.08);
+}
