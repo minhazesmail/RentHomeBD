@@ -18,6 +18,7 @@ import "./owner/owner-management-redesign.css";
 import "./dashboard/dashboard.css";
 import "./dashboard/dashboard-redesign.css";
 import "./messages/messages.css";
+import "./messages/messages-redesign.css";
 import "./saved/saved.css";
 
 import { GlobalShell } from "@/components/global-shell";
