@@ -1,0 +1,257 @@
+/* Step 17 — Visual regression cleanup.
+   Final cross-product reconciliation after the redesign, responsive, accessibility,
+   motion, and performance layers. Keep this file intentionally small and corrective. */
+
+/* Prevent route-level art direction from being visually doubled by the global shell. */
+.nb-global-shell[data-route="/"] > .nb-shell-atmosphere,
+.nb-global-shell[data-route="/"] > .nb-shell-grid,
+.nb-global-shell[data-route^="/messages"] > .nb-shell-atmosphere,
+.nb-global-shell[data-route^="/messages"] > .nb-shell-grid {
+  opacity: 0;
+}
+
+/* Shared optical alignment for the final product family. */
+:where(
+  .landing-frame,
+  .information-frame,
+  .owner-shell,
+  .listing-shell,
+  .dashboard-shell,
+  .messages-shell,
+  .thread-shell,
+  .saved-shell,
+  .moderation-shell,
+  .property-detail-shell
+) {
+  margin-inline: auto;
+}
+
+:where(
+  .owner-header,
+  .dashboard-header,
+  .saved-header,
+  .messages-header,
+  .listing-page-header
+) h1 {
+  text-wrap: balance;
+}
+
+/* Cards that represent comparable records should share one restrained edge language. */
+:where(
+  .renter-result-card,
+  .saved-property-card,
+  .conversation-card,
+  .owner-property-card,
+  .owner-dashboard-action-card,
+  .moderation-queue-card
+) {
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+}
+
+:where(
+  .renter-result-card,
+  .saved-property-card,
+  .conversation-card,
+  .owner-property-card,
+  .owner-dashboard-action-card,
+  .moderation-queue-card
+):focus-within {
+  outline-color: rgba(15, 107, 77, .22);
+}
+
+/* Landing page reconciliation. */
+.landing-nav {
+  isolation: isolate;
+}
+
+.landing-visual {
+  backface-visibility: hidden;
+}
+
+.landing-trust-grid .landing-trust-card > div {
+  min-width: 0;
+}
+
+.landing-listing-title-row > div,
+.landing-map-property-copy {
+  min-width: 0;
+}
+
+.landing-listing-title-row h3,
+.landing-map-property-copy strong,
+.landing-map-property-copy span {
+  overflow-wrap: anywhere;
+}
+
+/* Renter search reconciliation. */
+.shell-renter .renter-result-card-wrap {
+  isolation: isolate;
+}
+
+.shell-renter .renter-result-card-wrap.active {
+  z-index: 2;
+}
+
+.shell-renter .renter-map-panel,
+.shell-renter .renter-search-sidebar {
+  scrollbar-gutter: stable;
+}
+
+/* Keep operational status information visually stable even when labels wrap. */
+:where(
+  .owner-property-card,
+  .moderation-queue-card,
+  .saved-property-card,
+  .conversation-card
+) :where(.status-pill, .unread-badge, .tenant-match-badge) {
+  flex: 0 0 auto;
+}
+
+/* Messaging: prevent composer/thread chrome from visually drifting across viewport heights. */
+.thread-shell {
+  isolation: isolate;
+}
+
+.message-list {
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.message-composer {
+  box-shadow: 0 -1px 0 rgba(13, 95, 67, .035);
+}
+
+/* Owner and moderation workflows should remain flatter than renter/marketing cards. */
+.nb-global-shell--owner :where(
+  .owner-property-card,
+  .moderation-queue-card,
+  .owner-dashboard-action-card
+) {
+  box-shadow: 0 8px 24px rgba(4, 26, 20, .045);
+}
+
+.nb-global-shell--owner :where(
+  .owner-property-card,
+  .moderation-queue-card,
+  .owner-dashboard-action-card
+):hover {
+  box-shadow: 0 12px 30px rgba(4, 26, 20, .065);
+}
+
+/* Legal/editorial reading surfaces should not inherit product-card visual density. */
+.information-prose :where(p, li) {
+  text-wrap: pretty;
+}
+
+.information-prose :where(h2, h3) {
+  text-wrap: balance;
+}
+
+/* Final responsive fixes discovered after the performance layer. */
+@media (max-width: 920px) {
+  /* Once the hero becomes single-column the desktop perspective tilt reads as accidental. */
+  .landing-visual {
+    transform: none !important;
+    transform-origin: center;
+  }
+}
+
+@media (max-width: 767px) {
+  /* performance-optimizations.css removes blur on mobile; preserve the landing nav's dark identity. */
+  .landing-nav {
+    border-color: rgba(255,255,255,.13);
+    background: rgba(8,35,27,.97) !important;
+    color: #fff;
+    box-shadow: 0 12px 34px rgba(7,31,24,.18);
+  }
+
+  .landing-nav .brand-logo,
+  .landing-nav .brand-logo *,
+  .landing-nav-center a,
+  .landing-nav-actions .text-link {
+    color: #fff;
+  }
+
+  .landing-visual {
+    min-height: 0;
+  }
+
+  .landing-trust-grid .landing-trust-card > div {
+    margin-top: 32px !important;
+  }
+
+  /* Avoid nested edge-to-edge surfaces looking like accidental double cards. */
+  .messages-list,
+  .thread-shell,
+  .saved-shell,
+  .owner-shell,
+  .moderation-shell {
+    box-shadow: none;
+  }
+
+  .message-bubble {
+    max-width: min(88%, 42rem);
+  }
+
+  :where(.owner-header-actions, .dashboard-header-actions, .saved-header-actions) > * {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .landing-frame {
+    width: min(100% - 20px, 1500px);
+  }
+
+  .landing-nav {
+    top: 8px;
+    margin-top: 8px;
+    border-radius: 15px;
+  }
+
+  .landing-copy > h1 {
+    letter-spacing: -.06em;
+  }
+
+  .landing-confidence-row {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-confidence-row > div,
+  .landing-confidence-row > div + div {
+    padding: 14px 0;
+    border-left: 0;
+    border-top: 1px solid rgba(16,37,29,.1);
+  }
+
+  .landing-confidence-row > div:first-child {
+    border-top: 0;
+  }
+
+  .shell-renter .renter-result-card {
+    grid-template-columns: 82px minmax(0, 1fr);
+  }
+
+  .shell-renter .renter-result-image {
+    height: 86px;
+  }
+
+  .conversation-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .conversation-meta {
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-visual {
+    transform: none !important;
+  }
+}
