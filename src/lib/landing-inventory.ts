@@ -82,24 +82,34 @@ export const getLandingInventory = cache(async (): Promise<LandingInventory> => 
     if (!coverPaths.has(row.property_id)) coverPaths.set(row.property_id, row.storage_path);
   }
 
-  const featuredListings = await Promise.all(
-    properties.map(async (property) => {
-      const propertyTenantTypes = tenantTypes.get(property.id) ?? [];
-      const coverPath = coverPaths.get(property.id);
-      let imageUrl: string | null = null;
-      if (coverPath) {
-        const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(coverPath, IMAGE_TTL_SECONDS);
-        imageUrl = signed?.signedUrl ?? null;
-      }
+  const uniqueCoverPaths = [...new Set(coverPaths.values())];
+  const signedUrlByPath = new Map<string, string>();
 
-      return {
-        ...property,
-        imageUrl,
-        tenantLabel: tenantSummary(propertyTenantTypes),
-        tenantTypes: propertyTenantTypes,
-      };
-    }),
-  );
+  if (uniqueCoverPaths.length) {
+    const { data: signedRows, error: signedError } = await supabase.storage
+      .from("property-media")
+      .createSignedUrls(uniqueCoverPaths, IMAGE_TTL_SECONDS);
+
+    if (signedError) {
+      console.error("Could not sign landing cover images", signedError.message);
+    } else {
+      for (const signed of signedRows ?? []) {
+        if (signed.path && signed.signedUrl) signedUrlByPath.set(signed.path, signed.signedUrl);
+      }
+    }
+  }
+
+  const featuredListings = properties.map((property) => {
+    const propertyTenantTypes = tenantTypes.get(property.id) ?? [];
+    const coverPath = coverPaths.get(property.id);
+
+    return {
+      ...property,
+      imageUrl: coverPath ? signedUrlByPath.get(coverPath) ?? null : null,
+      tenantLabel: tenantSummary(propertyTenantTypes),
+      tenantTypes: propertyTenantTypes,
+    };
+  });
 
   return { availableCount: count ?? featuredListings.length, featuredListings };
 });
