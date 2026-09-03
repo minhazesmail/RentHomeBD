@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { MobileMapModel } from "@/components/mobile-map-model";
 import { ProductNavigation } from "@/components/product-navigation";
 import { RenterMapSearch } from "@/components/renter-map-search";
 import { getAuthContext } from "@/lib/auth";
@@ -62,12 +63,14 @@ export default async function HomesPage({
           “{params.area}” is not one of the supported quick-search locations yet. The map opened at the default Dhaka center instead. Move the map manually to the area you want, then choose Search map.
         </div>
       )}
-      <RenterMapSearch
-        userId={auth?.userId ?? null}
-        initialSavedPropertyIds={savedPropertyIds}
-        initialSearch={initialSearch}
-        preferredTenantType={preferredTenantType}
-      />
+      <MobileMapModel>
+        <RenterMapSearch
+          userId={auth?.userId ?? null}
+          initialSavedPropertyIds={savedPropertyIds}
+          initialSearch={initialSearch}
+          preferredTenantType={preferredTenantType}
+        />
+      </MobileMapModel>
     </main>
   );
 }
