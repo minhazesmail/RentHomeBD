@@ -89,8 +89,46 @@
     grid-row: 2;
     justify-content: flex-start;
     overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
     scrollbar-width: none;
   }
 
+  .productNavLink,
+  .productNavLinkActive {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
   .productNavLinks::-webkit-scrollbar { display: none; }
+}
+
+@media (max-width: 480px) {
+  .productNav {
+    width: calc(100% - 20px);
+    gap: 8px;
+    padding-block: 10px;
+  }
+
+  .productNavBrand img {
+    width: 124px;
+  }
+
+  .productNavAccountLink,
+  .productNavAccountActive {
+    min-height: 40px;
+    padding-inline: 11px;
+    font-size: .8rem;
+  }
+
+  .productNavLinks {
+    margin-inline: -2px;
+  }
+
+  .productNavLink,
+  .productNavLinkActive {
+    min-height: 40px;
+    padding-inline: 12px;
+    font-size: .82rem;
+  }
 }
