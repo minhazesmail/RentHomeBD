@@ -24,6 +24,7 @@ export default async function HomesPage({
   const auth = await getAuthContext();
   const supabase = (await createClient()) as unknown as SupabaseClient;
   const areaPreset = resolveLocationPreset(params.area);
+  const unsupportedArea = Boolean(params.area && !areaPreset && numberParam(params.lat) === undefined && numberParam(params.lng) === undefined);
 
   let savedPropertyIds: string[] = [];
   let preferredTenantType;
@@ -65,6 +66,11 @@ export default async function HomesPage({
         <strong>Search by exact location</strong>
         <span>Explore the map, then refine results with the filters below.</span>
       </div>
+      {unsupportedArea && (
+        <div className="auth-message compact-message" role="status">
+          “{params.area}” is not one of the supported quick-search locations yet. The map opened at the default Dhaka center instead. Move the map manually to the area you want, then choose Search map.
+        </div>
+      )}
       <RenterMapSearch
         userId={auth?.userId ?? null}
         initialSavedPropertyIds={savedPropertyIds}
