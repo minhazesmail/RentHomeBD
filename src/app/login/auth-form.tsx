@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
+import { TENANT_PROFILE_LABELS, type TenantType } from "@/lib/tenant-match";
 
 type Mode = "signin" | "signup";
 type Method = "email" | "phone";
 type Role = "renter" | "owner" | "agent";
-type TenantType = "family" | "bachelor" | "student" | "job_holder";
 type AuthIntent = "list-property" | undefined;
 
 const OTP_COOLDOWN_SECONDS = 60;
@@ -61,7 +61,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<Role>(listingIntent ? "owner" : "renter");
-  const [tenantType, setTenantType] = useState<TenantType | "">("");
+  const [tenantType, setTenantType] = useState<Exclude<TenantType, "everyone"> | "">("");
   const [phone, setPhone] = useState("+880");
   const [token, setToken] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -256,14 +256,14 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
         </label>
         {role === "renter" && (
           <label>My renter type
-            <select value={tenantType} onChange={(e) => setTenantType(e.target.value as TenantType)} required>
+            <select value={tenantType} onChange={(e) => setTenantType(e.target.value as Exclude<TenantType, "everyone">)} required>
               <option value="">Choose one</option>
-              <option value="family">Family</option>
-              <option value="bachelor">Bachelor</option>
-              <option value="student">Student</option>
-              <option value="job_holder">Job holder</option>
+              <option value="family">{TENANT_PROFILE_LABELS.family}</option>
+              <option value="bachelor">{TENANT_PROFILE_LABELS.bachelor}</option>
+              <option value="student">{TENANT_PROFILE_LABELS.student}</option>
+              <option value="job_holder">{TENANT_PROFILE_LABELS.job_holder}</option>
             </select>
-            <span className="form-hint">We’ll use this as your default map match. You can still change the tenant filter while searching.</span>
+            <span className="form-hint">We’ll use this as your default map match. You can still change the renter type filter while searching.</span>
           </label>
         )}
       </>
