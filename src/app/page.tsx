@@ -8,6 +8,8 @@ import { LandingMapPreview } from "@/components/landing-map-preview";
 import { LandingScrollAtmosphere } from "@/components/landing-scroll-atmosphere";
 import { LOCATION_PRESETS } from "@/lib/location-presets";
 
+const LIST_PROPERTY_HREF = "/login?intent=list-property&next=%2Fowner%2Fproperties%2Fnew";
+
 const trustSignals = [
   {
     title: "Phone OTP verification",
@@ -60,7 +62,7 @@ export default function HomePage() {
           </div>
           <div className="landing-nav-actions">
             <Link className="text-link" href="/login">Sign in</Link>
-            <Link className="primary-button link-button" href="/login">List a property</Link>
+            <Link className="primary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link>
           </div>
         </nav>
 
@@ -175,13 +177,13 @@ export default function HomePage() {
 
         <section className="landing-cta-band" data-scroll-theme="action" aria-label="Start using NearBasha">
           <div><p className="eyebrow">Ready when you are</p><h2>Start with the map, not another endless listing feed.</h2><p>Explore homes around the places that matter to you, or publish a property with an exact pin and clear tenant preferences.</p></div>
-          <div className="landing-cta-actions"><Link className="primary-button link-button" href="/homes">Browse the live map</Link><Link className="secondary-button link-button" href="/login">List a property</Link></div>
+          <div className="landing-cta-actions"><Link className="primary-button link-button" href="/homes">Browse the live map</Link><Link className="secondary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link></div>
         </section>
 
         <footer className="landing-footer" data-scroll-theme="footer">
           <div className="landing-footer-brand"><BrandLogo /><p>Map-first home rental discovery built for Bangladesh.</p><span>Currently focused on making local rental search clearer, fresher, and easier to trust.</span></div>
           <div className="landing-footer-links">
-            <div><strong>Product</strong><Link href="/homes">Browse homes</Link><Link href="/login">List a property</Link><Link href="/login">Sign in</Link></div>
+            <div><strong>Product</strong><Link href="/homes">Browse homes</Link><Link href={LIST_PROPERTY_HREF}>List a property</Link><Link href="/login">Sign in</Link></div>
             <div><strong>Company</strong><Link href="/about">About</Link><Link href="/contact">Contact</Link></div>
             <div><strong>Legal</strong><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></div>
           </div>
