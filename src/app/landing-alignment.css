@@ -1,24 +1,28 @@
 /* Targeted alignment fixes for repeated landing-page content cards. */
-.landing-trust-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  align-content: initial;
-  gap: 0;
+.landing-trust-grid .landing-trust-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  align-content: normal !important;
+  gap: 0 !important;
 }
 
-.landing-trust-card > div {
+.landing-trust-grid .landing-trust-card > .landing-trust-icon {
+  flex: 0 0 46px;
+}
+
+.landing-trust-grid .landing-trust-card > div {
   width: 100%;
-  margin-top: 54px;
+  margin-top: 54px !important;
 }
 
-.landing-trust-card > div > strong {
-  margin-top: 0;
+.landing-trust-grid .landing-trust-card > div > strong {
+  margin-top: 0 !important;
 }
 
 @media (max-width: 700px) {
-  .landing-trust-card > div {
-    margin-top: 28px;
+  .landing-trust-grid .landing-trust-card > div {
+    margin-top: 28px !important;
   }
 }
