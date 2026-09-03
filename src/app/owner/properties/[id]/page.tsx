@@ -6,6 +6,8 @@ import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
+const OWNER_MEDIA_PREVIEW_TTL_SECONDS = 300;
+
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const auth = await requireOwnerOrAgent();
   const { id } = await params;
@@ -21,11 +23,16 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
 
   if (!property) notFound();
 
+  const mediaWithPreviews = await Promise.all((mediaRows ?? []).map(async ({ id: mediaId, storage_path, media_type }) => {
+    const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(storage_path, OWNER_MEDIA_PREVIEW_TTL_SECONDS);
+    return { id: mediaId, storage_path, media_type, preview_url: signed?.signedUrl ?? null };
+  }));
+
   const formProperty = {
     ...property,
     tenant_types: (tenantRows ?? []).map((row) => row.tenant_type),
     amenities: (amenityRows ?? []).map((row) => row.amenity_slug),
-    media: (mediaRows ?? []).map(({ id: mediaId, storage_path, media_type }) => ({ id: mediaId, storage_path, media_type })),
+    media: mediaWithPreviews,
   };
 
   return (
