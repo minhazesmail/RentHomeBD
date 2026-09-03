@@ -29,6 +29,7 @@ type InitialSearch = {
   maxRent?: string;
   tenantType?: string;
   bedrooms?: string;
+  selectedId?: string;
 };
 
 type TenantTypeRow = {
@@ -99,7 +100,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const initialCenter: [number, number] = [initialSearch.centerLat ?? DHAKA_CENTER[0], initialSearch.centerLong ?? DHAKA_CENTER[1]];
   const [listings, setListings] = useState<MapListing[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialSearch.selectedId ?? null);
   const [center, setCenter] = useState<[number, number]>(initialCenter);
   const [radiusKm, setRadiusKm] = useState(initialRadius(initialSearch.radiusKm));
   const [minRent, setMinRent] = useState(initialSearch.minRent ?? "");
@@ -132,6 +133,24 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
     () => visibleListings.find((listing) => listing.id === effectiveSelectedId) ?? null,
     [effectiveSelectedId, visibleListings],
   );
+
+  const searchReturnPath = useCallback((selectionId: string) => {
+    const params = new URLSearchParams({
+      lat: center[0].toFixed(6),
+      lng: center[1].toFixed(6),
+      radius: radiusKm,
+      selected: selectionId,
+    });
+    if (minRent) params.set("minRent", minRent);
+    if (maxRent) params.set("maxRent", maxRent);
+    if (tenantType) params.set("tenant", tenantType);
+    if (bedrooms) params.set("bedrooms", bedrooms);
+    return `/homes?${params.toString()}`;
+  }, [bedrooms, center, maxRent, minRent, radiusKm, tenantType]);
+
+  const propertyHref = useCallback((propertyId: string) => {
+    return `/homes/${propertyId}?returnTo=${encodeURIComponent(searchReturnPath(propertyId))}`;
+  }, [searchReturnPath]);
 
   const validateFilters = useCallback(() => {
     const radius = Number(radiusKm);
@@ -176,9 +195,12 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       ? hydrated
       : [...hydrated].sort((a, b) => compatibilityRank(a, preferredTenantType) - compatibilityRank(b, preferredTenantType) || (a.distance_meters ?? Number.MAX_SAFE_INTEGER) - (b.distance_meters ?? Number.MAX_SAFE_INTEGER));
     setListings(ranked);
-    setSelectedId(ranked[0]?.id ?? null);
+    setSelectedId((current) => {
+      const candidate = current ?? initialSearch.selectedId;
+      return candidate && ranked.some((listing) => listing.id === candidate) ? candidate : ranked[0]?.id ?? null;
+    });
     setBusy(false);
-  }, [bedrooms, center, maxRent, minRent, preferredTenantType, radiusKm, supabase, tenantType, validateFilters]);
+  }, [bedrooms, center, initialSearch.selectedId, maxRent, minRent, preferredTenantType, radiusKm, supabase, tenantType, validateFilters]);
 
   useEffect(() => { runSearchRef.current = runSearch; }, [runSearch]);
   useEffect(() => {
@@ -286,7 +308,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
           {!busy && visibleListings.length === 0 && <div className="renter-empty">{customArea.length >= 3 ? "No available homes fall inside this custom area. Try expanding the shape or radius." : "No available homes match these filters yet."}</div>}
           {visibleListings.map((listing) => {
             const compatibility = tenantCompatibility(listing.tenant_types ?? [], softPreference);
-            return <div className={`renter-result-card-wrap tenant-compatibility-${compatibility}${effectiveSelectedId === listing.id ? " active" : ""}`} key={listing.id} onMouseEnter={() => setSelectedId(listing.id)}><Link className="renter-result-card" href={`/homes/${listing.id}`} onFocus={() => setSelectedId(listing.id)}><div className="renter-result-image">{listing.cover_url ? <Image src={listing.cover_url} alt="" width={320} height={220} sizes="(max-width: 900px) 40vw, 220px" /> : <span>⌂</span>}</div><div className="renter-result-copy"><TenantBadge types={listing.tenant_types ?? []} preference={softPreference} /><strong>{listing.title || "Rental property"}</strong><span>{listing.address_text || "Location available on map"}</span>{compatibility === "match" && <small className="tenant-preference-note is-match">✓ Matches your tenant profile</small>}{compatibility === "mismatch" && <small className="tenant-preference-note is-mismatch">This landlord prefers a different tenant type.</small>}<div className="renter-result-meta"><b>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</b><small>{listing.bedrooms ?? "—"} bed · {listing.bathrooms ?? "—"} bath</small></div>{listing.distance_meters !== null && <small>{listing.distance_meters < 1000 ? `${Math.round(listing.distance_meters)} m away` : `${(listing.distance_meters / 1000).toFixed(1)} km away`}</small>}</div></Link><SaveHomeButton propertyId={listing.id} userId={userId} initialSaved={savedSet.has(listing.id)} compact /></div>;
+            return <div className={`renter-result-card-wrap tenant-compatibility-${compatibility}${effectiveSelectedId === listing.id ? " active" : ""}`} key={listing.id} onMouseEnter={() => setSelectedId(listing.id)}><Link className="renter-result-card" href={propertyHref(listing.id)} onFocus={() => setSelectedId(listing.id)}><div className="renter-result-image">{listing.cover_url ? <Image src={listing.cover_url} alt="" width={320} height={220} sizes="(max-width: 900px) 40vw, 220px" /> : <span>⌂</span>}</div><div className="renter-result-copy"><TenantBadge types={listing.tenant_types ?? []} preference={softPreference} /><strong>{listing.title || "Rental property"}</strong><span>{listing.address_text || "Location available on map"}</span>{compatibility === "match" && <small className="tenant-preference-note is-match">✓ Matches your tenant profile</small>}{compatibility === "mismatch" && <small className="tenant-preference-note is-mismatch">This landlord prefers a different tenant type.</small>}<div className="renter-result-meta"><b>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</b><small>{listing.bedrooms ?? "—"} bed · {listing.bathrooms ?? "—"} bath</small></div>{listing.distance_meters !== null && <small>{listing.distance_meters < 1000 ? `${Math.round(listing.distance_meters)} m away` : `${(listing.distance_meters / 1000).toFixed(1)} km away`}</small>}</div></Link><SaveHomeButton propertyId={listing.id} userId={userId} initialSaved={savedSet.has(listing.id)} compact /></div>;
           })}
         </div>
       </aside>
@@ -294,7 +316,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       <section className="renter-map-panel">
         <LeafletMap listings={visibleListings} center={center} radiusKm={Number(radiusKm)} selectedId={effectiveSelectedId} onSelect={setSelectedId} onCenterChange={handleMapCenterChange} userLocation={userLocation} liveTracking={liveTracking} customArea={customArea} drawingCustomArea={drawingCustomArea} onCustomAreaChange={setCustomArea} />
         {drawingCustomArea && <div className="custom-area-map-hint" role="status"><strong>Draw your search area</strong><span>Tap corners on the map · {customArea.length}/3 minimum</span></div>}
-        {selectedListing && <article className={`mobile-map-sheet tenant-compatibility-${tenantCompatibility(selectedListing.tenant_types ?? [], softPreference)}`} aria-live="polite"><button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close property preview">×</button><div className="mobile-map-sheet-handle" aria-hidden="true" /><div className="mobile-map-sheet-content"><div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div><div className="mobile-map-sheet-copy"><TenantBadge types={selectedListing.tenant_types ?? []} preference={softPreference} /><h2>{selectedListing.title || "Rental property"}</h2><p>{selectedListing.address_text || "Location available on map"}</p>{tenantCompatibility(selectedListing.tenant_types ?? [], softPreference) === "mismatch" && <small className="tenant-preference-note is-mismatch">Different tenant preference</small>}<div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? `৳${selectedListing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>{selectedListing.bedrooms ?? "—"} bed · {selectedListing.bathrooms ?? "—"} bath</span></div></div></div><div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} initialSaved={savedSet.has(selectedListing.id)} compact /><Link className="primary-button link-button" href={`/homes/${selectedListing.id}`}>View full listing</Link></div></article>}
+        {selectedListing && <article className={`mobile-map-sheet tenant-compatibility-${tenantCompatibility(selectedListing.tenant_types ?? [], softPreference)}`} aria-live="polite"><button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close property preview">×</button><div className="mobile-map-sheet-handle" aria-hidden="true" /><div className="mobile-map-sheet-content"><div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div><div className="mobile-map-sheet-copy"><TenantBadge types={selectedListing.tenant_types ?? []} preference={softPreference} /><h2>{selectedListing.title || "Rental property"}</h2><p>{selectedListing.address_text || "Location available on map"}</p>{tenantCompatibility(selectedListing.tenant_types ?? [], softPreference) === "mismatch" && <small className="tenant-preference-note is-mismatch">Different tenant preference</small>}<div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? `৳${selectedListing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>{selectedListing.bedrooms ?? "—"} bed · {selectedListing.bathrooms ?? "—"} bath</span></div></div></div><div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} initialSaved={savedSet.has(selectedListing.id)} compact /><Link className="primary-button link-button" href={propertyHref(selectedListing.id)}>View full listing</Link></div></article>}
       </section>
     </div>
   );
