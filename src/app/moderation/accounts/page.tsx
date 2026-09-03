@@ -33,31 +33,31 @@ export default async function AccountVerificationPage({
   const profiles = (data ?? []) as TrustProfile[];
 
   return (
-    <main className="owner-shell">
-      <header className="owner-header">
+    <main className="owner-shell moderation-shell moderation-accounts-shell">
+      <header className="owner-header moderation-header">
         <div>
           <Link className="brand-link compact-brand" href="/">NearBasha</Link>
           <p className="eyebrow">Trust moderation</p>
           <h1 className="owner-title">Account verification</h1>
           <p className="intro">Review owner and agent accounts. A verified badge means the account was reviewed by NearBasha; it is not proof of legal identity or ownership of any property.</p>
         </div>
-        <div className="owner-header-actions"><Link className="secondary-button link-button" href="/moderation">Listing queue</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
+        <div className="owner-header-actions moderation-nav"><Link className="secondary-button link-button" href="/moderation">Listing queue</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
       </header>
 
       {params.notice === "verified" && <div className="success-message">Account badge issued and synced to live listings.</div>}
       {params.notice === "revoked" && <div className="success-message">Account badge revoked and removed from live listings.</div>}
 
-      <section className="property-list-panel">
+      <section className="property-list-panel moderation-account-panel">
         {!profiles.length ? (
           <div className="empty-state"><div className="empty-icon">✓</div><h2>No owner or agent accounts yet</h2><p>Eligible accounts will appear here once they sign up.</p></div>
         ) : (
-          <div className="verification-account-list">
+          <div className="verification-account-list moderation-account-list">
             {profiles.map((profile) => {
               const verified = Boolean(profile.role_verified_at && profile.role_verified_role === profile.primary_role);
               return (
-                <article className="listing-section" key={profile.id}>
+                <article className={`listing-section moderation-account-card${verified ? " is-verified" : ""}`} key={profile.id}>
                   <div className="section-heading"><span>{verified ? "✓" : "?"}</span><div><h2>{profile.display_name || "Unnamed account"}</h2><p>{profile.primary_role} · joined {new Date(profile.created_at).toLocaleDateString("en-BD")}</p></div></div>
-                  <div className="property-tags">
+                  <div className="property-tags moderation-account-signals">
                     <span>{profile.phone_verified_at ? "Phone verified" : "Phone not verified"}</span>
                     <span>{verified ? `Verified ${profile.primary_role}` : "No role badge"}</span>
                   </div>
