@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 
 type ShellKind = "marketing" | "renter" | "owner" | "auth" | "neutral";
@@ -32,20 +32,21 @@ function safeReturnTo(value: string | null) {
 
 export function GlobalShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const shell = resolveShell(pathname);
-  const returnTo = safeReturnTo(searchParams.get("returnTo"));
   const isPropertyDetail = /^\/homes\/[^/]+$/.test(pathname);
 
   function handleShellClick(event: ReactMouseEvent<HTMLDivElement>) {
-    if (!isPropertyDetail || !returnTo) return;
+    if (!isPropertyDetail) return;
     const target = event.target as HTMLElement;
     const anchor = target.closest("a");
     if (!anchor) return;
     if (anchor.getAttribute("href") !== "/homes" || !anchor.textContent?.includes("Back to map")) return;
+
+    const returnTo = safeReturnTo(new URLSearchParams(window.location.search).get("returnTo"));
+    if (!returnTo) return;
+
     event.preventDefault();
-    router.push(returnTo);
+    window.location.assign(returnTo);
   }
 
   return (
