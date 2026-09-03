@@ -40,9 +40,10 @@ const inter = Inter({
 });
 
 const hindSiliguri = Hind_Siliguri({
-  subsets: ["bengali", "latin"],
-  weight: ["400", "500", "600", "700"],
+  subsets: ["bengali"],
+  weight: ["400", "600"],
   display: "swap",
+  preload: false,
   variable: "--font-hind-siliguri",
 });
 
