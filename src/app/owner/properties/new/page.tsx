@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import "../listing-media-ux.css";
 export const dynamic = "force-dynamic";
 
 export default async function NewPropertyPage() {
