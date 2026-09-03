@@ -263,8 +263,40 @@
   }
 
   .thread-property-context {
-    width: 100%;
+    width: calc(100% - 51px);
     max-width: none;
     margin-left: 51px;
+  }
+}
+
+@media (max-width: 480px) {
+  .messages-search-form {
+    grid-template-columns: 1fr;
+  }
+
+  .messages-search-form .secondary-button,
+  .messages-search-form .text-link {
+    width: 100%;
+    grid-column: 1;
+    text-align: center;
+  }
+
+  .messages-filter-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .messages-filter-tabs::-webkit-scrollbar { display: none; }
+  .messages-filter-tabs a { flex: 0 0 auto; }
+
+  .modern-thread-header {
+    gap: 8px;
+  }
+
+  .thread-property-context {
+    width: 100%;
+    margin-left: 0;
   }
 }
