@@ -42,7 +42,8 @@ export function OwnerLocationPicker({
   const exactPosition: [number, number] | null = latitude !== null && longitude !== null
     ? [latitude, longitude]
     : null;
-  const viewportPosition = exactPosition ?? focusPosition ?? DHAKA_CENTER;
+  const viewportPosition = focusPosition ?? exactPosition ?? DHAKA_CENTER;
+  const viewportZoom = focusPosition ? 14 : exactPosition ? 16 : 12;
 
   const markerIcon = useMemo(() => divIcon({
     className: "owner-location-marker-wrap",
@@ -53,13 +54,13 @@ export function OwnerLocationPicker({
 
   return (
     <div className="owner-location-map" aria-label="Exact property location picker">
-      <MapContainer center={viewportPosition} zoom={exactPosition ? 16 : focusPosition ? 14 : 12} scrollWheelZoom className="owner-location-map-canvas">
+      <MapContainer center={viewportPosition} zoom={viewportZoom} scrollWheelZoom className="owner-location-map-canvas">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ClickToPlace disabled={disabled} onChange={onChange} />
-        {(exactPosition || focusPosition) && <Recenter position={viewportPosition} zoom={exactPosition ? 16 : 14} />}
+        {(exactPosition || focusPosition) && <Recenter position={viewportPosition} zoom={viewportZoom} />}
         {exactPosition && (
           <Marker
             position={exactPosition}
@@ -75,8 +76,8 @@ export function OwnerLocationPicker({
         )}
       </MapContainer>
       <div className="owner-location-map-tip">
-        <strong>{exactPosition ? "Exact pin placed" : focusPosition ? "Map centered near the typed area" : "Place the property pin"}</strong>
-        <span>{disabled ? "Location is locked for this listing." : exactPosition ? "Drag the pin to the building gate, or click elsewhere on the map." : focusPosition ? "This is only an approximate area. Click the actual building entrance to place the exact pin." : "Click the map where the building entrance is located."}</span>
+        <strong>{focusPosition ? "Map centered near the typed area" : exactPosition ? "Exact pin placed" : "Place the property pin"}</strong>
+        <span>{disabled ? "Location is locked for this listing." : focusPosition ? "This is only an approximate area. Click the actual building entrance to place the exact pin." : exactPosition ? "Drag the pin to the building gate, or click elsewhere on the map." : "Click the map where the building entrance is located."}</span>
       </div>
     </div>
   );
