@@ -37,8 +37,8 @@ export default async function ModerationDetailPage({ params }: { params: Promise
     : null;
 
   return (
-    <main className="listing-shell">
-      <header className="listing-page-header">
+    <main className="listing-shell moderation-shell moderation-detail-shell">
+      <header className="listing-page-header moderation-header">
         <div>
           <Link className="brand-link compact-brand" href="/">NearBasha</Link>
           <p className="eyebrow">Moderation review</p>
@@ -48,9 +48,9 @@ export default async function ModerationDetailPage({ params }: { params: Promise
         <Link className="text-link" href="/moderation">Back to queue</Link>
       </header>
 
-      <section className="moderation-review-grid">
-        <div className="listing-form">
-          <section className="listing-section">
+      <section className="moderation-review-grid moderation-inspection-grid">
+        <div className="listing-form moderation-inspection-stack">
+          <section className="listing-section moderation-inspection-card">
             <div className="section-heading"><span>1</span><div><h2>Listing details</h2><p>Check completeness and consistency before publishing.</p></div></div>
             <dl className="review-facts">
               <div><dt>Type</dt><dd>{property.property_type?.replaceAll("_", " ")}</dd></div>
@@ -67,20 +67,20 @@ export default async function ModerationDetailPage({ params }: { params: Promise
             {property.description && <div className="review-description"><strong>Description</strong><p>{property.description}</p></div>}
           </section>
 
-          <section className="listing-section">
+          <section className="listing-section moderation-inspection-card">
             <div className="section-heading"><span>2</span><div><h2>Tenant fit & amenities</h2><p>Verify the structured preferences match the description.</p></div></div>
             <div className="review-tags"><strong>Tenant types</strong><div>{(tenants ?? []).map((row) => <span key={row.tenant_type}>{row.tenant_type.replaceAll("_", " ")}</span>)}</div></div>
             <div className="review-tags"><strong>Amenities</strong><div>{(amenities ?? []).map((amenity) => <span key={amenity.slug}>{amenity.name}</span>)}</div></div>
             <div className="review-tags"><strong>Utilities included</strong><div>{property.utilities_included.map((item) => <span key={item}>{item.replaceAll("_", " ")}</span>)}</div></div>
           </section>
 
-          <section className="listing-section">
+          <section className="listing-section moderation-inspection-card">
             <div className="section-heading"><span>3</span><div><h2>Location</h2><p>Confirm the pin matches the stated address.</p></div></div>
             <p className="review-address">{property.address_text}</p>
-            {mapUrl && <div className="map-preview"><iframe title="Submitted property location" src={mapUrl} loading="lazy" /></div>}
+            {mapUrl && <div className="map-preview moderation-map-preview"><iframe title="Submitted property location" src={mapUrl} loading="lazy" /></div>}
           </section>
 
-          <section className="listing-section">
+          <section className="listing-section moderation-inspection-card moderation-media-section">
             <div className="section-heading"><span>4</span><div><h2>Media</h2><p>Check that photos clearly represent the property.</p></div></div>
             <div className="moderation-media-grid">
               {media.map((item) => item.signedUrl ? (
@@ -90,7 +90,7 @@ export default async function ModerationDetailPage({ params }: { params: Promise
           </section>
         </div>
 
-        <aside className="moderation-sidebar">
+        <aside className="moderation-sidebar moderation-decision-rail">
           <ModerationDecisionForm propertyId={property.id} reviewerId={auth.userId} />
         </aside>
       </section>
