@@ -1,12 +1,12 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { DeleteSavedSearchButton } from "@/components/delete-saved-search-button";
 import { SaveHomeButton } from "@/components/save-home-button";
+import { SavedSearchCard } from "@/components/saved-search-card";
 import { requireUser } from "@/lib/auth";
 import { describeMapCenter } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/server";
-import { normalizeTenantType, TENANT_PROFILE_LABELS } from "@/lib/tenant-match";
+import { normalizeTenantType, TENANT_PROFILE_LABELS, type TenantType } from "@/lib/tenant-match";
 export const dynamic = "force-dynamic";
 
 const SAVED_HOME_MEDIA_TTL_SECONDS = 300;
@@ -179,14 +179,25 @@ export default async function SavedPage() {
           ) : (
             <div className="saved-search-list">
               {searches.map((search) => (
-                <div className="saved-search-card" key={search.id as string}>
-                  <div>
-                    <strong>{savedSearchTitle(search)}</strong>
-                    <span>{savedSearchArea(search)}</span>
-                    <small>{savedSearchFilters(search)}</small>
-                  </div>
-                  <div className="saved-search-actions"><Link className="primary-button link-button" href={searchHref(search as never)}>Run search</Link><DeleteSavedSearchButton searchId={search.id as string} userId={auth.userId} /></div>
-                </div>
+                <SavedSearchCard
+                  key={search.id as string}
+                  userId={auth.userId}
+                  runHref={searchHref(search as never)}
+                  displayTitle={savedSearchTitle(search)}
+                  displayArea={savedSearchArea(search)}
+                  displayFilters={savedSearchFilters(search)}
+                  search={{
+                    id: search.id as string,
+                    name: search.name as string,
+                    center_lat: Number(search.center_lat),
+                    center_long: Number(search.center_long),
+                    radius_km: search.radius_km == null ? null : Number(search.radius_km),
+                    min_rent: search.min_rent == null ? null : Number(search.min_rent),
+                    max_rent: search.max_rent == null ? null : Number(search.max_rent),
+                    tenant_type: normalizeTenantType(search.tenant_type) as TenantType | null,
+                    min_bedrooms: search.min_bedrooms == null ? null : Number(search.min_bedrooms),
+                  }}
+                />
               ))}
             </div>
           )}
