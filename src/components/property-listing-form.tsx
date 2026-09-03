@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ListingReadiness } from "@/components/listing-readiness";
 import { resolveLocationPreset } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/client";
+import { TENANT_PROFILE_LABELS } from "@/lib/tenant-match";
 
 const OwnerLocationPicker = dynamic(() => import("@/components/owner-location-picker").then((module) => module.OwnerLocationPicker), { ssr: false });
 
@@ -43,7 +44,7 @@ type OrderedMedia =
   | { key: string; kind: "existing"; media: ExistingMedia }
   | { key: string; kind: "new"; file: File };
 
-const tenantOptions = [["family", "Family"], ["bachelor", "Bachelor"], ["student", "Student"], ["job_holder", "Job holder"], ["everyone", "Everyone"]] as const;
+const tenantOptions = [["family", TENANT_PROFILE_LABELS.family], ["bachelor", TENANT_PROFILE_LABELS.bachelor], ["student", TENANT_PROFILE_LABELS.student], ["job_holder", TENANT_PROFILE_LABELS.job_holder], ["everyone", TENANT_PROFILE_LABELS.everyone]] as const;
 const utilityOptions = [["water", "Water"], ["gas", "Gas"], ["electricity", "Electricity"], ["internet", "Internet"], ["service_charge", "Service charge"]] as const;
 
 function optionalNumber(value: string) {
@@ -83,7 +84,7 @@ function friendlyListingError(error: unknown) {
   if (message.includes("monthly rent is required") || message.includes("properties_rent_positive")) return "Enter a valid monthly rent greater than ৳0.";
   if (message.includes("availability date is required")) return "Choose the date when the property will be available.";
   if (message.includes("exact map coordinates are required")) return "Add the exact property location using the map coordinates.";
-  if (message.includes("preferred tenant type")) return "Choose at least one preferred tenant type.";
+  if (message.includes("preferred tenant type")) return "Choose at least one preferred renter type.";
   if (message.includes("property photo")) return "Upload at least one property photo before submitting for review.";
   if (message.includes("properties_deposit_nonnegative")) return "Security deposit cannot be negative.";
   if (message.includes("properties_floor_within_building")) return "Floor number cannot be higher than the building's total floors.";
@@ -240,7 +241,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
     if (latNumber === null || lngNumber === null) return "Add the exact property location before submitting for review.";
     if (latNumber < -90 || latNumber > 90) return "Latitude must be between -90 and 90.";
     if (lngNumber < -180 || lngNumber > 180) return "Longitude must be between -180 and 180.";
-    if (!tenantTypes.length) return "Choose at least one preferred tenant type.";
+    if (!tenantTypes.length) return "Choose at least one preferred renter type.";
     if (!hasPhoto) return "Upload at least one property photo before submitting for review.";
     return null;
   }
@@ -384,7 +385,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       </section>
 
       <section className="listing-section">
-        <div className="section-heading"><span>3</span><div><h2>Preferred tenants</h2><p>Choose at least one before submitting for review.</p></div></div>
+        <div className="section-heading"><span>3</span><div><h2>Preferred renter types</h2><p>Choose every renter type this home is suitable for. Select at least one before submitting for review.</p></div></div>
         <fieldset className="choice-group" disabled={locked}><div className="choice-grid">{tenantOptions.map(([value, label]) => <label className="choice-chip" key={value}><input type="checkbox" checked={tenantTypes.includes(value)} onChange={() => toggle(value, tenantTypes, setTenantTypes)} />{label}</label>)}</div></fieldset>
       </section>
 
