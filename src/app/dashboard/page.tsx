@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ShieldCheck } from "lucide-react";
 
-import { BrandLogo } from "@/components/brand-logo";
+import { ProductNavigation } from "@/components/product-navigation";
 import { RenterPreferenceForm } from "@/components/renter-preference-form";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -47,9 +47,9 @@ export default async function DashboardPage({
   return (
     <main className={`shell dashboard-shell renter-dashboard-shell${!isRenter ? " owner-dashboard-shell" : ""}`}>
       <section className={`dashboard-card renter-dashboard-card${!isRenter ? " owner-dashboard-card" : ""}`}>
+        <ProductNavigation authenticated canList={canList} current="dashboard" />
         <div className={`dashboard-header renter-dashboard-header${!isRenter ? " owner-dashboard-header" : ""}`}>
           <div>
-            <BrandLogo />
             <p className="eyebrow">{isRenter ? "Renter workspace" : canList ? "Owner workspace" : "Account dashboard"}</p>
             <h1 className="dashboard-title">Welcome{auth.profile.display_name ? `, ${auth.profile.display_name}` : ""}.</h1>
             <p className="intro">
