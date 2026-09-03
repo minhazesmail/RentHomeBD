@@ -28,6 +28,7 @@ import "./moderation/moderation-redesign.css";
 import "./motion-polish.css";
 import "./responsive-audit.css";
 import "./accessibility-audit.css";
+import "./performance-optimizations.css";
 
 import { GlobalShell } from "@/components/global-shell";
 
