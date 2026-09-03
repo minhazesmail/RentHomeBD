@@ -1,10 +1,11 @@
 "use client";
 
-import { Circle, CircleMarker, MapContainer, Marker, Polygon, Popup, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { Circle, CircleMarker, MapContainer, Marker, Polygon, Popup, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { divIcon } from "leaflet";
 import type { LatLngBoundsExpression } from "leaflet";
 
+import styles from "./leaflet-map.module.css";
 import { tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
 
 export type MapListing = {
@@ -89,6 +90,42 @@ function CustomAreaDrawing({ active, points, onChange }: { active: boolean; poin
     },
   });
   return null;
+}
+
+function customAreaVertexIcon(index: number) {
+  return divIcon({
+    className: styles.customAreaVertexIcon,
+    html: `<span>${index + 1}</span>`,
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
+  });
+}
+
+function CustomAreaVertices({ points, editable, onChange }: { points: [number, number][]; editable: boolean; onChange: (points: [number, number][]) => void }) {
+  if (!editable) {
+    return points.map((point, index) => <CircleMarker key={`custom-area-${index}`} center={point} radius={5} pathOptions={{ color: "#0b3d2e", fillColor: "#126b4d", fillOpacity: 1, weight: 2 }} />);
+  }
+
+  return points.map((point, index) => (
+    <Marker
+      key={`custom-area-edit-${index}`}
+      position={point}
+      icon={customAreaVertexIcon(index)}
+      draggable
+      keyboard
+      autoPan
+      eventHandlers={{
+        dragend: (event) => {
+          const next = event.target.getLatLng();
+          const updated = [...points];
+          updated[index] = [next.lat, next.lng];
+          onChange(updated);
+        },
+      }}
+    >
+      {index === 0 && <Tooltip permanent direction="top" offset={[0, -18]}>Drag corners to adjust area</Tooltip>}
+    </Marker>
+  ));
 }
 
 function clusterCellSize(zoom: number) {
@@ -220,16 +257,17 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, onS
   onCustomAreaChange?: (points: [number, number][]) => void;
 }) {
   const userCenter: [number, number] | null = userLocation ? [userLocation.latitude, userLocation.longitude] : null;
+  const editingCustomArea = !drawingCustomArea && customArea.length >= 3;
 
   return (
     <MapContainer center={center} zoom={12} scrollWheelZoom className={`renter-map-canvas${drawingCustomArea ? " drawing-custom-area" : ""}`}>
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <FitToResults listings={listings} center={center} liveTracking={liveTracking} />
-      <ManualMapCenter disabled={drawingCustomArea} onChange={onCenterChange} />
+      <ManualMapCenter disabled={drawingCustomArea || editingCustomArea} onChange={onCenterChange} />
       <CustomAreaDrawing active={drawingCustomArea} points={customArea} onChange={onCustomAreaChange ?? (() => {})} />
       {radiusKm !== null && customArea.length < 3 && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: "#126b4d", fillColor: "#126b4d", fillOpacity: 0.04, weight: 1 }} />}
       {customArea.length >= 2 && <Polygon positions={customArea} pathOptions={{ color: "#126b4d", fillColor: "#126b4d", fillOpacity: customArea.length >= 3 ? 0.12 : 0.04, weight: 3 }} />}
-      {customArea.map((point, index) => <CircleMarker key={`custom-area-${index}`} center={point} radius={5} pathOptions={{ color: "#0b3d2e", fillColor: "#126b4d", fillOpacity: 1, weight: 2 }} />)}
+      <CustomAreaVertices points={customArea} editable={editingCustomArea} onChange={onCustomAreaChange ?? (() => {})} />
       {userCenter && <><Circle center={userCenter} radius={Math.max(userLocation?.accuracy ?? 0, 5)} pathOptions={{ color: "#167d78", fillColor: "#167d78", fillOpacity: 0.08, weight: 1 }} /><CircleMarker center={userCenter} radius={9} pathOptions={{ color: "#ffffff", fillColor: "#167d78", fillOpacity: 1, weight: 4 }}><Popup><div className="map-popup"><strong>Your live location</strong><small>Accuracy ±{Math.round(userLocation?.accuracy ?? 0)} m</small></div></Popup></CircleMarker></>}
       <ClusteredListings listings={listings} selectedId={selectedId} onSelect={onSelect} />
     </MapContainer>
