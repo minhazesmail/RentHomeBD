@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { DeleteSavedSearchButton } from "@/components/delete-saved-search-button";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { requireUser } from "@/lib/auth";
+import { describeMapCenter } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
@@ -81,7 +82,7 @@ export default async function SavedPage() {
         </section>
 
         <section className="saved-section">
-          <div className="saved-section-heading"><div><h2>Saved searches</h2><p>Each preset stores its exact map center and active filters.</p></div><span>{searches?.length ?? 0}</span></div>
+          <div className="saved-section-heading"><div><h2>Saved searches</h2><p>Each preset stores its map area and active filters.</p></div><span>{searches?.length ?? 0}</span></div>
           {!searches?.length ? (
             <div className="saved-empty">No saved searches yet. Name a filter set from the map page and save it.</div>
           ) : (
@@ -91,7 +92,7 @@ export default async function SavedPage() {
                   <div>
                     <strong>{search.name as string}</strong>
                     <span>{search.radius_km ? `${search.radius_km} km radius` : "Any distance"}{search.min_rent || search.max_rent ? ` · ৳${search.min_rent ?? 0}–${search.max_rent ?? "any"}` : ""}{search.tenant_type ? ` · ${String(search.tenant_type).replaceAll("_", " ")}` : ""}{search.min_bedrooms ? ` · ${search.min_bedrooms}+ bed` : ""}</span>
-                    <small>Center {Number(search.center_lat).toFixed(4)}, {Number(search.center_long).toFixed(4)}</small>
+                    <small>{describeMapCenter(Number(search.center_lat), Number(search.center_long))}</small>
                   </div>
                   <div className="saved-search-actions"><Link className="primary-button link-button" href={searchHref(search as never)}>Run search</Link><DeleteSavedSearchButton searchId={search.id as string} userId={auth.userId} /></div>
                 </div>
