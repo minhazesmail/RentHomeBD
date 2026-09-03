@@ -114,7 +114,7 @@ export function PhoneVerificationForm({
                 placeholder="1712345678"
                 value={phoneInput}
                 onChange={(event) => setPhoneInput(bangladeshPhoneSubscriberDigits(event.target.value))}
-                maxLength={10}
+                maxLength={14}
                 aria-describedby="verification-phone-guidance"
                 disabled={busy}
               />
