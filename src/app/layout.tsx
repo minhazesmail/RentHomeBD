@@ -3,6 +3,7 @@ import { Hind_Siliguri, Inter } from "next/font/google";
 import "leaflet/dist/leaflet.css";
 import "./tokens.css";
 import "./globals.css";
+import "./foundation.css";
 import "./primitives.css";
 import "./brand.css";
 import "./auth.css";
