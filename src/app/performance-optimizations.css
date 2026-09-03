@@ -1,0 +1,96 @@
+/* Step 16 — Performance optimization layer.
+   Keep these rules paint/layout focused and non-functional. */
+
+/* Long marketing pages do not need full layout/paint work before sections approach the viewport. */
+.landing-trust-section,
+.landing-content-section,
+.landing-strip,
+.landing-cta-band,
+.landing-footer,
+.information-section,
+.information-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
+
+.landing-footer,
+.information-footer {
+  contain-intrinsic-size: auto 420px;
+}
+
+/* Isolate dense, repeatable inventory surfaces so changes do not invalidate the full page. */
+.renter-result-card,
+.landing-listing-card,
+.saved-property-card,
+.conversation-card,
+.owner-property-card,
+.owner-dashboard-action-card,
+.moderation-queue-card {
+  contain: layout paint;
+}
+
+/* Expensive blur is useful on large screens, but unnecessary on constrained devices. */
+@media (max-width: 767px) {
+  .nb-surface-glass,
+  .landing-nav,
+  .renter-filter-panel,
+  .messages-list,
+  .thread-shell,
+  .message-composer,
+  .owner-dashboard-card,
+  .property-contact-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .landing-nav,
+  .renter-filter-panel,
+  .messages-list,
+  .thread-shell,
+  .owner-dashboard-card,
+  .property-contact-card {
+    background-color: rgba(255, 255, 252, 0.96);
+  }
+}
+
+/* Do not keep browser compositor layers alive after transitions complete. */
+:where(.renter-result-card, .landing-listing-card, .conversation-card, .owner-dashboard-action-card) {
+  will-change: auto;
+}
+
+/* Decorative layers should never trigger pointer hit-testing or layout participation. */
+:where(
+  .nb-shell-atmosphere,
+  .nb-shell-grid,
+  .messages-page::before,
+  .messages-page::after,
+  .owner-dashboard-shell::before,
+  .landing-shell::before,
+  .landing-shell::after
+) {
+  pointer-events: none;
+}
+
+/* Avoid offscreen animation work on long landing-page sections until they become relevant. */
+@media (prefers-reduced-motion: no-preference) {
+  .landing-trust-section,
+  .landing-content-section,
+  .landing-strip,
+  .landing-cta-band,
+  .landing-footer {
+    view-timeline-inset: 0;
+  }
+}
+
+@media print {
+  .landing-trust-section,
+  .landing-content-section,
+  .landing-strip,
+  .landing-cta-band,
+  .landing-footer,
+  .information-section,
+  .information-footer {
+    content-visibility: visible;
+    contain-intrinsic-size: none;
+  }
+}
