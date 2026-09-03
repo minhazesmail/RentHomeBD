@@ -24,10 +24,22 @@ type PublicProperty = {
 };
 
 const PUBLIC_MEDIA_TTL_SECONDS = 300;
+const PROPERTY_DATE_FORMATTER = new Intl.DateTimeFormat("en-BD", {
+  timeZone: "Asia/Dhaka",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
 
 export const dynamic = "force-dynamic";
 
 function label(value: string | null | undefined) { return value ? value.replaceAll("_", " ") : "—"; }
+
+function formatPropertyDate(value: string | null | undefined) {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? "—" : PROPERTY_DATE_FORMATTER.format(parsed);
+}
 
 function dhakaDateKey(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-GB", {
@@ -43,7 +55,7 @@ function dhakaDateKey(date = new Date()) {
 function availabilityLabel(availableFrom: string | null) {
   if (!availableFrom) return "Availability date not listed";
   const dateKey = availableFrom.slice(0, 10);
-  return dateKey <= dhakaDateKey() ? "Available now" : `Available from ${dateKey}`;
+  return dateKey <= dhakaDateKey() ? "Available now" : `Available from ${formatPropertyDate(availableFrom)}`;
 }
 
 export default async function PublicPropertyPage({ params }: { params: Promise<{ id: string }> }) {
@@ -102,7 +114,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
               <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} /></span><span className="summary-stat-copy"><strong>{property.floor_number ?? "—"}{property.total_floors ? ` / ${property.total_floors}` : ""}</strong><span>Floor</span></span></div>
             </section>
 
-            <section className="property-detail-section"><div className="property-section-heading"><div><h2>About this home</h2><p className="section-copy">The practical details you’ll want before arranging a viewing.</p></div><Sparkles size={20} aria-hidden="true" /></div><p className="property-description">{property.description || "The owner has not added a longer description yet."}</p><dl className="property-facts"><div><dt>Property type</dt><dd>{label(property.property_type)}</dd></div><div><dt>Furnishing</dt><dd>{label(property.furnishing)}</dd></div><div><dt>Available from</dt><dd>{property.available_from || "—"}</dd></div><div><dt>Deposit</dt><dd>৳{property.deposit_bdt.toLocaleString("en-BD")}</dd></div><div><dt>Gender preference</dt><dd>{label(property.gender_preference)}</dd></div></dl></section>
+            <section className="property-detail-section"><div className="property-section-heading"><div><h2>About this home</h2><p className="section-copy">The practical details you’ll want before arranging a viewing.</p></div><Sparkles size={20} aria-hidden="true" /></div><p className="property-description">{property.description || "The owner has not added a longer description yet."}</p><dl className="property-facts"><div><dt>Property type</dt><dd>{label(property.property_type)}</dd></div><div><dt>Furnishing</dt><dd>{label(property.furnishing)}</dd></div><div><dt>Available from</dt><dd>{formatPropertyDate(property.available_from)}</dd></div><div><dt>Deposit</dt><dd>৳{property.deposit_bdt.toLocaleString("en-BD")}</dd></div><div><dt>Gender preference</dt><dd>{label(property.gender_preference)}</dd></div></dl></section>
 
             <section className="property-detail-section tenant-compatibility-card"><div className="tenant-compatibility-top"><div className="tenant-compatibility-icon"><Users size={22} /></div><div><h2>Renter fit</h2><p>These are the renter types the owner has marked as suitable for this home.</p></div></div><div className="tenant-compatibility-tags">{renterTypes.length ? renterTypes.map((type) => <span key={type}><CircleCheck size={14} />{TENANT_PROFILE_LABELS[type]}</span>) : <span>Renter type not specified</span>}</div></section>
 
@@ -144,7 +156,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
                 signInHref={signInHref}
               />
             </div>
-            <div className="freshness-note"><Clock size={17} aria-hidden="true" /><strong>Fresh listing</strong><span>Published {new Date(property.published_at).toLocaleDateString("en-BD")}{property.expires_at ? ` · reconfirmation due ${new Date(property.expires_at).toLocaleDateString("en-BD")}` : ""}</span></div>
+            <div className="freshness-note"><Clock size={17} aria-hidden="true" /><strong>Fresh listing</strong><span>Published {formatPropertyDate(property.published_at)}{property.expires_at ? ` · reconfirmation due ${formatPropertyDate(property.expires_at)}` : ""}</span></div>
           </aside>
         </div>
       </div>
