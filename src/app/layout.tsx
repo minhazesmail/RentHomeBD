@@ -14,6 +14,7 @@ import "./homes/homes.css";
 import "./homes/homes-redesign.css";
 import "./homes/property-detail-redesign.css";
 import "./owner/owner.css";
+import "./owner/owner-management-redesign.css";
 import "./dashboard/dashboard.css";
 import "./dashboard/dashboard-redesign.css";
 import "./messages/messages.css";
