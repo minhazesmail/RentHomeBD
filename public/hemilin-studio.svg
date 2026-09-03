@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 510" role="img" aria-labelledby="title desc">
+  <title id="title">Hemilin Studio</title>
+  <desc id="desc">Hemilin wolf emblem and wordmark</desc>
+  <rect x="14" y="17" width="442" height="476" fill="#171719"/>
+  <path fill="#fff" d="M75 29v357h128l31 31 32-31h126V29l-94 95v-45l-64 69-65-69v45L75 29Zm35 75 86 87 38-40 38 40 88-88-18 79 40 43-42-7 28 66-39-15 19 76-44-29-31 68-39 38-39-38-31-68-44 29 19-76-39 15 28-66-42 7 40-43-18-79Z"/>
+  <path fill="#171719" d="M153 198c17 1 35 7 48 17 8 7 11 17 12 30 1 17-6 34-10 49-4 16-4 31 4 41 7 9 17 13 27 13s20-4 27-13c8-10 8-25 4-41-4-15-11-32-10-49 1-13 4-23 12-30 13-10 31-16 48-17-4 14-11 27-22 35-7 5-13 7-20 8-1 14 2 25 6 39 7 25 9 48-4 66-9 13-24 21-41 21s-32-8-41-21c-13-18-11-41-4-66 4-14 7-25 6-39-7-1-13-3-20-8-11-8-18-21-22-35Zm31 15c8 2 16 6 22 11-1 5-4 8-8 10-7-1-12-7-14-21Zm100 0c-2 14-7 20-14 21-4-2-7-5-8-10 6-5 14-9 22-11Z"/>
+  <ellipse cx="234" cy="325" rx="21" ry="20" fill="#171719"/>
+  <text x="235" y="467" text-anchor="middle" fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="57" letter-spacing="14">HEMILIN</text>
+</svg>
