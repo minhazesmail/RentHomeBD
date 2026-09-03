@@ -263,6 +263,19 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
     setMessage("Map moved. Choose Search map to find homes around this area.");
   }
 
+  function clearFilters() {
+    setMinRent("");
+    setMaxRent("");
+    setTenantType("");
+    setBedrooms("");
+    setRadiusKm("15");
+    setCustomArea([]);
+    setDrawingCustomArea(false);
+    setSelectedId(null);
+    setMessage("Filters cleared. Refreshing homes around this map location.");
+    window.setTimeout(() => { void runSearchRef.current(center); }, 0);
+  }
+
   async function saveSearch() {
     if (customAreaMode) { setMessage("Custom drawn areas are temporary and cannot be saved yet. Clear the custom area first, then save the radius and filters."); return; }
     if (!userId) { router.push(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`); return; }
@@ -318,6 +331,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
           </div>
           <div className="renter-filter-actions">{liveTracking ? <button className="secondary-button renter-live-location-button" type="button" onClick={stopLiveLocation}>Stop live location</button> : <button className="secondary-button renter-live-location-button" type="button" onClick={startLiveLocation} disabled={locating}>{locating ? "Finding you…" : "◎ My live location"}</button>}<button className="primary-button" type="button" onClick={() => void runSearch()} disabled={busy}>{busy ? "Searching…" : "Search map"}</button></div>
           <div className="custom-area-controls">
+            <button className="text-button" type="button" onClick={clearFilters} disabled={busy}>Clear filters</button>
             {!drawingCustomArea && customArea.length < 3 && <button className="secondary-button" type="button" onClick={startCustomArea}>◇ Draw custom area</button>}
             {drawingCustomArea && <><button className="primary-button" type="button" onClick={finishCustomArea}>Finish area ({customArea.length})</button><button className="text-button" type="button" onClick={clearCustomArea}>Cancel</button></>}
             {!drawingCustomArea && customArea.length >= 3 && <><span><strong>Custom area active · temporary</strong>{visibleListings.length} homes inside</span><button className="text-button" type="button" onClick={clearCustomArea}>Clear area</button></>}
