@@ -29,6 +29,23 @@ export const dynamic = "force-dynamic";
 
 function label(value: string | null | undefined) { return value ? value.replaceAll("_", " ") : "—"; }
 
+function dhakaDateKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${value.year}-${value.month}-${value.day}`;
+}
+
+function availabilityLabel(availableFrom: string | null) {
+  if (!availableFrom) return "Availability date not listed";
+  const dateKey = availableFrom.slice(0, 10);
+  return dateKey <= dhakaDateKey() ? "Available now" : `Available from ${dateKey}`;
+}
+
 export default async function PublicPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = (await createClient()) as unknown as SupabaseClient;
@@ -50,6 +67,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
   const photos = media.filter((item) => item.media_type === "photo" && item.signed_url);
   const videos = media.filter((item) => item.media_type === "video" && item.signed_url);
   const renterTypes = normalizeTenantTypes(property.tenant_types);
+  const availability = availabilityLabel(property.available_from);
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`;
   const signInHref = `/login?next=${encodeURIComponent(`/homes/${property.id}#contact`)}`;
   const roleVerified = Boolean(property.owner_role_verified_at && property.owner_role_verified_role === property.owner_role);
@@ -65,7 +83,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
       <div className="property-detail-shell">
         <section className="property-detail-hero">
           <div className="property-detail-hero-main">
-            <div className="property-detail-hero-kicker"><p className="eyebrow">{label(property.property_type)}</p><span className="property-detail-availability"><CircleCheck size={13} />Available now</span></div>
+            <div className="property-detail-hero-kicker"><p className="eyebrow">{label(property.property_type)}</p><span className="property-detail-availability"><CircleCheck size={13} />{availability}</span></div>
             <h1>{property.title || "Rental property"}</h1>
             <p className="property-detail-address"><MapPin size={17} aria-hidden="true" />{property.address_text || "Exact location shown below"}</p>
           </div>
