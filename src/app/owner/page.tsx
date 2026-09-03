@@ -42,33 +42,86 @@ type Listing = {
   moderation_notes: string | null;
 };
 
+type StatusPresentation = {
+  label: string;
+  detail: string;
+  tone: "good" | "attention" | "urgent" | "neutral";
+};
+
 function firstValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function freshnessCopy(status: string, expiresAt: string | null) {
-  if (status === "pending_confirmation") return "Hidden from search until you confirm it is still available.";
-  if (status === "available" && expiresAt) {
-    const date = new Date(expiresAt);
-    const days = Math.max(0, Math.ceil((date.getTime() - Date.now()) / 86_400_000));
-    return days <= 3 ? `Reconfirm soon · ${days} day${days === 1 ? "" : "s"} left` : `Fresh for ${days} more days`;
+function listingStatusPresentation(status: string, expiresAt: string | null): StatusPresentation {
+  if (status === "pending_confirmation") {
+    return {
+      label: "Needs confirmation",
+      detail: "Hidden from renter search until you confirm it is still available.",
+      tone: "urgent",
+    };
   }
-  if (status === "expired") return "Expired after the confirmation grace period.";
-  return null;
-}
-
-function nextAction(status: string, expiresAt: string | null) {
-  if (status === "pending_confirmation") return { label: "Reconfirm availability now", tone: "urgent" };
-  if (status === "rejected") return { label: "Review feedback and update", tone: "urgent" };
-  if (status === "draft") return { label: "Finish draft and submit", tone: "neutral" };
-  if (status === "pending_review") return { label: "Waiting for moderation", tone: "neutral" };
-  if (status === "available" && expiresAt) {
+  if (status === "rejected") {
+    return {
+      label: "Needs changes",
+      detail: "Review the moderator feedback below, update the listing, then submit it again.",
+      tone: "urgent",
+    };
+  }
+  if (status === "draft") {
+    return {
+      label: "Draft",
+      detail: "Finish the listing when ready, then submit it for moderation.",
+      tone: "neutral",
+    };
+  }
+  if (status === "pending_review") {
+    return {
+      label: "In review",
+      detail: "Waiting for NearBasha moderation before it can appear in renter search.",
+      tone: "neutral",
+    };
+  }
+  if (status === "available") {
+    if (!expiresAt) {
+      return {
+        label: "Available",
+        detail: "Live and discoverable in renter search.",
+        tone: "good",
+      };
+    }
     const days = Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86_400_000));
-    return days <= 3 ? { label: "Reconfirm soon", tone: "attention" } : { label: "Live and discoverable", tone: "good" };
+    if (days <= 3) {
+      return {
+        label: "Available · Reconfirm soon",
+        detail: days === 0 ? "Reconfirm today to keep this listing live." : `Live in renter search · reconfirm within ${days} day${days === 1 ? "" : "s"}.`,
+        tone: "attention",
+      };
+    }
+    return {
+      label: "Available",
+      detail: `Live in renter search · confirmation stays current for ${days} more days.`,
+      tone: "good",
+    };
   }
-  if (status === "rented") return { label: "Rental completed", tone: "good" };
-  if (status === "expired") return { label: "Listing expired", tone: "neutral" };
-  return { label: "Review listing", tone: "neutral" };
+  if (status === "rented") {
+    return {
+      label: "Rented",
+      detail: "Rental completed and no longer visible in renter search.",
+      tone: "good",
+    };
+  }
+  if (status === "expired") {
+    return {
+      label: "Expired",
+      detail: "The confirmation window passed and this listing is no longer visible in renter search.",
+      tone: "neutral",
+    };
+  }
+  return {
+    label: statusLabels[status] ?? "Review listing",
+    detail: "Open the listing to review its current state.",
+    tone: "neutral",
+  };
 }
 
 function filteredAndSortedListings(listings: Listing[], query: string, status: string, sort: string) {
@@ -169,14 +222,13 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
         </section>
       )}
 
-      <section className="freshness-explainer owner-freshness-explainer">
-        <span className="freshness-explainer-icon"><Clock3 size={19} aria-hidden="true" /></span>
-        <div><strong>Freshness protects renter trust</strong><span>Approved listings stay live for 14 days. When that window ends, they move to “Needs confirmation” and disappear from renter search. You then have 7 days to reconfirm before they expire.</span></div>
-      </section>
-
       <section className="property-list-panel owner-property-panel">
         <div className="owner-property-panel-heading">
-          <div><p className="eyebrow">Property portfolio</p><h2>{listings.length ? `${listings.length} ${listings.length === 1 ? "listing" : "listings"}` : "Your listings"}</h2></div>
+          <div>
+            <p className="eyebrow">Property portfolio</p>
+            <h2>{listings.length ? `${listings.length} ${listings.length === 1 ? "listing" : "listings"}` : "Your listings"}</h2>
+            {!!listings.length && <p className={styles.ownerPortfolioPolicy}>Live listings need a quick availability confirmation every 14 days. Each card shows one current status and what it means.</p>}
+          </div>
           {!!attentionCount && <span className="owner-attention-count"><AlertTriangle size={14} aria-hidden="true" /> {attentionCount} need{attentionCount === 1 ? "s" : ""} action</span>}
         </div>
 
@@ -229,10 +281,14 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
             {hasPortfolioFilters && <p className={styles.ownerPortfolioResultNote}>Showing {visibleListings.length} of {listings.length} listings.</p>}
             <div className="property-list owner-property-list">
               {visibleListings.map((property) => {
-                const freshness = freshnessCopy(property.status, property.expires_at);
-                const action = nextAction(property.status, property.expires_at);
+                const statusPresentation = listingStatusPresentation(property.status, property.expires_at);
                 const hasFeedback = property.status === "rejected" && Boolean(property.moderation_notes?.trim());
                 const coverUrl = coverUrlByProperty.get(property.id);
+                const StatusIcon = statusPresentation.tone === "good"
+                  ? CheckCircle2
+                  : statusPresentation.tone === "urgent" || statusPresentation.tone === "attention"
+                    ? AlertTriangle
+                    : Clock3;
                 return (
                   <article className={`property-row property-row-with-actions owner-property-card status-card-${property.status}`} key={property.id}>
                     <Link className="property-row-link owner-property-card-link" href={`/owner/properties/${property.id}`}>
@@ -243,12 +299,14 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
                         <div className="property-row-main owner-property-main">
                           <div className="owner-property-title-row">
                             <strong>{property.title || "Untitled draft"}</strong>
-                            <span className={`status-pill status-${property.status}`}>{statusLabels[property.status] ?? property.status}</span>
                           </div>
                           <span className="owner-property-address">{property.address_text || "Location not added yet"}</span>
-                          <div className="owner-property-signals">
-                            <span className={`owner-next-action is-${action.tone}`}>{action.tone === "good" ? <CheckCircle2 size={13} aria-hidden="true" /> : action.tone === "urgent" || action.tone === "attention" ? <AlertTriangle size={13} aria-hidden="true" /> : <Clock3 size={13} aria-hidden="true" />}{action.label}</span>
-                            {freshness && <small className={`freshness-copy freshness-${property.status}`}>{freshness}</small>}
+                          <div className={`${styles.ownerPortfolioStatusSummary} ${styles[`ownerPortfolioStatus_${statusPresentation.tone}`]}`}>
+                            <StatusIcon size={15} aria-hidden="true" />
+                            <div>
+                              <strong>{statusPresentation.label}</strong>
+                              <span>{statusPresentation.detail}</span>
+                            </div>
                           </div>
                           {hasFeedback && <div className="owner-moderation-feedback"><MessageSquareText size={15} aria-hidden="true" /><div><strong>Moderator feedback</strong><span>{property.moderation_notes}</span></div></div>}
                         </div>
