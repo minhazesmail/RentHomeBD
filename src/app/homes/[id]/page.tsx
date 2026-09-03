@@ -160,8 +160,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
               <span className={`owner-verification-badge${ownerPhoneVerified ? "" : " is-neutral"}`}><Phone size={12} aria-hidden="true" />{ownerPhoneVerified ? "Phone verified" : "Phone unverified"}</span>
               <span className={`owner-verification-badge${roleVerified ? "" : " is-neutral"}`}><ShieldCheck size={12} aria-hidden="true" />{roleVerified ? `Verified ${label(property.owner_role)}` : "Role unverified"}</span>
             </div>
-            <div className="owner-trust-summary"><ShieldCheck size={18} aria-hidden="true" /><div><strong>{ownerPhoneVerified || roleVerified ? "Trust signals available" : "Limited verification signals"}</strong><span>Review the trust section below before arranging a viewing or sharing sensitive information.</span></div></div>
-            <div className="contact-safe-note"><MessageCircle size={17} aria-hidden="true" /><span>Start with private NearBasha chat. Phone reveal stays controlled and only appears when the verification rules allow it.</span></div>
+            <Link className="text-link" href="#trust">Review trust & safety details</Link>
             <div className="contact-action-stack">
               {auth ? <StartConversationButton propertyId={property.id} userId={auth.userId} /> : <Link className="primary-button link-button property-contact-button" href={signInHref}>Sign in to contact owner</Link>}
               <PhoneRevealButton
