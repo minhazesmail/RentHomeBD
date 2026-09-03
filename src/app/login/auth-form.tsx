@@ -79,7 +79,6 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
 
   function validateSignupProfile() {
     if (displayName.trim().length < 2) return "Enter a display name with at least 2 characters.";
-    if (role === "renter" && !tenantType) return "Choose the renter type that best describes you so we can match suitable homes by default.";
     return null;
   }
 
@@ -252,15 +251,15 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
           {listingIntent && <span className="form-hint">Owner / Landlord is selected because you chose “List a property.” Change this only if another role describes you better.</span>}
         </label>
         {role === "renter" && (
-          <label>My renter type
-            <select value={tenantType} onChange={(e) => setTenantType(e.target.value as Exclude<TenantType, "everyone">)} required>
-              <option value="">Choose one</option>
+          <label>My renter type <span className="form-optional">Optional</span>
+            <select value={tenantType} onChange={(e) => setTenantType(e.target.value as Exclude<TenantType, "everyone">)}>
+              <option value="">Choose later</option>
               <option value="family">{TENANT_PROFILE_LABELS.family}</option>
               <option value="bachelor">{TENANT_PROFILE_LABELS.bachelor}</option>
               <option value="student">{TENANT_PROFILE_LABELS.student}</option>
               <option value="job_holder">{TENANT_PROFILE_LABELS.job_holder}</option>
             </select>
-            <span className="form-hint">We’ll use this as your default map match. You can still change the renter type filter while searching.</span>
+            <span className="form-hint">Choosing one personalizes renter-fit signals and your default map match. You can skip this now and add it from your profile later.</span>
           </label>
         )}
       </>
