@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { PhoneRevealButton } from "@/components/phone-reveal-button";
+import { PropertyLocationActions } from "@/components/property-location-actions";
 import { PropertyMediaGallery, type PropertyGalleryMedia } from "@/components/property-media-gallery";
 import { ReportListingButton } from "@/components/report-listing-button";
 import { SaveHomeButton } from "@/components/save-home-button";
@@ -120,7 +121,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
 
             <section className="property-detail-section"><div className="property-section-heading"><div><h2>Amenities & included utilities</h2><p className="section-copy">A quick scan of what comes with the property and what may already be covered in rent.</p></div></div><div className="property-tag-groups"><div><h3>Amenities</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} />{amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} />None listed</span>}</div></div><div><h3>Utilities included</h3><div className="amenity-grid utility-grid">{property.utilities_included.length ? property.utilities_included.map((utility) => <span className="amenity-item" key={utility}><Zap size={15} />{label(utility)}</span>) : <span className="amenity-item"><Zap size={15} />None listed</span>}</div></div></div></section>
 
-            <section className="property-detail-section"><div className="property-section-heading"><div><h2>Exact location</h2><p className="section-copy">The owner pinned this exact property location during listing creation.</p></div><MapPin size={20} aria-hidden="true" /></div><div className="property-map"><iframe title="Exact property location" src={mapUrl} loading="lazy" /></div></section>
+            <section className="property-detail-section"><div className="property-section-heading"><div><h2>Exact location</h2><p className="section-copy">The owner pinned this exact property location during listing creation.</p></div><MapPin size={20} aria-hidden="true" /></div><div className="property-map"><iframe title="Exact property location" src={mapUrl} loading="lazy" /></div><PropertyLocationActions latitude={property.latitude} longitude={property.longitude} /></section>
             <section className="property-detail-section property-trust-section" id="trust">
               <div className="trust-section-heading"><div><h2>Trust & safety</h2><p className="section-copy">NearBasha surfaces the checks that matter before you contact a landlord, so you can understand what has been verified at a glance.</p></div><div className="trust-shield" aria-hidden="true"><ShieldCheck size={23} /></div></div>
               <div className="trust-signal-grid">
