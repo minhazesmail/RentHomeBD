@@ -248,6 +248,49 @@
   outline-offset: 1px;
 }
 
+.bd-phone-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid rgba(16,37,29,.14);
+  border-radius: 12px;
+  background: #fffefa;
+}
+
+.bd-phone-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 13px;
+  border-right: 1px solid rgba(16,37,29,.12);
+  background: var(--nb-sage-soft, #edf3ef);
+  color: var(--nb-ink-soft, #4d6055);
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+
+.auth-form .bd-phone-field input {
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.bd-phone-field:focus-within {
+  border-color: var(--nb-emerald);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(8,118,83,.1);
+}
+
+.auth-form .bd-phone-field input:focus {
+  box-shadow: none;
+}
+
+.bd-phone-field:has(input:disabled) {
+  opacity: .62;
+}
+
 @media (max-width: 760px) {
 
   .auth-layout {
