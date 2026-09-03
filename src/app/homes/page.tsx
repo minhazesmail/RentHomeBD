@@ -1,7 +1,6 @@
-import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { BrandLogo } from "@/components/brand-logo";
+import { ProductNavigation } from "@/components/product-navigation";
 import { RenterMapSearch } from "@/components/renter-map-search";
 import { getAuthContext } from "@/lib/auth";
 import { resolveLocationPreset } from "@/lib/location-presets";
@@ -49,21 +48,11 @@ export default async function HomesPage({
     sort: params.sort,
   };
 
+  const canList = auth?.profile.primary_role === "owner" || auth?.profile.primary_role === "agent";
+
   return (
     <main className="homes-page">
-      <header className="homes-topbar">
-        <BrandLogo className="homes-brand-logo" />
-        <nav className="homes-topbar-nav" aria-label="Rental workspace">
-          <Link className="is-active" aria-current="page" href="/homes">Explore</Link>
-          <Link href="/saved">Saved</Link>
-          <Link href="/messages">Messages</Link>
-        </nav>
-        <div className="homes-topbar-actions">
-          <span className="homes-live-status"><i aria-hidden="true" />Live map · moderated homes</span>
-          {auth ? <Link className="text-link" href="/saved">Saved</Link> : null}
-          <Link className="text-link" href={auth ? "/dashboard" : "/login"}>{auth ? "Dashboard" : "Sign in"}</Link>
-        </div>
-      </header>
+      <ProductNavigation authenticated={Boolean(auth)} canList={canList} current="explore" />
       <div className="mobile-homes-intro">
         <strong>Search by exact location</strong>
         <span>Explore the map, then refine results with the filters below.</span>
