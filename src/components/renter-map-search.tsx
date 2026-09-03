@@ -10,6 +10,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { SaveHomeButton } from "@/components/save-home-button";
 import type { MapListing, UserMapLocation } from "@/components/leaflet-map";
+import { LOCATION_PRESETS } from "@/lib/location-presets";
 import { TENANT_PROFILE_LABELS, tenantCompatibility, tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
 import { createClient } from "@/lib/supabase/client";
 
@@ -99,9 +100,11 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   const router = useRouter();
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const initialCenter: [number, number] = [initialSearch.centerLat ?? DHAKA_CENTER[0], initialSearch.centerLong ?? DHAKA_CENTER[1]];
+  const initialLocationPreset = LOCATION_PRESETS.find((preset) => Math.abs(preset.latitude - initialCenter[0]) < 0.0001 && Math.abs(preset.longitude - initialCenter[1]) < 0.0001)?.label ?? "";
   const [listings, setListings] = useState<MapListing[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(initialSearch.selectedId ?? null);
   const [center, setCenter] = useState<[number, number]>(initialCenter);
+  const [locationPreset, setLocationPreset] = useState(initialLocationPreset);
   const [radiusKm, setRadiusKm] = useState(initialRadius(initialSearch.radiusKm));
   const [minRent, setMinRent] = useState(initialSearch.minRent ?? "");
   const [maxRent, setMaxRent] = useState(initialSearch.maxRent ?? "");
@@ -225,7 +228,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       const lastSearchLocation = lastLiveSearchLocationRef.current;
       const movedEnough = !lastSearchLocation || distanceMeters(lastSearchLocation, next) >= LIVE_SEARCH_MIN_DISTANCE_METERS;
       const enoughTimePassed = now - lastLiveSearchAtRef.current >= LIVE_SEARCH_MAX_INTERVAL_MS;
-      setUserLocation({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy }); setCenter(next); setLocating(false); setLiveTracking(true); setLocationStatus(`Live GPS on · accuracy ±${Math.round(coords.accuracy)} m · nearby homes update as you move.`);
+      setLocationPreset(""); setUserLocation({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy }); setCenter(next); setLocating(false); setLiveTracking(true); setLocationStatus(`Live GPS on · accuracy ±${Math.round(coords.accuracy)} m · nearby homes update as you move.`);
       if (movedEnough || enoughTimePassed) { lastLiveSearchLocationRef.current = next; lastLiveSearchAtRef.current = now; void runSearchRef.current(next); }
     }, (error) => {
       setLocating(false); setLiveTracking(false); if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
@@ -233,11 +236,28 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
     }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
   }
 
+  function searchPresetLocation(label: string) {
+    setLocationPreset(label);
+    const preset = LOCATION_PRESETS.find((location) => location.label === label);
+    if (!preset) return;
+    if (liveTracking) {
+      stopLiveLocation();
+      setLocationStatus("Live location paused because you chose another search area.");
+    }
+    setCustomArea([]);
+    setDrawingCustomArea(false);
+    setSelectedId(null);
+    const nextCenter: [number, number] = [preset.latitude, preset.longitude];
+    setCenter(nextCenter);
+    void runSearch(nextCenter);
+  }
+
   function handleMapCenterChange(nextCenter: [number, number]) {
     if (liveTracking) {
       stopLiveLocation();
       setLocationStatus("Live location paused because you moved the map manually.");
     }
+    setLocationPreset("");
     setCenter(nextCenter);
     setSelectedId(null);
     setMessage("Map moved. Choose Search map to find homes around this area.");
@@ -257,6 +277,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
 
   function startCustomArea() {
     stopLiveLocation();
+    setLocationPreset("");
     setCustomArea([]);
     setSelectedId(null);
     setDrawingCustomArea(true);
@@ -280,12 +301,14 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
         <div className="renter-search-heading"><p className="eyebrow">Live map search</p><h1>Find a home around you.</h1><p>Use live GPS, radius filters, or draw a custom area around the streets and blocks that actually matter to you.</p></div>
         <div className="renter-filter-panel">
           <div className="renter-filter-grid">
+            <label className="field full">Area or landmark<select value={locationPreset} onChange={(event) => searchPresetLocation(event.target.value)} disabled={busy}><option value="">Choose a supported Dhaka location</option>{LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label}>{location.label}</option>)}</select></label>
             <label className="field">Minimum rent (৳)<input inputMode="numeric" value={minRent} onChange={(e) => setMinRent(e.target.value.replace(/\D/g, ""))} placeholder="10000" /></label>
             <label className="field">Maximum rent (৳)<input inputMode="numeric" value={maxRent} onChange={(e) => setMaxRent(e.target.value.replace(/\D/g, ""))} placeholder="40000" /></label>
             <label className="field">Tenant type<select value={tenantType} onChange={(e) => setTenantType(e.target.value)}><option value="">Any tenant type</option><option value="family">Family</option><option value="bachelor">Bachelor</option><option value="student">Student</option><option value="job_holder">Job holder</option></select></label>
             <label className="field">Bedrooms<select value={bedrooms} onChange={(e) => setBedrooms(e.target.value)}><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></label>
             <label className="field">Radius<select value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)}><option value="2">2 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="15">15 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select></label>
           </div>
+          <p className="form-hint">Choose a supported area to move the map and search there immediately. You can still pan the map manually for anywhere else.</p>
           {softPreference && <div className="tenant-profile-preference"><CircleCheck size={15} aria-hidden="true" /><span><strong>{TENANT_PROFILE_LABELS[softPreference]} profile active</strong>Compatible homes are shown first. Other homes stay visible for comparison.</span></div>}
           <div className="tenant-match-legend" aria-label="Tenant fit map colors">
             <span className="tenant-legend-chip tenant-family"><Users size={12} aria-hidden="true" />Family</span>
