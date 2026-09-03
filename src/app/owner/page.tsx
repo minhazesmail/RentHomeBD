@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { AlertTriangle, CheckCircle2, Clock3, FileEdit, Home, MessageSquareText, Plus, ShieldCheck } from "lucide-react";
 
-import { BrandLogo } from "@/components/brand-logo";
 import { ListingFreshnessActions } from "@/components/listing-freshness-actions";
+import { ProductNavigation } from "@/components/product-navigation";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./portfolio-controls.module.css";
@@ -196,16 +196,14 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
 
   return (
     <main className="owner-shell owner-management-shell">
+      <ProductNavigation authenticated canList current="properties" />
       <header className="owner-header owner-management-header">
         <div>
-          <BrandLogo />
           <p className="eyebrow">Owner workspace</p>
           <h1 className="owner-title">Manage your properties</h1>
           <p className="intro">See what is live, what needs attention, and what NearBasha needs from you next. Available listings are reconfirmed every 14 days to keep renter search fresh.</p>
         </div>
         <div className="owner-header-actions">
-          <Link className="secondary-button link-button" href="/messages"><MessageSquareText size={16} aria-hidden="true" /> Messages</Link>
-          <Link className="secondary-button link-button" href="/dashboard">Dashboard</Link>
           <Link className="primary-button link-button" href="/owner/properties/new"><Plus size={16} aria-hidden="true" /> Add property</Link>
         </div>
       </header>
