@@ -83,8 +83,8 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
             {query && <Link className="text-link" href={inboxHref({ unreadOnly })}>Clear search</Link>}
           </form>
           <nav className="messages-filter-tabs" aria-label="Conversation filters">
-            <Link className={!unreadOnly ? "is-active" : ""} href={inboxHref({ query })} aria-current={!unreadOnly ? "page" : undefined}>All conversations</Link>
-            <Link className={unreadOnly ? "is-active" : ""} href={inboxHref({ query, unreadOnly: true })} aria-current={unreadOnly ? "page" : undefined}>Unread</Link>
+            <Link className={!unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query })} aria-current={!unreadOnly ? "page" : undefined}>All conversations</Link>
+            <Link className={unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query, unreadOnly: true })} aria-current={unreadOnly ? "page" : undefined}>Unread</Link>
           </nav>
         </section>
 
