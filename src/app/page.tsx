@@ -182,7 +182,14 @@ export default function HomePage() {
             <div><strong>Company</strong><Link href="/about">About</Link><Link href="/contact">Contact</Link></div>
             <div><strong>Legal</strong><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></div>
           </div>
-          <div className="landing-footer-bottom"><span>Bangladesh-focused rental marketplace</span><span>© 2026 NearBasha. All rights reserved.</span></div>
+          <div className="landing-footer-bottom">
+            <span>Bangladesh-focused rental marketplace</span>
+            <div className="landing-footer-studio" aria-label="Built by Hemilin Studio">
+              <img src="/hemilin-studio.svg" alt="Hemilin Studio" className="landing-footer-studio-logo" />
+              <span>By Hemilin Studio</span>
+            </div>
+            <span>© 2026 NearBasha. All rights reserved.</span>
+          </div>
         </footer>
       </div>
     </main>
