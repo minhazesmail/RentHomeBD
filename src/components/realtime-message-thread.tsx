@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useEffect, useMemo, useOptimistic, useRef, useState } from "react";
+import { startTransition, useEffect, useLayoutEffect, useMemo, useOptimistic, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { MessageComposer, friendlyMessageError, type ChatMessage } from "@/components/message-composer";
@@ -13,6 +13,8 @@ type Props = {
   otherReadField: "renter_last_read_at" | "owner_last_read_at";
   initialOtherReadAt: string | null;
   initialMessages: ChatMessage[];
+  initialHasOlderMessages: boolean;
+  pageSize: number;
 };
 
 type ConnectionState = "connecting" | "live" | "offline";
@@ -22,13 +24,25 @@ function mergeMessage(messages: ChatMessage[], next: ChatMessage) {
   return [...messages, next].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 }
 
-export function RealtimeMessageThread({ conversationId, userId, readField, otherReadField, initialOtherReadAt, initialMessages }: Props) {
+function mergeMessages(messages: ChatMessage[], incoming: ChatMessage[]) {
+  const byId = new Map(messages.map((message) => [message.id, message]));
+  for (const message of incoming) byId.set(message.id, message);
+  return Array.from(byId.values()).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+}
+
+export function RealtimeMessageThread({ conversationId, userId, readField, otherReadField, initialOtherReadAt, initialMessages, initialHasOlderMessages, pageSize }: Props) {
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [messages, setMessages] = useState(initialMessages);
   const [optimisticMessages, addOptimisticMessage] = useOptimistic(messages, (current, next: ChatMessage) => mergeMessage(current, next));
   const [connectionState, setConnectionState] = useState<ConnectionState>("connecting");
   const [otherReadAt, setOtherReadAt] = useState(initialOtherReadAt);
+  const [hasOlderMessages, setHasOlderMessages] = useState(initialHasOlderMessages);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
+  const [olderMessagesError, setOlderMessagesError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const restoreScrollHeightRef = useRef<number | null>(null);
+  const hasPositionedInitiallyRef = useRef(false);
+  const lastMessageId = optimisticMessages.at(-1)?.id ?? null;
 
   useEffect(() => {
     const messageChannel = supabase
@@ -82,11 +96,55 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
     };
   }, [conversationId, otherReadField, readField, supabase, userId]);
 
+  useLayoutEffect(() => {
+    const node = listRef.current;
+    const previousHeight = restoreScrollHeightRef.current;
+    if (!node || previousHeight === null) return;
+    node.scrollTop += node.scrollHeight - previousHeight;
+    restoreScrollHeightRef.current = null;
+  }, [messages]);
+
   useEffect(() => {
     const node = listRef.current;
-    if (!node) return;
-    node.scrollTo({ top: node.scrollHeight, behavior: optimisticMessages.length > initialMessages.length ? "smooth" : "auto" });
-  }, [initialMessages.length, optimisticMessages.length]);
+    if (!node || !lastMessageId) return;
+    if (!hasPositionedInitiallyRef.current) {
+      node.scrollTo({ top: node.scrollHeight, behavior: "auto" });
+      hasPositionedInitiallyRef.current = true;
+      return;
+    }
+    node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
+  }, [lastMessageId]);
+
+  async function loadOlderMessages() {
+    const oldestMessage = messages[0];
+    const node = listRef.current;
+    if (!oldestMessage || !hasOlderMessages || loadingOlderMessages) return;
+
+    setLoadingOlderMessages(true);
+    setOlderMessagesError(null);
+    if (node) restoreScrollHeightRef.current = node.scrollHeight;
+
+    const { data, error } = await supabase
+      .from("messages")
+      .select("id, sender_id, body, created_at")
+      .eq("conversation_id", conversationId)
+      .lt("created_at", oldestMessage.created_at)
+      .order("created_at", { ascending: false })
+      .limit(pageSize + 1);
+
+    if (error) {
+      restoreScrollHeightRef.current = null;
+      setOlderMessagesError("Could not load earlier messages. Please try again.");
+      setLoadingOlderMessages(false);
+      return;
+    }
+
+    const newestFirst = (data ?? []) as ChatMessage[];
+    const olderMessages = newestFirst.slice(0, pageSize).reverse();
+    setHasOlderMessages(newestFirst.length > pageSize);
+    setMessages((current) => mergeMessages(current, olderMessages));
+    setLoadingOlderMessages(false);
+  }
 
   async function sendMessage(text: string) {
     let resultError: string | undefined;
@@ -134,6 +192,15 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
       </div>
 
       <div className="message-list" ref={listRef}>
+        {hasOlderMessages && (
+          <div className="older-message-loader">
+            <button className="secondary-button" type="button" onClick={loadOlderMessages} disabled={loadingOlderMessages}>
+              {loadingOlderMessages ? "Loading earlier messages…" : "Load earlier messages"}
+            </button>
+            {olderMessagesError && <span className="form-error" role="alert">{olderMessagesError}</span>}
+          </div>
+        )}
+        {!hasOlderMessages && optimisticMessages.length > pageSize && <div className="message-history-start">You’ve reached the start of this conversation.</div>}
         {!optimisticMessages.length && <div className="renter-empty">No messages yet. Use a quick inquiry below or write your own message.</div>}
         {optimisticMessages.map((message) => {
           const mine = message.sender_id === userId;
