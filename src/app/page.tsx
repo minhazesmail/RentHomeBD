@@ -45,7 +45,7 @@ const faqs = [
   ["Are listings verified?", "NearBasha uses moderation and account-verification signals to improve trust. Verification status can vary by listing, so renters should still review listing details carefully before making payments or commitments."],
   ["How does NearBasha help prevent scams or fake listings?", "The product includes phone OTP, listing moderation, reporting tools, and freshness controls. These reduce risk, but renters should still avoid sending money before they are satisfied with the property and the person they are dealing with."],
   ["Is it free to browse or list a property?", "Pricing is not published on this marketing page yet. Any browsing or listing fees will be shown clearly before a user is asked to pay."],
-  ["How does tenant-type matching work?", "Owners specify who a property is suitable for, such as families, bachelors, students, or job holders. Renters can use those structured preferences to avoid listings that are not a good fit."],
+  ["How does renter-type matching work?", "Owners specify which renter types a property is suitable for, such as Family, Bachelor, Student, or Job holder. Renters can use those structured preferences to avoid listings that are not a good fit."],
 ];
 
 // TODO(i18n): Treat each major marketing copy block on this page as a future translation target.
@@ -71,7 +71,7 @@ export default function HomePage() {
           <div className="landing-copy">
             <div className="landing-live-kicker"><span aria-hidden="true" />Map-first rental discovery across Dhaka</div>
             <h1>Find a home close to the life you already live.</h1>
-            <p className="intro">Search around the streets, campuses, offices, and neighborhoods that matter. Compare exact locations and tenant fit before you spend time on a visit.</p>
+            <p className="intro">Search around the streets, campuses, offices, and neighborhoods that matter. Compare exact locations and renter fit before you spend time on a visit.</p>
 
             <form className="landing-search-console" action="/homes" method="get" role="search">
               <div className="landing-search-console-heading">
@@ -124,7 +124,7 @@ export default function HomePage() {
 
             <div className="landing-confidence-row" aria-label="NearBasha marketplace safeguards">
               <div><strong>Exact map pins</strong><span>See the real neighborhood</span></div>
-              <div><strong>Tenant-fit signals</strong><span>Know who each home suits</span></div>
+              <div><strong>Renter-fit signals</strong><span>Know who each home suits</span></div>
               <div><strong>Freshness checks</strong><span>Less time on stale listings</span></div>
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function HomePage() {
 
         <section className="landing-strip" data-scroll-theme="local" aria-label="How NearBasha is different">
           <div className="landing-feature"><strong>Search by real location.</strong><span>See what is actually near work, university, transport, or family—not just what shares an area name.</span></div>
-          <div className="landing-feature"><strong>Know who the home suits.</strong><span>Tenant preferences are structured into each listing so both sides waste less time.</span></div>
+          <div className="landing-feature"><strong>Know who the home suits.</strong><span>Preferred renter types are structured into each listing so both sides waste less time.</span></div>
           <div className="landing-feature"><strong>Keep listings fresh.</strong><span>Freshness controls are designed to stop old, unavailable homes from quietly filling the marketplace.</span></div>
         </section>
 
@@ -177,7 +177,7 @@ export default function HomePage() {
         </section>
 
         <section className="landing-cta-band" data-scroll-theme="action" aria-label="Start using NearBasha">
-          <div><p className="eyebrow">Ready when you are</p><h2>Start with the map, not another endless listing feed.</h2><p>Explore homes around the places that matter to you, or publish a property with an exact pin and clear tenant preferences.</p></div>
+          <div><p className="eyebrow">Ready when you are</p><h2>Start with the map, not another endless listing feed.</h2><p>Explore homes around the places that matter to you, or publish a property with an exact pin and clear renter-type preferences.</p></div>
           <div className="landing-cta-actions"><Link className="primary-button link-button" href="/homes">Browse the live map</Link><Link className="secondary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link></div>
         </section>
 
