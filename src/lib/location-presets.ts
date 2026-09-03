@@ -25,6 +25,17 @@ function normalize(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+function distanceKm(latitude: number, longitude: number, preset: LocationPreset) {
+  const earthRadiusKm = 6371;
+  const toRadians = (degrees: number) => degrees * Math.PI / 180;
+  const lat1 = toRadians(latitude);
+  const lat2 = toRadians(preset.latitude);
+  const deltaLat = toRadians(preset.latitude - latitude);
+  const deltaLong = toRadians(preset.longitude - longitude);
+  const value = Math.sin(deltaLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLong / 2) ** 2;
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
 export function resolveLocationPreset(value?: string) {
   if (!value) return undefined;
   const query = normalize(value);
@@ -34,4 +45,18 @@ export function resolveLocationPreset(value?: string) {
     const candidates = [preset.label, ...(preset.aliases ?? [])].map(normalize);
     return candidates.some((candidate) => candidate === query || candidate.includes(query) || query.includes(candidate));
   });
+}
+
+export function describeMapCenter(latitude: number, longitude: number) {
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return "Custom map area";
+
+  const nearest = LOCATION_PRESETS
+    .map((preset) => ({ preset, distance: distanceKm(latitude, longitude, preset) }))
+    .sort((a, b) => a.distance - b.distance)[0];
+
+  if (nearest && nearest.distance <= 0.35) return nearest.preset.label;
+  if (nearest && nearest.distance <= 5) return `Near ${nearest.preset.label}`;
+
+  const inDhakaMetro = latitude >= 23.62 && latitude <= 24.02 && longitude >= 90.20 && longitude <= 90.62;
+  return inDhakaMetro ? "Custom area in Dhaka" : "Custom map area";
 }
