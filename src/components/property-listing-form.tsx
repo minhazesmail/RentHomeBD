@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ListingReadiness } from "@/components/listing-readiness";
@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 const OwnerLocationPicker = dynamic(() => import("@/components/owner-location-picker").then((module) => module.OwnerLocationPicker), { ssr: false });
 
 type Amenity = { slug: string; name: string };
-type ExistingMedia = { id: string; storage_path: string; media_type: "photo" | "video" };
+type ExistingMedia = { id: string; storage_path: string; media_type: "photo" | "video"; preview_url?: string | null };
 type ExistingProperty = {
   id: string;
   title: string | null;
@@ -88,6 +88,14 @@ function friendlyListingError(error: unknown) {
   return "Could not save this listing. Please try again.";
 }
 
+function SelectedMediaPreview({ file }: { file: File }) {
+  const previewUrl = useMemo(() => URL.createObjectURL(file), [file]);
+  useEffect(() => () => URL.revokeObjectURL(previewUrl), [previewUrl]);
+  return file.type.startsWith("video/")
+    ? <video className="listing-media-preview" src={previewUrl} muted controls preload="metadata" />
+    : <img className="listing-media-preview" src={previewUrl} alt={`Preview of ${file.name}`} />;
+}
+
 export function PropertyListingForm({ userId, amenities, property }: Props) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -127,6 +135,18 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
     setLatitude(lat.toFixed(6));
     setLongitude(lng.toFixed(6));
     setMessage("Exact pin updated. Place it on the building entrance or gate before submitting.");
+  }
+
+  function addSelectedFiles(nextFiles: File[]) {
+    if (!nextFiles.length) return;
+    const currentKeys = new Set(files.map((file) => `${file.name}:${file.size}:${file.lastModified}`));
+    const unique = nextFiles.filter((file) => !currentKeys.has(`${file.name}:${file.size}:${file.lastModified}`));
+    if (existingMedia.length + files.length + unique.length > 10) {
+      setMessage(`A listing can have up to 10 media files. You can add ${Math.max(0, 10 - existingMedia.length - files.length)} more.`);
+      return;
+    }
+    setFiles((items) => [...items, ...unique]);
+    setMessage(unique.length < nextFiles.length ? "Duplicate selections were skipped. Your existing selected files were kept." : null);
   }
 
   function validateNumericFields() {
@@ -305,9 +325,22 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
 
       <section className="listing-section">
         <div className="section-heading"><span>5</span><div><h2>Photos & video</h2><p>At least one photo is required for review. Up to 10 files, 20 MB each.</p></div></div>
-        {!!existingMedia.length && <div className="media-grid">{existingMedia.map((media) => <div className="media-card" key={media.id}><div className="media-placeholder"><strong>{media.media_type === "photo" ? "Photo" : "Video"}</strong><small>{storageFilename(media.storage_path)}</small></div><button type="button" className="text-button" disabled={locked} onClick={() => { setExistingMedia((items) => items.filter((item) => item.id !== media.id)); setRemovedMedia((items) => [...items, media]); }}>Remove</button></div>)}</div>}
-        {!locked && <label className="upload-drop">Add files<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple onChange={(event) => { const next = Array.from(event.target.files ?? []); if (existingMedia.length + next.length > 10) { setMessage("A listing can have up to 10 media files."); return; } setFiles(next); }} /><span>{files.length ? `${files.length} new file${files.length === 1 ? "" : "s"} selected` : "Choose JPG, PNG, WebP, MP4 or WebM"}</span></label>}
-        <p className="form-hint">Current media count: {mediaCount}/10</p>
+        {(existingMedia.length > 0 || files.length > 0) && <div className="media-grid listing-media-preview-grid">
+          {existingMedia.map((media) => <div className="media-card listing-media-card" key={media.id}>
+            <div className="media-placeholder listing-media-visual">
+              {media.preview_url ? (media.media_type === "video" ? <video className="listing-media-preview" src={media.preview_url} muted controls preload="metadata" /> : <img className="listing-media-preview" src={media.preview_url} alt="Existing property photo" />) : <div className="listing-media-preview-fallback"><strong>{media.media_type === "photo" ? "Photo" : "Video"}</strong><small>Preview unavailable</small></div>}
+            </div>
+            <div className="listing-media-meta"><strong>{media.media_type === "photo" ? "Existing photo" : "Existing video"}</strong><small>{storageFilename(media.storage_path)}</small></div>
+            <button type="button" className="text-button" disabled={locked} onClick={() => { setExistingMedia((items) => items.filter((item) => item.id !== media.id)); setRemovedMedia((items) => [...items, media]); }}>Remove</button>
+          </div>)}
+          {files.map((file, index) => <div className="media-card listing-media-card is-new" key={`${file.name}:${file.size}:${file.lastModified}`}>
+            <div className="media-placeholder listing-media-visual"><SelectedMediaPreview file={file} /></div>
+            <div className="listing-media-meta"><strong>New {file.type.startsWith("video/") ? "video" : "photo"}</strong><small>{file.name}</small><small>{(file.size / (1024 * 1024)).toFixed(1)} MB</small></div>
+            <button type="button" className="text-button" onClick={() => setFiles((items) => items.filter((_, itemIndex) => itemIndex !== index))}>Remove</button>
+          </div>)}
+        </div>}
+        {!locked && <label className="upload-drop">Add files<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple onChange={(event) => { addSelectedFiles(Array.from(event.target.files ?? [])); event.currentTarget.value = ""; }} /><span>{files.length ? `${files.length} new file${files.length === 1 ? "" : "s"} ready to upload · choose more to add` : "Choose JPG, PNG, WebP, MP4 or WebM"}</span></label>}
+        <p className="form-hint">Current media count: {mediaCount}/10. Selecting more files adds to your current selection instead of replacing it.</p>
       </section>
 
       {message && <div className="auth-message" role="status" aria-live="polite">{message}</div>}
