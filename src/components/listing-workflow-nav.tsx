@@ -7,7 +7,7 @@ import styles from "./listing-workflow-nav.module.css";
 const steps = [
   "Basics & rent",
   "Home details",
-  "Tenant fit",
+  "Renter fit",
   "Exact map pin",
   "Photos & video",
 ] as const;
