@@ -1,0 +1,38 @@
+/* NearBasha global stylesheet manifest.
+   Keep import order stable: later layers intentionally override earlier ones.
+   Route ownership and selector cleanup are handled separately in Tasks 62–63. */
+
+/* Design system foundation */
+@import "./tokens.css";
+@import "./globals.css";
+@import "./primitives.css";
+@import "./foundation.css";
+@import "./shells.css";
+@import "./brand.css";
+
+/* Route and feature layers */
+@import "./auth.css";
+@import "./auth-verification-redesign.css";
+@import "./information-redesign.css";
+@import "./landing.css";
+@import "./landing-alignment.css";
+@import "./landing-redesign.css";
+@import "./homes/homes.css";
+@import "./homes/homes-redesign.css";
+@import "./homes/property-detail-redesign.css";
+@import "./owner/owner.css";
+@import "./owner/owner-management-redesign.css";
+@import "./dashboard/dashboard.css";
+@import "./dashboard/dashboard-redesign.css";
+@import "./messages/messages.css";
+@import "./messages/messages-redesign.css";
+@import "./saved/saved.css";
+@import "./saved/saved-redesign.css";
+@import "./moderation/moderation-redesign.css";
+
+/* Cross-product finishing layers */
+@import "./motion-polish.css";
+@import "./responsive-audit.css";
+@import "./accessibility-audit.css";
+@import "./performance-optimizations.css";
+@import "./visual-regression-cleanup.css";
