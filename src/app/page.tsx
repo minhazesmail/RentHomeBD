@@ -45,7 +45,7 @@ const faqs = [
   ["Where is NearBasha available?", "NearBasha is a Bangladesh-focused rental marketplace launching first in Dhaka. The current location search supports the Dhaka areas and landmarks shown in the product; broader Bangladesh coverage can expand as local inventory and location support grow."],
   ["Are listings verified?", "NearBasha uses moderation and account-verification signals to improve trust. Verification status can vary by listing, so renters should still review listing details carefully before making payments or commitments."],
   ["How does NearBasha help prevent scams or fake listings?", "The product includes phone OTP, listing moderation, reporting tools, and freshness controls. These reduce risk, but renters should still avoid sending money before they are satisfied with the property and the person they are dealing with."],
-  ["Is it free to browse or list a property?", "Pricing is not published on this marketing page yet. Any browsing or listing fees will be shown clearly before a user is asked to pay."],
+  ["What does NearBasha cost right now?", "NearBasha is free to browse and list during the current launch phase. There is no NearBasha checkout in the product today. If paid features are introduced later, their price and what they include will be shown before you choose to pay."],
   ["How does renter-type matching work?", "Owners specify which renter types a property is suitable for, such as Family, Bachelor, Student, or Job holder. Renters can use those structured preferences to avoid listings that are not a good fit."],
 ];
 
