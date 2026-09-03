@@ -6,12 +6,13 @@ import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-lea
 
 const DHAKA_CENTER: [number, number] = [23.8103, 90.4125];
 
-function Recenter({ position }: { position: [number, number] }) {
+function Recenter({ position, zoom }: { position: [number, number]; zoom: number }) {
   const map = useMap();
+  const [latitude, longitude] = position;
 
   useEffect(() => {
-    map.setView(position, Math.max(map.getZoom(), 16), { animate: true });
-  }, [map, position]);
+    map.setView([latitude, longitude], Math.max(map.getZoom(), zoom), { animate: true });
+  }, [latitude, longitude, map, zoom]);
 
   return null;
 }
@@ -28,17 +29,20 @@ function ClickToPlace({ disabled, onChange }: { disabled: boolean; onChange: (la
 export function OwnerLocationPicker({
   latitude,
   longitude,
+  focusPosition = null,
   disabled = false,
   onChange,
 }: {
   latitude: number | null;
   longitude: number | null;
+  focusPosition?: [number, number] | null;
   disabled?: boolean;
   onChange: (lat: number, lng: number) => void;
 }) {
-  const position: [number, number] = latitude !== null && longitude !== null
+  const exactPosition: [number, number] | null = latitude !== null && longitude !== null
     ? [latitude, longitude]
-    : DHAKA_CENTER;
+    : null;
+  const viewportPosition = exactPosition ?? focusPosition ?? DHAKA_CENTER;
 
   const markerIcon = useMemo(() => divIcon({
     className: "owner-location-marker-wrap",
@@ -49,16 +53,16 @@ export function OwnerLocationPicker({
 
   return (
     <div className="owner-location-map" aria-label="Exact property location picker">
-      <MapContainer center={position} zoom={latitude !== null && longitude !== null ? 16 : 12} scrollWheelZoom className="owner-location-map-canvas">
+      <MapContainer center={viewportPosition} zoom={exactPosition ? 16 : focusPosition ? 14 : 12} scrollWheelZoom className="owner-location-map-canvas">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ClickToPlace disabled={disabled} onChange={onChange} />
-        {latitude !== null && longitude !== null && <Recenter position={position} />}
-        {latitude !== null && longitude !== null && (
+        {(exactPosition || focusPosition) && <Recenter position={viewportPosition} zoom={exactPosition ? 16 : 14} />}
+        {exactPosition && (
           <Marker
-            position={position}
+            position={exactPosition}
             icon={markerIcon}
             draggable={!disabled}
             eventHandlers={{
@@ -71,8 +75,8 @@ export function OwnerLocationPicker({
         )}
       </MapContainer>
       <div className="owner-location-map-tip">
-        <strong>{latitude !== null && longitude !== null ? "Exact pin placed" : "Place the property pin"}</strong>
-        <span>{disabled ? "Location is locked for this listing." : latitude !== null && longitude !== null ? "Drag the pin to the building gate, or click elsewhere on the map." : "Click the map where the building entrance is located."}</span>
+        <strong>{exactPosition ? "Exact pin placed" : focusPosition ? "Map centered near the typed area" : "Place the property pin"}</strong>
+        <span>{disabled ? "Location is locked for this listing." : exactPosition ? "Drag the pin to the building gate, or click elsewhere on the map." : focusPosition ? "This is only an approximate area. Click the actual building entrance to place the exact pin." : "Click the map where the building entrance is located."}</span>
       </div>
     </div>
   );
