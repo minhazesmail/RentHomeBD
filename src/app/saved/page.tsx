@@ -122,6 +122,8 @@ export default async function SavedPage() {
       ])
     : [{ data: [] }, { data: [] }];
   const propertyMap = new Map((properties ?? []).map((property) => [property.id as string, property]));
+  const availableSavedRows = (savedRows ?? []).filter((saved) => propertyMap.has(saved.property_id as string));
+  const unavailableSavedRows = (savedRows ?? []).filter((saved) => !propertyMap.has(saved.property_id as string));
 
   const coverPathByProperty = new Map<string, string>();
   for (const media of mediaRows ?? []) {
@@ -152,17 +154,14 @@ export default async function SavedPage() {
         </div>
 
         <section className="saved-section">
-          <div className="saved-section-heading"><div><h2>Saved homes</h2><p>Only homes that are still publicly available are shown.</p></div><span>{propertyMap.size}</span></div>
-          {!savedRows?.length ? (
-            <div className="saved-empty">No saved homes yet. Use the heart on any map result or property page.</div>
+          <div className="saved-section-heading"><div><h2>Available saved homes</h2><p>Homes you saved that are still publicly available.</p></div><span>{availableSavedRows.length}</span></div>
+          {!availableSavedRows.length ? (
+            <div className="saved-empty">No saved homes are currently available. Use the heart on any map result or property page to save more.</div>
           ) : (
             <div className="saved-home-grid">
-              {savedRows.map((saved) => {
+              {availableSavedRows.map((saved) => {
                 const propertyId = saved.property_id as string;
-                const property = propertyMap.get(propertyId);
-                if (!property) {
-                  return <div className="saved-home-card unavailable" key={propertyId}><div><strong>No longer available</strong><span>This saved listing is currently hidden or has expired.</span></div><SaveHomeButton propertyId={propertyId} userId={auth.userId} initialSaved /></div>;
-                }
+                const property = propertyMap.get(propertyId)!;
                 const coverUrl = coverUrlByProperty.get(propertyId);
                 return (
                   <div className="saved-home-card" key={property.id as string}>
@@ -192,6 +191,23 @@ export default async function SavedPage() {
             </div>
           )}
         </section>
+
+        {unavailableSavedRows.length > 0 && (
+          <section className="saved-section">
+            <div className="saved-section-heading"><div><h2>Unavailable saved homes</h2><p>These homes are hidden, expired, rented, or otherwise no longer publicly available. You can remove them from your saved list.</p></div><span>{unavailableSavedRows.length}</span></div>
+            <div className="saved-home-grid">
+              {unavailableSavedRows.map((saved) => {
+                const propertyId = saved.property_id as string;
+                return (
+                  <div className="saved-home-card unavailable" key={propertyId}>
+                    <div><strong>No longer available</strong><span>This saved listing is not currently visible to renters.</span></div>
+                    <SaveHomeButton propertyId={propertyId} userId={auth.userId} initialSaved />
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         <section className="saved-section">
           <div className="saved-section-heading"><div><h2>Saved searches</h2><p>See how many homes match now and which appeared since you last changed each search.</p></div><span>{searches?.length ?? 0}</span></div>
