@@ -156,12 +156,12 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
         </div>
 
         {!!listings.length && (
-          <form className={styles.toolbar} action="/owner" method="get" aria-label="Search, filter and sort property portfolio">
-            <label className={styles.field}>
+          <form className={styles.ownerPortfolioToolbar} action="/owner" method="get" aria-label="Search, filter and sort property portfolio">
+            <label className={styles.ownerPortfolioField}>
               Search properties
               <input name="q" type="search" defaultValue={query} maxLength={120} placeholder="Title or location" />
             </label>
-            <label className={styles.field}>
+            <label className={styles.ownerPortfolioField}>
               Status
               <select name="status" defaultValue={status}>
                 <option value="all">All statuses</option>
@@ -169,7 +169,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
                 {sortableStatuses.map((value) => <option value={value} key={value}>{statusLabels[value]}</option>)}
               </select>
             </label>
-            <label className={styles.field}>
+            <label className={styles.ownerPortfolioField}>
               Sort by
               <select name="sort" defaultValue={sort}>
                 <option value="updated-desc">Recently updated</option>
@@ -179,7 +179,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
                 <option value="title">Title A–Z</option>
               </select>
             </label>
-            <div className={styles.actions}>
+            <div className={styles.ownerPortfolioActions}>
               <button className="secondary-button" type="submit">Apply</button>
               {hasPortfolioFilters && <Link className="text-link" href="/owner">Clear</Link>}
             </div>
@@ -194,14 +194,14 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
             <Link className="primary-button link-button" href="/owner/properties/new">Create first listing</Link>
           </div>
         ) : !visibleListings.length ? (
-          <div className={styles.emptyFiltered}>
+          <div className={styles.ownerPortfolioEmptyFiltered}>
             <h3>No listings match these portfolio filters</h3>
             <p>Try another search term or status, or clear the controls to see your full portfolio.</p>
             <Link className="secondary-button link-button" href="/owner">Clear portfolio filters</Link>
           </div>
         ) : (
           <>
-            {hasPortfolioFilters && <p className={styles.resultNote}>Showing {visibleListings.length} of {listings.length} listings.</p>}
+            {hasPortfolioFilters && <p className={styles.ownerPortfolioResultNote}>Showing {visibleListings.length} of {listings.length} listings.</p>}
             <div className="property-list owner-property-list">
               {visibleListings.map((property) => {
                 const freshness = freshnessCopy(property.status, property.expires_at);
