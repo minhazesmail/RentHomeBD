@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { bangladeshPhoneSubscriberDigits, normalizeBangladeshPhone } from "@/lib/bangladesh-phone";
 import { createClient } from "@/lib/supabase/client";
 import { TENANT_PROFILE_LABELS, type TenantType } from "@/lib/tenant-match";
 
@@ -43,14 +44,6 @@ function friendlyAuthError(error: unknown, context: "signin" | "signup" | "otp-s
   return "Authentication failed. Please try again.";
 }
 
-function normalizeBangladeshPhone(value: string) {
-  const compact = value.replace(/[\s()-]/g, "");
-  if (/^01[3-9]\d{8}$/.test(compact)) return `+88${compact}`;
-  if (/^8801[3-9]\d{8}$/.test(compact)) return `+${compact}`;
-  if (/^\+8801[3-9]\d{8}$/.test(compact)) return compact;
-  return null;
-}
-
 export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: string; intent?: AuthIntent }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -64,7 +57,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<Role>(listingIntent ? "owner" : "renter");
   const [tenantType, setTenantType] = useState<Exclude<TenantType, "everyone"> | "">("");
-  const [phone, setPhone] = useState("+880");
+  const [phone, setPhone] = useState("");
   const [token, setToken] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -159,7 +152,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
 
     const normalizedPhone = normalizeBangladeshPhone(phone);
     if (!normalizedPhone) {
-      setMessage("Enter a valid Bangladesh mobile number, for example +8801XXXXXXXXX.");
+      setMessage("Enter a valid Bangladesh mobile number after +880, for example 1712345678.");
       return;
     }
     if (mode === "signup") {
@@ -186,7 +179,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
       return;
     }
 
-    setPhone(normalizedPhone);
+    setPhone(bangladeshPhoneSubscriberDigits(normalizedPhone));
     setOtpSent(true);
     setCooldown(OTP_COOLDOWN_SECONDS);
     setMessage("OTP sent. Enter the 6-digit code to continue.");
@@ -203,10 +196,16 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
       setMessage("Enter the complete 6-digit OTP.");
       return;
     }
+    const normalizedPhone = normalizeBangladeshPhone(phone);
+    if (!normalizedPhone) {
+      setMessage("Enter a valid Bangladesh mobile number and request a new OTP.");
+      setOtpSent(false);
+      return;
+    }
 
     setBusy(true);
     setMessage(null);
-    const { error } = await supabase.auth.verifyOtp({ phone, token, type: "sms" });
+    const { error } = await supabase.auth.verifyOtp({ phone: normalizedPhone, token, type: "sms" });
     setBusy(false);
 
     if (error) {
@@ -332,8 +331,24 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
       ) : (
         <form className="auth-form" onSubmit={sendPhoneOtp}>
           {signupProfileFields()}
-          <label>Mobile number<input type="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+8801XXXXXXXXX" required /></label>
-          <p className="form-hint">Bangladesh mobile numbers only. OTP delivery and abuse limits are also enforced by the authentication provider.</p>
+          <label>
+            Mobile number
+            <span className="bd-phone-field">
+              <span className="bd-phone-prefix">+880</span>
+              <input
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                value={phone}
+                onChange={(e) => setPhone(bangladeshPhoneSubscriberDigits(e.target.value))}
+                placeholder="1712345678"
+                maxLength={10}
+                aria-describedby="auth-phone-guidance"
+                required
+              />
+            </span>
+          </label>
+          <p className="form-hint" id="auth-phone-guidance">Enter the 10 digits after +880. Pasting 01712345678 or +8801712345678 also works.</p>
           <button className="primary-button" disabled={busy || cooldown > 0} type="submit">{busy ? "Sending…" : cooldown > 0 ? `Try again in ${cooldown}s` : mode === "signin" ? "Send sign-in OTP" : "Create account with OTP"}</button>
         </form>
       )}
