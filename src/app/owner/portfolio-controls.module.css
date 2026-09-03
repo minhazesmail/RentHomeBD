@@ -69,6 +69,33 @@
   color: var(--muted);
 }
 
+.ownerPortfolioListingBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ownerPortfolioThumbnail {
+  display: grid;
+  place-items: center;
+  width: 116px;
+  height: 88px;
+  flex: 0 0 116px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--sand-50);
+  color: var(--muted);
+}
+
+.ownerPortfolioThumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 @media (max-width: 900px) {
   .ownerPortfolioToolbar {
     grid-template-columns: 1fr 1fr;
@@ -87,5 +114,16 @@
 
   .ownerPortfolioResultNote {
     padding-inline: 20px;
+  }
+
+  .ownerPortfolioListingBody {
+    gap: 12px;
+  }
+
+  .ownerPortfolioThumbnail {
+    width: 88px;
+    height: 68px;
+    flex-basis: 88px;
+    border-radius: 12px;
   }
 }
