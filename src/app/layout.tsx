@@ -12,6 +12,7 @@ import "./auth-verification-redesign.css";
 import "./information-redesign.css";
 import "./landing.css";
 import "./landing-alignment.css";
+import "./landing-redesign.css";
 import "./homes/homes.css";
 import "./homes/homes-redesign.css";
 import "./homes/property-detail-redesign.css";
