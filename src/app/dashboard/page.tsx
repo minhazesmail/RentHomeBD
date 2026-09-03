@@ -77,44 +77,39 @@ export default async function DashboardPage({
                 <p>Map searches ready to reopen.</p>
               </article>
               <article className={preferredTenant ? "complete" : "attention"}>
-                <span>Tenant profile</span>
-                <strong>{preferredTenant ? tenantLabels[preferredTenant] ?? preferredTenant.replaceAll("_", " ") : "Not set"}</strong>
-                <p>{preferredTenant ? "Used to rank compatible homes first." : "Set this to improve tenant-fit ranking."}</p>
-              </article>
-              <article className={phoneVerified ? "complete" : "attention"}>
-                <span>Phone trust</span>
-                <strong>{phoneVerified ? "Verified" : "Not verified"}</strong>
-                <p>{phoneVerified ? "Verified contact features are available." : "Verify before using protected phone sharing."}</p>
+                <span>Renter fit</span>
+                <strong>{preferredTenant ? tenantLabels[preferredTenant] ?? preferredTenant.replaceAll("_", " ") : "Optional"}</strong>
+                <p>{preferredTenant ? "Used to rank compatible homes first." : "Add this later if you want personalized ranking."}</p>
               </article>
             </section>
 
             <section className="renter-dashboard-grid">
               <div className="renter-journey-card renter-journey-primary">
-                <div className="section-heading"><span>1</span><div><h2>Keep your search profile current</h2><p>Your tenant type is a soft matching signal. It does not hide other homes unless you explicitly apply a tenant filter on the map.</p></div></div>
+                <div className="renter-journey-copy">
+                  <span className="renter-journey-kicker">Continue your search</span>
+                  <h2>Pick up where you left off.</h2>
+                  <p>Search the live map, compare your saved homes, or continue a conversation without working through account setup first.</p>
+                </div>
+                <div className="renter-journey-actions">
+                  <Link className="primary-button link-button" href="/homes">Browse live map</Link>
+                  <Link className="secondary-button link-button" href="/saved">Saved homes & searches</Link>
+                  <Link className="text-link" href="/messages">Open messages →</Link>
+                </div>
+              </div>
+
+              <div className="renter-journey-card">
+                <div className="section-heading"><span>✓</span><div><h2>Personalize renter fit</h2><p>Optional. Your renter type is a soft matching signal and does not hide homes unless you explicitly apply a renter filter on the map.</p></div></div>
                 <RenterPreferenceForm userId={auth.userId} initialPreference={preferredTenant ?? null} />
               </div>
 
               <div className="renter-journey-card">
                 <div className="renter-journey-copy">
-                  <span className="renter-journey-kicker">Saved shortlist</span>
-                  <h2>Compare homes and repeat searches.</h2>
-                  <p>Open saved homes alongside your reusable map searches so you can continue where you left off.</p>
+                  <span className="renter-journey-kicker">Account trust</span>
+                  <h2>{phoneVerified ? "Phone verified" : "Phone verification is optional until you need protected contact sharing."}</h2>
+                  <p>{phoneVerified ? "Your phone trust signal is active." : "Verify when you want to use protected phone reveal with a verified property owner."}</p>
                 </div>
                 <div className="renter-journey-actions">
-                  <Link className="primary-button link-button" href="/saved">Open saved workspace</Link>
-                  <Link className="text-link" href="/homes">Browse live map →</Link>
-                </div>
-              </div>
-
-              <div className="renter-journey-card">
-                <div className="renter-journey-copy">
-                  <span className="renter-journey-kicker">Trust & contact</span>
-                  <h2>{phoneVerified ? "Your phone is verified." : "Verify before sharing contact details."}</h2>
-                  <p>{phoneVerified ? "You can use NearBasha's protected phone-reveal flow when the property owner is also phone verified." : "Phone verification adds an account trust signal and unlocks protected phone reveal when both sides are verified."}</p>
-                </div>
-                <div className="renter-journey-actions">
-                  <Link className="secondary-button link-button" href="/account/phone">{phoneVerified ? "Manage verified phone" : "Verify phone"}</Link>
-                  <Link className="text-link" href="/messages">Open messages →</Link>
+                  <Link className="text-link" href="/account/phone">{phoneVerified ? "Manage verified phone →" : "Verify phone when needed →"}</Link>
                 </div>
               </div>
             </section>
@@ -177,9 +172,9 @@ export default async function DashboardPage({
         )}
 
         <div className="dashboard-actions renter-dashboard-actions">
-          <Link className="primary-button link-button" href="/messages">Messages</Link>
-          <Link className="secondary-button link-button" href="/saved">Saved homes & searches</Link>
-          {canList ? <Link className="secondary-button link-button" href="/owner">Open owner workspace</Link> : <Link className="secondary-button link-button" href="/homes">Browse homes</Link>}
+          {!isRenter && <Link className="primary-button link-button" href="/messages">Messages</Link>}
+          {!isRenter && <Link className="secondary-button link-button" href="/saved">Saved homes & searches</Link>}
+          {!isRenter && (canList ? <Link className="secondary-button link-button" href="/owner">Open owner workspace</Link> : <Link className="secondary-button link-button" href="/homes">Browse homes</Link>)}
           {moderatorMembership && <Link className="secondary-button link-button" href="/moderation">Open moderation queue</Link>}
           <Link className="text-link" href="/">Back to home</Link>
         </div>
