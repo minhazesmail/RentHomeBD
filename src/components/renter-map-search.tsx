@@ -167,9 +167,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   const customAreaMode = drawingCustomArea || customArea.length > 0;
   const orderedListings = useMemo(() => sortedResults(listings, sortOption, preferredTenantType, tenantType), [listings, preferredTenantType, sortOption, tenantType]);
   const visibleListings = useMemo(() => customArea.length >= 3 ? orderedListings.filter((listing) => pointInPolygon([listing.latitude, listing.longitude], customArea)) : orderedListings, [customArea, orderedListings]);
-  const effectiveSelectedId = selectedId && !visibleListings.some((listing) => listing.id === selectedId)
-    ? visibleListings[0]?.id ?? null
-    : selectedId;
+  const effectiveSelectedId = selectedId && visibleListings.some((listing) => listing.id === selectedId) ? selectedId : null;
   const selectedListing = useMemo(
     () => visibleListings.find((listing) => listing.id === effectiveSelectedId) ?? null,
     [effectiveSelectedId, visibleListings],
@@ -233,14 +231,10 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(listing.cover_media_path, PUBLIC_MEDIA_TTL_SECONDS);
       return { ...listing, tenant_types, cover_url: signed?.signedUrl ?? null };
     }));
-    const ordered = sortedResults(hydrated, sortOption, preferredTenantType, tenantType);
     setListings(hydrated);
-    setSelectedId((current) => {
-      const candidate = current ?? initialSearch.selectedId;
-      return candidate && hydrated.some((listing) => listing.id === candidate) ? candidate : ordered[0]?.id ?? null;
-    });
+    setSelectedId((current) => current && hydrated.some((listing) => listing.id === current) ? current : null);
     setBusy(false);
-  }, [bedrooms, center, initialSearch.selectedId, maxRent, minRent, preferredTenantType, radiusKm, sortOption, supabase, tenantType, validateFilters]);
+  }, [bedrooms, center, maxRent, minRent, radiusKm, supabase, tenantType, validateFilters]);
 
   useEffect(() => { runSearchRef.current = runSearch; }, [runSearch]);
   useEffect(() => {
@@ -356,12 +350,12 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   function finishCustomArea() {
     if (customArea.length < 3) { setMessage("Add at least 3 points to create a custom search area."); return; }
     setDrawingCustomArea(false);
-    setSelectedId(visibleListings[0]?.id ?? null);
-    setMessage(`${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"} inside your custom area. This drawn area is temporary and will not be saved.`);
+    setSelectedId(null);
+    setMessage(`${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"} inside your custom area. Choose a result or map marker to preview a specific home. This drawn area is temporary and will not be saved.`);
   }
 
   function clearCustomArea() {
-    setCustomArea([]); setDrawingCustomArea(false); setSelectedId(orderedListings[0]?.id ?? null); setMessage(null);
+    setCustomArea([]); setDrawingCustomArea(false); setSelectedId(null); setMessage(null);
   }
 
   return (
