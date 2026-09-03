@@ -22,6 +22,7 @@ import "./messages/messages.css";
 import "./messages/messages-redesign.css";
 import "./saved/saved.css";
 import "./saved/saved-redesign.css";
+import "./moderation/moderation-redesign.css";
 
 import { GlobalShell } from "@/components/global-shell";
 
