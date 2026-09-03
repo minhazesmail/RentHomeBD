@@ -1,7 +1,7 @@
 "use client";
 
 import { Circle, CircleMarker, MapContainer, Marker, Polygon, Popup, TileLayer, useMap, useMapEvents } from "react-leaflet";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { divIcon } from "leaflet";
 import type { LatLngBoundsExpression } from "leaflet";
 
@@ -40,14 +40,22 @@ type ListingCluster = {
 
 function FitToResults({ listings, center, liveTracking }: { listings: MapListing[]; center: [number, number]; liveTracking: boolean }) {
   const map = useMap();
+  const centerRef = useRef(center);
 
   useEffect(() => {
-    if (liveTracking) {
-      map.setView(center, Math.max(map.getZoom(), 15), { animate: true });
-      return;
-    }
+    centerRef.current = center;
+  }, [center]);
+
+  useEffect(() => {
+    if (!liveTracking) return;
+    map.setView(center, Math.max(map.getZoom(), 15), { animate: true });
+  }, [center, liveTracking, map]);
+
+  useEffect(() => {
+    if (liveTracking) return;
+    const searchCenter = centerRef.current;
     if (listings.length === 0) {
-      map.setView(center, 12);
+      map.setView(searchCenter, 12);
       return;
     }
     if (listings.length === 1) {
@@ -56,8 +64,20 @@ function FitToResults({ listings, center, liveTracking }: { listings: MapListing
     }
     const bounds = listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
     map.fitBounds(bounds, { padding: [36, 36], maxZoom: 15 });
-  }, [center, listings, liveTracking, map]);
+  }, [listings, liveTracking, map]);
 
+  return null;
+}
+
+function ManualMapCenter({ disabled, onChange }: { disabled: boolean; onChange?: (center: [number, number]) => void }) {
+  const map = useMap();
+  useMapEvents({
+    dragend: () => {
+      if (disabled || !onChange) return;
+      const next = map.getCenter();
+      onChange([next.lat, next.lng]);
+    },
+  });
   return null;
 }
 
@@ -186,12 +206,13 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
   });
 }
 
-export default function LeafletMap({ listings, center, radiusKm, selectedId, onSelect, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange }: {
+export default function LeafletMap({ listings, center, radiusKm, selectedId, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange }: {
   listings: MapListing[];
   center: [number, number];
   radiusKm: number | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onCenterChange?: (center: [number, number]) => void;
   userLocation?: UserMapLocation | null;
   liveTracking?: boolean;
   customArea?: [number, number][];
@@ -204,6 +225,7 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, onS
     <MapContainer center={center} zoom={12} scrollWheelZoom className={`renter-map-canvas${drawingCustomArea ? " drawing-custom-area" : ""}`}>
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <FitToResults listings={listings} center={center} liveTracking={liveTracking} />
+      <ManualMapCenter disabled={drawingCustomArea} onChange={onCenterChange} />
       <CustomAreaDrawing active={drawingCustomArea} points={customArea} onChange={onCustomAreaChange ?? (() => {})} />
       {radiusKm !== null && customArea.length < 3 && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: "#126b4d", fillColor: "#126b4d", fillOpacity: 0.04, weight: 1 }} />}
       {customArea.length >= 2 && <Polygon positions={customArea} pathOptions={{ color: "#126b4d", fillColor: "#126b4d", fillOpacity: customArea.length >= 3 ? 0.12 : 0.04, weight: 3 }} />}
