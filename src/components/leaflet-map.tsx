@@ -128,11 +128,11 @@ function CustomAreaVertices({ points, editable, onChange }: { points: [number, n
   ));
 }
 
-function clusterCellSize(zoom: number) {
-  if (zoom <= 10) return 0.06;
-  if (zoom === 11) return 0.035;
-  if (zoom === 12) return 0.018;
-  if (zoom === 13) return 0.009;
+function clusterRadiusPixels(zoom: number) {
+  if (zoom <= 10) return 72;
+  if (zoom === 11) return 64;
+  if (zoom === 12) return 56;
+  if (zoom === 13) return 48;
   return 0;
 }
 
@@ -165,28 +165,52 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
   useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
 
   const clusters = useMemo<ListingCluster[]>(() => {
-    const cellSize = clusterCellSize(zoom);
-    if (cellSize === 0) {
+    const clusterRadius = clusterRadiusPixels(zoom);
+    if (clusterRadius === 0) {
       return listings.map((listing) => ({ id: listing.id, latitude: listing.latitude, longitude: listing.longitude, listings: [listing] }));
     }
 
-    const cells = new Map<string, MapListing[]>();
-    for (const listing of listings) {
-      const latCell = Math.floor(listing.latitude / cellSize);
-      const lngCell = Math.floor(listing.longitude / cellSize);
-      const key = `${latCell}:${lngCell}`;
-      const current = cells.get(key) ?? [];
-      current.push(listing);
-      cells.set(key, current);
+    const selectedListing = selectedId ? listings.find((listing) => listing.id === selectedId) ?? null : null;
+    const clusterableListings = selectedListing ? listings.filter((listing) => listing.id !== selectedListing.id) : listings;
+    const working: Array<{ listings: MapListing[]; x: number; y: number }> = [];
+
+    for (const listing of clusterableListings) {
+      const point = map.project([listing.latitude, listing.longitude], zoom);
+      let nearest: { listings: MapListing[]; x: number; y: number } | null = null;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      for (const candidate of working) {
+        const distance = Math.hypot(point.x - candidate.x, point.y - candidate.y);
+        if (distance <= clusterRadius && distance < nearestDistance) {
+          nearest = candidate;
+          nearestDistance = distance;
+        }
+      }
+
+      if (!nearest) {
+        working.push({ listings: [listing], x: point.x, y: point.y });
+        continue;
+      }
+
+      const previousCount = nearest.listings.length;
+      nearest.listings.push(listing);
+      nearest.x = (nearest.x * previousCount + point.x) / (previousCount + 1);
+      nearest.y = (nearest.y * previousCount + point.y) / (previousCount + 1);
     }
 
-    return Array.from(cells.entries()).map(([key, grouped]) => ({
-      id: key,
-      latitude: grouped.reduce((sum, listing) => sum + listing.latitude, 0) / grouped.length,
-      longitude: grouped.reduce((sum, listing) => sum + listing.longitude, 0) / grouped.length,
-      listings: grouped,
+    const grouped = working.map((cluster) => ({
+      id: `cluster:${cluster.listings.map((listing) => listing.id).sort().join(":")}`,
+      latitude: cluster.listings.reduce((sum, listing) => sum + listing.latitude, 0) / cluster.listings.length,
+      longitude: cluster.listings.reduce((sum, listing) => sum + listing.longitude, 0) / cluster.listings.length,
+      listings: cluster.listings,
     }));
-  }, [listings, zoom]);
+
+    if (selectedListing) {
+      grouped.push({ id: selectedListing.id, latitude: selectedListing.latitude, longitude: selectedListing.longitude, listings: [selectedListing] });
+    }
+
+    return grouped;
+  }, [listings, map, selectedId, zoom]);
 
   return clusters.map((cluster) => {
     const tone = clusterTone(cluster.listings);
@@ -201,10 +225,8 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
           icon={markerIcon(compactRent(listing.rent_bdt), tone, selected)}
           riseOnHover
           zIndexOffset={selected ? 1000 : 0}
-          eventHandlers={{
-            click: () => onSelect(listing.id),
-            mouseover: () => onSelect(listing.id),
-          }}
+          title={listing.title || "Rental property"}
+          eventHandlers={{ click: () => onSelect(listing.id) }}
         >
           <Popup>
             <div className="map-popup">
@@ -224,6 +246,7 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
         position={[cluster.latitude, cluster.longitude]}
         icon={markerIcon(String(cluster.listings.length), tone, false, true)}
         riseOnHover
+        title={`${cluster.listings.length} homes in this area. Activate to zoom in.`}
         eventHandlers={{
           click: () => {
             const bounds = cluster.listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
@@ -234,8 +257,8 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
         <Popup>
           <div className="map-popup map-cluster-popup">
             <strong>{cluster.listings.length} homes in this area</strong>
-            <span>{tone === "neutral" ? "Mixed tenant fit" : tenantSummary(cluster.listings[0].tenant_types ?? [])}</span>
-            <small>Tap the cluster to zoom in and compare individual matches.</small>
+            <span>{tone === "neutral" ? "Mixed renter fit" : tenantSummary(cluster.listings[0].tenant_types ?? [])}</span>
+            <small>Activate the cluster to zoom in and compare individual homes.</small>
           </div>
         </Popup>
       </Marker>
