@@ -151,7 +151,7 @@
   text-decoration: none;
 }
 
-.messages-filter-tabs a.is-active {
+.messages-filter-tabs a.messages-filter-active {
   border-color: rgba(23, 107, 74, .35);
   background: #e8f5ed;
   color: #176b4a;
