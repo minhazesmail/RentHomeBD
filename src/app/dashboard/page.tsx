@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ArrowUpRight, CircleCheck, CircleDashed, Home, MapPinned, MessageCircle, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { RenterPreferenceForm } from "@/components/renter-preference-form";
@@ -117,46 +117,32 @@ export default async function DashboardPage({
         )}
 
         {!isRenter && canList && (
-          <>
-            <section className="owner-dashboard-status" aria-label="Owner account status">
+          <section className="owner-dashboard-workspace">
+            <div className="owner-dashboard-priority">
+              <div className="owner-dashboard-section-kicker">Owner workspace</div>
+              <h2>Manage listings and renter conversations from one starting point.</h2>
+              <p>Open your property portfolio for listing work, respond to renter messages, or check the renter-facing market when you need context.</p>
+              <div className="owner-dashboard-priority-actions">
+                <Link className="primary-button link-button" href="/owner">Manage properties</Link>
+                <Link className="secondary-button link-button" href="/messages">Open messages</Link>
+                <Link className="text-link" href="/homes">View live market →</Link>
+              </div>
+            </div>
+
+            <section className="owner-dashboard-status" aria-label="Owner trust status">
               <article className={ownerNeedsAttention ? "needs-attention" : "is-ready"}>
-                <span className="owner-dashboard-status-icon">{ownerNeedsAttention ? <CircleDashed size={18} /> : <CircleCheck size={18} />}</span>
-                <div><small>Account readiness</small><strong>{ownerNeedsAttention ? "Action needed" : "Ready to manage listings"}</strong><p>{ownerNeedsAttention ? "Complete the trust checks below to strengthen renter confidence." : "Your core account trust signals are in place."}</p></div>
-              </article>
-              <article className={phoneVerified ? "is-ready" : "needs-attention"}>
                 <span className="owner-dashboard-status-icon"><ShieldCheck size={18} /></span>
-                <div><small>Phone trust</small><strong>{phoneVerified ? "Verified" : "Verification required"}</strong><p>{phoneVerified ? "Protected contact features are available." : "Verify your phone before relying on protected phone sharing."}</p></div>
-              </article>
-              <article className={roleVerified ? "is-ready" : "needs-attention"}>
-                <span className="owner-dashboard-status-icon"><CircleCheck size={18} /></span>
-                <div><small>Role review</small><strong>{roleVerified ? `Verified ${auth.profile.primary_role}` : "Badge not issued"}</strong><p>{roleVerified ? "Your role has been reviewed by NearBasha." : "Your owner or agent role has not yet received a verified badge."}</p></div>
-              </article>
-            </section>
-
-            <section className="owner-dashboard-workspace">
-              <div className="owner-dashboard-priority">
-                <div className="owner-dashboard-section-kicker">Priority</div>
-                <h2>{ownerNeedsAttention ? "Finish account trust setup before your next listing push." : "Your workspace is ready for the next listing action."}</h2>
-                <p>{ownerNeedsAttention ? "NearBasha surfaces phone and role verification beside public listings. Completing these signals helps renters understand who they are contacting." : "Move directly into property management, respond to renter messages, or review your public presence."}</p>
-                <div className="owner-dashboard-priority-actions">
-                  {ownerNeedsAttention && <Link className="primary-button link-button" href="/account/phone">Complete trust setup</Link>}
-                  <Link className={ownerNeedsAttention ? "secondary-button link-button" : "primary-button link-button"} href="/owner">Open owner workspace</Link>
+                <div>
+                  <small>Trust signals</small>
+                  <strong>{ownerNeedsAttention ? "Setup incomplete" : "Phone and role verified"}</strong>
+                  <p>
+                    {phoneVerified ? "Phone verified" : "Phone not verified"} · {roleVerified ? `${auth.profile.primary_role} role verified` : `${auth.profile.primary_role} role awaiting verification`}.
+                  </p>
+                  {!phoneVerified && <Link className="text-link" href="/account/phone">Verify phone →</Link>}
                 </div>
-              </div>
-
-              <div className="owner-dashboard-action-grid">
-                <Link href="/owner" className="owner-dashboard-action-card">
-                  <span><Home size={20} /></span><div><small>Listings</small><strong>Manage properties</strong><p>Create, edit, review and maintain your rental inventory.</p></div><ArrowUpRight size={18} />
-                </Link>
-                <Link href="/messages" className="owner-dashboard-action-card">
-                  <span><MessageCircle size={20} /></span><div><small>Conversations</small><strong>Respond to renters</strong><p>Keep property conversations moving from one workspace.</p></div><ArrowUpRight size={18} />
-                </Link>
-                <Link href="/homes" className="owner-dashboard-action-card">
-                  <span><MapPinned size={20} /></span><div><small>Market view</small><strong>Open the live map</strong><p>See the renter-facing marketplace and location context.</p></div><ArrowUpRight size={18} />
-                </Link>
-              </div>
+              </article>
             </section>
-          </>
+          </section>
         )}
 
         {!isRenter && !canList && (
@@ -172,9 +158,9 @@ export default async function DashboardPage({
         )}
 
         <div className="dashboard-actions renter-dashboard-actions">
-          {!isRenter && <Link className="primary-button link-button" href="/messages">Messages</Link>}
+          {!isRenter && !canList && <Link className="primary-button link-button" href="/messages">Messages</Link>}
           {!isRenter && <Link className="secondary-button link-button" href="/saved">Saved homes & searches</Link>}
-          {!isRenter && (canList ? <Link className="secondary-button link-button" href="/owner">Open owner workspace</Link> : <Link className="secondary-button link-button" href="/homes">Browse homes</Link>)}
+          {!isRenter && !canList && <Link className="secondary-button link-button" href="/homes">Browse homes</Link>}
           {moderatorMembership && <Link className="secondary-button link-button" href="/moderation">Open moderation queue</Link>}
           <Link className="text-link" href="/">Back to home</Link>
         </div>
