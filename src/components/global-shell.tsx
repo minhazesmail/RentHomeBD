@@ -33,7 +33,9 @@ export function GlobalShell({ children }: { children: ReactNode }) {
     <div className={`nb-global-shell nb-global-shell--${shell}`} data-shell={shell} data-route={pathname}>
       <div className="nb-shell-atmosphere" aria-hidden="true" />
       <div className="nb-shell-grid" aria-hidden="true" />
-      <div className="nb-shell-content">{children}</div>
+      <div className="nb-shell-content">
+        <div className="nb-route-stage" data-route-stage={shell} key={pathname}>{children}</div>
+      </div>
     </div>
   );
 }
