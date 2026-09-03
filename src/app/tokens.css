@@ -1,52 +1,88 @@
 :root {
-  /* Brand palette — Bangladesh-inspired, premium and restrained */
-  --emerald-950: #082c21;
-  --emerald-900: #0b3d2e;
-  --emerald-800: #0d513b;
-  --emerald-700: #126b4d;
-  --emerald-600: #16805b;
-  --emerald-100: #dff2e8;
-  --emerald-50: #eef8f3;
+  /* NearBasha Living Map foundation */
+  --emerald-1000: #041a14;
+  --emerald-950: #06271d;
+  --emerald-900: #0a3a2b;
+  --emerald-800: #0c513b;
+  --emerald-700: #0f6b4d;
+  --emerald-600: #14845f;
+  --emerald-500: #1b9b70;
+  --emerald-200: #b9dfcf;
+  --emerald-100: #dbf0e7;
+  --emerald-50: #edf8f3;
 
-  --sand-500: #c7a979;
-  --sand-300: #ddc8a4;
-  --sand-200: #e9dcc5;
-  --sand-100: #f2e9d9;
-  --sand-50: #faf6ee;
+  --lime-500: #9dd84c;
+  --lime-300: #c6ec8c;
+  --lime-100: #eefad8;
 
-  --slate-950: #16201c;
-  --slate-800: #34433c;
-  --slate-600: #63726b;
-  --slate-400: #9ba7a1;
-  --slate-200: #d9e0dc;
-  --slate-100: #e9eeeb;
-  --off-white: #fbfcf9;
+  --sand-600: #aa895c;
+  --sand-500: #c5a574;
+  --sand-300: #ddc7a2;
+  --sand-200: #e9dbc2;
+  --sand-100: #f3eadb;
+  --sand-50: #faf6ed;
+
+  --stone-1000: #111814;
+  --stone-950: #16201b;
+  --stone-800: #324139;
+  --stone-700: #47584f;
+  --stone-600: #66746d;
+  --stone-500: #839089;
+  --stone-400: #a2aca7;
+  --stone-300: #c3cbc7;
+  --stone-200: #dbe1de;
+  --stone-100: #edf0ee;
+  --stone-50: #f7f8f6;
+  --off-white: #fbfcf8;
+
+  /* Legacy slate aliases retained while routes migrate */
+  --slate-950: var(--stone-950);
+  --slate-800: var(--stone-800);
+  --slate-600: var(--stone-600);
+  --slate-400: var(--stone-400);
+  --slate-200: var(--stone-200);
+  --slate-100: var(--stone-100);
+
+  /* Semantic color system */
+  --background: #f6f5ef;
+  --background-warm: #f3efe5;
+  --background-dark: var(--emerald-1000);
+  --foreground: var(--stone-950);
+  --ink: var(--emerald-950);
+  --ink-soft: var(--stone-700);
+  --muted: var(--stone-600);
+  --muted-faint: var(--stone-500);
+
+  --surface: rgba(255, 255, 252, 0.94);
+  --surface-solid: #fffefb;
+  --surface-soft: rgba(250, 247, 239, 0.9);
+  --surface-muted: #eff1ec;
+  --surface-strong: var(--stone-100);
+  --surface-glass: rgba(255, 255, 252, 0.76);
+  --surface-dark: rgba(6, 39, 29, 0.94);
+  --surface-dark-soft: rgba(10, 58, 43, 0.7);
+
+  --border: rgba(22, 32, 27, 0.11);
+  --border-soft: rgba(22, 32, 27, 0.07);
+  --border-strong: rgba(22, 32, 27, 0.18);
+  --border-dark: rgba(237, 248, 243, 0.13);
+
+  --accent: var(--emerald-700);
+  --accent-dark: var(--emerald-900);
+  --accent-hover: var(--emerald-600);
+  --accent-soft: var(--emerald-50);
+  --accent-bright: var(--lime-500);
+  --accent-bright-soft: var(--lime-100);
+  --accent-warm: var(--sand-500);
+  --accent-warm-dark: var(--sand-600);
+  --highlight: var(--sand-300);
+  --highlight-soft: var(--sand-100);
 
   /* Product status colors */
   --verified: #167d78;
   --verified-soft: #e6f5f3;
   --high-demand: #c86d5d;
   --high-demand-soft: #fff0ec;
-
-  /* Semantic application colors — kept compatible with existing UI */
-  --background: var(--off-white);
-  --foreground: var(--slate-950);
-  --muted: var(--slate-600);
-  --surface: #ffffff;
-  --surface-soft: var(--sand-50);
-  --surface-strong: var(--slate-100);
-  --surface-glass: rgba(255, 255, 255, 0.9);
-  --border: var(--slate-200);
-  --border-strong: #c4cec8;
-  --accent: var(--emerald-700);
-  --accent-dark: var(--emerald-900);
-  --accent-hover: var(--emerald-600);
-  --accent-soft: var(--emerald-50);
-  --accent-warm: var(--sand-500);
-  --accent-warm-dark: #9f7e4f;
-  --highlight: var(--sand-300);
-  --highlight-soft: var(--sand-100);
-  --ink: var(--emerald-950);
   --danger-bg: #fff1ef;
   --danger: #9a342d;
   --success-bg: var(--verified-soft);
@@ -54,11 +90,21 @@
   --warning-bg: #fff8e8;
   --warning: #806314;
 
+  /* Spatial graphic colors */
+  --map-line: rgba(15, 107, 77, 0.10);
+  --map-line-strong: rgba(15, 107, 77, 0.17);
+  --map-node: rgba(157, 216, 76, 0.72);
+  --map-node-soft: rgba(157, 216, 76, 0.18);
+  --contour-line: rgba(12, 81, 59, 0.075);
+  --blueprint-line: rgba(15, 107, 77, 0.095);
+
   /* Radius scale */
+  --radius-xs: 8px;
   --radius-sm: 12px;
   --radius-md: 18px;
-  --radius-lg: 28px;
-  --radius-xl: 36px;
+  --radius-lg: 26px;
+  --radius-xl: 34px;
+  --radius-2xl: 44px;
   --radius-pill: 999px;
 
   /* Spacing rhythm */
@@ -73,44 +119,70 @@
   --space-12: 3rem;
   --space-16: 4rem;
   --space-20: 5rem;
+  --space-24: 6rem;
 
-  /* Softer premium elevation */
-  --shadow-sm: 0 1px 2px rgba(8, 44, 33, 0.035), 0 8px 24px rgba(8, 44, 33, 0.045);
-  --shadow-md: 0 18px 55px rgba(8, 44, 33, 0.08);
-  --shadow-lg: 0 28px 80px rgba(8, 44, 33, 0.12);
-  --shadow-button: 0 10px 24px rgba(18, 107, 77, 0.2);
-  --shadow-button-hover: 0 16px 34px rgba(18, 107, 77, 0.25);
+  /* Elevation */
+  --shadow-xs: 0 1px 1px rgba(4, 26, 20, 0.04);
+  --shadow-sm: 0 1px 2px rgba(4, 26, 20, 0.04), 0 10px 28px rgba(4, 26, 20, 0.055);
+  --shadow-md: 0 18px 55px rgba(4, 26, 20, 0.085);
+  --shadow-lg: 0 32px 90px rgba(4, 26, 20, 0.13);
+  --shadow-float: 0 20px 70px rgba(4, 26, 20, 0.16);
+  --shadow-button: 0 10px 24px rgba(15, 107, 77, 0.2);
+  --shadow-button-hover: 0 16px 34px rgba(15, 107, 77, 0.25);
   --nb-shadow: var(--shadow-md);
   --nb-shadow-hover: var(--shadow-lg);
+
+  /* Blur */
+  --blur-surface: 18px;
+  --blur-atmosphere: 80px;
 
   /* Typography */
   --font-latin: var(--font-inter), Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-bangla: var(--font-hind-siliguri), "Hind Siliguri", "Noto Sans Bengali", sans-serif;
   --font-sans: var(--font-latin);
   --font-display: var(--font-latin);
-  --type-xs: 0.76rem;
-  --type-sm: 0.86rem;
+  --type-xs: 0.74rem;
+  --type-sm: 0.84rem;
   --type-base: 1rem;
   --type-lg: 1.08rem;
   --type-xl: 1.2rem;
-  --leading-tight: 1.08;
-  --leading-body: 1.65;
-  --tracking-display: -0.045em;
-  --tracking-heading: -0.025em;
+  --type-2xl: clamp(1.55rem, 2vw, 2.15rem);
+  --type-display: clamp(2.5rem, 5.4vw, 5.4rem);
+  --leading-tight: 1.04;
+  --leading-heading: 1.12;
+  --leading-body: 1.62;
+  --tracking-display: -0.052em;
+  --tracking-heading: -0.03em;
+
+  /* Motion */
+  --motion-instant: 100ms;
+  --motion-fast: 160ms;
+  --motion-base: 220ms;
+  --motion-slow: 360ms;
+  --motion-ambient: 18s;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Layering */
+  --z-base: 0;
+  --z-atmosphere: 1;
+  --z-content: 2;
+  --z-sticky: 20;
+  --z-overlay: 40;
+  --z-modal: 60;
 }
 
-/* Tailwind CSS 4 theme bridge.
-   These names make the brand system available to utility classes while
-   the semantic variables above keep all existing CSS working unchanged. */
 @theme inline {
   --color-brand: var(--emerald-700);
   --color-brand-dark: var(--emerald-900);
   --color-brand-deep: var(--emerald-950);
   --color-brand-soft: var(--emerald-50);
+  --color-brand-bright: var(--lime-500);
   --color-sand: var(--sand-500);
   --color-sand-soft: var(--sand-50);
   --color-canvas: var(--background);
-  --color-surface: var(--surface);
+  --color-surface: var(--surface-solid);
   --color-ink: var(--foreground);
   --color-muted: var(--muted);
   --color-border: var(--border);
