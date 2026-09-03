@@ -1,0 +1,176 @@
+/* Living Map global shells.
+   These route-level treatments establish one product family while allowing
+   marketing, renter, owner, and authentication surfaces to carry distinct density. */
+
+.nb-global-shell {
+  --shell-grid-opacity: .28;
+  --shell-atmosphere-opacity: .78;
+  --shell-grid-size: 84px;
+  position: relative;
+  min-height: 100dvh;
+  isolation: isolate;
+  overflow-x: clip;
+  background: var(--background);
+}
+
+.nb-shell-content {
+  position: relative;
+  z-index: 2;
+  min-height: 100dvh;
+}
+
+.nb-shell-atmosphere,
+.nb-shell-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.nb-shell-grid {
+  opacity: var(--shell-grid-opacity);
+  background-image:
+    linear-gradient(var(--map-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--map-line) 1px, transparent 1px);
+  background-size: var(--shell-grid-size) var(--shell-grid-size);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,.24) 72%, transparent);
+}
+
+.nb-shell-atmosphere {
+  opacity: var(--shell-atmosphere-opacity);
+  background:
+    radial-gradient(circle at 13% 9%, rgba(157,216,76,.14), transparent 24rem),
+    radial-gradient(circle at 87% 7%, rgba(15,107,77,.095), transparent 30rem),
+    radial-gradient(circle at 74% 82%, rgba(199,169,121,.09), transparent 26rem);
+  animation: nb-shell-breathe 22s var(--ease-standard) infinite alternate;
+}
+
+/* Marketing: expressive, spacious, topographic. */
+.nb-global-shell--marketing {
+  --shell-grid-opacity: .22;
+  --shell-atmosphere-opacity: 1;
+  --shell-grid-size: 96px;
+  background:
+    linear-gradient(180deg, rgba(251,252,249,.98), rgba(248,249,244,.98)),
+    var(--background);
+}
+
+.nb-global-shell--marketing .nb-shell-atmosphere {
+  background:
+    radial-gradient(circle at 9% -2%, rgba(157,216,76,.20), transparent 28rem),
+    radial-gradient(circle at 91% 2%, rgba(15,107,77,.13), transparent 34rem),
+    repeating-radial-gradient(ellipse at 82% 18%, transparent 0 46px, rgba(15,107,77,.038) 47px 48px, transparent 49px 68px),
+    repeating-radial-gradient(ellipse at 6% 76%, transparent 0 58px, rgba(15,107,77,.026) 59px 60px, transparent 61px 84px);
+}
+
+/* Renter: spatial, map-led, slightly denser. */
+.nb-global-shell--renter {
+  --shell-grid-opacity: .34;
+  --shell-atmosphere-opacity: .86;
+  --shell-grid-size: 72px;
+  background:
+    linear-gradient(180deg, #f7f9f5 0%, #fbfcf9 38%, #f6f8f4 100%);
+}
+
+.nb-global-shell--renter .nb-shell-atmosphere {
+  background:
+    radial-gradient(circle at 76% 8%, rgba(157,216,76,.12), transparent 24rem),
+    radial-gradient(circle at 13% 30%, rgba(15,107,77,.075), transparent 26rem),
+    radial-gradient(circle at 88% 76%, rgba(15,107,77,.055), transparent 22rem);
+}
+
+.nb-global-shell--renter .nb-shell-grid {
+  background-image:
+    linear-gradient(rgba(15,107,77,.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,107,77,.032) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgba(157,216,76,.24) 0 1px, transparent 2px);
+  background-size: 72px 72px, 72px 72px, 216px 216px;
+}
+
+/* Owner: operational, blueprint inspired, quieter and flatter. */
+.nb-global-shell--owner {
+  --shell-grid-opacity: .44;
+  --shell-atmosphere-opacity: .62;
+  --shell-grid-size: 64px;
+  background: #f5f7f3;
+}
+
+.nb-global-shell--owner .nb-shell-grid {
+  background-image:
+    linear-gradient(rgba(15,107,77,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,107,77,.04) 1px, transparent 1px),
+    linear-gradient(rgba(15,107,77,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,107,77,.018) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px, 16px 16px, 16px 16px;
+}
+
+.nb-global-shell--owner .nb-shell-atmosphere {
+  background:
+    radial-gradient(circle at 96% 0%, rgba(15,107,77,.08), transparent 30rem),
+    radial-gradient(circle at 8% 100%, rgba(199,169,121,.07), transparent 26rem);
+}
+
+/* Auth: calm, focused, intentionally low-noise. */
+.nb-global-shell--auth {
+  --shell-grid-opacity: .16;
+  --shell-atmosphere-opacity: .78;
+  --shell-grid-size: 112px;
+  display: grid;
+  align-items: stretch;
+  background:
+    linear-gradient(180deg, #f9faf6 0%, #f4f7f2 100%);
+}
+
+.nb-global-shell--auth .nb-shell-atmosphere {
+  background:
+    radial-gradient(circle at 50% 16%, rgba(157,216,76,.15), transparent 24rem),
+    radial-gradient(circle at 50% 78%, rgba(15,107,77,.065), transparent 30rem);
+}
+
+.nb-global-shell--auth .nb-shell-grid {
+  mask-image: radial-gradient(circle at 50% 35%, rgba(0,0,0,.72), transparent 68%);
+}
+
+/* Neutral fallback keeps future routes visually compatible. */
+.nb-global-shell--neutral {
+  --shell-grid-opacity: .2;
+  --shell-atmosphere-opacity: .64;
+}
+
+/* Shared shell behavior for existing headers/navigation without restructuring pages yet. */
+.nb-global-shell :where(header, nav) {
+  position: relative;
+  z-index: 4;
+}
+
+.nb-global-shell--renter :where(.site-header, .app-header, .homes-header),
+.nb-global-shell--owner :where(.site-header, .app-header, .dashboard-header, .owner-header) {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+@keyframes nb-shell-breathe {
+  from { transform: translate3d(0,0,0) scale(1); }
+  to { transform: translate3d(-1.2%, .8%, 0) scale(1.018); }
+}
+
+@media (max-width: 767px) {
+  .nb-global-shell {
+    --shell-grid-opacity: .18;
+    --shell-grid-size: 104px;
+  }
+
+  .nb-global-shell--owner {
+    --shell-grid-opacity: .28;
+  }
+
+  .nb-shell-atmosphere {
+    opacity: calc(var(--shell-atmosphere-opacity) * .72);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nb-shell-atmosphere {
+    animation: none;
+  }
+}
