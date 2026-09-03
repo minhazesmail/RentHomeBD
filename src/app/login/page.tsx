@@ -48,6 +48,9 @@ export default async function LoginPage({
               </>
             )}
           </div>
+          <p className="form-hint">
+            <strong>Owners and agents:</strong> after signup, you can verify a Bangladesh mobile number to add a phone-verified trust signal to your account. That signal confirms control of the number at verification time; it does not prove legal identity or property ownership, and listings still follow NearBasha moderation.
+          </p>
         </div>
         <AuthForm nextPath={nextPath} intent={intent} />
       </section>
