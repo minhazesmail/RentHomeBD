@@ -23,7 +23,6 @@ export default async function DashboardPage({
 }) {
   const auth = await requireUser();
   const params = await searchParams;
-  const identity = auth.email ?? auth.phone ?? auth.userId;
   const canList = auth.profile.primary_role === "owner" || auth.profile.primary_role === "agent";
   const isRenter = auth.profile.primary_role === "renter";
   const supabase = (await createClient()) as unknown as SupabaseClient;
@@ -51,9 +50,15 @@ export default async function DashboardPage({
         <div className={`dashboard-header renter-dashboard-header${!isRenter ? " owner-dashboard-header" : ""}`}>
           <div>
             <BrandLogo />
-            <p className="eyebrow">{isRenter ? "Renter workspace" : canList ? "Owner command center" : "Account dashboard"}</p>
+            <p className="eyebrow">{isRenter ? "Renter workspace" : canList ? "Owner workspace" : "Account dashboard"}</p>
             <h1 className="dashboard-title">Welcome{auth.profile.display_name ? `, ${auth.profile.display_name}` : ""}.</h1>
-            <p className="intro">Signed in as {identity}. Your current role is <strong>{auth.profile.primary_role}</strong>.</p>
+            <p className="intro">
+              {isRenter
+                ? "Continue your home search, saved shortlist, and conversations."
+                : canList
+                  ? "Manage your properties and renter conversations from here."
+                  : "Your account tools and conversations are ready."}
+            </p>
           </div>
           <form action="/auth/signout" method="post">
             <button className="secondary-button" type="submit">Sign out</button>
