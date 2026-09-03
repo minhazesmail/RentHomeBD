@@ -9,6 +9,8 @@ import { createClient } from "@/lib/supabase/server";
 import { normalizeTenantType, TENANT_PROFILE_LABELS } from "@/lib/tenant-match";
 export const dynamic = "force-dynamic";
 
+const SAVED_HOME_MEDIA_TTL_SECONDS = 300;
+
 function searchHref(search: {
   center_lat: number;
   center_long: number;
@@ -42,10 +44,27 @@ export default async function SavedPage() {
   ]);
 
   const propertyIds = (savedRows ?? []).map((row) => row.property_id as string);
-  const { data: properties } = propertyIds.length
-    ? await supabase.from("properties").select("id, title, address_text, rent_bdt, bedrooms, bathrooms, status").in("id", propertyIds)
-    : { data: [] };
+  const [{ data: properties }, { data: mediaRows }] = propertyIds.length
+    ? await Promise.all([
+        supabase.from("properties").select("id, title, address_text, rent_bdt, bedrooms, bathrooms, status").in("id", propertyIds),
+        supabase.from("property_media").select("property_id, storage_path, media_type, sort_order").in("property_id", propertyIds).eq("media_type", "photo").order("sort_order", { ascending: true }),
+      ])
+    : [{ data: [] }, { data: [] }];
   const propertyMap = new Map((properties ?? []).map((property) => [property.id as string, property]));
+
+  const coverPathByProperty = new Map<string, string>();
+  for (const media of mediaRows ?? []) {
+    const propertyId = media.property_id as string;
+    if (!coverPathByProperty.has(propertyId) && media.storage_path) coverPathByProperty.set(propertyId, media.storage_path as string);
+  }
+
+  const coverEntries = await Promise.all(
+    Array.from(coverPathByProperty.entries()).map(async ([propertyId, storagePath]) => {
+      const { data } = await supabase.storage.from("property-media").createSignedUrl(storagePath, SAVED_HOME_MEDIA_TTL_SECONDS);
+      return [propertyId, data?.signedUrl ?? null] as const;
+    }),
+  );
+  const coverUrlByProperty = new Map(coverEntries);
 
   return (
     <main className="saved-page">
@@ -68,16 +87,23 @@ export default async function SavedPage() {
           ) : (
             <div className="saved-home-grid">
               {savedRows.map((saved) => {
-                const property = propertyMap.get(saved.property_id as string);
+                const propertyId = saved.property_id as string;
+                const property = propertyMap.get(propertyId);
                 if (!property) {
-                  return <div className="saved-home-card unavailable" key={saved.property_id}><div><strong>No longer available</strong><span>This saved listing is currently hidden or has expired.</span></div><SaveHomeButton propertyId={saved.property_id as string} userId={auth.userId} initialSaved /></div>;
+                  return <div className="saved-home-card unavailable" key={propertyId}><div><strong>No longer available</strong><span>This saved listing is currently hidden or has expired.</span></div><SaveHomeButton propertyId={propertyId} userId={auth.userId} initialSaved /></div>;
                 }
+                const coverUrl = coverUrlByProperty.get(propertyId);
                 return (
                   <div className="saved-home-card" key={property.id as string}>
                     <Link href={`/homes/${property.id}`}>
-                      <strong>{property.title || "Rental property"}</strong>
-                      <span>{property.address_text || "Location shown on map"}</span>
-                      <small>{property.rent_bdt ? `৳${Number(property.rent_bdt).toLocaleString("en-BD")}/mo` : "Rent on request"} · {property.bedrooms ?? "—"} bed · {property.bathrooms ?? "—"} bath</small>
+                      <div className="saved-home-media" aria-hidden={!coverUrl}>
+                        {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <span>No photo yet</span>}
+                      </div>
+                      <div className="saved-home-copy">
+                        <strong>{property.title || "Rental property"}</strong>
+                        <span>{property.address_text || "Location shown on map"}</span>
+                        <small>{property.rent_bdt ? `৳${Number(property.rent_bdt).toLocaleString("en-BD")}/mo` : "Rent on request"} · {property.bedrooms ?? "—"} bed · {property.bathrooms ?? "—"} bath</small>
+                      </div>
                     </Link>
                     <SaveHomeButton propertyId={property.id as string} userId={auth.userId} initialSaved compact />
                   </div>
