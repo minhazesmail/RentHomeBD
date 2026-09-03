@@ -34,6 +34,12 @@ function renterTypeLabel(value: unknown) {
   return type ? TENANT_PROFILE_LABELS[type] : null;
 }
 
+function propertyLabel(value: unknown) {
+  return typeof value === "string" && value
+    ? value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase())
+    : "Not listed";
+}
+
 export default async function SavedPage() {
   const auth = await requireUser();
   const supabase = (await createClient()) as unknown as SupabaseClient;
@@ -46,7 +52,7 @@ export default async function SavedPage() {
   const propertyIds = (savedRows ?? []).map((row) => row.property_id as string);
   const [{ data: properties }, { data: mediaRows }] = propertyIds.length
     ? await Promise.all([
-        supabase.from("properties").select("id, title, address_text, rent_bdt, bedrooms, bathrooms, status").in("id", propertyIds),
+        supabase.from("properties").select("id, title, address_text, rent_bdt, bedrooms, bathrooms, size_sqft, furnishing, property_type, status").in("id", propertyIds),
         supabase.from("property_media").select("property_id, storage_path, media_type, sort_order").in("property_id", propertyIds).eq("media_type", "photo").order("sort_order", { ascending: true }),
       ])
     : [{ data: [] }, { data: [] }];
@@ -100,9 +106,18 @@ export default async function SavedPage() {
                         {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <span>No photo yet</span>}
                       </div>
                       <div className="saved-home-copy">
-                        <strong>{property.title || "Rental property"}</strong>
-                        <span>{property.address_text || "Location shown on map"}</span>
-                        <small>{property.rent_bdt ? `৳${Number(property.rent_bdt).toLocaleString("en-BD")}/mo` : "Rent on request"} · {property.bedrooms ?? "—"} bed · {property.bathrooms ?? "—"} bath</small>
+                        <div className="saved-home-heading">
+                          <strong>{property.title || "Rental property"}</strong>
+                          <span>{property.address_text || "Location shown on map"}</span>
+                        </div>
+                        <div className="saved-home-price">{property.rent_bdt ? `৳${Number(property.rent_bdt).toLocaleString("en-BD")}/mo` : "Rent on request"}</div>
+                        <div className="saved-home-metadata" aria-label="Home comparison details">
+                          <span><b>{property.bedrooms ?? "—"}</b> bed</span>
+                          <span><b>{property.bathrooms ?? "—"}</b> bath</span>
+                          <span><b>{property.size_sqft ? Number(property.size_sqft).toLocaleString("en-BD") : "—"}</b> sq ft</span>
+                          <span>{propertyLabel(property.property_type)}</span>
+                          <span>{propertyLabel(property.furnishing)}</span>
+                        </div>
                       </div>
                     </Link>
                     <SaveHomeButton propertyId={property.id as string} userId={auth.userId} initialSaved compact />
