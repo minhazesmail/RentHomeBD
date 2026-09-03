@@ -203,3 +203,29 @@
     margin-top: 10px;
   }
 }
+
+@media (max-width: 480px) {
+  .ownerPortfolioActions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .ownerPortfolioActions > * {
+    width: 100%;
+    text-align: center;
+  }
+
+  .ownerPortfolioListingBody {
+    flex-direction: column;
+  }
+
+  .ownerPortfolioThumbnail {
+    width: 100%;
+    height: 136px;
+    flex-basis: 136px;
+  }
+
+  .ownerPortfolioStatusSummary {
+    width: 100%;
+  }
+}
