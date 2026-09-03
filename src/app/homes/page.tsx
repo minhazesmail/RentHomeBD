@@ -45,6 +45,7 @@ export default async function HomesPage({
     maxRent: params.maxRent,
     tenantType: params.tenant,
     bedrooms: params.bedrooms,
+    selectedId: params.selected,
   };
 
   return (
