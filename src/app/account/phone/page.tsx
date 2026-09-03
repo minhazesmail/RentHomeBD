@@ -17,8 +17,8 @@ export default async function PhoneVerificationPage() {
     .maybeSingle();
 
   return (
-    <main className="listing-shell">
-      <header className="listing-page-header">
+    <main className="listing-shell verification-shell">
+      <header className="listing-page-header verification-page-header">
         <div>
           <Link className="brand-link compact-brand" href="/">NearBasha</Link>
           <p className="eyebrow">Account security</p>
@@ -33,7 +33,7 @@ export default async function PhoneVerificationPage() {
         isVerified={Boolean(trustProfile?.phone_verified_at)}
       />
 
-      <section className="listing-section" style={{ marginTop: 22 }}>
+      <section className="listing-section verification-explainer" style={{ marginTop: 22 }}>
         <div className="section-heading"><span>i</span><div><h2>How this trust signal works</h2><p>Verification proves control of the phone number at the time of verification. It does not prove legal identity or property ownership.</p></div></div>
         <p className="section-copy">The SMS is sent and the OTP is validated by Supabase Auth using the configured provider. Provider credentials belong in Supabase Auth settings only; they must never be placed in NEXT_PUBLIC variables, committed to Git, or stored in the browser.</p>
       </section>
