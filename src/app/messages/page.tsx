@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { ProductNavigation } from "@/components/product-navigation";
 import { requireUser } from "@/lib/auth";
 import { formatExactMessageTime, formatInboxMessageTime } from "@/lib/message-time";
 import { createClient } from "@/lib/supabase/server";
@@ -50,6 +51,7 @@ function inboxHref({ page = 1, query = "", unreadOnly = false }: { page?: number
 
 export default async function MessagesPage({ searchParams }: { searchParams: Promise<InboxSearchParams> }) {
   const auth = await requireUser();
+  const canList = auth.profile.primary_role === "owner" || auth.profile.primary_role === "agent";
   const supabase = (await createClient()) as unknown as SupabaseClient;
   const resolvedSearchParams = await searchParams;
   const page = pageNumber(resolvedSearchParams.page);
@@ -95,10 +97,10 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
 
   return (
     <main className="messages-page">
+      <ProductNavigation authenticated canList={canList} current="messages" />
       <div className="messages-shell">
         <header className="messages-header">
-          <div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">Private messaging</p><h1>Messages</h1></div>
-          <div className="owner-header-actions"><Link className="secondary-button link-button" href="/homes">Browse homes</Link><Link className="text-link" href="/dashboard">Dashboard</Link></div>
+          <div><p className="eyebrow">Private messaging</p><h1>Messages</h1></div>
         </header>
 
         <section className="messages-organization" aria-label="Organize conversations">
