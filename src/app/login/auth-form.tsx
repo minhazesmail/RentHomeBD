@@ -342,7 +342,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
                 value={phone}
                 onChange={(e) => setPhone(bangladeshPhoneSubscriberDigits(e.target.value))}
                 placeholder="1712345678"
-                maxLength={10}
+                maxLength={14}
                 aria-describedby="auth-phone-guidance"
                 required
               />
