@@ -46,6 +46,7 @@ export default async function HomesPage({
     tenantType: params.tenant,
     bedrooms: params.bedrooms,
     selectedId: params.selected,
+    sort: params.sort,
   };
 
   return (
