@@ -11,6 +11,7 @@ import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
 import { getAuthContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeTenantTypes, TENANT_PROFILE_LABELS } from "@/lib/tenant-match";
 type Amenity = { slug: string; name: string };
 type MediaItem = { id: string; storage_path: string; media_type: "photo" | "video"; sort_order: number; signed_url?: string | null };
 type PublicProperty = {
@@ -48,6 +49,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
 
   const photos = media.filter((item) => item.media_type === "photo" && item.signed_url);
   const videos = media.filter((item) => item.media_type === "video" && item.signed_url);
+  const renterTypes = normalizeTenantTypes(property.tenant_types);
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`;
   const signInHref = `/login?next=${encodeURIComponent(`/homes/${property.id}#contact`)}`;
   const roleVerified = Boolean(property.owner_role_verified_at && property.owner_role_verified_role === property.owner_role);
@@ -86,7 +88,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
 
             <section className="property-detail-section"><div className="property-section-heading"><div><h2>About this home</h2><p className="section-copy">The practical details you’ll want before arranging a viewing.</p></div><Sparkles size={20} aria-hidden="true" /></div><p className="property-description">{property.description || "The owner has not added a longer description yet."}</p><dl className="property-facts"><div><dt>Property type</dt><dd>{label(property.property_type)}</dd></div><div><dt>Furnishing</dt><dd>{label(property.furnishing)}</dd></div><div><dt>Available from</dt><dd>{property.available_from || "—"}</dd></div><div><dt>Deposit</dt><dd>৳{property.deposit_bdt.toLocaleString("en-BD")}</dd></div><div><dt>Gender preference</dt><dd>{label(property.gender_preference)}</dd></div></dl></section>
 
-            <section className="property-detail-section tenant-compatibility-card"><div className="tenant-compatibility-top"><div className="tenant-compatibility-icon"><Users size={22} /></div><div><h2>Tenant compatibility</h2><p>These are the renter profiles this landlord has explicitly marked as suitable for the home.</p></div></div><div className="tenant-compatibility-tags">{property.tenant_types.length ? property.tenant_types.map((type) => <span key={type}><CircleCheck size={14} />{label(type)}</span>) : <span>Tenant fit not specified</span>}</div></section>
+            <section className="property-detail-section tenant-compatibility-card"><div className="tenant-compatibility-top"><div className="tenant-compatibility-icon"><Users size={22} /></div><div><h2>Renter fit</h2><p>These are the renter types the owner has marked as suitable for this home.</p></div></div><div className="tenant-compatibility-tags">{renterTypes.length ? renterTypes.map((type) => <span key={type}><CircleCheck size={14} />{TENANT_PROFILE_LABELS[type]}</span>) : <span>Renter type not specified</span>}</div></section>
 
             <section className="property-detail-section"><div className="property-section-heading"><div><h2>Amenities & included utilities</h2><p className="section-copy">A quick scan of what comes with the property and what may already be covered in rent.</p></div></div><div className="property-tag-groups"><div><h3>Amenities</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} />{amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} />None listed</span>}</div></div><div><h3>Utilities included</h3><div className="amenity-grid utility-grid">{property.utilities_included.length ? property.utilities_included.map((utility) => <span className="amenity-item" key={utility}><Zap size={15} />{label(utility)}</span>) : <span className="amenity-item"><Zap size={15} />None listed</span>}</div></div></div></section>
 
