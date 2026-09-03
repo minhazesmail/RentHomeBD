@@ -4,14 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
+import { TENANT_PROFILE_LABELS, type TenantType } from "@/lib/tenant-match";
 
-const options = [
+const options: Array<["" | Exclude<TenantType, "everyone">, string]> = [
   ["", "No preference"],
-  ["family", "Family"],
-  ["bachelor", "Bachelor"],
-  ["student", "Student"],
-  ["job_holder", "Job holder"],
-] as const;
+  ["family", TENANT_PROFILE_LABELS.family],
+  ["bachelor", TENANT_PROFILE_LABELS.bachelor],
+  ["student", TENANT_PROFILE_LABELS.student],
+  ["job_holder", TENANT_PROFILE_LABELS.job_holder],
+];
 
 export function RenterPreferenceForm({
   userId,
@@ -35,12 +36,12 @@ export function RenterPreferenceForm({
       .eq("id", userId);
 
     if (error) {
-      setMessage("We couldn't update your tenant preference. Please try again.");
+      setMessage("We couldn't update your renter type preference. Please try again.");
       setBusy(false);
       return;
     }
 
-    setMessage("Tenant preference updated. Your map results will use it as a matching signal.");
+    setMessage("Renter type preference updated. Your map results will use it as a matching signal.");
     setBusy(false);
     router.refresh();
   }
@@ -48,7 +49,7 @@ export function RenterPreferenceForm({
   return (
     <div className="renter-preference-control">
       <label htmlFor="preferred-tenant-type">
-        <span>Tenant profile</span>
+        <span>Renter type</span>
         <select
           id="preferred-tenant-type"
           value={preference}
