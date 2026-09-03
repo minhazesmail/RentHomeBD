@@ -9,6 +9,8 @@ import styles from "./portfolio-controls.module.css";
 
 export const dynamic = "force-dynamic";
 
+const OWNER_PROPERTY_MEDIA_TTL_SECONDS = 300;
+
 const statusLabels: Record<string, string> = {
   draft: "Draft",
   pending_review: "In review",
@@ -110,6 +112,29 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
 
   const listings = (properties ?? []) as Listing[];
   const visibleListings = filteredAndSortedListings(listings, query, status, sort);
+  const visibleListingIds = visibleListings.map((property) => property.id);
+  const { data: mediaRows } = visibleListingIds.length
+    ? await supabase
+        .from("property_media")
+        .select("property_id, storage_path, sort_order")
+        .in("property_id", visibleListingIds)
+        .eq("media_type", "photo")
+        .order("sort_order", { ascending: true })
+    : { data: [] };
+  const coverPathByProperty = new Map<string, string>();
+  for (const media of mediaRows ?? []) {
+    const propertyId = media.property_id as string;
+    if (!coverPathByProperty.has(propertyId) && media.storage_path) {
+      coverPathByProperty.set(propertyId, media.storage_path as string);
+    }
+  }
+  const coverEntries = await Promise.all(
+    Array.from(coverPathByProperty.entries()).map(async ([propertyId, storagePath]) => {
+      const { data } = await supabase.storage.from("property-media").createSignedUrl(storagePath, OWNER_PROPERTY_MEDIA_TTL_SECONDS);
+      return [propertyId, data?.signedUrl ?? null] as const;
+    }),
+  );
+  const coverUrlByProperty = new Map(coverEntries);
   const hasPortfolioFilters = Boolean(query || status !== "all" || sort !== "updated-desc");
   const liveCount = listings.filter((property) => property.status === "available").length;
   const attentionCount = listings.filter((property) => ["pending_confirmation", "rejected"].includes(property.status)).length;
@@ -207,20 +232,26 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
                 const freshness = freshnessCopy(property.status, property.expires_at);
                 const action = nextAction(property.status, property.expires_at);
                 const hasFeedback = property.status === "rejected" && Boolean(property.moderation_notes?.trim());
+                const coverUrl = coverUrlByProperty.get(property.id);
                 return (
                   <article className={`property-row property-row-with-actions owner-property-card status-card-${property.status}`} key={property.id}>
                     <Link className="property-row-link owner-property-card-link" href={`/owner/properties/${property.id}`}>
-                      <div className="property-row-main owner-property-main">
-                        <div className="owner-property-title-row">
-                          <strong>{property.title || "Untitled draft"}</strong>
-                          <span className={`status-pill status-${property.status}`}>{statusLabels[property.status] ?? property.status}</span>
+                      <div className={styles.ownerPortfolioListingBody}>
+                        <div className={styles.ownerPortfolioThumbnail} aria-hidden="true">
+                          {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <Home size={22} aria-hidden="true" />}
                         </div>
-                        <span className="owner-property-address">{property.address_text || "Location not added yet"}</span>
-                        <div className="owner-property-signals">
-                          <span className={`owner-next-action is-${action.tone}`}>{action.tone === "good" ? <CheckCircle2 size={13} aria-hidden="true" /> : action.tone === "urgent" || action.tone === "attention" ? <AlertTriangle size={13} aria-hidden="true" /> : <Clock3 size={13} aria-hidden="true" />}{action.label}</span>
-                          {freshness && <small className={`freshness-copy freshness-${property.status}`}>{freshness}</small>}
+                        <div className="property-row-main owner-property-main">
+                          <div className="owner-property-title-row">
+                            <strong>{property.title || "Untitled draft"}</strong>
+                            <span className={`status-pill status-${property.status}`}>{statusLabels[property.status] ?? property.status}</span>
+                          </div>
+                          <span className="owner-property-address">{property.address_text || "Location not added yet"}</span>
+                          <div className="owner-property-signals">
+                            <span className={`owner-next-action is-${action.tone}`}>{action.tone === "good" ? <CheckCircle2 size={13} aria-hidden="true" /> : action.tone === "urgent" || action.tone === "attention" ? <AlertTriangle size={13} aria-hidden="true" /> : <Clock3 size={13} aria-hidden="true" />}{action.label}</span>
+                            {freshness && <small className={`freshness-copy freshness-${property.status}`}>{freshness}</small>}
+                          </div>
+                          {hasFeedback && <div className="owner-moderation-feedback"><MessageSquareText size={15} aria-hidden="true" /><div><strong>Moderator feedback</strong><span>{property.moderation_notes}</span></div></div>}
                         </div>
-                        {hasFeedback && <div className="owner-moderation-feedback"><MessageSquareText size={15} aria-hidden="true" /><div><strong>Moderator feedback</strong><span>{property.moderation_notes}</span></div></div>}
                       </div>
                       <div className="property-row-meta owner-property-meta">
                         <strong>{property.rent_bdt ? `৳${property.rent_bdt.toLocaleString("en-BD")}` : "—"}</strong>
