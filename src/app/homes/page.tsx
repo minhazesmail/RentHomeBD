@@ -51,7 +51,7 @@ export default async function HomesPage({
       <header className="homes-topbar">
         <BrandLogo className="homes-brand-logo" />
         <nav className="homes-topbar-nav" aria-label="Rental workspace">
-          <Link className="is-active" href="/homes">Explore</Link>
+          <Link className="is-active" aria-current="page" href="/homes">Explore</Link>
           <Link href="/saved">Saved</Link>
           <Link href="/messages">Messages</Link>
         </nav>
