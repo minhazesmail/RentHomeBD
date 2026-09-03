@@ -27,6 +27,7 @@ import "./saved/saved-redesign.css";
 import "./moderation/moderation-redesign.css";
 import "./motion-polish.css";
 import "./responsive-audit.css";
+import "./accessibility-audit.css";
 
 import { GlobalShell } from "@/components/global-shell";
 
