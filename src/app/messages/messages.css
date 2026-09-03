@@ -157,6 +157,92 @@
   color: #176b4a;
 }
 
+.conversation-property-media {
+  position: absolute;
+  z-index: 2;
+  left: 14px;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  border: 1px solid rgba(16, 37, 29, 0.12);
+  border-radius: 14px;
+  background: #edf2ec;
+  color: var(--muted);
+  font-size: .62rem;
+  font-weight: 800;
+  transform: translateY(-50%);
+  box-shadow: 0 5px 14px rgba(16, 37, 29, 0.08);
+}
+
+.conversation-property-media img,
+.thread-property-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thread-property-context {
+  min-width: 0;
+  max-width: min(44vw, 360px);
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 7px 10px 7px 7px;
+  border: 1px solid rgba(13, 95, 67, .12);
+  border-radius: 16px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+}
+
+.thread-property-context:hover {
+  border-color: rgba(13, 95, 67, .28);
+  box-shadow: 0 8px 22px rgba(10, 38, 26, .07);
+}
+
+.thread-property-media {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #edf2ec;
+  color: var(--muted);
+  font-size: .62rem;
+  font-weight: 800;
+}
+
+.thread-property-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.thread-property-copy small {
+  color: var(--muted);
+  font-size: .62rem;
+  font-weight: 700;
+}
+
+.thread-property-copy strong {
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: .78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thread-property-copy > span {
+  color: var(--accent-dark);
+  font-size: .67rem;
+  font-weight: 800;
+}
+
 @media (max-width: 760px) {
 
   .messages-page {
@@ -169,5 +255,16 @@
 
   .messages-search-form .text-link {
     grid-column: 1 / -1;
+  }
+
+  .modern-thread-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .thread-property-context {
+    width: 100%;
+    max-width: none;
+    margin-left: 51px;
   }
 }
