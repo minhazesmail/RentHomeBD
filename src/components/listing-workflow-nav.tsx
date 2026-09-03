@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import styles from "./listing-workflow-nav.module.css";
+
 const steps = [
   "Basics & rent",
   "Home details",
@@ -38,23 +40,24 @@ export function ListingWorkflowNav({ mode }: { mode: "creation" | "editing" }) {
     const sections = document.querySelectorAll<HTMLElement>(".listing-form .listing-section");
     const target = sections[index];
     if (!target) return;
+    const reducedMotion = prefersReducedMotion();
     setActiveStep(index);
-    target.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
-    window.setTimeout(() => target.querySelector<HTMLElement>("input, select, textarea, button")?.focus({ preventScroll: true }), prefersReducedMotion() ? 0 : 420);
+    target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    window.setTimeout(() => target.querySelector<HTMLElement>("input, select, textarea, button")?.focus({ preventScroll: true }), reducedMotion ? 0 : 420);
   }
 
   return (
-    <nav className="listing-workflow-ribbon" aria-label={`Listing ${mode} steps`}>
+    <nav className={styles.rail} aria-label={`Listing ${mode} steps`}>
       {steps.map((label, index) => (
         <button
-          className={`listing-workflow-step${activeStep === index ? " is-active" : ""}`}
+          className={styles.step}
           type="button"
           key={label}
           aria-current={activeStep === index ? "step" : undefined}
           onClick={() => goToStep(index)}
         >
-          <b>{index + 1}</b>
-          <span>{label}</span>
+          <b className={styles.number}>{index + 1}</b>
+          <span className={styles.label}>{label}</span>
         </button>
       ))}
     </nav>
