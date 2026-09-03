@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ListingReadiness } from "@/components/listing-readiness";
+import { resolveLocationPreset } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/client";
 
 const OwnerLocationPicker = dynamic(() => import("@/components/owner-location-picker").then((module) => module.OwnerLocationPicker), { ssr: false });
@@ -128,12 +129,14 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
   const [removedMedia, setRemovedMedia] = useState<ExistingMedia[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [mediaOrder, setMediaOrder] = useState<string[]>(() => (property?.media ?? []).map((media) => existingMediaKey(media.id)));
+  const [mapFocusPosition, setMapFocusPosition] = useState<[number, number] | null>(null);
   const [busy, setBusy] = useState(false);
   const [locating, setLocating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   const latNumber = optionalNumber(latitude);
   const lngNumber = optionalNumber(longitude);
+  const matchedArea = useMemo(() => resolveLocationPreset(addressText), [addressText]);
   const orderedMedia = useMemo<OrderedMedia[]>(() => {
     const existingByKey = new Map(existingMedia.map((media) => [existingMediaKey(media.id), media]));
     const fileByKey = new Map(files.map((file) => [selectedFileKey(file), file]));
@@ -153,7 +156,14 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
   function setMapLocation(lat: number, lng: number) {
     setLatitude(lat.toFixed(6));
     setLongitude(lng.toFixed(6));
+    setMapFocusPosition(null);
     setMessage("Exact pin updated. Place it on the building entrance or gate before submitting.");
+  }
+
+  function focusMapNearTypedArea() {
+    if (!matchedArea) return;
+    setMapFocusPosition([matchedArea.latitude, matchedArea.longitude]);
+    setMessage(`Map centered near ${matchedArea.label}. This is only an approximate area—click the exact building entrance to place the property pin.`);
   }
 
   function addSelectedFiles(nextFiles: File[]) {
@@ -379,17 +389,22 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       </section>
 
       <section className="listing-section listing-location-section">
-        <div className="section-heading"><span>4</span><div><h2>Exact location</h2><p>Enter the address, then place the pin on the actual building entrance. Renters discover homes from this exact map point.</p></div></div>
-        <label className="field full">Address / area<input value={addressText} onChange={(e) => setAddressText(e.target.value)} maxLength={500} placeholder="Road 8, Dhanmondi, Dhaka" disabled={locked} /></label>
-        <div className="location-workflow-note"><strong>Pin accuracy matters</strong><span>Use the gate or main entrance—not a neighborhood center or nearby landmark.</span></div>
+        <div className="section-heading"><span>4</span><div><h2>Exact location</h2><p>Enter the address, then use it to move the map near the property before placing the exact pin. GPS and manual pin placement update the same exact location.</p></div></div>
+        <label className="field full">Address / area<input value={addressText} onChange={(e) => { setAddressText(e.target.value); setMapFocusPosition(null); }} maxLength={500} placeholder="Road 8, Dhanmondi, Dhaka" disabled={locked} /></label>
+        {!locked && addressText.trim() && <div className="location-workflow-note">
+          <strong>{matchedArea ? `Area match: ${matchedArea.label}` : "Address saved as written"}</strong>
+          <span>{matchedArea ? "Center the map near this supported Dhaka area, then click the exact building entrance. Area matching never sets the exact property pin automatically." : "This address is not in the supported area index, so we will not guess its coordinates. Use current location or navigate the map manually to place the exact pin."}</span>
+          {matchedArea && <button className="secondary-button" type="button" onClick={focusMapNearTypedArea}>Center map near {matchedArea.label}</button>}
+        </div>}
+        <div className="location-workflow-note"><strong>Pin accuracy matters</strong><span>The address is descriptive; the map pin is the renter-facing exact location. Use the gate or main entrance—not a neighborhood center or nearby landmark.</span></div>
         <div className="location-grid">
           <div className="location-fields">
             {!locked && <button className="secondary-button" type="button" onClick={useCurrentLocation} disabled={locating}>{locating ? "Getting location…" : "◎ Use my current location"}</button>}
             <div className="coordinate-readout"><span>Exact coordinates</span><strong>{latNumber !== null && lngNumber !== null ? `${latNumber.toFixed(6)}, ${lngNumber.toFixed(6)}` : "Pin not placed yet"}</strong></div>
-            <details className="coordinate-advanced"><summary>Advanced: enter coordinates manually</summary><div className="coordinate-fields"><label className="field">Latitude<input inputMode="decimal" value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="23.7465" disabled={locked} /></label><label className="field">Longitude<input inputMode="decimal" value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="90.3760" disabled={locked} /></label></div></details>
-            <p className="form-hint">Click anywhere on the map to place the pin. Once placed, drag it for gate-level accuracy.</p>
+            <details className="coordinate-advanced"><summary>Advanced: enter coordinates manually</summary><div className="coordinate-fields"><label className="field">Latitude<input inputMode="decimal" value={latitude} onChange={(e) => { setLatitude(e.target.value); setMapFocusPosition(null); }} placeholder="23.7465" disabled={locked} /></label><label className="field">Longitude<input inputMode="decimal" value={longitude} onChange={(e) => { setLongitude(e.target.value); setMapFocusPosition(null); }} placeholder="90.3760" disabled={locked} /></label></div></details>
+            <p className="form-hint">Type a recognized area to center the map approximately, use GPS when you are at the property, or navigate the map manually. Only the final exact pin is submitted.</p>
           </div>
-          <div className="map-preview interactive-map-preview"><OwnerLocationPicker latitude={latNumber} longitude={lngNumber} disabled={locked} onChange={setMapLocation} /></div>
+          <div className="map-preview interactive-map-preview"><OwnerLocationPicker latitude={latNumber} longitude={lngNumber} focusPosition={mapFocusPosition} disabled={locked} onChange={setMapLocation} /></div>
         </div>
       </section>
 
