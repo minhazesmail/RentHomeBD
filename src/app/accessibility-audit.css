@@ -1,0 +1,226 @@
+/* Step 15 — Cross-product accessibility and reduced-motion audit.
+   Loaded last so keyboard, contrast, motion, reflow, and platform preference rules win consistently. */
+
+html {
+  scroll-padding-top: 5rem;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+}
+
+/* Keep keyboard navigation visible even when route styles use glass/dark surfaces. */
+:where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--accent-bright) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 2px var(--emerald-950), 0 0 0 6px rgba(157, 216, 76, 0.22) !important;
+}
+
+:where(input, select, textarea):focus-visible {
+  border-color: var(--emerald-700) !important;
+}
+
+/* The skip link exists globally; make its focused state unmistakable and usable above sticky UI. */
+.skip-link {
+  position: fixed !important;
+  z-index: 10000 !important;
+  top: 10px !important;
+  left: 10px !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 11px 15px !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  border: 2px solid var(--accent-bright) !important;
+  border-radius: 10px !important;
+  background: var(--emerald-1000) !important;
+  color: #fff !important;
+  font-size: .88rem !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+  transform: translateY(-160%);
+  transition: transform var(--motion-fast) var(--ease-enter) !important;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Preserve readable focus and affordance on content links without forcing underlines on button-like links. */
+:where(.intro, .information-copy, .legal-copy, .review-description, .empty-conversations, .renter-empty) a:not([class]),
+:where(.intro, .information-copy, .legal-copy) .text-link {
+  text-decoration-thickness: .09em;
+  text-underline-offset: .18em;
+}
+
+/* Form readability and state clarity. */
+::placeholder {
+  color: var(--stone-600);
+  opacity: 1;
+}
+
+:where(input, select, textarea):disabled,
+:where(button, [role="button"]):disabled {
+  cursor: not-allowed;
+  opacity: .62;
+}
+
+:where(input, select, textarea)[aria-invalid="true"] {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(154, 52, 45, .10) !important;
+}
+
+:where(summary) {
+  cursor: pointer;
+}
+
+:where(button, input, select, textarea) {
+  font: inherit;
+}
+
+/* Prevent long Bangla/English content, email addresses, URLs, and property names from causing horizontal reflow. */
+:where(h1, h2, h3, p, dd, dt, strong, small, span, a, button, label) {
+  overflow-wrap: break-word;
+}
+
+:where(.property-detail-hero, .listing-page-header, .dashboard-header, .messages-header, .landing-copy, .information-hero) h1 {
+  text-wrap: balance;
+}
+
+/* Status chips remain distinguishable by shape/border, not color alone. */
+:where(.tenant-match-badge, .unread-badge, .message-verified-badge, .homes-live-status, [class*="status"], [class*="badge"]) {
+  border-style: solid;
+}
+
+/* Touch accessibility: increase compact interactive targets only on touch-first pointers. */
+@media (pointer: coarse) {
+  :where(button, select, input[type="button"], input[type="submit"], input[type="reset"], .primary-button, .secondary-button, .link-button, .text-link, summary) {
+    min-height: 44px;
+  }
+
+  :where(.save-home-button, .thread-back-button, .leaflet-control-zoom a) {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  :where(.homes-topbar-nav a, .landing-nav a, .information-nav a) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Increased contrast preference: strengthen text, borders, controls, and selected states. */
+@media (prefers-contrast: more) {
+  :root {
+    --muted: #45534c;
+    --muted-faint: #59665f;
+    --border: rgba(4, 26, 20, .28);
+    --border-soft: rgba(4, 26, 20, .20);
+    --border-strong: rgba(4, 26, 20, .42);
+    --border-dark: rgba(255, 255, 255, .34);
+  }
+
+  :where(.nb-surface, .nb-surface-soft, .nb-surface-glass, .nb-surface-dark, .renter-result-card, .conversation-card, .saved-card, .listing-section, .property-detail-section) {
+    border-width: 2px;
+  }
+
+  :where(input, select, textarea) {
+    border-width: 2px;
+  }
+
+  :where(.is-active, [aria-current="page"], [aria-selected="true"], [aria-pressed="true"]) {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* Windows High Contrast / forced-colors support. */
+@media (forced-colors: active) {
+  :root {
+    forced-color-adjust: auto;
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 3px solid Highlight !important;
+    box-shadow: none !important;
+  }
+
+  :where(.primary-button, .secondary-button, .link-button, .save-home-button, .message-send-button, .thread-back-button) {
+    border: 1px solid ButtonText !important;
+  }
+
+  :where(.is-active, [aria-current="page"], [aria-selected="true"], [aria-pressed="true"]) {
+    border: 2px solid Highlight !important;
+  }
+
+  :where(.nb-location-node::after, .homes-live-status i, .thread-live-dot, .renter-result-card-wrap.active::before) {
+    forced-color-adjust: none;
+    background: Highlight !important;
+    border: 1px solid Canvas !important;
+  }
+}
+
+/* Reduce transparency where the operating system requests it. */
+@media (prefers-reduced-transparency: reduce) {
+  :where(.nb-surface-glass, .homes-topbar, .renter-search-sidebar, .renter-filter-panel, .messages-list, .thread-shell, .message-composer, .landing-nav) {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  :where(.nb-surface-glass, .homes-topbar, .renter-search-sidebar, .renter-filter-panel, .messages-list, .thread-shell, .message-composer) {
+    background-color: var(--surface-solid) !important;
+  }
+}
+
+/* Full reduced-motion contract: no decorative drift, pulses, route staging, smooth scroll, or hover displacement. */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition-duration: .01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .nb-route-stage,
+  .nb-enter,
+  .nb-fade,
+  .nb-panel-interactive:hover,
+  .renter-result-card:hover,
+  .renter-result-card-wrap.active .renter-result-card,
+  .conversation-card:hover,
+  .save-home-button:hover,
+  .thread-back-button:hover,
+  .message-send-button:hover,
+  .landing-trust-card:hover,
+  .landing-feature:hover {
+    transform: none !important;
+  }
+
+  :where(.renter-result-image img, .property-gallery img, .landing-featured-card img) {
+    transform: none !important;
+  }
+}
+
+/* Reflow safety for narrow phones and high browser zoom. */
+@media (max-width: 420px) {
+  :where(.primary-button, .secondary-button, .link-button) {
+    white-space: normal;
+    text-align: center;
+  }
+
+  :where(.review-facts, .property-facts-grid, .dashboard-status-grid, .moderation-facts-grid) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
