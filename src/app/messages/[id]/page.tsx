@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 const THREAD_PAGE_SIZE = 50;
+const MESSAGE_MEDIA_TTL_SECONDS = 300;
 
 type Conversation = {
   id: string;
@@ -46,7 +47,7 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
 
   await supabase.from("conversations").update({ [readField]: new Date().toISOString() }).eq("id", conversation.id);
 
-  const [{ data: messageRows }, { data: otherProfile }] = await Promise.all([
+  const [{ data: messageRows }, { data: otherProfile }, { data: propertyMedia }] = await Promise.all([
     supabase
       .from("messages")
       .select("id, sender_id, body, created_at")
@@ -54,6 +55,14 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
       .order("created_at", { ascending: false })
       .limit(THREAD_PAGE_SIZE + 1),
     supabase.from("profiles").select("phone_verified_at").eq("id", otherUserId).maybeSingle(),
+    supabase
+      .from("property_media")
+      .select("storage_path")
+      .eq("property_id", conversation.property_id)
+      .eq("media_type", "photo")
+      .order("sort_order", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const newestFirst = (messageRows ?? []) as Message[];
@@ -63,6 +72,11 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
   const otherRole = viewerIsRenter ? "Owner / agent" : "Renter";
   const phoneVerified = Boolean(otherProfile?.phone_verified_at);
   const initial = (otherName || "R").slice(0, 1).toUpperCase();
+  const propertyTitle = conversation.property_title || "Rental property";
+  const { data: signedCover } = propertyMedia?.storage_path
+    ? await supabase.storage.from("property-media").createSignedUrl(propertyMedia.storage_path as string, MESSAGE_MEDIA_TTL_SECONDS)
+    : { data: null };
+  const propertyCoverUrl = signedCover?.signedUrl ?? null;
 
   return (
     <main className="messages-page">
@@ -76,10 +90,19 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
                 <h1>{otherName || "NearBasha user"}</h1>
                 {phoneVerified && <span className="message-verified-badge" title="Phone verified">✓ Verified</span>}
               </div>
-              <p>{otherRole} · {conversation.property_title || "Rental property"}</p>
+              <p>{otherRole}</p>
             </div>
           </div>
-          <Link className="secondary-button link-button thread-property-link" href={`/homes/${conversation.property_id}`}>View property</Link>
+          <Link className="thread-property-context" href={`/homes/${conversation.property_id}`} aria-label={`View ${propertyTitle}`}>
+            <span className="thread-property-media" aria-hidden="true">
+              {propertyCoverUrl ? <img src={propertyCoverUrl} alt="" /> : <span>Home</span>}
+            </span>
+            <span className="thread-property-copy">
+              <small>Conversation about</small>
+              <strong>{propertyTitle}</strong>
+              <span>View property</span>
+            </span>
+          </Link>
         </header>
 
         <RealtimeMessageThread
