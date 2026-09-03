@@ -24,18 +24,18 @@ export default async function ReportReviewPage({ params }: { params: Promise<{ i
   if (!property) notFound();
 
   return (
-    <main className="listing-shell">
-      <header className="listing-page-header">
+    <main className="listing-shell moderation-shell moderation-report-detail-shell">
+      <header className="listing-page-header moderation-header">
         <div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">Trust & safety review</p><h1 className="listing-page-title">{property.title || "Reported listing"}</h1><p className="intro">Report from {reporter?.display_name || "a NearBasha user"} · {new Date(report.created_at).toLocaleString("en-BD")}</p></div>
         <Link className="text-link" href="/moderation/reports">Back to reports</Link>
       </header>
 
-      <section className="moderation-review-grid">
-        <div className="listing-form">
-          <section className="listing-section"><div className="section-heading"><span>1</span><div><h2>Report</h2><p>Review the renter&apos;s reason and supporting details.</p></div></div><dl className="review-facts"><div><dt>Reason</dt><dd>{label(report.reason)}</dd></div><div><dt>Reporter role</dt><dd>{reporter?.primary_role || "user"}</dd></div></dl><div className="review-description"><strong>Details</strong><p>{report.details || "No additional details were provided."}</p></div></section>
-          <section className="listing-section"><div className="section-heading"><span>2</span><div><h2>Current listing</h2><p>Check the current public state before deciding.</p></div></div><dl className="review-facts"><div><dt>Status</dt><dd>{label(property.status)}</dd></div><div><dt>Type</dt><dd>{property.property_type ? label(property.property_type) : "—"}</dd></div><div><dt>Rent</dt><dd>{property.rent_bdt ? `৳${property.rent_bdt.toLocaleString("en-BD")}` : "—"}</dd></div><div><dt>Address</dt><dd>{property.address_text || "—"}</dd></div></dl><Link className="text-link" href={`/homes/${property.id}`}>Open public listing</Link></section>
+      <section className="moderation-review-grid moderation-inspection-grid">
+        <div className="listing-form moderation-inspection-stack">
+          <section className="listing-section moderation-inspection-card moderation-report-card"><div className="section-heading"><span>1</span><div><h2>Report</h2><p>Review the renter&apos;s reason and supporting details.</p></div></div><dl className="review-facts"><div><dt>Reason</dt><dd>{label(report.reason)}</dd></div><div><dt>Reporter role</dt><dd>{reporter?.primary_role || "user"}</dd></div></dl><div className="review-description"><strong>Details</strong><p>{report.details || "No additional details were provided."}</p></div></section>
+          <section className="listing-section moderation-inspection-card"><div className="section-heading"><span>2</span><div><h2>Current listing</h2><p>Check the current public state before deciding.</p></div></div><dl className="review-facts"><div><dt>Status</dt><dd>{label(property.status)}</dd></div><div><dt>Type</dt><dd>{property.property_type ? label(property.property_type) : "—"}</dd></div><div><dt>Rent</dt><dd>{property.rent_bdt ? `৳${property.rent_bdt.toLocaleString("en-BD")}` : "—"}</dd></div><div><dt>Address</dt><dd>{property.address_text || "—"}</dd></div></dl><Link className="text-link" href={`/homes/${property.id}`}>Open public listing</Link></section>
         </div>
-        <aside className="moderation-sidebar"><ReportModerationActions reportId={report.id} reviewerId={auth.userId} /></aside>
+        <aside className="moderation-sidebar moderation-decision-rail"><ReportModerationActions reportId={report.id} reviewerId={auth.userId} /></aside>
       </section>
     </main>
   );
