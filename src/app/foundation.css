@@ -1,0 +1,276 @@
+/* NearBasha Living Map visual foundation.
+   This file defines cross-product surfaces, background graphics, and motion primitives.
+   Route-specific redesigns should compose these primitives rather than recreate them. */
+
+html {
+  background: var(--background-dark);
+}
+
+body {
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at 14% -8%, rgba(157, 216, 76, 0.10), transparent 28rem),
+    radial-gradient(circle at 88% 2%, rgba(15, 107, 77, 0.08), transparent 34rem),
+    var(--background);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(157, 216, 76, 0.34);
+  color: var(--emerald-1000);
+}
+
+:where(a, button, input, select, textarea, summary) {
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-base) var(--ease-standard),
+    opacity var(--motion-fast) var(--ease-standard),
+    transform var(--motion-base) var(--ease-enter);
+}
+
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: 3px;
+}
+
+/* Surface hierarchy */
+.nb-surface,
+.nb-surface-soft,
+.nb-surface-glass,
+.nb-surface-dark {
+  position: relative;
+  border: 1px solid var(--border);
+}
+
+.nb-surface {
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.nb-surface-soft {
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+}
+
+.nb-surface-glass {
+  border-color: rgba(255, 255, 255, 0.58);
+  border-radius: var(--radius-lg);
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(var(--blur-surface));
+  -webkit-backdrop-filter: blur(var(--blur-surface));
+}
+
+.nb-surface-dark {
+  border-color: var(--border-dark);
+  border-radius: var(--radius-lg);
+  background: var(--surface-dark);
+  color: #f3f8f5;
+  box-shadow: var(--shadow-lg);
+}
+
+.nb-panel-interactive:hover {
+  border-color: rgba(15, 107, 77, 0.2);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Background engine */
+.nb-atmosphere {
+  --nb-atmosphere-opacity: 1;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.nb-atmosphere > * {
+  position: relative;
+  z-index: var(--z-content);
+}
+
+.nb-atmosphere::before,
+.nb-atmosphere::after {
+  position: absolute;
+  z-index: var(--z-atmosphere);
+  pointer-events: none;
+  content: "";
+}
+
+.nb-atmosphere::before {
+  inset: 0;
+  opacity: var(--nb-atmosphere-opacity);
+  background-image:
+    linear-gradient(var(--map-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--map-line) 1px, transparent 1px),
+    radial-gradient(circle at 72% 22%, var(--map-node-soft) 0 1px, transparent 2px),
+    radial-gradient(circle at 24% 68%, rgba(15, 107, 77, 0.08) 0 1px, transparent 2px);
+  background-size: 72px 72px, 72px 72px, 180px 180px, 240px 240px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.78), transparent 92%);
+}
+
+.nb-atmosphere::after {
+  width: min(58vw, 760px);
+  aspect-ratio: 1;
+  top: -26%;
+  right: -14%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(157, 216, 76, 0.13), rgba(15, 107, 77, 0.055) 36%, transparent 69%);
+  filter: blur(10px);
+  animation: nb-atmosphere-drift var(--motion-ambient) var(--ease-standard) infinite alternate;
+}
+
+.nb-atmosphere--quiet {
+  --nb-atmosphere-opacity: 0.48;
+}
+
+.nb-atmosphere--dark::before {
+  opacity: 0.58;
+  background-image:
+    linear-gradient(rgba(219, 240, 231, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(219, 240, 231, 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 72% 22%, rgba(157, 216, 76, 0.2) 0 1px, transparent 2px);
+}
+
+/* Topographic treatment */
+.nb-contours {
+  position: relative;
+  isolation: isolate;
+}
+
+.nb-contours::before {
+  position: absolute;
+  inset: -12%;
+  z-index: var(--z-atmosphere);
+  pointer-events: none;
+  opacity: 0.7;
+  background:
+    repeating-radial-gradient(ellipse at 78% 22%, transparent 0 32px, var(--contour-line) 33px 34px, transparent 35px 53px),
+    repeating-radial-gradient(ellipse at 8% 86%, transparent 0 44px, rgba(15, 107, 77, 0.045) 45px 46px, transparent 47px 70px);
+  content: "";
+  transform: rotate(-4deg);
+}
+
+.nb-contours > * {
+  position: relative;
+  z-index: var(--z-content);
+}
+
+/* Blueprint treatment for owner/task workflows */
+.nb-blueprint {
+  background-image:
+    linear-gradient(var(--blueprint-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--blueprint-line) 1px, transparent 1px),
+    linear-gradient(rgba(15, 107, 77, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 107, 77, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px, 16px 16px, 16px 16px;
+}
+
+/* Location pulse */
+.nb-location-node {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+
+.nb-location-node::before,
+.nb-location-node::after {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  content: "";
+}
+
+.nb-location-node::before {
+  width: 100%;
+  height: 100%;
+  background: var(--map-node-soft);
+  animation: nb-location-pulse 3.8s var(--ease-standard) infinite;
+}
+
+.nb-location-node::after {
+  width: 8px;
+  height: 8px;
+  background: var(--map-node);
+  box-shadow: 0 0 0 5px rgba(157, 216, 76, 0.12);
+}
+
+/* Motion utility primitives */
+.nb-enter {
+  animation: nb-enter var(--motion-slow) var(--ease-enter) both;
+}
+
+.nb-enter-delay-1 { animation-delay: 60ms; }
+.nb-enter-delay-2 { animation-delay: 120ms; }
+.nb-enter-delay-3 { animation-delay: 180ms; }
+
+.nb-fade {
+  animation: nb-fade var(--motion-base) var(--ease-standard) both;
+}
+
+@keyframes nb-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes nb-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes nb-atmosphere-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-2.2%, 1.5%, 0) scale(1.035); }
+}
+
+@keyframes nb-location-pulse {
+  0%, 100% { opacity: 0.38; transform: scale(0.82); }
+  50% { opacity: 0; transform: scale(1.75); }
+}
+
+/* Numeric product data should remain stable while values change. */
+.nb-numeric {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* One accessibility contract for the entire redesign. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .nb-panel-interactive:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .nb-atmosphere::before {
+    background-size: 96px 96px, 96px 96px, 220px 220px, 280px 280px;
+    opacity: calc(var(--nb-atmosphere-opacity) * 0.68);
+  }
+
+  .nb-atmosphere::after {
+    width: 86vw;
+    right: -36%;
+    opacity: 0.72;
+  }
+
+  .nb-contours::before {
+    opacity: 0.42;
+  }
+}
