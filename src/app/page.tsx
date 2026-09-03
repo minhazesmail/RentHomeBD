@@ -72,7 +72,7 @@ export default function HomePage() {
           <div className="landing-copy">
             <div className="landing-live-kicker"><span aria-hidden="true" />Bangladesh-focused · launching in Dhaka</div>
             <h1>Find a home close to the life you already live.</h1>
-            <p className="intro">NearBasha is starting in Dhaka with map-first rental discovery built for Bangladesh. Search around the streets, campuses, offices, and neighborhoods that matter, then compare exact locations and renter fit before you visit.</p>
+            <p className="intro">Search Dhaka around the streets, campuses, offices, and neighborhoods that matter to you. Compare location and renter fit before you visit.</p>
 
             <form className="landing-search-console" action="/homes" method="get" role="search">
               <div className="landing-search-console-heading">
@@ -112,7 +112,7 @@ export default function HomePage() {
                 <input type="hidden" name="radius" value={DEFAULT_RENTER_SEARCH_RADIUS} />
                 <button className="landing-search-submit" type="submit"><Search aria-hidden="true" /><span>Search map</span><ArrowRight aria-hidden="true" /></button>
               </div>
-              <p className="form-hint" id="landing-area-help">NearBasha is launching in Dhaka first. Location search currently supports the Dhaka areas and landmarks listed here. Searches start within {DEFAULT_RENTER_SEARCH_RADIUS} km; you can refine the radius or move the full map manually.</p>
+              <p className="form-hint" id="landing-area-help">Current location search supports the Dhaka areas and landmarks listed here. Searches start within {DEFAULT_RENTER_SEARCH_RADIUS} km; refine the radius or move the full map manually.</p>
             </form>
 
             <div className="landing-popular-searches">
@@ -132,7 +132,7 @@ export default function HomePage() {
           <div className="landing-visual">
             <div className="landing-map-caption">
               <span className="landing-map-caption-dot" aria-hidden="true" />
-              <div><strong>Explore Dhaka visually</strong><small>Current launch market · move the map, then refine your radius</small></div>
+              <div><strong>Explore Dhaka visually</strong><small>Move the map, then refine your radius</small></div>
               <Link href="/homes">Open full map <ArrowRight aria-hidden="true" /></Link>
             </div>
             <LandingMapPreview />
@@ -141,8 +141,8 @@ export default function HomePage() {
 
         <section className="landing-trust-section" data-scroll-theme="trust" aria-labelledby="trust-heading">
           <div className="landing-trust-heading">
-            <div><p className="eyebrow">Built for higher-trust renting</p><h2 id="trust-heading">Local rental discovery needs more than a list of phone numbers.</h2></div>
-            <p>NearBasha combines identity signals, moderation, precise location, and listing-freshness tools so renters and owners can make better decisions before money or time changes hands.</p>
+            <div><p className="eyebrow">Built for higher-trust renting</p><h2 id="trust-heading">More context before you commit.</h2></div>
+            <p>Verification signals, moderation, precise location, and freshness controls help both sides make better-informed decisions.</p>
           </div>
           <div className="landing-trust-grid">
             {trustSignals.map((signal) => (
@@ -162,14 +162,8 @@ export default function HomePage() {
 
         <LandingFeaturedSection />
 
-        <section className="landing-strip" data-scroll-theme="local" aria-label="How NearBasha is different">
-          <div className="landing-feature"><strong>Search by real location.</strong><span>See what is actually near work, university, transport, or family—not just what shares an area name.</span></div>
-          <div className="landing-feature"><strong>Know who the home suits.</strong><span>Preferred renter types are structured into each listing so both sides waste less time.</span></div>
-          <div className="landing-feature"><strong>Keep listings fresh.</strong><span>Freshness controls are designed to stop old, unavailable homes from quietly filling the marketplace.</span></div>
-        </section>
-
         <section className="landing-content-section landing-faq" data-scroll-theme="clarity" aria-labelledby="faq-heading">
-          <div className="landing-section-intro"><p className="eyebrow">Questions, answered</p><h2 id="faq-heading">What to know before you start.</h2><p>Clear expectations matter on both sides of a rental. These are the basics behind the NearBasha experience.</p></div>
+          <div className="landing-section-intro"><p className="eyebrow">Questions, answered</p><h2 id="faq-heading">What to know before you start.</h2><p>Coverage, trust, pricing, and renter matching in one place.</p></div>
           <div className="landing-faq-list">
             {faqs.map(([question, answer]) => (
               <details key={question} className="landing-faq-item"><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>
@@ -178,19 +172,19 @@ export default function HomePage() {
         </section>
 
         <section className="landing-cta-band" data-scroll-theme="action" aria-label="Start using NearBasha">
-          <div><p className="eyebrow">Ready when you are</p><h2>Start with the map, not another endless listing feed.</h2><p>Explore homes around the places that matter to you, or publish a property with an exact pin and clear renter-type preferences.</p></div>
+          <div><p className="eyebrow">Ready when you are</p><h2>Start with the map.</h2><p>Browse current Dhaka homes, or add a property for renters to discover.</p></div>
           <div className="landing-cta-actions"><Link className="primary-button link-button" href="/homes">Browse the live map</Link><Link className="secondary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link></div>
         </section>
 
         <footer className="landing-footer" data-scroll-theme="footer">
-          <div className="landing-footer-brand"><BrandLogo /><p>Bangladesh-focused rental discovery, launching first in Dhaka.</p><span>NearBasha is building local rental search for Bangladesh while current map-search coverage is centered on supported Dhaka areas and landmarks.</span></div>
+          <div className="landing-footer-brand"><BrandLogo /><p>Bangladesh-focused rental discovery, launching first in Dhaka.</p></div>
           <div className="landing-footer-links">
             <div><strong>Product</strong><Link href="/homes">Browse homes</Link><Link href={LIST_PROPERTY_HREF}>List a property</Link><Link href="/login">Sign in</Link></div>
             <div><strong>Company</strong><Link href="/about">About</Link><Link href="/contact">Contact</Link></div>
             <div><strong>Legal</strong><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></div>
           </div>
           <div className="landing-footer-bottom">
-            <span>Dhaka-first · built for Bangladesh</span>
+            <span>Dhaka launch market</span>
             <div className="landing-footer-studio" aria-label="Built by Hemilin Studio">
               <img src="/hemilin-studio.svg" alt="Hemilin Studio" className="landing-footer-studio-logo" />
               <span>By Hemilin Studio</span>
