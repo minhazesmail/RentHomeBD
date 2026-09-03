@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ListingDraftGuard } from "@/components/listing-draft-guard";
+import { ListingWorkflowNav } from "@/components/listing-workflow-nav";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -50,13 +51,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         <Link className="text-link" href="/owner">Back to properties</Link>
       </header>
 
-      <nav className="listing-workflow-ribbon" aria-label="Listing editing steps">
-        <span><b>1</b>Basics & rent</span>
-        <span><b>2</b>Home details</span>
-        <span><b>3</b>Tenant fit</span>
-        <span><b>4</b>Exact map pin</span>
-        <span><b>5</b>Photos & video</span>
-      </nav>
+      <ListingWorkflowNav mode="editing" />
 
       {editable && <ListingDraftGuard userId={auth.userId} propertyId={id} />}
       <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} property={formProperty} />
