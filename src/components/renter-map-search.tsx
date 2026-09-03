@@ -22,6 +22,8 @@ const PUBLIC_MEDIA_TTL_SECONDS = 300;
 const LIVE_SEARCH_MIN_DISTANCE_METERS = 100;
 const LIVE_SEARCH_MAX_INTERVAL_MS = 20_000;
 
+type SortOption = "recommended" | "distance" | "rent-asc" | "rent-desc";
+
 type InitialSearch = {
   centerLat?: number;
   centerLong?: number;
@@ -31,6 +33,7 @@ type InitialSearch = {
   tenantType?: string;
   bedrooms?: string;
   selectedId?: string;
+  sort?: string;
 };
 
 type TenantTypeRow = {
@@ -40,6 +43,17 @@ type TenantTypeRow = {
 
 function initialRadius(value?: string) {
   return value && RADIUS_OPTIONS.includes(value) ? value : "15";
+}
+
+function initialSort(value?: string): SortOption {
+  return value === "distance" || value === "rent-asc" || value === "rent-desc" ? value : "recommended";
+}
+
+function sortDescription(sort: SortOption, preferredTenantType?: TenantType, tenantType?: string) {
+  if (sort === "distance") return "Nearest first";
+  if (sort === "rent-asc") return "Lowest rent first";
+  if (sort === "rent-desc") return "Highest rent first";
+  return preferredTenantType && !tenantType ? "Best matches first" : "Closest first";
 }
 
 function friendlySearchError(error: unknown) {
@@ -84,6 +98,27 @@ function compatibilityRank(listing: MapListing, preference?: TenantType) {
   return 2;
 }
 
+function sortedResults(listings: MapListing[], sort: SortOption, preferredTenantType?: TenantType, tenantType?: string) {
+  const next = [...listings];
+  const distance = (listing: MapListing) => listing.distance_meters ?? Number.MAX_SAFE_INTEGER;
+  const rent = (listing: MapListing) => listing.rent_bdt ?? Number.MAX_SAFE_INTEGER;
+
+  if (sort === "distance") return next.sort((a, b) => distance(a) - distance(b));
+  if (sort === "rent-asc") return next.sort((a, b) => rent(a) - rent(b) || distance(a) - distance(b));
+  if (sort === "rent-desc") {
+    return next.sort((a, b) => {
+      if (a.rent_bdt == null && b.rent_bdt == null) return distance(a) - distance(b);
+      if (a.rent_bdt == null) return 1;
+      if (b.rent_bdt == null) return -1;
+      return b.rent_bdt - a.rent_bdt || distance(a) - distance(b);
+    });
+  }
+  if (preferredTenantType && !tenantType) {
+    return next.sort((a, b) => compatibilityRank(a, preferredTenantType) - compatibilityRank(b, preferredTenantType) || distance(a) - distance(b));
+  }
+  return next.sort((a, b) => distance(a) - distance(b));
+}
+
 function TenantBadge({ types, preference }: { types: TenantType[]; preference?: TenantType }) {
   const tone = tenantTone(types);
   const compatibility = tenantCompatibility(types, preference);
@@ -110,6 +145,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   const [maxRent, setMaxRent] = useState(initialSearch.maxRent ?? "");
   const [tenantType, setTenantType] = useState(initialSearch.tenantType ?? "");
   const [bedrooms, setBedrooms] = useState(initialSearch.bedrooms ?? "");
+  const [sortOption, setSortOption] = useState<SortOption>(initialSort(initialSearch.sort));
   const [searchName, setSearchName] = useState("");
   const [busy, setBusy] = useState(true);
   const [savingSearch, setSavingSearch] = useState(false);
@@ -129,7 +165,8 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   const savedSet = useMemo(() => new Set(initialSavedPropertyIds), [initialSavedPropertyIds]);
   const softPreference = tenantType ? undefined : preferredTenantType;
   const customAreaMode = drawingCustomArea || customArea.length > 0;
-  const visibleListings = useMemo(() => customArea.length >= 3 ? listings.filter((listing) => pointInPolygon([listing.latitude, listing.longitude], customArea)) : listings, [customArea, listings]);
+  const orderedListings = useMemo(() => sortedResults(listings, sortOption, preferredTenantType, tenantType), [listings, preferredTenantType, sortOption, tenantType]);
+  const visibleListings = useMemo(() => customArea.length >= 3 ? orderedListings.filter((listing) => pointInPolygon([listing.latitude, listing.longitude], customArea)) : orderedListings, [customArea, orderedListings]);
   const effectiveSelectedId = selectedId && !visibleListings.some((listing) => listing.id === selectedId)
     ? visibleListings[0]?.id ?? null
     : selectedId;
@@ -144,13 +181,14 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       lng: center[1].toFixed(6),
       radius: radiusKm,
       selected: selectionId,
+      sort: sortOption,
     });
     if (minRent) params.set("minRent", minRent);
     if (maxRent) params.set("maxRent", maxRent);
     if (tenantType) params.set("tenant", tenantType);
     if (bedrooms) params.set("bedrooms", bedrooms);
     return `/homes?${params.toString()}`;
-  }, [bedrooms, center, maxRent, minRent, radiusKm, tenantType]);
+  }, [bedrooms, center, maxRent, minRent, radiusKm, sortOption, tenantType]);
 
   const propertyHref = useCallback((propertyId: string) => {
     return `/homes/${propertyId}?returnTo=${encodeURIComponent(searchReturnPath(propertyId))}`;
@@ -195,16 +233,14 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(listing.cover_media_path, PUBLIC_MEDIA_TTL_SECONDS);
       return { ...listing, tenant_types, cover_url: signed?.signedUrl ?? null };
     }));
-    const ranked = tenantType || !preferredTenantType
-      ? hydrated
-      : [...hydrated].sort((a, b) => compatibilityRank(a, preferredTenantType) - compatibilityRank(b, preferredTenantType) || (a.distance_meters ?? Number.MAX_SAFE_INTEGER) - (b.distance_meters ?? Number.MAX_SAFE_INTEGER));
-    setListings(ranked);
+    const ordered = sortedResults(hydrated, sortOption, preferredTenantType, tenantType);
+    setListings(hydrated);
     setSelectedId((current) => {
       const candidate = current ?? initialSearch.selectedId;
-      return candidate && ranked.some((listing) => listing.id === candidate) ? candidate : ranked[0]?.id ?? null;
+      return candidate && hydrated.some((listing) => listing.id === candidate) ? candidate : ordered[0]?.id ?? null;
     });
     setBusy(false);
-  }, [bedrooms, center, initialSearch.selectedId, maxRent, minRent, preferredTenantType, radiusKm, supabase, tenantType, validateFilters]);
+  }, [bedrooms, center, initialSearch.selectedId, maxRent, minRent, preferredTenantType, radiusKm, sortOption, supabase, tenantType, validateFilters]);
 
   useEffect(() => { runSearchRef.current = runSearch; }, [runSearch]);
   useEffect(() => {
@@ -305,7 +341,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   }
 
   function clearCustomArea() {
-    setCustomArea([]); setDrawingCustomArea(false); setSelectedId(listings[0]?.id ?? null); setMessage(null);
+    setCustomArea([]); setDrawingCustomArea(false); setSelectedId(orderedListings[0]?.id ?? null); setMessage(null);
   }
 
   return (
@@ -320,6 +356,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
             <label className="field">Tenant type<select value={tenantType} onChange={(e) => setTenantType(e.target.value)}><option value="">Any tenant type</option><option value="family">Family</option><option value="bachelor">Bachelor</option><option value="student">Student</option><option value="job_holder">Job holder</option></select></label>
             <label className="field">Bedrooms<select value={bedrooms} onChange={(e) => setBedrooms(e.target.value)}><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></label>
             <label className="field">Radius<select value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)}><option value="2">2 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="15">15 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select></label>
+            <label className="field">Sort results<select value={sortOption} onChange={(event) => setSortOption(event.target.value as SortOption)}><option value="recommended">Recommended</option><option value="distance">Distance: nearest</option><option value="rent-asc">Rent: low to high</option><option value="rent-desc">Rent: high to low</option></select></label>
           </div>
           <p className="form-hint">Choose a supported area to move the map and search there immediately. You can still pan the map manually for anywhere else.</p>
           {softPreference && <div className="tenant-profile-preference"><CircleCheck size={15} aria-hidden="true" /><span><strong>{TENANT_PROFILE_LABELS[softPreference]} profile active</strong>Compatible homes are shown first. Other homes stay visible for comparison.</span></div>}
@@ -342,7 +379,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
           {message && <div className={message.startsWith("Search saved") || message.includes("inside your custom area") ? "success-message compact-message" : "auth-message"} role="status" aria-live="polite">{message}</div>}
         </div>
 
-        <div className="renter-results-header"><strong>{busy ? "Searching…" : `${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"}`}</strong><span>{customArea.length >= 3 ? "Inside custom area" : softPreference ? "Best matches first" : "Closest first"}</span></div>
+        <div className="renter-results-header"><strong>{busy ? "Searching…" : `${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"}`}</strong><span>{customArea.length >= 3 ? `Inside custom area · ${sortDescription(sortOption, preferredTenantType, tenantType)}` : sortDescription(sortOption, preferredTenantType, tenantType)}</span></div>
         <div className="renter-results-list">
           {!busy && visibleListings.length === 0 && <div className="renter-empty">{customArea.length >= 3 ? "No available homes fall inside this custom area. Try expanding the shape or radius." : "No available homes match these filters yet."}</div>}
           {visibleListings.map((listing) => {
@@ -355,7 +392,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       <section className="renter-map-panel">
         <LeafletMap listings={visibleListings} center={center} radiusKm={Number(radiusKm)} selectedId={effectiveSelectedId} onSelect={setSelectedId} onCenterChange={handleMapCenterChange} userLocation={userLocation} liveTracking={liveTracking} customArea={customArea} drawingCustomArea={drawingCustomArea} onCustomAreaChange={setCustomArea} />
         {drawingCustomArea && <div className="custom-area-map-hint" role="status"><strong>Draw your search area</strong><span>Tap corners on the map · {customArea.length}/3 minimum · temporary session only</span></div>}
-        {selectedListing && <article className={`mobile-map-sheet tenant-compatibility-${tenantCompatibility(selectedListing.tenant_types ?? [], softPreference)}`} aria-live="polite"><button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close property preview">×</button><div className="mobile-map-sheet-handle" aria-hidden="true" /><div className="mobile-map-sheet-content"><div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div><div className="mobile-map-sheet-copy"><TenantBadge types={selectedListing.tenant_types ?? []} preference={softPreference} /><h2>{selectedListing.title || "Rental property"}</h2><p>{selectedListing.address_text || "Location available on map"}</p>{tenantCompatibility(selectedListing.tenant_types ?? [], softPreference) === "mismatch" && <small className="tenant-preference-note is-mismatch">Different tenant preference</small>}<div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? `৳${selectedListing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>{selectedListing.bedrooms ?? "—"} bed · {selectedListing.bathrooms ?? "—"} bath</span></div></div></div><div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} initialSaved={savedSet.has(selectedListing.id)} compact /><Link className="primary-button link-button" href={propertyHref(selectedListing.id)}>View full listing</Link></div></article>}
+        {selectedListing && <article className={`mobile-map-sheet tenant-compatibility-${tenantCompatibility(selectedListing.tenant_types ?? [], softPreference)}`} aria-live="polite"><button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close property preview">×</button><div className="mobile-map-sheet-handle" aria-hidden="true" /><div className="mobile-map-sheet-content"><div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div><div className="mobile-map-sheet-copy"><TenantBadge types={selectedListing.tenant_types ?? [], preference={softPreference} /><h2>{selectedListing.title || "Rental property"}</h2><p>{selectedListing.address_text || "Location available on map"}</p>{tenantCompatibility(selectedListing.tenant_types ?? [], softPreference) === "mismatch" && <small className="tenant-preference-note is-mismatch">Different tenant preference</small>}<div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? `৳${selectedListing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>{selectedListing.bedrooms ?? "—"} bed · {selectedListing.bathrooms ?? "—"} bath</span></div></div></div><div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} initialSaved={savedSet.has(selectedListing.id)} compact /><Link className="primary-button link-button" href={propertyHref(selectedListing.id)}>View full listing</Link></div></article>}
       </section>
     </div>
   );
