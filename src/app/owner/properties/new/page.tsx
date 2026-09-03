@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ListingDraftGuard } from "@/components/listing-draft-guard";
+import { ListingWorkflowNav } from "@/components/listing-workflow-nav";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -24,13 +25,7 @@ export default async function NewPropertyPage() {
         <Link className="text-link" href="/owner">Back to properties</Link>
       </header>
 
-      <nav className="listing-workflow-ribbon" aria-label="Listing creation steps">
-        <span><b>1</b>Basics & rent</span>
-        <span><b>2</b>Home details</span>
-        <span><b>3</b>Tenant fit</span>
-        <span><b>4</b>Exact map pin</span>
-        <span><b>5</b>Photos & video</span>
-      </nav>
+      <ListingWorkflowNav mode="creation" />
 
       <ListingDraftGuard userId={auth.userId} />
       <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} />
