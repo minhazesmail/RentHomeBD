@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import styles from "./saved-search-match-state.module.css";
 import { createClient } from "@/lib/supabase/client";
 import { TENANT_PROFILE_LABELS, type TenantType } from "@/lib/tenant-match";
 
@@ -20,6 +21,11 @@ type SavedSearchRecord = {
   min_bedrooms: number | null;
 };
 
+type MatchState = {
+  currentCount: number;
+  newCount: number;
+};
+
 type Props = {
   search: SavedSearchRecord;
   userId: string;
@@ -27,6 +33,7 @@ type Props = {
   displayTitle: string;
   displayArea: string;
   displayFilters: string;
+  matchState: MatchState | null;
 };
 
 const MAX_RENT = 10_000_000;
@@ -37,7 +44,7 @@ function duplicateName(name: string) {
   return `${base.slice(0, 80 - suffix.length)}${suffix}`;
 }
 
-export function SavedSearchCard({ search, userId, runHref, displayTitle, displayArea, displayFilters }: Props) {
+export function SavedSearchCard({ search, userId, runHref, displayTitle, displayArea, displayFilters, matchState }: Props) {
   const router = useRouter();
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [editing, setEditing] = useState(false);
@@ -153,6 +160,12 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
         <strong>{displayTitle}</strong>
         <span>{displayArea}</span>
         <small>{displayFilters}</small>
+        {matchState ? (
+          <div className={styles.state} aria-label="Current saved search matches">
+            <span className={styles.pill}>{matchState.currentCount} current {matchState.currentCount === 1 ? "match" : "matches"}</span>
+            {matchState.newCount > 0 ? <span className={`${styles.pill} ${styles.newPill}`}>{matchState.newCount} new since last change</span> : <span className={styles.muted}>No new matches since last change</span>}
+          </div>
+        ) : <span className={styles.muted}>Match counts unavailable right now</span>}
       </div>
 
       {editing ? (
