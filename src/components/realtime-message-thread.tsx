@@ -4,6 +4,7 @@ import { startTransition, useEffect, useLayoutEffect, useMemo, useOptimistic, us
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { MessageComposer, friendlyMessageError, type ChatMessage } from "@/components/message-composer";
+import { formatExactMessageTime, formatThreadMessageTime } from "@/lib/message-time";
 import { createClient } from "@/lib/supabase/client";
 
 type Props = {
@@ -43,6 +44,7 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
   const restoreScrollHeightRef = useRef<number | null>(null);
   const hasPositionedInitiallyRef = useRef(false);
   const lastMessageId = optimisticMessages.at(-1)?.id ?? null;
+  const renderedAt = new Date();
 
   useEffect(() => {
     const messageChannel = supabase
@@ -210,7 +212,7 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
               <div className="message-bubble">
                 <div>{message.body}</div>
                 <small className="message-status">
-                  <span>{message.pending ? "Sending…" : new Date(message.created_at).toLocaleString("en-BD", { dateStyle: "medium", timeStyle: "short" })}</span>
+                  <span>{message.pending ? "Sending…" : <time suppressHydrationWarning dateTime={message.created_at} title={formatExactMessageTime(message.created_at)}>{formatThreadMessageTime(message.created_at, renderedAt)}</time>}</span>
                   {mine && !message.pending && <span className={read ? "read-receipt read" : "read-receipt"}>{read ? "✓✓ Read" : "✓ Sent"}</span>}
                 </small>
               </div>
