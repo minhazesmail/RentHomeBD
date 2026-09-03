@@ -7,6 +7,7 @@ import "./primitives.css";
 import "./brand.css";
 import "./auth.css";
 import "./landing.css";
+import "./landing-alignment.css";
 import "./homes/homes.css";
 import "./owner/owner.css";
 import "./dashboard/dashboard.css";
