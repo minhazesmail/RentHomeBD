@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ListingDraftGuard } from "@/components/listing-draft-guard";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -35,6 +36,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
     amenities: (amenityRows ?? []).map((row) => row.amenity_slug),
     media: mediaWithPreviews,
   };
+  const editable = ["draft", "pending_review", "rejected"].includes(property.status);
 
   return (
     <main className="listing-shell">
@@ -56,6 +58,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         <span><b>5</b>Photos & video</span>
       </nav>
 
+      {editable && <ListingDraftGuard userId={auth.userId} propertyId={id} />}
       <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} property={formProperty} />
     </main>
   );
