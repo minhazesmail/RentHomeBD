@@ -3,6 +3,8 @@ import Link from "next/link";
 
 import { getLandingInventory } from "@/lib/landing-inventory";
 
+const LIST_PROPERTY_HREF = "/login?intent=list-property&next=%2Fowner%2Fproperties%2Fnew";
+
 function label(value: string | null | undefined) {
   return value ? value.replaceAll("_", " ") : "—";
 }
@@ -59,12 +61,17 @@ export async function LandingFeaturedSection() {
         </div>
       ) : (
         <div className="landing-featured-empty">
-          <strong>No moderated homes are live yet.</strong>
-          <p>As soon as owners publish approved, currently available listings, they will appear here automatically.</p>
+          <p className="eyebrow">Dhaka launch inventory</p>
+          <strong>No moderated homes are live right now.</strong>
+          <p>NearBasha only shows real, currently available listings here—never demo properties to make the marketplace look fuller. New homes will appear automatically as owners publish listings and moderation approves them.</p>
+          <div className="landing-featured-action">
+            <Link className="secondary-button link-button" href="/homes">Open the live map</Link>
+            <Link className="primary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link>
+          </div>
         </div>
       )}
 
-      <div className="landing-featured-action"><Link className="secondary-button link-button" href="/homes">Browse homes on the map</Link></div>
+      {featuredListings.length ? <div className="landing-featured-action"><Link className="secondary-button link-button" href="/homes">Browse homes on the map</Link></div> : null}
     </section>
   );
 }
