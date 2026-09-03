@@ -11,6 +11,7 @@ import "./auth.css";
 import "./landing.css";
 import "./landing-alignment.css";
 import "./homes/homes.css";
+import "./homes/homes-redesign.css";
 import "./owner/owner.css";
 import "./dashboard/dashboard.css";
 import "./messages/messages.css";
