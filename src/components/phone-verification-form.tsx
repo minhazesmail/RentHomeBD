@@ -5,15 +5,8 @@ import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { bangladeshPhoneSubscriberDigits, normalizeBangladeshPhone } from "@/lib/bangladesh-phone";
 import { createClient } from "@/lib/supabase/client";
-
-function normalizeBangladeshPhone(value: string) {
-  const compact = value.replace(/[\s()-]/g, "");
-  if (/^01[3-9]\d{8}$/.test(compact)) return `+88${compact}`;
-  if (/^8801[3-9]\d{8}$/.test(compact)) return `+${compact}`;
-  if (/^\+8801[3-9]\d{8}$/.test(compact)) return compact;
-  return null;
-}
 
 function friendlyError(message: string) {
   const lower = message.toLowerCase();
@@ -33,7 +26,7 @@ export function PhoneVerificationForm({
 }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
-  const [phoneInput, setPhoneInput] = useState(currentPhone ?? "");
+  const [phoneInput, setPhoneInput] = useState(bangladeshPhoneSubscriberDigits(currentPhone ?? ""));
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
   const [token, setToken] = useState("");
   const [busy, setBusy] = useState(false);
@@ -45,7 +38,7 @@ export function PhoneVerificationForm({
     event?.preventDefault();
     const phone = normalizeBangladeshPhone(phoneInput);
     if (!phone) {
-      setMessage("Enter a valid Bangladesh mobile number, for example 01712345678 or +8801712345678.");
+      setMessage("Enter a valid Bangladesh mobile number after +880, for example 1712345678.");
       return;
     }
 
@@ -59,6 +52,7 @@ export function PhoneVerificationForm({
       return;
     }
 
+    setPhoneInput(bangladeshPhoneSubscriberDigits(phone));
     setPendingPhone(phone);
     setCooldown(true);
     window.setTimeout(() => setCooldown(false), 60_000);
@@ -111,16 +105,22 @@ export function PhoneVerificationForm({
         <form className="auth-form" onSubmit={requestCode}>
           <label>
             Bangladesh mobile number
-            <input
-              inputMode="tel"
-              autoComplete="tel"
-              placeholder="01712345678"
-              value={phoneInput}
-              onChange={(event) => setPhoneInput(event.target.value)}
-              disabled={busy}
-            />
+            <span className="bd-phone-field">
+              <span className="bd-phone-prefix">+880</span>
+              <input
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel-national"
+                placeholder="1712345678"
+                value={phoneInput}
+                onChange={(event) => setPhoneInput(bangladeshPhoneSubscriberDigits(event.target.value))}
+                maxLength={10}
+                aria-describedby="verification-phone-guidance"
+                disabled={busy}
+              />
+            </span>
           </label>
-          <p className="form-hint">Accepted formats: 01XXXXXXXXX, 8801XXXXXXXXX, or +8801XXXXXXXXX.</p>
+          <p className="form-hint" id="verification-phone-guidance">Enter the 10 digits after +880. Pasting 01712345678 or +8801712345678 also works.</p>
           <button className="primary-button" type="submit" disabled={busy || cooldown}>
             {busy ? "Working…" : cooldown ? "Code requested — wait 60s" : pendingPhone ? "Request another code" : "Send verification code"}
           </button>
