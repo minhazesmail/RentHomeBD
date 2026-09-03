@@ -19,8 +19,8 @@ const DHAKA_CENTER: [number, number] = [23.8103, 90.4125];
 const RADIUS_OPTIONS = ["2", "5", "10", "15", "25", "50", "100"];
 const MAX_RENT_FILTER = 10_000_000;
 const PUBLIC_MEDIA_TTL_SECONDS = 300;
-const LIVE_SEARCH_MIN_DISTANCE_METERS = 100;
-const LIVE_SEARCH_MAX_INTERVAL_MS = 20_000;
+const LIVE_SEARCH_MIN_DISTANCE_METERS = 120;
+const LIVE_CENTER_MIN_DISTANCE_METERS = 30;
 
 type SortOption = "recommended" | "distance" | "rent-asc" | "rent-desc";
 
@@ -157,8 +157,8 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   const [customArea, setCustomArea] = useState<[number, number][]>([]);
   const [drawingCustomArea, setDrawingCustomArea] = useState(false);
   const watchIdRef = useRef<number | null>(null);
+  const lastLiveCenterRef = useRef<[number, number] | null>(null);
   const lastLiveSearchLocationRef = useRef<[number, number] | null>(null);
-  const lastLiveSearchAtRef = useRef(0);
   const runSearchRef = useRef<(searchCenter?: [number, number]) => Promise<void>>(async () => {});
   const initialCenterRef = useRef(initialCenter);
 
@@ -257,15 +257,35 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   function startLiveLocation() {
     if (!navigator.geolocation) { setMessage("Location access is not supported by this browser."); return; }
     if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
-    setLocating(true); setMessage(null); setLocationStatus("Requesting precise location…"); lastLiveSearchLocationRef.current = null; lastLiveSearchAtRef.current = 0;
+    setLocating(true);
+    setMessage(null);
+    setLocationStatus("Requesting precise location…");
+    lastLiveCenterRef.current = null;
+    lastLiveSearchLocationRef.current = null;
     watchIdRef.current = navigator.geolocation.watchPosition(({ coords }) => {
       const next: [number, number] = [coords.latitude, coords.longitude];
-      const now = Date.now();
+      const accuracy = Number.isFinite(coords.accuracy) ? Math.max(coords.accuracy, 0) : 0;
+      const centerThreshold = Math.max(LIVE_CENTER_MIN_DISTANCE_METERS, Math.min(accuracy * 0.5, 100));
+      const searchThreshold = Math.max(LIVE_SEARCH_MIN_DISTANCE_METERS, Math.min(accuracy, 250));
+      const lastCenter = lastLiveCenterRef.current;
       const lastSearchLocation = lastLiveSearchLocationRef.current;
-      const movedEnough = !lastSearchLocation || distanceMeters(lastSearchLocation, next) >= LIVE_SEARCH_MIN_DISTANCE_METERS;
-      const enoughTimePassed = now - lastLiveSearchAtRef.current >= LIVE_SEARCH_MAX_INTERVAL_MS;
-      setLocationPreset(""); setUserLocation({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy }); setCenter(next); setLocating(false); setLiveTracking(true); setLocationStatus(`Live GPS on · accuracy ±${Math.round(coords.accuracy)} m · nearby homes update as you move.`);
-      if (movedEnough || enoughTimePassed) { lastLiveSearchLocationRef.current = next; lastLiveSearchAtRef.current = now; void runSearchRef.current(next); }
+      const shouldMoveCenter = !lastCenter || distanceMeters(lastCenter, next) >= centerThreshold;
+      const shouldRefreshResults = !lastSearchLocation || distanceMeters(lastSearchLocation, next) >= searchThreshold;
+
+      setLocationPreset("");
+      setUserLocation({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy });
+      setLocating(false);
+      setLiveTracking(true);
+      setLocationStatus(`Live GPS on · accuracy ±${Math.round(coords.accuracy)} m · results refresh after meaningful movement.`);
+
+      if (shouldMoveCenter) {
+        lastLiveCenterRef.current = next;
+        setCenter(next);
+      }
+      if (shouldRefreshResults) {
+        lastLiveSearchLocationRef.current = next;
+        void runSearchRef.current(next);
+      }
     }, (error) => {
       setLocating(false); setLiveTracking(false); if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
       setMessage(error.code === error.PERMISSION_DENIED ? "Location permission was denied. Enable location access for NearBasha in your browser settings and try again." : "Could not keep track of your location. Check GPS/network access and try again."); setLocationStatus(null);
