@@ -6,6 +6,7 @@ import { SaveHomeButton } from "@/components/save-home-button";
 import { requireUser } from "@/lib/auth";
 import { describeMapCenter } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeTenantType, TENANT_PROFILE_LABELS } from "@/lib/tenant-match";
 export const dynamic = "force-dynamic";
 
 function searchHref(search: {
@@ -24,6 +25,11 @@ function searchHref(search: {
   if (search.tenant_type) params.set("tenant", search.tenant_type);
   if (search.min_bedrooms !== null) params.set("bedrooms", String(search.min_bedrooms));
   return `/homes?${params.toString()}`;
+}
+
+function renterTypeLabel(value: unknown) {
+  const type = normalizeTenantType(value);
+  return type ? TENANT_PROFILE_LABELS[type] : null;
 }
 
 export default async function SavedPage() {
@@ -87,16 +93,19 @@ export default async function SavedPage() {
             <div className="saved-empty">No saved searches yet. Name a filter set from the map page and save it.</div>
           ) : (
             <div className="saved-search-list">
-              {searches.map((search) => (
-                <div className="saved-search-card" key={search.id as string}>
-                  <div>
-                    <strong>{search.name as string}</strong>
-                    <span>{search.radius_km ? `${search.radius_km} km radius` : "Any distance"}{search.min_rent || search.max_rent ? ` · ৳${search.min_rent ?? 0}–${search.max_rent ?? "any"}` : ""}{search.tenant_type ? ` · ${String(search.tenant_type).replaceAll("_", " ")}` : ""}{search.min_bedrooms ? ` · ${search.min_bedrooms}+ bed` : ""}</span>
-                    <small>{describeMapCenter(Number(search.center_lat), Number(search.center_long))}</small>
+              {searches.map((search) => {
+                const renterType = renterTypeLabel(search.tenant_type);
+                return (
+                  <div className="saved-search-card" key={search.id as string}>
+                    <div>
+                      <strong>{search.name as string}</strong>
+                      <span>{search.radius_km ? `${search.radius_km} km radius` : "Any distance"}{search.min_rent || search.max_rent ? ` · ৳${search.min_rent ?? 0}–${search.max_rent ?? "any"}` : ""}{renterType ? ` · ${renterType}` : ""}{search.min_bedrooms ? ` · ${search.min_bedrooms}+ bed` : ""}</span>
+                      <small>{describeMapCenter(Number(search.center_lat), Number(search.center_long))}</small>
+                    </div>
+                    <div className="saved-search-actions"><Link className="primary-button link-button" href={searchHref(search as never)}>Run search</Link><DeleteSavedSearchButton searchId={search.id as string} userId={auth.userId} /></div>
                   </div>
-                  <div className="saved-search-actions"><Link className="primary-button link-button" href={searchHref(search as never)}>Run search</Link><DeleteSavedSearchButton searchId={search.id as string} userId={auth.userId} /></div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
