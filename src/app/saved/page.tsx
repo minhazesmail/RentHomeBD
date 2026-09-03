@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { ProductNavigation } from "@/components/product-navigation";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { SavedSearchCard } from "@/components/saved-search-card";
 import { requireUser } from "@/lib/auth";
@@ -91,6 +92,7 @@ function savedSearchFilters(search: {
 
 export default async function SavedPage() {
   const auth = await requireUser();
+  const canList = auth.profile.primary_role === "owner" || auth.profile.primary_role === "agent";
   const supabase = (await createClient()) as unknown as SupabaseClient;
 
   const [{ data: savedRows }, { data: searches }] = await Promise.all([
@@ -141,10 +143,7 @@ export default async function SavedPage() {
 
   return (
     <main className="saved-page">
-      <header className="saved-topbar">
-        <Link className="homes-brand" href="/">NearBasha</Link>
-        <nav><Link className="text-link" href="/homes">Map search</Link><Link className="text-link" href="/messages">Messages</Link><Link className="text-link" href="/dashboard">Dashboard</Link></nav>
-      </header>
+      <ProductNavigation authenticated canList={canList} current="saved" />
 
       <div className="saved-shell">
         <div className="saved-hero">
