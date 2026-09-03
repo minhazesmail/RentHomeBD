@@ -13,7 +13,7 @@ type AuthIntent = "list-property" | undefined;
 
 const OTP_COOLDOWN_SECONDS = 60;
 
-function friendlyAuthError(error: unknown, context: "signin" | "signup" | "otp-send" | "otp-verify") {
+function friendlyAuthError(error: unknown, context: "signin" | "signup" | "otp-send" | "otp-verify" | "password-reset") {
   const raw = error instanceof Error
     ? error.message
     : typeof error === "object" && error !== null && "message" in error && typeof (error as { message?: unknown }).message === "string"
@@ -29,6 +29,9 @@ function friendlyAuthError(error: unknown, context: "signin" | "signup" | "otp-s
   }
   if (context === "otp-send") {
     return "We couldn't send an OTP to that number. Check the number and try again.";
+  }
+  if (context === "password-reset") {
+    return "We couldn't send a password reset email right now. Please wait a moment and try again.";
   }
   if (context === "signin") {
     return "We couldn't sign you in with those credentials.";
@@ -53,6 +56,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
   const listingIntent = intent === "list-property";
   const [method, setMethod] = useState<Method>("email");
   const [mode, setMode] = useState<Mode>("signin");
+  const [recoveringPassword, setRecoveringPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -124,6 +128,30 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
 
     router.replace(nextPath);
     router.refresh();
+  }
+
+  async function requestPasswordReset(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setMessage("Enter the email address you use for NearBasha.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage(null);
+    const resetDestination = `/auth/reset?next=${encodeURIComponent(nextPath)}`;
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(resetDestination)}`,
+    });
+    setBusy(false);
+
+    if (error) {
+      setMessage(friendlyAuthError(error, "password-reset"));
+      return;
+    }
+
+    setMessage("If an account exists for that email, a password reset link will arrive shortly. Check your inbox and spam folder.");
   }
 
   async function requestPhoneOtp() {
@@ -198,6 +226,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
 
   function switchMethod(nextMethod: Method) {
     setMethod(nextMethod);
+    setRecoveringPassword(false);
     setOtpSent(false);
     setToken("");
     setMessage(null);
@@ -205,6 +234,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
 
   function switchMode(nextMode: Mode) {
     setMode(nextMode);
+    setRecoveringPassword(false);
     if (nextMode === "signup" && listingIntent) setRole("owner");
     setOtpSent(false);
     setToken("");
@@ -242,25 +272,37 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
 
   return (
     <div className="auth-card">
-      <div className="auth-tabs" aria-label="Authentication method">
-        <button className={method === "email" ? "active" : ""} onClick={() => switchMethod("email")} type="button">
-          Email
-        </button>
-        <button className={method === "phone" ? "active" : ""} onClick={() => switchMethod("phone")} type="button">
-          Phone OTP
-        </button>
-      </div>
+      {!recoveringPassword && (
+        <>
+          <div className="auth-tabs" aria-label="Authentication method">
+            <button className={method === "email" ? "active" : ""} onClick={() => switchMethod("email")} type="button">Email</button>
+            <button className={method === "phone" ? "active" : ""} onClick={() => switchMethod("phone")} type="button">Phone OTP</button>
+          </div>
 
-      <div className="auth-tabs compact" aria-label="Account mode">
-        <button className={mode === "signin" ? "active" : ""} onClick={() => switchMode("signin")} type="button">Sign in</button>
-        <button className={mode === "signup" ? "active" : ""} onClick={() => switchMode("signup")} type="button">Create account</button>
-      </div>
+          <div className="auth-tabs compact" aria-label="Account mode">
+            <button className={mode === "signin" ? "active" : ""} onClick={() => switchMode("signin")} type="button">Sign in</button>
+            <button className={mode === "signup" ? "active" : ""} onClick={() => switchMode("signup")} type="button">Create account</button>
+          </div>
+        </>
+      )}
 
-      {method === "email" ? (
+      {recoveringPassword ? (
+        <form className="auth-form" onSubmit={requestPasswordReset}>
+          <div>
+            <p className="eyebrow">Account recovery</p>
+            <h2>Reset your password</h2>
+            <p className="form-hint">Enter the email address on your NearBasha account. We’ll send a secure link to choose a new password.</p>
+          </div>
+          <label>Email<input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
+          <button className="primary-button" disabled={busy} type="submit">{busy ? "Sending…" : "Send reset link"}</button>
+          <button className="text-button" type="button" onClick={() => { setRecoveringPassword(false); setMessage(null); }}>Back to sign in</button>
+        </form>
+      ) : method === "email" ? (
         <form className="auth-form" onSubmit={submitEmail}>
           {signupProfileFields()}
           <label>Email<input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
           <label>Password<input type="password" autoComplete={mode === "signin" ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required /></label>
+          {mode === "signin" && <button className="text-button" type="button" onClick={() => { setRecoveringPassword(true); setMessage(null); }}>Forgot password?</button>}
           <button className="primary-button" disabled={busy} type="submit">{busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}</button>
         </form>
       ) : otpSent ? (
@@ -268,9 +310,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
           <label>6-digit OTP<input inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={token} onChange={(e) => setToken(e.target.value.replace(/\D/g, ""))} required /></label>
           <button className="primary-button" disabled={busy} type="submit">{busy ? "Verifying…" : "Verify OTP"}</button>
           <button className="text-button" onClick={() => { setOtpSent(false); setToken(""); setMessage(null); }} type="button">Use a different number</button>
-          <button className="text-button" onClick={() => void requestPhoneOtp()} type="button" disabled={busy || cooldown > 0}>
-            {cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}
-          </button>
+          <button className="text-button" onClick={() => void requestPhoneOtp()} type="button" disabled={busy || cooldown > 0}>{cooldown > 0 ? `Resend OTP in ${cooldown}s` : "Resend OTP"}</button>
         </form>
       ) : (
         <form className="auth-form" onSubmit={sendPhoneOtp}>
