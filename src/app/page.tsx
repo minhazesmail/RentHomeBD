@@ -7,6 +7,7 @@ import { LandingFeaturedSection } from "@/components/landing-featured-section";
 import { LandingMapPreview } from "@/components/landing-map-preview";
 import { LandingScrollAtmosphere } from "@/components/landing-scroll-atmosphere";
 import { LOCATION_PRESETS } from "@/lib/location-presets";
+import { DEFAULT_RENTER_SEARCH_RADIUS } from "@/lib/search-defaults";
 
 const LIST_PROPERTY_HREF = "/login?intent=list-property&next=%2Fowner%2Fproperties%2Fnew";
 
@@ -107,18 +108,18 @@ export default function HomePage() {
                     <option value="3">3+ bedrooms</option>
                   </select>
                 </label>
-                <input type="hidden" name="radius" value="5" />
+                <input type="hidden" name="radius" value={DEFAULT_RENTER_SEARCH_RADIUS} />
                 <button className="landing-search-submit" type="submit"><Search aria-hidden="true" /><span>Search map</span><ArrowRight aria-hidden="true" /></button>
               </div>
-              <p className="form-hint" id="landing-area-help">Location search currently supports the Dhaka areas and landmarks listed here. You can move the full map manually to search somewhere else.</p>
+              <p className="form-hint" id="landing-area-help">Location search currently supports the Dhaka areas and landmarks listed here. Searches start within {DEFAULT_RENTER_SEARCH_RADIUS} km; you can refine the radius or move the full map manually.</p>
             </form>
 
             <div className="landing-popular-searches">
               <span>Popular:</span>
-              <Link href="/homes?area=Dhanmondi&radius=5">Dhanmondi</Link>
-              <Link href="/homes?area=Banani&radius=5">Banani</Link>
-              <Link href="/homes?area=Uttara&radius=5">Uttara</Link>
-              <Link href="/homes?area=BUET&radius=5">Near BUET</Link>
+              <Link href={`/homes?area=Dhanmondi&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Dhanmondi</Link>
+              <Link href={`/homes?area=Banani&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Banani</Link>
+              <Link href={`/homes?area=Uttara&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Uttara</Link>
+              <Link href={`/homes?area=BUET&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Near BUET</Link>
             </div>
 
             <div className="landing-confidence-row" aria-label="NearBasha marketplace safeguards">
