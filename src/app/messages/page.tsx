@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 const INBOX_PAGE_SIZE = 20;
+const MESSAGE_MEDIA_TTL_SECONDS = 300;
 
 type ConversationSummary = {
   id: string;
@@ -68,6 +69,30 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
   const hasOrganizationFilters = Boolean(query || unreadOnly);
   const firstPageHref = inboxHref({ query, unreadOnly });
 
+  const propertyIds = Array.from(new Set(conversations.map((conversation) => conversation.property_id)));
+  const { data: mediaRows } = propertyIds.length
+    ? await supabase
+        .from("property_media")
+        .select("property_id, storage_path, sort_order")
+        .in("property_id", propertyIds)
+        .eq("media_type", "photo")
+        .order("sort_order", { ascending: true })
+    : { data: [] };
+
+  const coverPathByProperty = new Map<string, string>();
+  for (const media of mediaRows ?? []) {
+    const propertyId = media.property_id as string;
+    if (!coverPathByProperty.has(propertyId) && media.storage_path) coverPathByProperty.set(propertyId, media.storage_path as string);
+  }
+
+  const coverEntries = await Promise.all(
+    Array.from(coverPathByProperty.entries()).map(async ([propertyId, storagePath]) => {
+      const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(storagePath, MESSAGE_MEDIA_TTL_SECONDS);
+      return [propertyId, signed?.signedUrl ?? null] as const;
+    }),
+  );
+  const coverUrlByProperty = new Map(coverEntries);
+
   return (
     <main className="messages-page">
       <div className="messages-shell">
@@ -105,9 +130,14 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
                 const unread = Number(conversation.unread_count);
                 const otherName = auth.userId === conversation.renter_id ? conversation.owner_display_name : conversation.renter_display_name;
                 const timestamp = conversation.last_message_at || conversation.created_at;
+                const propertyTitle = conversation.property_title || "Rental property";
+                const coverUrl = coverUrlByProperty.get(conversation.property_id);
                 return (
                   <Link className="conversation-card" href={`/messages/${conversation.id}`} key={conversation.id}>
-                    <div className="conversation-main"><strong>{otherName || "NearBasha user"}</strong><span>{conversation.property_title || "Rental property"}</span><small>{conversation.last_message_body || "Conversation started — send the first message."}</small></div>
+                    <span className="conversation-property-media" aria-hidden="true">
+                      {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <span>Home</span>}
+                    </span>
+                    <div className="conversation-main"><strong>{otherName || "NearBasha user"}</strong><span>Regarding {propertyTitle}</span><small>{conversation.last_message_body || "Conversation started — send the first message."}</small></div>
                     <div className="conversation-meta">{unread > 0 && <span className="unread-badge">{unread}</span>}<time dateTime={timestamp} title={formatExactMessageTime(timestamp)}>{formatInboxMessageTime(timestamp, renderedAt)}</time></div>
                   </Link>
                 );
