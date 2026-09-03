@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 const OwnerLocationPicker = dynamic(() => import("@/components/owner-location-picker").then((module) => module.OwnerLocationPicker), { ssr: false });
 
 type Amenity = { slug: string; name: string };
-type ExistingMedia = { id: string; storage_path: string; media_type: "photo" | "video"; preview_url?: string | null };
+type ExistingMedia = { id: string; storage_path: string; media_type: "photo" | "video"; sort_order?: number; preview_url?: string | null };
 type ExistingProperty = {
   id: string;
   title: string | null;
@@ -38,6 +38,9 @@ type ExistingProperty = {
 };
 
 type Props = { userId: string; amenities: Amenity[]; property?: ExistingProperty };
+type OrderedMedia =
+  | { key: string; kind: "existing"; media: ExistingMedia }
+  | { key: string; kind: "new"; file: File };
 
 const tenantOptions = [["family", "Family"], ["bachelor", "Bachelor"], ["student", "Student"], ["job_holder", "Job holder"], ["everyone", "Everyone"]] as const;
 const utilityOptions = [["water", "Water"], ["gas", "Gas"], ["electricity", "Electricity"], ["internet", "Internet"], ["service_charge", "Service charge"]] as const;
@@ -60,6 +63,8 @@ function fileExtension(file: File) {
 }
 
 function storageFilename(path: string) { return path.split("/").pop() ?? path; }
+function existingMediaKey(id: string) { return `existing:${id}`; }
+function selectedFileKey(file: File) { return `new:${file.name}:${file.size}:${file.lastModified}`; }
 function rawErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   if (typeof error === "object" && error !== null && "message" in error) {
@@ -122,13 +127,27 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
   const [existingMedia, setExistingMedia] = useState(property?.media ?? []);
   const [removedMedia, setRemovedMedia] = useState<ExistingMedia[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [mediaOrder, setMediaOrder] = useState<string[]>(() => (property?.media ?? []).map((media) => existingMediaKey(media.id)));
   const [busy, setBusy] = useState(false);
   const [locating, setLocating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   const latNumber = optionalNumber(latitude);
   const lngNumber = optionalNumber(longitude);
-  const hasPhoto = existingMedia.some((media) => media.media_type === "photo") || files.some((file) => file.type.startsWith("image/"));
+  const orderedMedia = useMemo<OrderedMedia[]>(() => {
+    const existingByKey = new Map(existingMedia.map((media) => [existingMediaKey(media.id), media]));
+    const fileByKey = new Map(files.map((file) => [selectedFileKey(file), file]));
+    const ordered: OrderedMedia[] = [];
+    for (const key of mediaOrder) {
+      const media = existingByKey.get(key);
+      if (media) { ordered.push({ key, kind: "existing", media }); continue; }
+      const file = fileByKey.get(key);
+      if (file) ordered.push({ key, kind: "new", file });
+    }
+    return ordered;
+  }, [existingMedia, files, mediaOrder]);
+  const hasPhoto = orderedMedia.some((item) => item.kind === "existing" ? item.media.media_type === "photo" : item.file.type.startsWith("image/"));
+  const coverKey = orderedMedia.find((item) => item.kind === "existing" ? item.media.media_type === "photo" : item.file.type.startsWith("image/"))?.key ?? null;
 
   function toggle(value: string, values: string[], setter: (next: string[]) => void) { setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]); }
   function setMapLocation(lat: number, lng: number) {
@@ -139,14 +158,44 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
 
   function addSelectedFiles(nextFiles: File[]) {
     if (!nextFiles.length) return;
-    const currentKeys = new Set(files.map((file) => `${file.name}:${file.size}:${file.lastModified}`));
-    const unique = nextFiles.filter((file) => !currentKeys.has(`${file.name}:${file.size}:${file.lastModified}`));
+    const currentKeys = new Set(files.map(selectedFileKey));
+    const unique = nextFiles.filter((file) => !currentKeys.has(selectedFileKey(file)));
     if (existingMedia.length + files.length + unique.length > 10) {
       setMessage(`A listing can have up to 10 media files. You can add ${Math.max(0, 10 - existingMedia.length - files.length)} more.`);
       return;
     }
     setFiles((items) => [...items, ...unique]);
+    setMediaOrder((items) => [...items, ...unique.map(selectedFileKey)]);
     setMessage(unique.length < nextFiles.length ? "Duplicate selections were skipped. Your existing selected files were kept." : null);
+  }
+
+  function removeExistingMedia(media: ExistingMedia) {
+    const key = existingMediaKey(media.id);
+    setExistingMedia((items) => items.filter((item) => item.id !== media.id));
+    setRemovedMedia((items) => [...items, media]);
+    setMediaOrder((items) => items.filter((item) => item !== key));
+  }
+
+  function removeSelectedFile(file: File) {
+    const key = selectedFileKey(file);
+    setFiles((items) => items.filter((item) => selectedFileKey(item) !== key));
+    setMediaOrder((items) => items.filter((item) => item !== key));
+  }
+
+  function moveMedia(key: string, direction: -1 | 1) {
+    setMediaOrder((items) => {
+      const index = items.indexOf(key);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= items.length) return items;
+      const next = [...items];
+      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+      return next;
+    });
+  }
+
+  function makeCover(key: string) {
+    setMediaOrder((items) => [key, ...items.filter((item) => item !== key)]);
+    setMessage("Cover photo selected. Save the listing to publish this media order.");
   }
 
   function validateNumericFields() {
@@ -223,18 +272,37 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
     }
   }
 
+  async function stageExistingMediaOrder() {
+    for (let index = 0; index < orderedMedia.length; index += 1) {
+      const item = orderedMedia[index];
+      if (item.kind !== "existing") continue;
+      const staged = await supabase.from("property_media").update({ sort_order: 100 + index } as never).eq("id", item.media.id);
+      if (staged.error) throw staged.error;
+    }
+  }
+
   async function uploadNewMedia(propertyId: string) {
-    let sortOrder = existingMedia.length;
-    for (const file of files) {
+    for (let index = 0; index < orderedMedia.length; index += 1) {
+      const item = orderedMedia[index];
+      if (item.kind !== "new") continue;
+      const file = item.file;
       if (file.size > 20 * 1024 * 1024) throw new Error(`${file.name} is larger than 20 MB.`);
       const id = crypto.randomUUID();
       const path = `${userId}/${propertyId}/${id}.${fileExtension(file)}`;
       const upload = await supabase.storage.from("property-media").upload(path, file, { cacheControl: "3600", upsert: false });
       if (upload.error) throw upload.error;
       const mediaType = file.type.startsWith("video/") ? "video" : "photo";
-      const metadata = await supabase.from("property_media").insert({ property_id: propertyId, storage_path: path, media_type: mediaType, sort_order: sortOrder } as never);
+      const metadata = await supabase.from("property_media").insert({ property_id: propertyId, storage_path: path, media_type: mediaType, sort_order: index } as never);
       if (metadata.error) { await supabase.storage.from("property-media").remove([path]); throw metadata.error; }
-      sortOrder += 1;
+    }
+  }
+
+  async function finalizeExistingMediaOrder() {
+    for (let index = 0; index < orderedMedia.length; index += 1) {
+      const item = orderedMedia[index];
+      if (item.kind !== "existing") continue;
+      const result = await supabase.from("property_media").update({ sort_order: index } as never).eq("id", item.media.id);
+      if (result.error) throw result.error;
     }
   }
 
@@ -257,7 +325,9 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       }
       await syncRelations(propertyId);
       await removeDeletedMedia();
+      await stageExistingMediaOrder();
       await uploadNewMedia(propertyId);
+      await finalizeExistingMediaOrder();
       if (submitForReview) {
         const submission = await supabase.from("properties").update({ status: "pending_review" } as never).eq("id", propertyId).eq("owner_id", userId);
         if (submission.error) throw submission.error;
@@ -267,7 +337,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
     } catch (error) { setMessage(friendlyListingError(error)); setBusy(false); }
   }
 
-  const mediaCount = existingMedia.length + files.length;
+  const mediaCount = orderedMedia.length;
 
   return (
     <form className="listing-form" onSubmit={(event) => { event.preventDefault(); void save(false); }}>
@@ -324,23 +394,35 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       </section>
 
       <section className="listing-section">
-        <div className="section-heading"><span>5</span><div><h2>Photos & video</h2><p>At least one photo is required for review. Up to 10 files, 20 MB each.</p></div></div>
-        {(existingMedia.length > 0 || files.length > 0) && <div className="media-grid listing-media-preview-grid">
-          {existingMedia.map((media) => <div className="media-card listing-media-card" key={media.id}>
-            <div className="media-placeholder listing-media-visual">
-              {media.preview_url ? (media.media_type === "video" ? <video className="listing-media-preview" src={media.preview_url} muted controls preload="metadata" /> : <img className="listing-media-preview" src={media.preview_url} alt="Existing property photo" />) : <div className="listing-media-preview-fallback"><strong>{media.media_type === "photo" ? "Photo" : "Video"}</strong><small>Preview unavailable</small></div>}
-            </div>
-            <div className="listing-media-meta"><strong>{media.media_type === "photo" ? "Existing photo" : "Existing video"}</strong><small>{storageFilename(media.storage_path)}</small></div>
-            <button type="button" className="text-button" disabled={locked} onClick={() => { setExistingMedia((items) => items.filter((item) => item.id !== media.id)); setRemovedMedia((items) => [...items, media]); }}>Remove</button>
-          </div>)}
-          {files.map((file, index) => <div className="media-card listing-media-card is-new" key={`${file.name}:${file.size}:${file.lastModified}`}>
-            <div className="media-placeholder listing-media-visual"><SelectedMediaPreview file={file} /></div>
-            <div className="listing-media-meta"><strong>New {file.type.startsWith("video/") ? "video" : "photo"}</strong><small>{file.name}</small><small>{(file.size / (1024 * 1024)).toFixed(1)} MB</small></div>
-            <button type="button" className="text-button" onClick={() => setFiles((items) => items.filter((_, itemIndex) => itemIndex !== index))}>Remove</button>
-          </div>)}
+        <div className="section-heading"><span>5</span><div><h2>Photos & video</h2><p>At least one photo is required for review. Up to 10 files, 20 MB each. The first photo is the cover shown in search results.</p></div></div>
+        {orderedMedia.length > 0 && <div className="media-grid listing-media-preview-grid">
+          {orderedMedia.map((item, index) => {
+            const isPhoto = item.kind === "existing" ? item.media.media_type === "photo" : item.file.type.startsWith("image/");
+            const isCover = isPhoto && item.key === coverKey;
+            return <div className={`media-card listing-media-card${item.kind === "new" ? " is-new" : ""}${isCover ? " is-cover" : ""}`} key={item.key}>
+              <div className="media-placeholder listing-media-visual">
+                {isCover && <span className="listing-cover-badge">Cover photo</span>}
+                {item.kind === "existing" ? (
+                  item.media.preview_url ? (item.media.media_type === "video" ? <video className="listing-media-preview" src={item.media.preview_url} muted controls preload="metadata" /> : <img className="listing-media-preview" src={item.media.preview_url} alt="Existing property photo" />) : <div className="listing-media-preview-fallback"><strong>{item.media.media_type === "photo" ? "Photo" : "Video"}</strong><small>Preview unavailable</small></div>
+                ) : <SelectedMediaPreview file={item.file} />}
+              </div>
+              <div className="listing-media-meta">
+                <strong>{item.kind === "existing" ? (item.media.media_type === "photo" ? "Existing photo" : "Existing video") : `New ${item.file.type.startsWith("video/") ? "video" : "photo"}`}</strong>
+                <small>{item.kind === "existing" ? storageFilename(item.media.storage_path) : item.file.name}</small>
+                {item.kind === "new" && <small>{(item.file.size / (1024 * 1024)).toFixed(1)} MB</small>}
+                <small>Position {index + 1} of {mediaCount}</small>
+              </div>
+              {!locked && <div className="listing-media-controls" aria-label={`Media position ${index + 1}`}>
+                <button type="button" className="text-button" disabled={index === 0} onClick={() => moveMedia(item.key, -1)} aria-label="Move media earlier">← Earlier</button>
+                <button type="button" className="text-button" disabled={index === mediaCount - 1} onClick={() => moveMedia(item.key, 1)} aria-label="Move media later">Later →</button>
+                {isPhoto && !isCover && <button type="button" className="text-button listing-cover-action" onClick={() => makeCover(item.key)}>Make cover</button>}
+              </div>}
+              {!locked && <button type="button" className="text-button listing-media-remove" onClick={() => item.kind === "existing" ? removeExistingMedia(item.media) : removeSelectedFile(item.file)}>Remove</button>}
+            </div>;
+          })}
         </div>}
         {!locked && <label className="upload-drop">Add files<input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple onChange={(event) => { addSelectedFiles(Array.from(event.target.files ?? [])); event.currentTarget.value = ""; }} /><span>{files.length ? `${files.length} new file${files.length === 1 ? "" : "s"} ready to upload · choose more to add` : "Choose JPG, PNG, WebP, MP4 or WebM"}</span></label>}
-        <p className="form-hint">Current media count: {mediaCount}/10. Selecting more files adds to your current selection instead of replacing it.</p>
+        <p className="form-hint">Current media count: {mediaCount}/10. Use Earlier/Later to set gallery order. Choose Make cover on any photo to move it to the first position.</p>
       </section>
 
       {message && <div className="auth-message" role="status" aria-live="polite">{message}</div>}
