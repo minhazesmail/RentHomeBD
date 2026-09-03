@@ -3,8 +3,9 @@ import { Hind_Siliguri, Inter } from "next/font/google";
 import "leaflet/dist/leaflet.css";
 import "./tokens.css";
 import "./globals.css";
-import "./foundation.css";
 import "./primitives.css";
+import "./foundation.css";
+import "./shells.css";
 import "./brand.css";
 import "./auth.css";
 import "./landing.css";
@@ -14,6 +15,8 @@ import "./owner/owner.css";
 import "./dashboard/dashboard.css";
 import "./messages/messages.css";
 import "./saved/saved.css";
+
+import { GlobalShell } from "@/components/global-shell";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -41,7 +44,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${inter.variable} ${hindSiliguri.variable}`}>
       <body>
         <a className="skip-link" href="#main-content">Skip to main content</a>
-        <div id="main-content" tabIndex={-1}>{children}</div>
+        <div id="main-content" tabIndex={-1}>
+          <GlobalShell>{children}</GlobalShell>
+        </div>
       </body>
     </html>
   );
