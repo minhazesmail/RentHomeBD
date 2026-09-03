@@ -1,11 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Bath, BedDouble, Building2, Camera, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
+import { Bath, BedDouble, Building2, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { PhoneRevealButton } from "@/components/phone-reveal-button";
+import { PropertyMediaGallery, type PropertyGalleryMedia } from "@/components/property-media-gallery";
 import { ReportListingButton } from "@/components/report-listing-button";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
@@ -64,8 +64,9 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
     })),
   ]);
 
-  const photos = media.filter((item) => item.media_type === "photo" && item.signed_url);
-  const videos = media.filter((item) => item.media_type === "video" && item.signed_url);
+  const galleryMedia = media
+    .filter((item): item is MediaItem & { signed_url: string } => Boolean(item.signed_url))
+    .map<PropertyGalleryMedia>((item) => ({ id: item.id, media_type: item.media_type, sort_order: item.sort_order, signed_url: item.signed_url }));
   const renterTypes = normalizeTenantTypes(property.tenant_types);
   const availability = availabilityLabel(property.available_from);
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`;
@@ -90,10 +91,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
           <div className="property-detail-price"><span className="property-detail-price-label">Monthly rent</span><strong>{property.rent_bdt ? `৳${property.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>per month</span><small>{property.deposit_bdt > 0 ? `Deposit ৳${property.deposit_bdt.toLocaleString("en-BD")}` : "No deposit listed"}</small></div>
         </section>
 
-        <section className="property-gallery">
-          {photos.length ? photos.slice(0, 5).map((item, index) => <div className={`property-gallery-item ${index === 0 ? "property-gallery-primary" : ""}`} key={item.id}><Image src={item.signed_url!} alt={`${property.title || "Property"} photo ${index + 1}`} fill sizes={index === 0 ? "(max-width: 900px) 100vw, 60vw" : "(max-width: 900px) 50vw, 20vw"} /></div>) : <div className="property-gallery-empty">No property photos are available.</div>}
-          {photos.length > 0 && <div className="property-gallery-count"><Camera size={15} aria-hidden="true" />{photos.length} photo{photos.length === 1 ? "" : "s"}</div>}
-        </section>
+        <PropertyMediaGallery media={galleryMedia} propertyTitle={property.title || "Rental property"} />
 
         <div className="property-detail-layout">
           <div className="property-detail-main">
@@ -110,7 +108,6 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
 
             <section className="property-detail-section"><div className="property-section-heading"><div><h2>Amenities & included utilities</h2><p className="section-copy">A quick scan of what comes with the property and what may already be covered in rent.</p></div></div><div className="property-tag-groups"><div><h3>Amenities</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} />{amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} />None listed</span>}</div></div><div><h3>Utilities included</h3><div className="amenity-grid utility-grid">{property.utilities_included.length ? property.utilities_included.map((utility) => <span className="amenity-item" key={utility}><Zap size={15} />{label(utility)}</span>) : <span className="amenity-item"><Zap size={15} />None listed</span>}</div></div></div></section>
 
-            {videos.length > 0 && <section className="property-detail-section"><h2>Property video</h2><div className="property-video-grid">{videos.map((item) => <video key={item.id} src={item.signed_url!} controls preload="metadata" />)}</div></section>}
             <section className="property-detail-section"><div className="property-section-heading"><div><h2>Exact location</h2><p className="section-copy">The owner pinned this exact property location during listing creation.</p></div><MapPin size={20} aria-hidden="true" /></div><div className="property-map"><iframe title="Exact property location" src={mapUrl} loading="lazy" /></div></section>
             <section className="property-detail-section property-trust-section" id="trust">
               <div className="trust-section-heading"><div><h2>Trust & safety</h2><p className="section-copy">NearBasha surfaces the checks that matter before you contact a landlord, so you can understand what has been verified at a glance.</p></div><div className="trust-shield" aria-hidden="true"><ShieldCheck size={23} /></div></div>
