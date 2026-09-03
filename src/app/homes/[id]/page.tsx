@@ -13,7 +13,7 @@ import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
 import { getAuthContext } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { normalizeTenantTypes, TENANT_PROFILE_LABELS } from "@/lib/tenant-match";
+import { normalizeTenantType, normalizeTenantTypes, TENANT_PROFILE_LABELS, tenantCompatibility } from "@/lib/tenant-match";
 type Amenity = { slug: string; name: string };
 type MediaItem = { id: string; storage_path: string; media_type: "photo" | "video"; sort_order: number; signed_url?: string | null };
 type PublicProperty = {
@@ -69,9 +69,9 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
   const property = (data?.[0] ?? null) as PublicProperty | null;
   if (!property) notFound();
 
-  const [{ data: savedRow }, { data: viewerTrust }, media] = await Promise.all([
+  const [{ data: savedRow }, { data: viewerProfile }, media] = await Promise.all([
     auth ? supabase.from("saved_properties").select("property_id").eq("user_id", auth.userId).eq("property_id", property.id).maybeSingle() : Promise.resolve({ data: null }),
-    auth ? supabase.from("profiles").select("phone_verified_at").eq("id", auth.userId).maybeSingle() : Promise.resolve({ data: null }),
+    auth ? supabase.from("profiles").select("phone_verified_at, preferred_tenant_type").eq("id", auth.userId).maybeSingle() : Promise.resolve({ data: null }),
     Promise.all((property.media ?? []).map(async (item) => {
       const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(item.storage_path, PUBLIC_MEDIA_TTL_SECONDS);
       return { ...item, signed_url: signed?.signedUrl ?? null };
@@ -82,12 +82,25 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
     .filter((item): item is MediaItem & { signed_url: string } => Boolean(item.signed_url))
     .map<PropertyGalleryMedia>((item) => ({ id: item.id, media_type: item.media_type, sort_order: item.sort_order, signed_url: item.signed_url }));
   const renterTypes = normalizeTenantTypes(property.tenant_types);
+  const preferredTenantType = normalizeTenantType(viewerProfile?.preferred_tenant_type);
+  const renterFit = tenantCompatibility(renterTypes, preferredTenantType);
+  const personalizedRenterFit = preferredTenantType && preferredTenantType !== "everyone"
+    ? renterFit === "match"
+      ? `This home matches your ${TENANT_PROFILE_LABELS[preferredTenantType]} renter preference.`
+      : renterFit === "mismatch"
+        ? `This home may not match your ${TENANT_PROFILE_LABELS[preferredTenantType]} renter preference.`
+        : `This listing does not provide enough renter-type detail to compare with your ${TENANT_PROFILE_LABELS[preferredTenantType]} preference.`
+    : preferredTenantType === "everyone"
+      ? "Your renter profile is open to every renter type, so no compatibility restriction is applied here."
+      : auth
+        ? "Add a renter-type preference to your profile to see a personalized fit signal on listings."
+        : null;
   const availability = availabilityLabel(property.available_from);
   const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.006}%2C${property.latitude - 0.004}%2C${property.longitude + 0.006}%2C${property.latitude + 0.004}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`;
   const signInHref = `/login?next=${encodeURIComponent(`/homes/${property.id}#contact`)}`;
   const roleVerified = Boolean(property.owner_role_verified_at && property.owner_role_verified_role === property.owner_role);
   const ownerPhoneVerified = Boolean(property.owner_phone_verified_at);
-  const viewerPhoneVerified = Boolean(viewerTrust?.phone_verified_at);
+  const viewerPhoneVerified = Boolean(viewerProfile?.phone_verified_at);
 
   return (
     <main className="property-detail-page">
@@ -118,7 +131,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
 
             <section className="property-detail-section"><div className="property-section-heading"><div><h2>About this home</h2><p className="section-copy">The practical details you’ll want before arranging a viewing.</p></div><Sparkles size={20} aria-hidden="true" /></div><p className="property-description">{property.description || "The owner has not added a longer description yet."}</p><dl className="property-facts"><div><dt>Property type</dt><dd>{label(property.property_type)}</dd></div><div><dt>Furnishing</dt><dd>{label(property.furnishing)}</dd></div><div><dt>Available from</dt><dd>{formatPropertyDate(property.available_from)}</dd></div><div><dt>Deposit</dt><dd>৳{property.deposit_bdt.toLocaleString("en-BD")}</dd></div><div><dt>Gender preference</dt><dd>{label(property.gender_preference)}</dd></div></dl></section>
 
-            <section className="property-detail-section tenant-compatibility-card"><div className="tenant-compatibility-top"><div className="tenant-compatibility-icon"><Users size={22} /></div><div><h2>Renter fit</h2><p>These are the renter types the owner has marked as suitable for this home.</p></div></div><div className="tenant-compatibility-tags">{renterTypes.length ? renterTypes.map((type) => <span key={type}><CircleCheck size={14} />{TENANT_PROFILE_LABELS[type]}</span>) : <span>Renter type not specified</span>}</div></section>
+            <section className="property-detail-section tenant-compatibility-card"><div className="tenant-compatibility-top"><div className="tenant-compatibility-icon"><Users size={22} /></div><div><h2>Renter fit</h2><p>{personalizedRenterFit || "These are the renter types the owner has marked as suitable for this home."}</p></div></div><div className="tenant-compatibility-tags">{renterTypes.length ? renterTypes.map((type) => <span key={type}><CircleCheck size={14} />{TENANT_PROFILE_LABELS[type]}</span>) : <span>Renter type not specified</span>}</div></section>
 
             <section className="property-detail-section"><div className="property-section-heading"><div><h2>Amenities & included utilities</h2><p className="section-copy">A quick scan of what comes with the property and what may already be covered in rent.</p></div></div><div className="property-tag-groups"><div><h3>Amenities</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} />{amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} />None listed</span>}</div></div><div><h3>Utilities included</h3><div className="amenity-grid utility-grid">{property.utilities_included.length ? property.utilities_included.map((utility) => <span className="amenity-item" key={utility}><Zap size={15} />{label(utility)}</span>) : <span className="amenity-item"><Zap size={15} />None listed</span>}</div></div></div></section>
 
