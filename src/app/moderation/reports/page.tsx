@@ -30,20 +30,20 @@ export default async function ReportQueuePage({ searchParams }: { searchParams: 
   const propertyById = new Map((properties ?? []).map((property) => [property.id, property]));
 
   return (
-    <main className="owner-shell">
-      <header className="owner-header">
+    <main className="owner-shell moderation-shell moderation-reports-shell">
+      <header className="owner-header moderation-header">
         <div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">Trust & safety</p><h1 className="owner-title">Listing reports</h1><p className="intro">Review renter-submitted safety and accuracy reports. Hiding a listing removes it from public search immediately.</p></div>
-        <div className="owner-header-actions"><Link className="secondary-button link-button" href="/moderation">Listing reviews</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
+        <div className="owner-header-actions moderation-nav"><Link className="secondary-button link-button" href="/moderation">Listing reviews</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
       </header>
 
       {params.notice === "hide_listing" && <div className="success-message">Listing hidden and report closed.</div>}
       {(params.notice === "dismiss" || params.notice === "resolve") && <div className="success-message">Report closed and decision recorded.</div>}
 
-      <section className="property-list-panel">
+      <section className="property-list-panel moderation-report-panel">
         {!reports?.length ? <div className="empty-state"><div className="empty-icon">✓</div><h2>No open reports</h2><p>The trust and safety queue is clear.</p></div> : (
-          <div className="property-list">{reports.map((report) => {
+          <div className="property-list moderation-list">{reports.map((report) => {
             const property = propertyById.get(report.property_id);
-            return <Link className="property-row" href={`/moderation/reports/${report.id}`} key={report.id}><div className="property-row-main"><strong>{property?.title || "Reported listing"}</strong><span>{reasonLabels[report.reason] || report.reason}{report.details ? ` · ${report.details}` : ""}</span></div><div className="property-row-meta"><span className="status-pill status-rejected">Open report</span><span>{new Date(report.created_at).toLocaleDateString("en-BD")}</span></div></Link>;
+            return <Link className="property-row moderation-row moderation-report-row" href={`/moderation/reports/${report.id}`} key={report.id}><div className="property-row-main"><strong>{property?.title || "Reported listing"}</strong><span>{reasonLabels[report.reason] || report.reason}{report.details ? ` · ${report.details}` : ""}</span></div><div className="property-row-meta"><span className="status-pill status-rejected">Open report</span><span>{new Date(report.created_at).toLocaleDateString("en-BD")}</span></div></Link>;
           })}</div>
         )}
       </section>
