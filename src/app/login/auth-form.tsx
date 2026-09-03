@@ -1,5 +1,6 @@
 "use client";
 
+import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -59,6 +60,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
   const [recoveringPassword, setRecoveringPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<Role>(listingIntent ? "owner" : "renter");
   const [tenantType, setTenantType] = useState<Exclude<TenantType, "everyone"> | "">("");
@@ -220,6 +222,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
   function switchMethod(nextMethod: Method) {
     setMethod(nextMethod);
     setRecoveringPassword(false);
+    setShowPassword(false);
     setOtpSent(false);
     setToken("");
     setMessage(null);
@@ -228,6 +231,7 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
   function switchMode(nextMode: Mode) {
     setMode(nextMode);
     setRecoveringPassword(false);
+    setShowPassword(false);
     if (nextMode === "signup" && listingIntent) setRole("owner");
     setOtpSent(false);
     setToken("");
@@ -292,7 +296,30 @@ export function AuthForm({ nextPath = "/dashboard", intent }: { nextPath?: strin
         <form className="auth-form" onSubmit={submitEmail}>
           {signupProfileFields()}
           <label>Email<input type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
-          <label>Password<input type="password" autoComplete={mode === "signin" ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required /></label>
+          <label>
+            Password
+            <span className="auth-password-field">
+              <input
+                type={showPassword ? "text" : "password"}
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={8}
+                aria-describedby={mode === "signup" ? "auth-password-guidance" : undefined}
+                required
+              />
+              <button
+                className="auth-password-toggle"
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
+              </button>
+            </span>
+            {mode === "signup" && <span className="form-hint" id="auth-password-guidance">Use at least 8 characters. A longer, unique password is safer.</span>}
+          </label>
           {mode === "signin" && <button className="text-button" type="button" onClick={() => { setRecoveringPassword(true); setMessage(null); }}>Forgot password?</button>}
           <button className="primary-button" disabled={busy} type="submit">{busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}</button>
         </form>
