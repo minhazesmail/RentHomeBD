@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ListingDraftGuard } from "@/components/listing-draft-guard";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -31,6 +32,7 @@ export default async function NewPropertyPage() {
         <span><b>5</b>Photos & video</span>
       </nav>
 
+      <ListingDraftGuard userId={auth.userId} />
       <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} />
     </main>
   );
