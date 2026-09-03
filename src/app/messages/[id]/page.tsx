@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+const THREAD_PAGE_SIZE = 50;
+
 type Conversation = {
   id: string;
   property_id: string;
@@ -49,11 +51,14 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
       .from("messages")
       .select("id, sender_id, body, created_at")
       .eq("conversation_id", conversation.id)
-      .order("created_at", { ascending: true }),
+      .order("created_at", { ascending: false })
+      .limit(THREAD_PAGE_SIZE + 1),
     supabase.from("profiles").select("phone_verified_at").eq("id", otherUserId).maybeSingle(),
   ]);
 
-  const messages = (messageRows ?? []) as Message[];
+  const newestFirst = (messageRows ?? []) as Message[];
+  const hasOlderMessages = newestFirst.length > THREAD_PAGE_SIZE;
+  const messages = newestFirst.slice(0, THREAD_PAGE_SIZE).reverse();
   const otherName = viewerIsRenter ? conversation.owner_display_name : conversation.renter_display_name;
   const otherRole = viewerIsRenter ? "Owner / agent" : "Renter";
   const phoneVerified = Boolean(otherProfile?.phone_verified_at);
@@ -84,6 +89,8 @@ export default async function MessageThreadPage({ params }: { params: Promise<{ 
           otherReadField={otherReadField}
           initialOtherReadAt={otherReadAt}
           initialMessages={messages}
+          initialHasOlderMessages={hasOlderMessages}
+          pageSize={THREAD_PAGE_SIZE}
         />
       </div>
     </main>
