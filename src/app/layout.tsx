@@ -8,6 +8,7 @@ import "./foundation.css";
 import "./shells.css";
 import "./brand.css";
 import "./auth.css";
+import "./auth-verification-redesign.css";
 import "./landing.css";
 import "./landing-alignment.css";
 import "./homes/homes.css";
