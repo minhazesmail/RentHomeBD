@@ -125,6 +125,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
 
   const savedSet = useMemo(() => new Set(initialSavedPropertyIds), [initialSavedPropertyIds]);
   const softPreference = tenantType ? undefined : preferredTenantType;
+  const customAreaMode = drawingCustomArea || customArea.length > 0;
   const visibleListings = useMemo(() => customArea.length >= 3 ? listings.filter((listing) => pointInPolygon([listing.latitude, listing.longitude], customArea)) : listings, [customArea, listings]);
   const effectiveSelectedId = selectedId && !visibleListings.some((listing) => listing.id === selectedId)
     ? visibleListings[0]?.id ?? null
@@ -243,13 +244,14 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   }
 
   async function saveSearch() {
+    if (customAreaMode) { setMessage("Custom drawn areas are temporary and cannot be saved yet. Clear the custom area first, then save the radius and filters."); return; }
     if (!userId) { router.push(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`); return; }
     if (!searchName.trim()) { setMessage("Give this search a short name before saving it."); return; }
     const validationMessage = validateFilters();
     if (validationMessage) { setMessage(validationMessage); return; }
     setSavingSearch(true); setMessage(null);
     const { error } = await supabase.from("saved_searches").insert({ user_id: userId, name: searchName.trim(), center_lat: center[0], center_long: center[1], radius_km: Number(radiusKm), min_rent: minRent ? Number(minRent) : null, max_rent: maxRent ? Number(maxRent) : null, tenant_type: tenantType || null, min_bedrooms: bedrooms ? Number(bedrooms) : null });
-    if (error) setMessage(friendlySearchError(error)); else { setSearchName(""); setMessage(customArea.length >= 3 ? "Search saved with its radius and filters. The custom drawn area is temporary for this map session." : "Search saved. You can reopen it from Saved."); }
+    if (error) setMessage(friendlySearchError(error)); else { setSearchName(""); setMessage("Search saved. You can reopen it from Saved."); }
     setSavingSearch(false);
   }
 
@@ -258,14 +260,14 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
     setCustomArea([]);
     setSelectedId(null);
     setDrawingCustomArea(true);
-    setMessage("Custom area mode: tap at least 3 points on the map, then choose Finish area.");
+    setMessage("Custom area mode: tap at least 3 points on the map, then choose Finish area. Drawn areas are temporary and cannot be saved yet.");
   }
 
   function finishCustomArea() {
     if (customArea.length < 3) { setMessage("Add at least 3 points to create a custom search area."); return; }
     setDrawingCustomArea(false);
     setSelectedId(visibleListings[0]?.id ?? null);
-    setMessage(`${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"} inside your custom area.`);
+    setMessage(`${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"} inside your custom area. This drawn area is temporary and will not be saved.`);
   }
 
   function clearCustomArea() {
@@ -295,11 +297,11 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
           <div className="custom-area-controls">
             {!drawingCustomArea && customArea.length < 3 && <button className="secondary-button" type="button" onClick={startCustomArea}>◇ Draw custom area</button>}
             {drawingCustomArea && <><button className="primary-button" type="button" onClick={finishCustomArea}>Finish area ({customArea.length})</button><button className="text-button" type="button" onClick={clearCustomArea}>Cancel</button></>}
-            {!drawingCustomArea && customArea.length >= 3 && <><span><strong>Custom area active</strong>{visibleListings.length} homes inside</span><button className="text-button" type="button" onClick={clearCustomArea}>Clear area</button></>}
+            {!drawingCustomArea && customArea.length >= 3 && <><span><strong>Custom area active · temporary</strong>{visibleListings.length} homes inside</span><button className="text-button" type="button" onClick={clearCustomArea}>Clear area</button></>}
           </div>
           {locationStatus && <div className="success-message compact-message" role="status" aria-live="polite">{locationStatus}</div>}
-          <div className="save-search-row"><input value={searchName} onChange={(e) => setSearchName(e.target.value)} maxLength={80} placeholder="Name this search, e.g. Dhanmondi family" /><button className="secondary-button" type="button" onClick={() => void saveSearch()} disabled={savingSearch}>{savingSearch ? "Saving…" : "Save search"}</button></div>
-          <p className="form-hint">{customArea.length >= 3 ? "Custom area filters the homes returned by your current radius search. Clear it to return to radius mode." : `Search center: ${center[0].toFixed(4)}, ${center[1].toFixed(4)} · Radius capped at 100 km for fast results.`}</p>
+          <div className="save-search-row"><input value={searchName} onChange={(e) => setSearchName(e.target.value)} maxLength={80} placeholder={customAreaMode ? "Clear custom area to save a radius search" : "Name this search, e.g. Dhanmondi family"} disabled={customAreaMode} aria-describedby="save-search-help" /><button className="secondary-button" type="button" onClick={() => void saveSearch()} disabled={savingSearch || customAreaMode}>{savingSearch ? "Saving…" : "Save radius search"}</button></div>
+          <p className="form-hint" id="save-search-help">{customAreaMode ? "Custom drawn areas are session-only and are not stored in Saved. Clear the custom area to save the current center, radius, and filters." : `Saved searches store this center, radius, and your filters. Search radius is capped at 100 km.`}</p>
           {message && <div className={message.startsWith("Search saved") || message.includes("inside your custom area") ? "success-message compact-message" : "auth-message"} role="status" aria-live="polite">{message}</div>}
         </div>
 
@@ -315,7 +317,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
 
       <section className="renter-map-panel">
         <LeafletMap listings={visibleListings} center={center} radiusKm={Number(radiusKm)} selectedId={effectiveSelectedId} onSelect={setSelectedId} onCenterChange={handleMapCenterChange} userLocation={userLocation} liveTracking={liveTracking} customArea={customArea} drawingCustomArea={drawingCustomArea} onCustomAreaChange={setCustomArea} />
-        {drawingCustomArea && <div className="custom-area-map-hint" role="status"><strong>Draw your search area</strong><span>Tap corners on the map · {customArea.length}/3 minimum</span></div>}
+        {drawingCustomArea && <div className="custom-area-map-hint" role="status"><strong>Draw your search area</strong><span>Tap corners on the map · {customArea.length}/3 minimum · temporary session only</span></div>}
         {selectedListing && <article className={`mobile-map-sheet tenant-compatibility-${tenantCompatibility(selectedListing.tenant_types ?? [], softPreference)}`} aria-live="polite"><button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close property preview">×</button><div className="mobile-map-sheet-handle" aria-hidden="true" /><div className="mobile-map-sheet-content"><div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div><div className="mobile-map-sheet-copy"><TenantBadge types={selectedListing.tenant_types ?? []} preference={softPreference} /><h2>{selectedListing.title || "Rental property"}</h2><p>{selectedListing.address_text || "Location available on map"}</p>{tenantCompatibility(selectedListing.tenant_types ?? [], softPreference) === "mismatch" && <small className="tenant-preference-note is-mismatch">Different tenant preference</small>}<div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? `৳${selectedListing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>{selectedListing.bedrooms ?? "—"} bed · {selectedListing.bathrooms ?? "—"} bath</span></div></div></div><div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} initialSaved={savedSet.has(selectedListing.id)} compact /><Link className="primary-button link-button" href={propertyHref(selectedListing.id)}>View full listing</Link></div></article>}
       </section>
     </div>
