@@ -98,9 +98,76 @@
   border-radius: 24px;
 }
 
+.messages-organization {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid rgba(16, 37, 29, 0.11);
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.88);
+}
+
+.messages-search-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.messages-search-form input[type="search"] {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #d6dfd8;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--foreground);
+}
+
+.messages-search-form input[type="search"]:focus-visible {
+  outline: 3px solid rgba(23, 107, 74, 0.18);
+  outline-offset: 2px;
+  border-color: #80aa91;
+}
+
+.messages-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.messages-filter-tabs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 13px;
+  border: 1px solid rgba(16, 37, 29, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--foreground);
+  font-size: .84rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.messages-filter-tabs a.is-active {
+  border-color: rgba(23, 107, 74, .35);
+  background: #e8f5ed;
+  color: #176b4a;
+}
+
 @media (max-width: 760px) {
 
   .messages-page {
     padding: 14px;
+  }
+
+  .messages-search-form {
+    grid-template-columns: 1fr auto;
+  }
+
+  .messages-search-form .text-link {
+    grid-column: 1 / -1;
   }
 }
