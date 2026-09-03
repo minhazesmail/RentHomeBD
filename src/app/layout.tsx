@@ -1,35 +1,7 @@
 import type { Metadata } from "next";
 import { Hind_Siliguri, Inter } from "next/font/google";
 import "leaflet/dist/leaflet.css";
-import "./tokens.css";
-import "./globals.css";
-import "./primitives.css";
-import "./foundation.css";
-import "./shells.css";
-import "./brand.css";
-import "./auth.css";
-import "./auth-verification-redesign.css";
-import "./information-redesign.css";
-import "./landing.css";
-import "./landing-alignment.css";
-import "./landing-redesign.css";
-import "./homes/homes.css";
-import "./homes/homes-redesign.css";
-import "./homes/property-detail-redesign.css";
-import "./owner/owner.css";
-import "./owner/owner-management-redesign.css";
-import "./dashboard/dashboard.css";
-import "./dashboard/dashboard-redesign.css";
-import "./messages/messages.css";
-import "./messages/messages-redesign.css";
-import "./saved/saved.css";
-import "./saved/saved-redesign.css";
-import "./moderation/moderation-redesign.css";
-import "./motion-polish.css";
-import "./responsive-audit.css";
-import "./accessibility-audit.css";
-import "./performance-optimizations.css";
-import "./visual-regression-cleanup.css";
+import "./styles.css";
 
 import { GlobalShell } from "@/components/global-shell";
 
