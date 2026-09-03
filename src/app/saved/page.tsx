@@ -11,6 +11,11 @@ export const dynamic = "force-dynamic";
 
 const SAVED_HOME_MEDIA_TTL_SECONDS = 300;
 
+type SavedSearchMatchRow = {
+  current_count: number | string;
+  new_count: number | string;
+};
+
 function searchHref(search: {
   center_lat: number;
   center_long: number;
@@ -93,6 +98,22 @@ export default async function SavedPage() {
     supabase.from("saved_searches").select("id, name, center_lat, center_long, radius_km, min_rent, max_rent, tenant_type, min_bedrooms, updated_at").eq("user_id", auth.userId).order("updated_at", { ascending: false }),
   ]);
 
+  const matchStateEntries = await Promise.all((searches ?? []).map(async (search) => {
+    const { data, error } = await supabase.rpc("count_saved_search_matches", {
+      center_lat: Number(search.center_lat),
+      center_long: Number(search.center_long),
+      radius_km: search.radius_km == null ? null : Number(search.radius_km),
+      min_rent: search.min_rent == null ? null : Number(search.min_rent),
+      max_rent: search.max_rent == null ? null : Number(search.max_rent),
+      renter_tenant_type: normalizeTenantType(search.tenant_type),
+      min_bedrooms: search.min_bedrooms == null ? null : Number(search.min_bedrooms),
+      changed_since: search.updated_at,
+    });
+    const row = (data?.[0] ?? null) as SavedSearchMatchRow | null;
+    return [search.id as string, error || !row ? null : { currentCount: Number(row.current_count), newCount: Number(row.new_count) }] as const;
+  }));
+  const matchStateBySearch = new Map(matchStateEntries);
+
   const propertyIds = (savedRows ?? []).map((row) => row.property_id as string);
   const [{ data: properties }, { data: mediaRows }] = propertyIds.length
     ? await Promise.all([
@@ -173,7 +194,7 @@ export default async function SavedPage() {
         </section>
 
         <section className="saved-section">
-          <div className="saved-section-heading"><div><h2>Saved searches</h2><p>Each preset stores its map area and active filters.</p></div><span>{searches?.length ?? 0}</span></div>
+          <div className="saved-section-heading"><div><h2>Saved searches</h2><p>See how many homes match now and which appeared since you last changed each search.</p></div><span>{searches?.length ?? 0}</span></div>
           {!searches?.length ? (
             <div className="saved-empty">No saved searches yet. Name a filter set from the map page and save it.</div>
           ) : (
@@ -186,6 +207,7 @@ export default async function SavedPage() {
                   displayTitle={savedSearchTitle(search)}
                   displayArea={savedSearchArea(search)}
                   displayFilters={savedSearchFilters(search)}
+                  matchState={matchStateBySearch.get(search.id as string) ?? null}
                   search={{
                     id: search.id as string,
                     name: search.name as string,
