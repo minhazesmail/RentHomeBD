@@ -6,8 +6,6 @@ import "@/app/landing-redesign.css";
 import "@/app/landing-pointed-fixes.css";
 import { useEffect } from "react";
 
-const SCENES = ["hero", "trust", "journey", "homes", "local", "clarity", "action", "footer"] as const;
-
 export function LandingScrollAtmosphere() {
   useEffect(() => {
     const root = document.querySelector<HTMLElement>(".landing-shell");
@@ -37,9 +35,9 @@ export function LandingScrollAtmosphere() {
     return () => observer.disconnect();
   }, []);
 
-  return (
-    <div className="landing-scroll-atmosphere" aria-hidden="true">
-      {SCENES.map((scene) => <span className="landing-scroll-scene" data-scene={scene} key={scene} />)}
-    </div>
-  );
+  // The theme still follows the active section, but the visual atmosphere is a
+  // single fixed layer. The previous implementation rendered eight oversized,
+  // continuously animated compositor layers and was the main source of scroll
+  // jank on the landing page.
+  return <div className="landing-scroll-atmosphere" aria-hidden="true" />;
 }
