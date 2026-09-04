@@ -11,6 +11,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { SaveHomeButton } from "@/components/save-home-button";
 import type { MapListing, UserMapLocation } from "@/components/leaflet-map";
 import { RenterResultsList } from "@/components/renter-results-list";
+import { buildHomesSearchPath } from "@/lib/homes-search-url";
 import { LOCATION_PRESETS } from "@/lib/location-presets";
 import { TENANT_PROFILE_LABELS, tenantCompatibility, tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
 import { createClient } from "@/lib/supabase/client";
@@ -180,24 +181,29 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
     [effectiveSelectedId, visibleListings],
   );
 
-  const searchReturnPath = useCallback((selectionId: string) => {
-    const params = new URLSearchParams({
-      lat: center[0].toFixed(6),
-      lng: center[1].toFixed(6),
-      radius: radiusKm,
-      selected: selectionId,
-      sort: sortOption,
-    });
-    if (minRent) params.set("minRent", minRent);
-    if (maxRent) params.set("maxRent", maxRent);
-    if (tenantType) params.set("tenant", tenantType);
-    if (bedrooms) params.set("bedrooms", bedrooms);
-    return `/homes?${params.toString()}`;
-  }, [bedrooms, center, maxRent, minRent, radiusKm, sortOption, tenantType]);
+  const searchReturnPath = useCallback((selectionId?: string | null) => buildHomesSearchPath({
+    centerLat: center[0],
+    centerLong: center[1],
+    radiusKm,
+    minRent,
+    maxRent,
+    tenantType,
+    bedrooms,
+    selectedId: selectionId,
+    sort: sortOption,
+  }), [bedrooms, center, maxRent, minRent, radiusKm, sortOption, tenantType]);
 
   const propertyHref = useCallback((propertyId: string) => {
     return `/homes/${propertyId}?returnTo=${encodeURIComponent(searchReturnPath(propertyId))}`;
   }, [searchReturnPath]);
+
+  useEffect(() => {
+    const nextPath = searchReturnPath(selectedId);
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    if (currentPath !== nextPath) {
+      window.history.replaceState(window.history.state, "", nextPath);
+    }
+  }, [searchReturnPath, selectedId]);
 
   const handleSelectListing = useCallback((propertyId: string) => {
     setSelectedId(propertyId);
