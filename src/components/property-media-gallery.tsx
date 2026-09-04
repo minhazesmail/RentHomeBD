@@ -16,6 +16,7 @@ export type PropertyGalleryMedia = {
 export function PropertyMediaGallery({ media, propertyTitle }: { media: PropertyGalleryMedia[]; propertyTitle: string }) {
   const orderedMedia = [...media].sort((a, b) => a.sort_order - b.sort_order);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const lightboxRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
   const activeItem = activeIndex === null ? null : orderedMedia[activeIndex];
@@ -45,9 +46,44 @@ export function PropertyMediaGallery({ media, propertyTitle }: { media: Property
     closeButtonRef.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeGallery();
-      if (event.key === "ArrowLeft" && orderedMedia.length > 1) showPrevious();
-      if (event.key === "ArrowRight" && orderedMedia.length > 1) showNext();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeGallery();
+        return;
+      }
+      if (event.key === "ArrowLeft" && orderedMedia.length > 1) {
+        event.preventDefault();
+        showPrevious();
+        return;
+      }
+      if (event.key === "ArrowRight" && orderedMedia.length > 1) {
+        event.preventDefault();
+        showNext();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const dialog = lightboxRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), video[controls], [tabindex]:not([tabindex="-1"])',
+      )).filter((element) => !element.hasAttribute("hidden") && element.getAttribute("aria-hidden") !== "true");
+      if (!focusable.length) {
+        event.preventDefault();
+        closeButtonRef.current?.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const activeElement = document.activeElement;
+      if (event.shiftKey && (activeElement === first || !dialog.contains(activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => {
@@ -99,7 +135,7 @@ export function PropertyMediaGallery({ media, propertyTitle }: { media: Property
       </section>
 
       {activeItem && activeIndex !== null && (
-        <div className={styles.lightbox} role="dialog" aria-modal="true" aria-label={`${propertyTitle} media viewer`} onMouseDown={(event) => { if (event.target === event.currentTarget) closeGallery(); }}>
+        <div ref={lightboxRef} className={styles.lightbox} role="dialog" aria-modal="true" aria-label={`${propertyTitle} media viewer`} onMouseDown={(event) => { if (event.target === event.currentTarget) closeGallery(); }}>
           <div className={styles.lightboxHeader}>
             <span>{activeIndex + 1} / {orderedMedia.length} · {activeItem.media_type === "photo" ? "Photo" : "Video"}</span>
             <button ref={closeButtonRef} className={styles.iconButton} type="button" onClick={closeGallery} aria-label="Close media viewer"><X aria-hidden="true" /></button>
