@@ -225,11 +225,19 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
       tenantTypesByProperty.set(row.property_id, current);
     }
 
-    const hydrated = await Promise.all(rows.map(async (listing) => {
-      const tenant_types = tenantTypesByProperty.get(listing.id) ?? [];
-      if (!listing.cover_media_path) return { ...listing, tenant_types };
-      const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(listing.cover_media_path, PUBLIC_MEDIA_TTL_SECONDS);
-      return { ...listing, tenant_types, cover_url: signed?.signedUrl ?? null };
+    const coverPaths = [...new Set(rows.flatMap((listing) => listing.cover_media_path ? [listing.cover_media_path] : []))];
+    const signedUrlByPath = new Map<string, string>();
+    if (coverPaths.length > 0) {
+      const { data: signedRows } = await supabase.storage.from("property-media").createSignedUrls(coverPaths, PUBLIC_MEDIA_TTL_SECONDS);
+      for (const signed of signedRows ?? []) {
+        if (signed.path && signed.signedUrl) signedUrlByPath.set(signed.path, signed.signedUrl);
+      }
+    }
+
+    const hydrated = rows.map((listing) => ({
+      ...listing,
+      tenant_types: tenantTypesByProperty.get(listing.id) ?? [],
+      cover_url: listing.cover_media_path ? signedUrlByPath.get(listing.cover_media_path) ?? null : null,
     }));
     setListings(hydrated);
     setSelectedId((current) => current && hydrated.some((listing) => listing.id === current) ? current : null);
