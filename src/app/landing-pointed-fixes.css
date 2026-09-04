@@ -54,6 +54,37 @@
   white-space: nowrap;
 }
 
+/* Search field structure: the redesign expects each field label to behave like
+   a normal block container with an absolutely positioned icon. Some older
+   landing rules leave these labels in a multi-column grid, which collapses the
+   uppercase helper text into a 1-3 character column at mid desktop widths. */
+.landing-shell .landing-search-console-field,
+.landing-shell .landing-search-console-field:nth-of-type(3) {
+  display: block !important;
+  grid-template-columns: none !important;
+  grid-template-rows: none !important;
+}
+
+.landing-shell .landing-search-console-field > span {
+  display: block !important;
+  width: auto !important;
+  min-width: 0;
+  max-width: 100%;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+.landing-shell .landing-search-console-field input,
+.landing-shell .landing-search-console-field select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
 /* Mid-sized desktop is the failure range in the screenshot: the viewport is
    wide, but the left hero column is not. Make the search UI fit the column it
    actually receives instead of forcing four controls into a single row. */
@@ -79,17 +110,6 @@
 
   .landing-shell .landing-search-console-area {
     grid-column: 1 / -1;
-  }
-
-  .landing-shell .landing-search-console-field:nth-of-type(3) {
-    display: grid;
-  }
-
-  .landing-shell .landing-search-console-field > span {
-    overflow: visible;
-    text-overflow: clip;
-    white-space: normal;
-    line-height: 1.2;
   }
 
   .landing-shell .landing-search-submit {
