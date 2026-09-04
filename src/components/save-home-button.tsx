@@ -25,8 +25,8 @@ export function SaveHomeButton({
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!busy) setSaved(initialSaved);
-  }, [busy, initialSaved]);
+    setSaved(initialSaved);
+  }, [initialSaved]);
 
   function toggle() {
     if (!userId) {
