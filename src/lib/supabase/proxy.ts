@@ -38,7 +38,10 @@ export async function updateSession(request: NextRequest) {
   const { data: claimsData } = await supabase.auth.getClaims();
   if (!claimsData?.claims?.sub && isProtectedRoute(request.nextUrl.pathname)) {
     const loginUrl = request.nextUrl.clone();
-    const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+    const nextUrl = request.nextUrl.clone();
+    nextUrl.searchParams.delete("_vercel_share");
+    const nextPath = `${nextUrl.pathname}${nextUrl.search}`;
+
     loginUrl.pathname = "/login";
     loginUrl.search = "";
     loginUrl.searchParams.set("next", nextPath);
