@@ -147,15 +147,14 @@ export default async function SavedPage() {
 
       <div className="saved-shell">
         <div className="saved-hero">
-          <p className="eyebrow">Renter workspace</p>
           <h1>Saved homes & searches</h1>
-          <p className="intro">Keep interesting listings in one place and reopen your favorite map filters without rebuilding them.</p>
+          <p className="intro">Compare homes and reopen saved map searches.</p>
         </div>
 
         <section className="saved-section">
-          <div className="saved-section-heading"><div><h2>Available saved homes</h2><p>Homes you saved that are still publicly available.</p></div><span>{availableSavedRows.length}</span></div>
+          <div className="saved-section-heading"><div><h2>Available saved homes</h2><p>Still live in renter search.</p></div><span>{availableSavedRows.length}</span></div>
           {!availableSavedRows.length ? (
-            <div className="saved-empty">No saved homes are currently available. Use the heart on any map result or property page to save more.</div>
+            <div className="saved-empty">No saved homes are currently available. Save homes from the map or a property page.</div>
           ) : (
             <div className="saved-home-grid">
               {availableSavedRows.map((saved) => {
@@ -193,13 +192,13 @@ export default async function SavedPage() {
 
         {unavailableSavedRows.length > 0 && (
           <section className="saved-section">
-            <div className="saved-section-heading"><div><h2>Unavailable saved homes</h2><p>These homes are hidden, expired, rented, or otherwise no longer publicly available. You can remove them from your saved list.</p></div><span>{unavailableSavedRows.length}</span></div>
+            <div className="saved-section-heading"><div><h2>Unavailable saved homes</h2><p>No longer visible to renters.</p></div><span>{unavailableSavedRows.length}</span></div>
             <div className="saved-home-grid">
               {unavailableSavedRows.map((saved) => {
                 const propertyId = saved.property_id as string;
                 return (
                   <div className="saved-home-card unavailable" key={propertyId}>
-                    <div><strong>No longer available</strong><span>This saved listing is not currently visible to renters.</span></div>
+                    <div><strong>No longer available</strong><span>Remove it when you no longer need it in your shortlist.</span></div>
                     <SaveHomeButton propertyId={propertyId} userId={auth.userId} initialSaved />
                   </div>
                 );
@@ -209,9 +208,9 @@ export default async function SavedPage() {
         )}
 
         <section className="saved-section">
-          <div className="saved-section-heading"><div><h2>Saved searches</h2><p>See how many homes match now and which appeared since you last changed each search.</p></div><span>{searches?.length ?? 0}</span></div>
+          <div className="saved-section-heading"><div><h2>Saved searches</h2><p>Current and new matches at a glance.</p></div><span>{searches?.length ?? 0}</span></div>
           {!searches?.length ? (
-            <div className="saved-empty">No saved searches yet. Name a filter set from the map page and save it.</div>
+            <div className="saved-empty">No saved searches yet. Save a filter set from the map.</div>
           ) : (
             <div className="saved-search-list">
               {searches.map((search) => (
