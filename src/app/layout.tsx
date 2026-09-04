@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     default: "NearBasha",
     template: "%s | NearBasha",
   },
-  description: "Find verified homes and apartments near you on a live map across Bangladesh.",
+  description: "Search moderated rental homes on a live map in Dhaka. NearBasha is a Bangladesh-focused rental marketplace launching first in Dhaka.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
