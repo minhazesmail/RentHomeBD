@@ -1,6 +1,6 @@
 /* NearBasha global stylesheet manifest.
    Keep import order stable: later layers intentionally override earlier ones.
-   Route families own their local cascade through route-level manifests; selector cleanup remains Task 63. */
+   Route families own their local cascade through route-level manifests; cross-product layers below are reserved for shared behavior rather than route-specific patching. */
 
 /* Design system foundation */
 @import "./tokens.css";
