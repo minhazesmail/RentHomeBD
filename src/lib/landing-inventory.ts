@@ -44,12 +44,7 @@ export const getLandingInventory = cache(async (): Promise<LandingInventory> => 
 
   const [{ count }, { data: propertyData, error: propertyError }] = await Promise.all([
     supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "available"),
-    supabase
-      .from("properties")
-      .select("id, title, address_text, property_type, rent_bdt, bedrooms, bathrooms, furnishing, available_from, latitude, longitude, published_at")
-      .eq("status", "available")
-      .order("published_at", { ascending: false })
-      .limit(FEATURED_LIMIT),
+    supabase.rpc("get_public_landing_inventory", { p_limit: FEATURED_LIMIT }),
   ]);
 
   if (propertyError) {
