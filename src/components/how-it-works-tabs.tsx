@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type Persona = "renter" | "owner";
 
@@ -36,17 +36,64 @@ function StepIcon({ name }: { name: Step["icon"] }) {
 
 export function HowItWorksTabs() {
   const [persona, setPersona] = useState<Persona>("renter");
+  const renterTabRef = useRef<HTMLButtonElement | null>(null);
+  const ownerTabRef = useRef<HTMLButtonElement | null>(null);
   const isRenter = persona === "renter";
   const steps = isRenter ? renterSteps : ownerSteps;
+
+  function activateTab(nextPersona: Persona) {
+    setPersona(nextPersona);
+    window.requestAnimationFrame(() => {
+      (nextPersona === "renter" ? renterTabRef.current : ownerTabRef.current)?.focus();
+    });
+  }
+
+  function handleTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const nextPersona = event.key === "Home" || event.key === "ArrowLeft" ? "renter" : "owner";
+    activateTab(nextPersona);
+  }
 
   return (
     <div className="landing-how-tabs-shell">
       <div className="landing-persona-tabs" role="tablist" aria-label="Choose renter or owner steps">
-        <button type="button" role="tab" aria-selected={isRenter} className={isRenter ? "active" : ""} onClick={() => setPersona("renter")}>I am a renter</button>
-        <button type="button" role="tab" aria-selected={!isRenter} className={!isRenter ? "active" : ""} onClick={() => setPersona("owner")}>I am an owner</button>
+        <button
+          ref={renterTabRef}
+          id="landing-persona-tab-renter"
+          type="button"
+          role="tab"
+          aria-selected={isRenter}
+          aria-controls="landing-persona-panel"
+          tabIndex={isRenter ? 0 : -1}
+          className={isRenter ? "active" : ""}
+          onClick={() => setPersona("renter")}
+          onKeyDown={handleTabKeyDown}
+        >
+          I am a renter
+        </button>
+        <button
+          ref={ownerTabRef}
+          id="landing-persona-tab-owner"
+          type="button"
+          role="tab"
+          aria-selected={!isRenter}
+          aria-controls="landing-persona-panel"
+          tabIndex={!isRenter ? 0 : -1}
+          className={!isRenter ? "active" : ""}
+          onClick={() => setPersona("owner")}
+          onKeyDown={handleTabKeyDown}
+        >
+          I am an owner
+        </button>
       </div>
 
-      <article className={`landing-how-panel ${persona}`} role="tabpanel">
+      <article
+        id="landing-persona-panel"
+        className={`landing-how-panel ${persona}`}
+        role="tabpanel"
+        aria-labelledby={isRenter ? "landing-persona-tab-renter" : "landing-persona-tab-owner"}
+      >
         <div className="landing-how-panel-heading">
           <div>
             <span className="landing-persona-kicker">{isRenter ? "Find with confidence" : "List with clarity"}</span>
