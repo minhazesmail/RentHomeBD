@@ -22,6 +22,9 @@ const MAX_RENT_FILTER = 10_000_000;
 const PUBLIC_MEDIA_TTL_SECONDS = 300;
 const LIVE_SEARCH_MIN_DISTANCE_METERS = 120;
 const LIVE_CENTER_MIN_DISTANCE_METERS = 30;
+const LIVE_DISPLAY_MIN_DISTANCE_METERS = 12;
+const LIVE_DISPLAY_ACCURACY_DELTA_METERS = 10;
+const LIVE_STATUS_ACCURACY_DELTA_METERS = 5;
 
 type SortOption = "recommended" | "distance" | "rent-asc" | "rent-desc";
 
@@ -160,6 +163,9 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
   const watchIdRef = useRef<number | null>(null);
   const lastLiveCenterRef = useRef<[number, number] | null>(null);
   const lastLiveSearchLocationRef = useRef<[number, number] | null>(null);
+  const lastLiveDisplayLocationRef = useRef<UserMapLocation | null>(null);
+  const lastLiveStatusAccuracyRef = useRef<number | null>(null);
+  const liveFixReceivedRef = useRef(false);
   const runSearchRef = useRef<(searchCenter?: [number, number]) => Promise<void>>(async () => {});
   const initialCenterRef = useRef(initialCenter);
 
@@ -258,6 +264,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
 
   function stopLiveLocation() {
     if (watchIdRef.current !== null && navigator.geolocation) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
+    liveFixReceivedRef.current = false;
     setLiveTracking(false); setLocating(false); setLocationStatus("Live location paused. Your last position remains on the map.");
   }
 
@@ -269,21 +276,43 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
     setLocationStatus("Requesting precise location…");
     lastLiveCenterRef.current = null;
     lastLiveSearchLocationRef.current = null;
+    lastLiveDisplayLocationRef.current = null;
+    lastLiveStatusAccuracyRef.current = null;
+    liveFixReceivedRef.current = false;
     watchIdRef.current = navigator.geolocation.watchPosition(({ coords }) => {
       const next: [number, number] = [coords.latitude, coords.longitude];
       const accuracy = Number.isFinite(coords.accuracy) ? Math.max(coords.accuracy, 0) : 0;
+      const roundedAccuracy = Math.round(accuracy);
       const centerThreshold = Math.max(LIVE_CENTER_MIN_DISTANCE_METERS, Math.min(accuracy * 0.5, 100));
       const searchThreshold = Math.max(LIVE_SEARCH_MIN_DISTANCE_METERS, Math.min(accuracy, 250));
+      const displayThreshold = Math.max(LIVE_DISPLAY_MIN_DISTANCE_METERS, Math.min(accuracy * 0.25, LIVE_CENTER_MIN_DISTANCE_METERS));
       const lastCenter = lastLiveCenterRef.current;
       const lastSearchLocation = lastLiveSearchLocationRef.current;
+      const lastDisplayLocation = lastLiveDisplayLocationRef.current;
       const shouldMoveCenter = !lastCenter || distanceMeters(lastCenter, next) >= centerThreshold;
       const shouldRefreshResults = !lastSearchLocation || distanceMeters(lastSearchLocation, next) >= searchThreshold;
+      const shouldUpdateDisplay = !lastDisplayLocation
+        || shouldMoveCenter
+        || distanceMeters([lastDisplayLocation.latitude, lastDisplayLocation.longitude], next) >= displayThreshold
+        || Math.abs(lastDisplayLocation.accuracy - accuracy) >= LIVE_DISPLAY_ACCURACY_DELTA_METERS;
 
-      setLocationPreset("");
-      setUserLocation({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy });
-      setLocating(false);
-      setLiveTracking(true);
-      setLocationStatus(`Live GPS on · accuracy ±${Math.round(coords.accuracy)} m · results refresh after meaningful movement.`);
+      if (!liveFixReceivedRef.current) {
+        liveFixReceivedRef.current = true;
+        setLocationPreset("");
+        setLocating(false);
+        setLiveTracking(true);
+      }
+
+      if (shouldUpdateDisplay) {
+        const nextDisplayLocation = { latitude: coords.latitude, longitude: coords.longitude, accuracy };
+        lastLiveDisplayLocationRef.current = nextDisplayLocation;
+        setUserLocation(nextDisplayLocation);
+      }
+
+      if (lastLiveStatusAccuracyRef.current === null || Math.abs(lastLiveStatusAccuracyRef.current - roundedAccuracy) >= LIVE_STATUS_ACCURACY_DELTA_METERS) {
+        lastLiveStatusAccuracyRef.current = roundedAccuracy;
+        setLocationStatus(`Live GPS on · accuracy ±${roundedAccuracy} m · results refresh after meaningful movement.`);
+      }
 
       if (shouldMoveCenter) {
         lastLiveCenterRef.current = next;
@@ -294,6 +323,7 @@ export function RenterMapSearch({ userId, initialSavedPropertyIds = [], initialS
         void runSearchRef.current(next);
       }
     }, (error) => {
+      liveFixReceivedRef.current = false;
       setLocating(false); setLiveTracking(false); if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
       setMessage(error.code === error.PERMISSION_DENIED ? "Location permission was denied. Enable location access for NearBasha in your browser settings and try again." : "Could not keep track of your location. Check GPS/network access and try again."); setLocationStatus(null);
     }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
