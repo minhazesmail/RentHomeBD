@@ -100,30 +100,30 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
       <ProductNavigation authenticated canList={canList} current="messages" />
       <div className="messages-shell">
         <header className="messages-header">
-          <div><p className="eyebrow">Private messaging</p><h1>Messages</h1></div>
+          <h1>Messages</h1>
         </header>
 
         <section className="messages-organization" aria-label="Organize conversations">
           <form className="messages-search-form" action="/messages" method="get">
             <label className="sr-only" htmlFor="message-search">Search conversations</label>
-            <input id="message-search" name="q" type="search" defaultValue={query} maxLength={120} placeholder="Search people, properties, or latest messages" />
+            <input id="message-search" name="q" type="search" defaultValue={query} maxLength={120} placeholder="Search conversations" />
             {unreadOnly && <input type="hidden" name="filter" value="unread" />}
             <button className="secondary-button" type="submit">Search</button>
-            {query && <Link className="text-link" href={inboxHref({ unreadOnly })}>Clear search</Link>}
+            {query && <Link className="text-link" href={inboxHref({ unreadOnly })}>Clear</Link>}
           </form>
           <nav className="messages-filter-tabs" aria-label="Conversation filters">
-            <Link className={!unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query })} aria-current={!unreadOnly ? "page" : undefined}>All conversations</Link>
+            <Link className={!unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query })} aria-current={!unreadOnly ? "page" : undefined}>All</Link>
             <Link className={unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query, unreadOnly: true })} aria-current={unreadOnly ? "page" : undefined}>Unread</Link>
           </nav>
         </section>
 
         {!conversations.length ? (
           page > 1 ? (
-            <div className="empty-conversations">There are no conversations on this page. <Link className="text-link" href={firstPageHref}>Return to the first matching page</Link>.</div>
+            <div className="empty-conversations">No conversations on this page. <Link className="text-link" href={firstPageHref}>Return to the first page</Link>.</div>
           ) : hasOrganizationFilters ? (
-            <div className="empty-conversations">No conversations match these inbox filters. <Link className="text-link" href="/messages">Show all conversations</Link>.</div>
+            <div className="empty-conversations">No conversations match these filters. <Link className="text-link" href="/messages">Show all</Link>.</div>
           ) : (
-            <div className="empty-conversations">No conversations yet. Open an available property and choose <strong>Message owner</strong> to start one.</div>
+            <div className="empty-conversations">No conversations yet. Open a property and choose <strong>Message owner</strong> to start one.</div>
           )
         ) : (
           <>
@@ -139,7 +139,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
                     <span className="conversation-property-media" aria-hidden="true">
                       {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <span>Home</span>}
                     </span>
-                    <div className="conversation-main"><strong>{otherName || "NearBasha user"}</strong><span>Regarding {propertyTitle}</span><small>{conversation.last_message_body || "Conversation started — send the first message."}</small></div>
+                    <div className="conversation-main"><strong>{otherName || "NearBasha user"}</strong><span>{propertyTitle}</span><small>{conversation.last_message_body || "Conversation started — send the first message."}</small></div>
                     <div className="conversation-meta">{unread > 0 && <span className="unread-badge">{unread}</span>}<time dateTime={timestamp} title={formatExactMessageTime(timestamp)}>{formatInboxMessageTime(timestamp, renderedAt)}</time></div>
                   </Link>
                 );
@@ -148,9 +148,9 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
 
             {(page > 1 || hasNextPage) && (
               <nav className="messages-pagination" aria-label="Messages pages">
-                {page > 1 ? <Link className="secondary-button link-button" href={inboxHref({ page: page - 1, query, unreadOnly })}>Newer conversations</Link> : <span />}
+                {page > 1 ? <Link className="secondary-button link-button" href={inboxHref({ page: page - 1, query, unreadOnly })}>Newer</Link> : <span />}
                 <span className="messages-page-number">Page {page}</span>
-                {hasNextPage ? <Link className="secondary-button link-button" href={inboxHref({ page: page + 1, query, unreadOnly })}>Older conversations</Link> : <span />}
+                {hasNextPage ? <Link className="secondary-button link-button" href={inboxHref({ page: page + 1, query, unreadOnly })}>Older</Link> : <span />}
               </nav>
             )}
           </>
