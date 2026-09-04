@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ActionButton } from "@/components/action";
 import { createClient } from "@/lib/supabase/client";
 
 export function ListingFreshnessActions({
@@ -58,12 +59,12 @@ export function ListingFreshnessActions({
 
   return (
     <div className="freshness-actions" onClick={(event) => event.preventDefault()} aria-live="polite">
-      <button className="secondary-button freshness-button" type="button" disabled={busy !== null} aria-busy={busy === "confirm"} onClick={() => void reconfirm()}>
+      <ActionButton variant="secondary" className="freshness-button" type="button" disabled={busy !== null} aria-busy={busy === "confirm"} onClick={() => void reconfirm()}>
         {busy === "confirm" ? "Confirming…" : "Still available"}
-      </button>
-      <button className="text-button freshness-rented" type="button" disabled={busy !== null} aria-busy={busy === "rented"} onClick={() => void markRented()}>
+      </ActionButton>
+      <ActionButton variant="text" className="freshness-rented" type="button" disabled={busy !== null} aria-busy={busy === "rented"} onClick={() => void markRented()}>
         {busy === "rented" ? "Updating…" : "Mark rented"}
-      </button>
+      </ActionButton>
       {error && <span className="freshness-error" role="alert">{error}</span>}
     </div>
   );
