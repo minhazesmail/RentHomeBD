@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ShieldCheck } from "lucide-react";
 
+import { ActionButton, ActionLink } from "@/components/action";
 import { ProductNavigation } from "@/components/product-navigation";
 import { RenterPreferenceForm } from "@/components/renter-preference-form";
 import { requireUser } from "@/lib/auth";
@@ -61,7 +61,7 @@ export default async function DashboardPage({
             </p>
           </div>
           <form action="/auth/signout" method="post">
-            <button className="secondary-button" type="submit">Sign out</button>
+            <ActionButton variant="secondary" type="submit">Sign out</ActionButton>
           </form>
         </div>
 
@@ -96,9 +96,9 @@ export default async function DashboardPage({
                   <p>Search the live map, compare your saved homes, or continue a conversation without working through account setup first.</p>
                 </div>
                 <div className="renter-journey-actions">
-                  <Link className="primary-button link-button" href="/homes">Browse live map</Link>
-                  <Link className="secondary-button link-button" href="/saved">Saved homes & searches</Link>
-                  <Link className="text-link" href="/messages">Open messages →</Link>
+                  <ActionLink href="/homes">Browse live map</ActionLink>
+                  <ActionLink variant="secondary" href="/saved">Saved homes & searches</ActionLink>
+                  <ActionLink variant="text" href="/messages">Open messages →</ActionLink>
                 </div>
               </div>
 
@@ -114,7 +114,7 @@ export default async function DashboardPage({
                   <p>{phoneVerified ? "Your phone trust signal is active." : "Verify when you want to use protected phone reveal with a verified property owner."}</p>
                 </div>
                 <div className="renter-journey-actions">
-                  <Link className="text-link" href="/account/phone">{phoneVerified ? "Manage verified phone →" : "Verify phone when needed →"}</Link>
+                  <ActionLink variant="text" href="/account/phone">{phoneVerified ? "Manage verified phone →" : "Verify phone when needed →"}</ActionLink>
                 </div>
               </div>
             </section>
@@ -128,9 +128,9 @@ export default async function DashboardPage({
               <h2>Manage listings and renter conversations from one starting point.</h2>
               <p>Open your property portfolio for listing work, respond to renter messages, or check the renter-facing market when you need context.</p>
               <div className="owner-dashboard-priority-actions">
-                <Link className="primary-button link-button" href="/owner">Manage properties</Link>
-                <Link className="secondary-button link-button" href="/messages">Open messages</Link>
-                <Link className="text-link" href="/homes">View live market →</Link>
+                <ActionLink href="/owner">Manage properties</ActionLink>
+                <ActionLink variant="secondary" href="/messages">Open messages</ActionLink>
+                <ActionLink variant="text" href="/homes">View live market →</ActionLink>
               </div>
             </div>
 
@@ -143,7 +143,7 @@ export default async function DashboardPage({
                   <p>
                     {phoneVerified ? "Phone verified" : "Phone not verified"} · {roleVerified ? `${auth.profile.primary_role} role verified` : `${auth.profile.primary_role} role awaiting verification`}.
                   </p>
-                  {!phoneVerified && <Link className="text-link" href="/account/phone">Verify phone →</Link>}
+                  {!phoneVerified && <ActionLink variant="text" href="/account/phone">Verify phone →</ActionLink>}
                 </div>
               </article>
             </section>
@@ -157,17 +157,17 @@ export default async function DashboardPage({
               <span>{phoneVerified ? "Phone verified" : "Phone not verified"}</span>
             </div>
             <div className="dashboard-actions dashboard-trust-actions">
-              <Link className="secondary-button link-button" href="/account/phone">{phoneVerified ? "Manage verified phone" : "Verify phone"}</Link>
+              <ActionLink variant="secondary" href="/account/phone">{phoneVerified ? "Manage verified phone" : "Verify phone"}</ActionLink>
             </div>
           </section>
         )}
 
         <div className="dashboard-actions renter-dashboard-actions">
-          {!isRenter && !canList && <Link className="primary-button link-button" href="/messages">Messages</Link>}
-          {!isRenter && <Link className="secondary-button link-button" href="/saved">Saved homes & searches</Link>}
-          {!isRenter && !canList && <Link className="secondary-button link-button" href="/homes">Browse homes</Link>}
-          {moderatorMembership && <Link className="secondary-button link-button" href="/moderation">Open moderation queue</Link>}
-          <Link className="text-link" href="/">Back to home</Link>
+          {!isRenter && !canList && <ActionLink href="/messages">Messages</ActionLink>}
+          {!isRenter && <ActionLink variant="secondary" href="/saved">Saved homes & searches</ActionLink>}
+          {!isRenter && !canList && <ActionLink variant="secondary" href="/homes">Browse homes</ActionLink>}
+          {moderatorMembership && <ActionLink variant="secondary" href="/moderation">Open moderation queue</ActionLink>}
+          <ActionLink variant="text" href="/">Back to home</ActionLink>
         </div>
       </section>
     </main>
