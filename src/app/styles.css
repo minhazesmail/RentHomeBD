@@ -2,17 +2,20 @@
    Keep this file limited to design-system foundations and truly cross-product behavior.
    Route-family styles are imported from their own pages/layouts so unrelated screens do not pay for them. */
 
+/* Explicit cascade order. Route manifests reuse these named layers. */
+@layer tokens, globals, primitives, foundation, shells, brand, route-base, route-polish, route-redesign, route-detail, motion, responsive, accessibility, performance, cleanup;
+
 /* Design system foundation */
-@import "./tokens.css";
-@import "./globals.css";
-@import "./primitives.css";
-@import "./foundation.css";
-@import "./shells.css";
-@import "./brand.css";
+@import "./tokens.css" layer(tokens);
+@import "./globals.css" layer(globals);
+@import "./primitives.css" layer(primitives);
+@import "./foundation.css" layer(foundation);
+@import "./shells.css" layer(shells);
+@import "./brand.css" layer(brand);
 
 /* Cross-product finishing layers */
-@import "./motion-polish.css";
-@import "./responsive-audit.css";
-@import "./accessibility-audit.css";
-@import "./performance-optimizations.css";
-@import "./visual-regression-cleanup.css";
+@import "./motion-polish.css" layer(motion);
+@import "./responsive-audit.css" layer(responsive);
+@import "./accessibility-audit.css" layer(accessibility);
+@import "./performance-optimizations.css" layer(performance);
+@import "./visual-regression-cleanup.css" layer(cleanup);

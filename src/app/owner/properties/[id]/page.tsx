@@ -7,7 +7,7 @@ import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { isUuid } from "@/lib/routing";
 import { createClient } from "@/lib/supabase/server";
-import "../listing-media-ux.css";
+import "../listing-media-styles.css";
 export const dynamic = "force-dynamic";
 
 const OWNER_MEDIA_PREVIEW_TTL_SECONDS = 300;
