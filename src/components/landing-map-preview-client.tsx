@@ -80,7 +80,7 @@ export function LandingMapPreviewClient({ listings }: { listings: LandingMapList
           {!liveListings.length && (
             <div className={styles.emptyState}>
               <strong>Explore Dhaka by neighborhood</strong>
-              <span>Open the full map to search exact streets, landmarks, and nearby rental homes.</span>
+              <span>Open the full map to search streets, landmarks, and nearby rental homes.</span>
             </div>
           )}
         </div>
@@ -100,7 +100,7 @@ export function LandingMapPreviewClient({ listings }: { listings: LandingMapList
                 <small>Moderated</small>
               </div>
               <div className="landing-map-property-copy">
-                <span>{listing.address_text || "Exact location pinned"}</span>
+                <span>{listing.address_text || "Approximate public location shown"}</span>
                 <strong>{listing.title || "Rental home"}</strong>
                 <div><b>{money(listing.rent_bdt)}</b><small>{listing.bedrooms ?? "—"} bed</small></div>
               </div>
@@ -117,7 +117,7 @@ export function LandingMapPreviewClient({ listings }: { listings: LandingMapList
         <Link className="landing-map-rail-action" href="/homes">Browse the full map <ArrowUpRight aria-hidden="true" /></Link>
       </aside>
 
-      <div className="landing-map-floating-note"><span aria-hidden="true" />Exact pins reveal what “nearby” really means</div>
+      <div className="landing-map-floating-note"><span aria-hidden="true" />Approximate public pins keep discovery useful without exposing precise coordinates</div>
     </div>
   );
 }

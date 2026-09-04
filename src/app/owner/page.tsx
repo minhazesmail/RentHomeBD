@@ -43,6 +43,8 @@ type Listing = {
   moderation_notes: string | null;
 };
 
+type ModerationNoteRow = { property_id: string; moderation_notes: string | null };
+
 type StatusPresentation = {
   label: string;
   detail: string;
@@ -160,11 +162,22 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
   const supabase = await createClient();
   const { data: properties } = await supabase
     .from("properties")
-    .select("id, title, address_text, rent_bdt, status, updated_at, expires_at, last_confirmed_at, moderation_notes")
+    .select("id, title, address_text, rent_bdt, status, updated_at, expires_at, last_confirmed_at")
     .eq("owner_id", auth.userId)
     .order("updated_at", { ascending: false });
 
-  const listings = (properties ?? []) as Listing[];
+  const propertyRows = (properties ?? []) as Omit<Listing, "moderation_notes">[];
+  const propertyIds = propertyRows.map((property) => property.id);
+  const { data: moderationRows } = propertyIds.length
+    ? await supabase.rpc("get_my_property_moderation_notes", { property_ids: propertyIds })
+    : { data: [] };
+  const moderationNotesByProperty = new Map(
+    ((moderationRows ?? []) as ModerationNoteRow[]).map((row) => [row.property_id, row.moderation_notes]),
+  );
+  const listings = propertyRows.map((property) => ({
+    ...property,
+    moderation_notes: moderationNotesByProperty.get(property.id) ?? null,
+  }));
   const visibleListings = filteredAndSortedListings(listings, query, status, sort);
   const visibleListingIds = visibleListings.map((property) => property.id);
   const { data: mediaRows } = visibleListingIds.length

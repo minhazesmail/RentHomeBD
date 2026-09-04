@@ -1,0 +1,4 @@
+/* Canonical layered style manifest for the landing page. */
+@import "./landing.css" layer(route-base);
+@import "./landing-alignment.css" layer(route-polish);
+@import "./landing-redesign.css" layer(route-redesign);

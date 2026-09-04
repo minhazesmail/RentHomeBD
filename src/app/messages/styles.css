@@ -1,3 +1,3 @@
-/* Canonical style manifest for the /messages route family. */
-@import "./messages.css";
-@import "./messages-redesign.css";
+/* Canonical layered style manifest for the /messages route family. */
+@import "./messages.css" layer(route-base);
+@import "./messages-redesign.css" layer(route-redesign);

@@ -260,18 +260,12 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
   }
 
   async function syncRelations(propertyId: string) {
-    const tenantDelete = await supabase.from("property_tenant_types").delete().eq("property_id", propertyId);
-    if (tenantDelete.error) throw tenantDelete.error;
-    if (tenantTypes.length) {
-      const tenantInsert = await supabase.from("property_tenant_types").insert(tenantTypes.map((tenant_type) => ({ property_id: propertyId, tenant_type })) as never);
-      if (tenantInsert.error) throw tenantInsert.error;
-    }
-    const amenityDelete = await supabase.from("property_amenities").delete().eq("property_id", propertyId);
-    if (amenityDelete.error) throw amenityDelete.error;
-    if (selectedAmenities.length) {
-      const amenityInsert = await supabase.from("property_amenities").insert(selectedAmenities.map((amenity_slug) => ({ property_id: propertyId, amenity_slug })) as never);
-      if (amenityInsert.error) throw amenityInsert.error;
-    }
+    const { error } = await supabase.rpc("replace_property_listing_relations", {
+      property_uuid: propertyId,
+      tenant_values: tenantTypes,
+      amenity_values: selectedAmenities,
+    });
+    if (error) throw error;
   }
 
   async function removeDeletedMedia() {
@@ -397,7 +391,7 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
           <span>{matchedArea ? "Center the map near this supported Dhaka area, then click the exact building entrance. Area matching never sets the exact property pin automatically." : "This address is not in the supported area index, so we will not guess its coordinates. Use current location or navigate the map manually to place the exact pin."}</span>
           {matchedArea && <button className="secondary-button" type="button" onClick={focusMapNearTypedArea}>Center map near {matchedArea.label}</button>}
         </div>}
-        <div className="location-workflow-note"><strong>Pin accuracy matters</strong><span>The address is descriptive; the map pin is the renter-facing exact location. Use the gate or main entrance—not a neighborhood center or nearby landmark.</span></div>
+        <div className="location-workflow-note"><strong>Pin accuracy matters</strong><span>The address is descriptive; the exact pin is used for moderation and listing management. Public renter discovery receives a rounded map point rather than these precise stored coordinates.</span></div>
         <div className="location-grid">
           <div className="location-fields">
             {!locked && <button className="secondary-button" type="button" onClick={useCurrentLocation} disabled={locating}>{locating ? "Getting location…" : "◎ Use my current location"}</button>}
