@@ -43,7 +43,7 @@
   will-change: transform;
 }
 
-:where(.primary-button, .secondary-button, .link-button, .landing-search-submit, button):not(:disabled):active {
+:where(.primary-button, .secondary-button, .link-button, .text-button, .landing-search-submit, button):not(:disabled):active {
   transform: translateY(1px) scale(.992);
   transition-duration: var(--motion-press);
 }
@@ -137,28 +137,11 @@ details[open] > summary + * {
   transform: translate3d(0, -2px, 0) scale(1.04);
 }
 
-/* Background motion: almost imperceptible and slower than interaction motion. */
+/* Decorative shell layers stay visually rich without keeping full-page compositor layers moving. */
 .nb-shell-atmosphere,
 .nb-shell-grid {
-  transform: translateZ(0);
-}
-
-.nb-global-shell--marketing .nb-shell-atmosphere {
-  animation: nb-shell-breathe var(--motion-ambient-slow) var(--ease-control) infinite alternate;
-}
-
-.nb-global-shell--renter .nb-shell-grid {
-  animation: nb-grid-drift 30s linear infinite alternate;
-}
-
-@keyframes nb-shell-breathe {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to { transform: translate3d(-6px, 4px, 0) scale(1.01); }
-}
-
-@keyframes nb-grid-drift {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-4px, 3px, 0); }
+  transform: none;
+  animation: none;
 }
 
 /* Media and imagery get a restrained tactile response. */
