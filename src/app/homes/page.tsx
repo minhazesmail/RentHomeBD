@@ -30,16 +30,17 @@ export default async function HomesPage({
 
   return (
     <main className="homes-page">
-      <div className="mobile-homes-intro">
-        <strong>Search by exact location</strong>
-        <span>Explore the map, then refine results with the filters below.</span>
-      </div>
-      {unsupportedArea && (
-        <div className="auth-message compact-message" role="status">
-          “{params.area}” is not one of the supported quick-search locations yet. The map opened at the default Dhaka center instead. Move the map manually to the area you want, then choose Search map.
+      <HomesSearchExperience initialSearch={initialSearch}>
+        <div className="mobile-homes-intro">
+          <strong>Search by exact location</strong>
+          <span>Explore the map, then refine results with the filters below.</span>
         </div>
-      )}
-      <HomesSearchExperience initialSearch={initialSearch} />
+        {unsupportedArea && (
+          <div className="auth-message compact-message" role="status">
+            “{params.area}” is not one of the supported quick-search locations yet. The map opened at the default Dhaka center instead. Move the map manually to the area you want, then choose Search map.
+          </div>
+        )}
+      </HomesSearchExperience>
     </main>
   );
 }
