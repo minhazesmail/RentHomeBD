@@ -170,6 +170,29 @@ function clusterBucketKey(cellX: number, cellY: number) {
   return `${cellX}:${cellY}`;
 }
 
+function ListingMarker({ listing, selected, onSelect }: { listing: MapListing; selected: boolean; onSelect: (id: string) => void }) {
+  const tone = clusterTone([listing]);
+  return (
+    <Marker
+      position={[listing.latitude, listing.longitude]}
+      icon={markerIcon(compactRent(listing.rent_bdt), tone, selected)}
+      riseOnHover
+      zIndexOffset={selected ? 1000 : 0}
+      title={listing.title || "Rental property"}
+      eventHandlers={{ click: () => onSelect(listing.id) }}
+    >
+      <Popup>
+        <div className="map-popup">
+          <strong>{listing.title || "Rental property"}</strong>
+          <span>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}/month` : "Rent on request"}</span>
+          <small>{tenantSummary(listing.tenant_types ?? [])}</small>
+          <small>{listing.address_text || "Exact location shown on map"}</small>
+        </div>
+      </Popup>
+    </Marker>
+  );
+}
+
 function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapListing[]; selectedId: string | null; onSelect: (id: string) => void }) {
   const map = useMap();
   const [zoom, setZoom] = useState(() => map.getZoom());
@@ -182,8 +205,6 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
       return listings.map((listing) => ({ id: listing.id, latitude: listing.latitude, longitude: listing.longitude, listings: [listing] }));
     }
 
-    const selectedListing = selectedId ? listings.find((listing) => listing.id === selectedId) ?? null : null;
-    const clusterableListings = selectedListing ? listings.filter((listing) => listing.id !== selectedListing.id) : listings;
     const working: WorkingCluster[] = [];
     const buckets = new Map<string, WorkingCluster[]>();
 
@@ -208,7 +229,7 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
       addToBucket(cluster);
     }
 
-    for (const listing of clusterableListings) {
+    for (const listing of listings) {
       const point = map.project([listing.latitude, listing.longitude], zoom);
       const cellX = Math.floor(point.x / clusterRadius);
       const cellY = Math.floor(point.y / clusterRadius);
@@ -243,72 +264,67 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
       moveBucket(nearest, Math.floor(nearest.x / clusterRadius), Math.floor(nearest.y / clusterRadius));
     }
 
-    const grouped = working.map((cluster) => ({
+    return working.map((cluster) => ({
       id: `cluster:${cluster.listings.map((listing) => listing.id).sort().join(":")}`,
       latitude: cluster.listings.reduce((sum, listing) => sum + listing.latitude, 0) / cluster.listings.length,
       longitude: cluster.listings.reduce((sum, listing) => sum + listing.longitude, 0) / cluster.listings.length,
       listings: cluster.listings,
     }));
+  }, [listings, map, zoom]);
 
-    if (selectedListing) {
-      grouped.push({ id: selectedListing.id, latitude: selectedListing.latitude, longitude: selectedListing.longitude, listings: [selectedListing] });
-    }
+  const selectedListing = selectedId ? listings.find((listing) => listing.id === selectedId) ?? null : null;
+  const displayClusters = useMemo(() => {
+    if (!selectedId) return clusters;
+    return clusters.flatMap((cluster) => {
+      const remaining = cluster.listings.filter((listing) => listing.id !== selectedId);
+      if (remaining.length === 0) return [];
+      if (remaining.length === cluster.listings.length) return [cluster];
+      return [{
+        id: `${cluster.id}:without:${selectedId}`,
+        latitude: remaining.reduce((sum, listing) => sum + listing.latitude, 0) / remaining.length,
+        longitude: remaining.reduce((sum, listing) => sum + listing.longitude, 0) / remaining.length,
+        listings: remaining,
+      }];
+    });
+  }, [clusters, selectedId]);
 
-    return grouped;
-  }, [listings, map, selectedId, zoom]);
+  return (
+    <>
+      {displayClusters.map((cluster) => {
+        const tone = clusterTone(cluster.listings);
 
-  return clusters.map((cluster) => {
-    const tone = clusterTone(cluster.listings);
+        if (cluster.listings.length === 1) {
+          const listing = cluster.listings[0];
+          return <ListingMarker key={listing.id} listing={listing} selected={false} onSelect={onSelect} />;
+        }
 
-    if (cluster.listings.length === 1) {
-      const listing = cluster.listings[0];
-      const selected = selectedId === listing.id;
-      return (
-        <Marker
-          key={listing.id}
-          position={[listing.latitude, listing.longitude]}
-          icon={markerIcon(compactRent(listing.rent_bdt), tone, selected)}
-          riseOnHover
-          zIndexOffset={selected ? 1000 : 0}
-          title={listing.title || "Rental property"}
-          eventHandlers={{ click: () => onSelect(listing.id) }}
-        >
-          <Popup>
-            <div className="map-popup">
-              <strong>{listing.title || "Rental property"}</strong>
-              <span>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}/month` : "Rent on request"}</span>
-              <small>{tenantSummary(listing.tenant_types ?? [])}</small>
-              <small>{listing.address_text || "Exact location shown on map"}</small>
-            </div>
-          </Popup>
-        </Marker>
-      );
-    }
-
-    return (
-      <Marker
-        key={cluster.id}
-        position={[cluster.latitude, cluster.longitude]}
-        icon={markerIcon(String(cluster.listings.length), tone, false, true)}
-        riseOnHover
-        title={`${cluster.listings.length} homes in this area. Activate to zoom in.`}
-        eventHandlers={{
-          click: () => {
-            const bounds = cluster.listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
-            map.fitBounds(bounds, { padding: [70, 70], maxZoom: Math.min(15, zoom + 2), animate: true });
-          },
-        }}
-      >
-        <Popup>
-          <div className="map-popup map-cluster-popup">
-            <strong>{cluster.listings.length} homes in this area</strong>
-            <span>{tone === "neutral" ? "Mixed renter fit" : tenantSummary(cluster.listings[0].tenant_types ?? [])}</span>
-            <small>Activate the cluster to zoom in and compare individual homes.</small>
-          </div>
-        </Popup>
-      </Marker>
-    );
-  });
+        return (
+          <Marker
+            key={cluster.id}
+            position={[cluster.latitude, cluster.longitude]}
+            icon={markerIcon(String(cluster.listings.length), tone, false, true)}
+            riseOnHover
+            title={`${cluster.listings.length} homes in this area. Activate to zoom in.`}
+            eventHandlers={{
+              click: () => {
+                const bounds = cluster.listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
+                map.fitBounds(bounds, { padding: [70, 70], maxZoom: Math.min(15, zoom + 2), animate: true });
+              },
+            }}
+          >
+            <Popup>
+              <div className="map-popup map-cluster-popup">
+                <strong>{cluster.listings.length} homes in this area</strong>
+                <span>{tone === "neutral" ? "Mixed renter fit" : tenantSummary(cluster.listings[0].tenant_types ?? [])}</span>
+                <small>Activate the cluster to zoom in and compare individual homes.</small>
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
+      {selectedListing && <ListingMarker key={`selected:${selectedListing.id}`} listing={selectedListing} selected onSelect={onSelect} />}
+    </>
+  );
 }
 
 export default function LeafletMap({ listings, center, radiusKm, selectedId, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange }: {
