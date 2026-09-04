@@ -23,8 +23,8 @@ const trustSignals = [
     icon: "shield",
   },
   {
-    title: "Exact map pins",
-    description: "Renters can judge the real location around work, university, transport, or family instead of relying only on area names.",
+    title: "Approximate public map pins",
+    description: "Owners provide a precise pin for moderation and listing management; public rental discovery receives rounded coordinates instead.",
     icon: "pin",
   },
   {
@@ -80,117 +80,94 @@ export default function HomePage() {
                 <ShieldCheck aria-label="Moderated listings" />
               </div>
               <div className="landing-search-console-fields">
-                <label className="landing-search-console-field landing-search-console-area">
-                  <MapPin aria-hidden="true" />
-                  <span>Supported Dhaka area or landmark</span>
-                  <select name="area" defaultValue="" required aria-describedby="landing-area-help">
-                    <option value="" disabled>Choose a Dhaka location</option>
-                    {LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label}>{location.label}</option>)}
+                <label className="landing-search-console-field">
+                  <MapPin size={18} aria-hidden="true" />
+                  <span>Area</span>
+                  <select name="area" defaultValue="Dhanmondi">
+                    {LOCATION_PRESETS.map((preset) => <option value={preset.label} key={preset.label}>{preset.label}</option>)}
                   </select>
                 </label>
                 <label className="landing-search-console-field">
-                  <Building2 aria-hidden="true" />
-                  <span>Monthly budget</span>
-                  <select name="maxRent" defaultValue="">
-                    <option value="">Any budget</option>
-                    <option value="15000">Up to ৳15,000</option>
-                    <option value="25000">Up to ৳25,000</option>
-                    <option value="40000">Up to ৳40,000</option>
-                    <option value="60000">Up to ৳60,000</option>
-                  </select>
-                </label>
-                <label className="landing-search-console-field">
-                  <BedDouble aria-hidden="true" />
+                  <BedDouble size={18} aria-hidden="true" />
                   <span>Bedrooms</span>
-                  <select name="bedrooms" defaultValue="">
-                    <option value="">Any size</option>
-                    <option value="1">1+ bedroom</option>
-                    <option value="2">2+ bedrooms</option>
-                    <option value="3">3+ bedrooms</option>
+                  <select name="bedrooms" defaultValue="2">
+                    <option value="">Any</option>
+                    <option value="1">1+</option>
+                    <option value="2">2+</option>
+                    <option value="3">3+</option>
+                    <option value="4">4+</option>
                   </select>
                 </label>
-                <input type="hidden" name="radius" value={DEFAULT_RENTER_SEARCH_RADIUS} />
-                <button className="landing-search-submit" type="submit"><Search aria-hidden="true" /><span>Search map</span><ArrowRight aria-hidden="true" /></button>
+                <label className="landing-search-console-field">
+                  <Building2 size={18} aria-hidden="true" />
+                  <span>Radius</span>
+                  <select name="radius" defaultValue={DEFAULT_RENTER_SEARCH_RADIUS.toString()}>
+                    <option value="2">2 km</option>
+                    <option value="5">5 km</option>
+                    <option value="10">10 km</option>
+                    <option value="15">15 km</option>
+                    <option value="25">25 km</option>
+                  </select>
+                </label>
+                <button className="landing-search-submit" type="submit"><Search size={19} aria-hidden="true" /><span>Search homes</span><ArrowRight size={17} aria-hidden="true" /></button>
               </div>
-              <p className="form-hint" id="landing-area-help">Current location search supports the Dhaka areas and landmarks listed here. Searches start within {DEFAULT_RENTER_SEARCH_RADIUS} km; refine the radius or move the full map manually.</p>
             </form>
 
-            <div className="landing-popular-searches">
-              <span>Popular in Dhaka:</span>
-              <Link href={`/homes?area=Dhanmondi&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Dhanmondi</Link>
-              <Link href={`/homes?area=Banani&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Banani</Link>
-              <Link href={`/homes?area=Uttara&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Uttara</Link>
-              <Link href={`/homes?area=BUET&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Near BUET</Link>
-            </div>
-
-            <div className="landing-confidence-row" aria-label="NearBasha marketplace safeguards">
-              <div><strong>Exact map pins</strong><span>See the real neighborhood</span></div>
-              <div><strong>Renter-fit signals</strong><span>Know who each home suits</span></div>
-              <div><strong>Freshness checks</strong><span>Less time on stale listings</span></div>
+            <div className="landing-confidence-row" aria-label="Marketplace trust signals">
+              <div><strong>Map-first</strong><span>Search around real-life anchors</span></div>
+              <div><strong>Renter fit</strong><span>Family, bachelor, student & job holder</span></div>
+              <div><strong>Moderated</strong><span>Review before public discovery</span></div>
             </div>
           </div>
-          <div className="landing-visual">
-            <div className="landing-map-caption">
-              <span className="landing-map-caption-dot" aria-hidden="true" />
-              <div><strong>Explore Dhaka visually</strong><small>Move the map, then refine your radius</small></div>
-              <Link href="/homes">Open full map <ArrowRight aria-hidden="true" /></Link>
-            </div>
-            <LandingMapPreview />
-          </div>
-        </section>
 
-        <section className="landing-trust-section" data-scroll-theme="trust" aria-labelledby="trust-heading">
-          <div className="landing-trust-heading">
-            <div><p className="eyebrow">Built for higher-trust renting</p><h2 id="trust-heading">More context before you commit.</h2></div>
-            <p>Verification signals, moderation, precise location, and freshness controls help both sides make better-informed decisions.</p>
-          </div>
-          <div className="landing-trust-grid">
-            {trustSignals.map((signal) => (
-              <article className="landing-trust-card" key={signal.title}>
-                <span className="landing-trust-icon"><TrustIcon type={signal.icon} /></span>
-                <div><strong>{signal.title}</strong><p>{signal.description}</p></div>
-              </article>
-            ))}
-          </div>
-          <div className="landing-trust-note"><strong>No inflated marketplace claims.</strong><span>NearBasha uses live marketplace inventory on this page instead of fabricated listing counts or sample property claims.</span></div>
-        </section>
-
-        <section className="landing-content-section landing-how" data-scroll-theme="journey" aria-labelledby="how-heading">
-          <div className="landing-section-intro"><p className="eyebrow">How it works</p><h2 id="how-heading">A clearer path for both sides of the rental.</h2><p>Choose your side to see only the steps that matter to you.</p></div>
-          <HowItWorksTabs />
+          <LandingMapPreview />
         </section>
 
         <LandingFeaturedSection />
 
-        <section className="landing-content-section landing-faq" data-scroll-theme="clarity" aria-labelledby="faq-heading">
-          <div className="landing-section-intro"><p className="eyebrow">Questions, answered</p><h2 id="faq-heading">What to know before you start.</h2><p>Coverage, trust, pricing, and renter matching in one place.</p></div>
-          <div className="landing-faq-list">
-            {faqs.map(([question, answer]) => (
-              <details key={question} className="landing-faq-item"><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>
+        <section className="landing-content-section landing-how" data-scroll-theme="process" aria-labelledby="how-heading">
+          <div className="landing-section-intro">
+            <p className="eyebrow">How it works</p>
+            <h2 id="how-heading">Built around the decisions people actually make before renting.</h2>
+            <p>Start with location, narrow by renter fit and practical details, then move into a listing only when the home looks worth your time.</p>
+          </div>
+          <HowItWorksTabs />
+        </section>
+
+        <section className="landing-content-section landing-trust-section" data-scroll-theme="trust" aria-labelledby="trust-heading">
+          <div className="landing-section-intro landing-section-intro-row">
+            <div><p className="eyebrow">Trust signals</p><h2 id="trust-heading">Useful checks without pretending risk disappears.</h2></div>
+            <p>NearBasha can surface verification and moderation signals. Renters should still inspect the property and verify the person they are dealing with before paying.</p>
+          </div>
+          <div className="landing-trust-grid">
+            {trustSignals.map((item) => (
+              <article className="landing-trust-card" key={item.title}>
+                <span className="landing-trust-icon"><TrustIcon type={item.icon} /></span>
+                <div><h3>{item.title}</h3><p>{item.description}</p></div>
+              </article>
             ))}
           </div>
         </section>
 
-        <section className="landing-cta-band" data-scroll-theme="action" aria-label="Start using NearBasha">
-          <div><p className="eyebrow">Ready when you are</p><h2>Start with the map.</h2><p>Browse current Dhaka homes, or add a property for renters to discover.</p></div>
-          <div className="landing-cta-actions"><Link className="primary-button link-button" href="/homes">Browse the live map</Link><Link className="secondary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link></div>
+        <section className="landing-content-section landing-faq" data-scroll-theme="faq" aria-labelledby="faq-heading">
+          <div className="landing-section-intro">
+            <p className="eyebrow">Questions before you start</p>
+            <h2 id="faq-heading">Straight answers about the current marketplace.</h2>
+          </div>
+          <div className="landing-faq-list">
+            {faqs.map(([question, answer], index) => <details key={question} open={index === 0}><summary>{question}</summary><p>{answer}</p></details>)}
+          </div>
         </section>
 
-        <footer className="landing-footer" data-scroll-theme="footer">
-          <div className="landing-footer-brand"><BrandLogo /><p>Bangladesh-focused rental discovery, launching first in Dhaka.</p></div>
-          <div className="landing-footer-links">
-            <div><strong>Product</strong><Link href="/homes">Browse homes</Link><Link href={LIST_PROPERTY_HREF}>List a property</Link><Link href="/login">Sign in</Link></div>
-            <div><strong>Company</strong><Link href="/about">About</Link><Link href="/contact">Contact</Link></div>
-            <div><strong>Legal</strong><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></div>
-          </div>
-          <div className="landing-footer-bottom">
-            <span>Dhaka launch market</span>
-            <div className="landing-footer-studio" aria-label="Built by Hemilin Studio">
-              <img src="/hemilin-studio.svg" alt="Hemilin Studio" className="landing-footer-studio-logo" />
-              <span>By Hemilin Studio</span>
-            </div>
-            <span>© 2026 NearBasha. All rights reserved.</span>
-          </div>
+        <section className="landing-content-section landing-final-cta" data-scroll-theme="cta">
+          <div><p className="eyebrow">Ready to look?</p><h2>Search around the places your day already revolves around.</h2><p>Use the live map to compare homes by distance, renter fit, rent, and the details that matter before a viewing.</p></div>
+          <div className="hero-actions"><Link className="primary-button link-button" href="/homes">Explore homes <ArrowRight size={17} aria-hidden="true" /></Link><Link className="secondary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link></div>
+        </section>
+
+        <footer className="landing-footer">
+          <BrandLogo />
+          <div><Link href="/about">About</Link><Link href="/contact">Contact</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div>
+          <span>Bangladesh-focused rental marketplace</span>
         </footer>
       </div>
     </main>
