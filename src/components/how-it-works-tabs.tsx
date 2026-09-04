@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 
 type Persona = "renter" | "owner";
 
@@ -48,11 +48,20 @@ export function HowItWorksTabs() {
     });
   }
 
-  function handleTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const nextPersona = event.key === "Home" || event.key === "ArrowLeft" ? "renter" : "owner";
-    activateTab(nextPersona);
+
+    if (event.key === "Home") {
+      activateTab("renter");
+      return;
+    }
+    if (event.key === "End") {
+      activateTab("owner");
+      return;
+    }
+
+    activateTab(persona === "renter" ? "owner" : "renter");
   }
 
   return (
