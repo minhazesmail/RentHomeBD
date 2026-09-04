@@ -1,6 +1,6 @@
 /* NearBasha global stylesheet manifest.
-   Keep import order stable: later layers intentionally override earlier ones.
-   Route families own their local cascade through route-level manifests; cross-product layers below are reserved for shared behavior rather than route-specific patching. */
+   Keep this file limited to design-system foundations and truly cross-product behavior.
+   Route-family styles are imported from their own pages/layouts so unrelated screens do not pay for them. */
 
 /* Design system foundation */
 @import "./tokens.css";
@@ -9,22 +9,6 @@
 @import "./foundation.css";
 @import "./shells.css";
 @import "./brand.css";
-
-/* Shared/root route layers */
-@import "./auth.css";
-@import "./auth-verification-redesign.css";
-@import "./information-redesign.css";
-@import "./landing.css";
-@import "./landing-alignment.css";
-@import "./landing-redesign.css";
-
-/* Canonical product-route manifests */
-@import "./homes/styles.css";
-@import "./owner/styles.css";
-@import "./dashboard/styles.css";
-@import "./messages/styles.css";
-@import "./saved/styles.css";
-@import "./moderation/styles.css";
 
 /* Cross-product finishing layers */
 @import "./motion-polish.css";
