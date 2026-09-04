@@ -84,6 +84,125 @@
   overflow-wrap: anywhere;
 }
 
+/* The hero caption is a light glass surface. Keep its text palette tied to that
+   surface instead of inheriting the older dark-map caption colors. */
+.landing-shell .landing-map-caption {
+  border-color: rgba(11, 35, 27, .1);
+  background: rgba(255, 253, 248, .96);
+  color: #0b231b;
+}
+
+.landing-shell .landing-map-caption strong {
+  color: #0b231b;
+}
+
+.landing-shell .landing-map-caption small {
+  color: #66756d;
+}
+
+.landing-shell .landing-map-caption a {
+  background: #0b231b;
+  color: #b9f227;
+}
+
+/* The hero is split-column at desktop sizes, so viewport breakpoints alone do
+   not describe the actual width available to the search console. */
+.landing-shell .landing-search-console {
+  container-type: inline-size;
+}
+
+@container (max-width: 620px) {
+  .landing-shell .landing-search-console-fields {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 8px;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .landing-shell .landing-search-console-field,
+  .landing-shell .landing-search-submit {
+    min-width: 0;
+    min-height: 72px;
+    margin: 0;
+    border-radius: 13px;
+  }
+
+  .landing-shell .landing-search-console-field {
+    display: grid;
+    border: 1px solid rgba(11, 35, 27, .11);
+    background: #f7f7f2;
+  }
+
+  .landing-shell .landing-search-console-field:nth-of-type(3) {
+    display: grid;
+  }
+
+  .landing-shell .landing-search-console-field > span {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  .landing-shell .landing-search-submit {
+    padding-inline: 12px;
+  }
+}
+
+@container (max-width: 380px) {
+  .landing-shell .landing-search-console-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-shell .landing-search-submit {
+    min-height: 52px;
+  }
+}
+
+/* The footer uses a dark surface. Reconcile the later light-footer typography
+   rules and use the open desktop space for navigation instead of stacking it. */
+.landing-shell .landing-footer-brand p,
+.landing-shell .landing-footer-links strong {
+  color: #fff;
+}
+
+.landing-shell .landing-footer-links a {
+  color: rgba(255, 255, 255, .72);
+}
+
+.landing-shell .landing-footer-links a:hover {
+  color: #fff;
+}
+
+.landing-shell .landing-footer-bottom {
+  color: rgba(255, 255, 255, .62);
+}
+
+@media (min-width: 761px) {
+  .landing-shell .landing-footer {
+    display: grid;
+    grid-template-columns: minmax(280px, .85fr) minmax(0, 1.15fr);
+    column-gap: clamp(48px, 8vw, 120px);
+    align-items: start;
+  }
+
+  .landing-shell .landing-footer-brand {
+    grid-column: 1;
+  }
+
+  .landing-shell .landing-footer-links {
+    grid-column: 2;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .landing-shell .landing-footer-bottom {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Renter search reconciliation. */
 .shell-renter .renter-result-card-wrap {
   isolation: isolate;
