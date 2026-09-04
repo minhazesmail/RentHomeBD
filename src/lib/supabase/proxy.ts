@@ -11,6 +11,10 @@ function isProtectedRoute(pathname: string) {
 }
 
 export async function updateSession(request: NextRequest) {
+  if (!isProtectedRoute(request.nextUrl.pathname)) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
@@ -36,7 +40,7 @@ export async function updateSession(request: NextRequest) {
   );
 
   const { data: claimsData } = await supabase.auth.getClaims();
-  if (!claimsData?.claims?.sub && isProtectedRoute(request.nextUrl.pathname)) {
+  if (!claimsData?.claims?.sub) {
     const loginUrl = request.nextUrl.clone();
     const nextUrl = request.nextUrl.clone();
     nextUrl.searchParams.delete("_vercel_share");
