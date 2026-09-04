@@ -53,7 +53,7 @@ export function MessageComposer({
 
   return (
     <div className="message-composer">
-      <div className="quick-inquiries" aria-label="Quick inquiry suggestions">
+      <div className="quick-inquiries" role="group" aria-label="Quick inquiry suggestions">
         {QUICK_INQUIRIES.map((inquiry) => (
           <button key={inquiry} type="button" onClick={() => setBody(inquiry)} disabled={busy}>
             {inquiry}
@@ -62,12 +62,15 @@ export function MessageComposer({
       </div>
 
       <div className="message-input-shell">
+        <label className="sr-only" htmlFor="message-composer-input">Message</label>
         <textarea
+          id="message-composer-input"
           value={body}
           onChange={(event) => setBody(event.target.value)}
           rows={2}
           maxLength={4000}
           placeholder="Write a polite message about this property…"
+          aria-describedby="message-composer-help message-composer-count"
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
               event.preventDefault();
@@ -81,10 +84,10 @@ export function MessageComposer({
       </div>
 
       <div className="message-composer-footer">
-        <span>Enter to send · Shift + Enter for a new line</span>
-        <span>{body.length}/4000</span>
+        <span id="message-composer-help">Enter to send · Shift + Enter for a new line</span>
+        <span id="message-composer-count">{body.length}/4000</span>
       </div>
-      {message && <div className="auth-message">{message}</div>}
+      {message && <div className="auth-message" role="alert">{message}</div>}
     </div>
   );
 }
