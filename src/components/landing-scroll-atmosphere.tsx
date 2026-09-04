@@ -1,5 +1,8 @@
 "use client";
 
+import "@/app/landing.css";
+import "@/app/landing-alignment.css";
+import "@/app/landing-redesign.css";
 import { useEffect } from "react";
 
 const SCENES = ["hero", "trust", "journey", "homes", "local", "clarity", "action", "footer"] as const;
