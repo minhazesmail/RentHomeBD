@@ -184,3 +184,188 @@
     padding-inline: 10px;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Scroll-performance reconciliation
+
+   The previous atmosphere rendered eight viewport-sized animated layers behind
+   several large backdrop-filter surfaces. That forced expensive repainting and
+   compositing on nearly every scroll frame. Keep the section-by-section color
+   identity, but render it through one static fixed layer and opaque-enough
+   surfaces that do not need live background blur.
+   -------------------------------------------------------------------------- */
+
+/* Remove the duplicate fixed/animated decorations owned by older landing
+   generations. The single atmosphere layer below replaces them. */
+.landing-shell::before,
+.landing-shell::after {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+}
+
+.landing-shell .landing-scroll-atmosphere {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(217, 166, 63, .22), transparent 32rem),
+    radial-gradient(circle at 86% 24%, rgba(62, 159, 117, .18), transparent 36rem),
+    linear-gradient(145deg, #fbf5e8, #e8f0e7);
+}
+
+/* The old atmosphere pseudo-art used mix-blend-mode, drop-shadow filters,
+   multi-ring box shadows and independent infinite transforms. Remove that work
+   and retain only a cheap static map-grid texture. */
+.landing-shell .landing-scroll-atmosphere::before {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  transform: none !important;
+}
+
+.landing-shell .landing-scroll-atmosphere::after {
+  inset: 0;
+  z-index: 1;
+  opacity: .14;
+  background-image:
+    linear-gradient(rgba(11, 35, 27, .10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 35, 27, .10) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: none;
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* One fixed background swaps when the observer changes the current section.
+   There are no cross-fading full-screen compositor layers anymore. */
+.landing-shell[data-landing-theme="hero"] .landing-scroll-atmosphere {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(217, 166, 63, .22), transparent 32rem),
+    radial-gradient(circle at 86% 24%, rgba(62, 159, 117, .18), transparent 36rem),
+    linear-gradient(145deg, #fbf5e8, #e8f0e7);
+}
+
+.landing-shell[data-landing-theme="trust"] .landing-scroll-atmosphere {
+  background:
+    radial-gradient(circle at 82% 18%, rgba(185, 242, 39, .18), transparent 30rem),
+    radial-gradient(circle at 18% 76%, rgba(8, 118, 83, .20), transparent 38rem),
+    linear-gradient(145deg, #edf5e8, #f8f0df);
+}
+
+.landing-shell[data-landing-theme="journey"] .landing-scroll-atmosphere {
+  background:
+    radial-gradient(ellipse at 22% 20%, rgba(22, 125, 120, .18), transparent 36rem),
+    radial-gradient(ellipse at 82% 78%, rgba(217, 166, 63, .20), transparent 34rem),
+    linear-gradient(135deg, #e6f0eb, #fbf2de);
+}
+
+.landing-shell[data-landing-theme="homes"] .landing-scroll-atmosphere {
+  background:
+    radial-gradient(circle at 74% 22%, rgba(67, 132, 166, .19), transparent 34rem),
+    radial-gradient(circle at 14% 68%, rgba(8, 118, 83, .20), transparent 38rem),
+    linear-gradient(150deg, #e3eeea, #f7eddb);
+}
+
+.landing-shell[data-landing-theme="local"] .landing-scroll-atmosphere {
+  background:
+    radial-gradient(circle at 50% 8%, rgba(185, 242, 39, .18), transparent 30rem),
+    radial-gradient(circle at 88% 74%, rgba(217, 166, 63, .20), transparent 34rem),
+    linear-gradient(145deg, #dfece4, #f6ead5);
+}
+
+.landing-shell[data-landing-theme="clarity"] .landing-scroll-atmosphere {
+  background:
+    radial-gradient(circle at 16% 20%, rgba(91, 145, 175, .18), transparent 34rem),
+    radial-gradient(circle at 80% 68%, rgba(85, 154, 114, .19), transparent 38rem),
+    linear-gradient(145deg, #e8f0ed, #f5f0e4);
+}
+
+.landing-shell[data-landing-theme="action"] .landing-scroll-atmosphere,
+.landing-shell[data-landing-theme="footer"] .landing-scroll-atmosphere {
+  background:
+    radial-gradient(circle at 80% 20%, rgba(217, 166, 63, .24), transparent 32rem),
+    radial-gradient(circle at 12% 74%, rgba(53, 143, 105, .22), transparent 38rem),
+    linear-gradient(145deg, #dce9df, #f0dfbd);
+}
+
+/* Defensive cleanup if an older cached component ever leaves scene nodes in
+   the DOM: they must not become compositor layers. */
+.landing-shell .landing-scroll-scene,
+.landing-shell .landing-scroll-scene::before,
+.landing-shell .landing-scroll-scene::after {
+  display: none !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  will-change: auto !important;
+}
+
+/* Live backdrop blur over a moving full-screen background is particularly
+   expensive. These surfaces are opaque enough to preserve the glass-like look
+   without asking the browser to re-blur the page underneath on every frame. */
+main.landing-shell .landing-frame,
+main.landing-shell .landing-nav,
+.landing-shell .landing-live-kicker,
+.landing-shell .landing-search-console,
+.landing-shell .landing-map-caption,
+.landing-shell .landing-map-rail,
+.landing-shell .landing-map-floating-note,
+.landing-shell .landing-persona-tabs,
+.landing-shell .landing-how-card,
+.landing-shell .landing-trust-section,
+.landing-shell .landing-content-section {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+main.landing-shell .landing-frame {
+  background: rgba(250, 247, 239, .74);
+}
+
+main.landing-shell .landing-nav {
+  background: #091f18;
+}
+
+.landing-shell .landing-live-kicker,
+.landing-shell .landing-search-console,
+.landing-shell .landing-map-caption {
+  background: rgba(255, 253, 248, .97);
+}
+
+.landing-shell .landing-map-rail {
+  background: rgba(255, 253, 248, .97);
+}
+
+.landing-shell .landing-map-floating-note {
+  background: rgba(11, 35, 27, .95);
+}
+
+.landing-shell .landing-trust-section,
+.landing-shell .landing-content-section {
+  background: rgba(255, 253, 248, .84);
+}
+
+/* View-timeline animations continuously mutate transforms as the user scrolls.
+   Keep hover/focus transitions, but stop tying card/FAQ/CTA transforms to every
+   scroll frame. */
+.landing-shell .landing-trust-card,
+.landing-shell .landing-listing-card,
+.landing-shell .landing-feature,
+.landing-shell .landing-faq-item,
+.landing-shell .landing-cta-band {
+  animation: none !important;
+  animation-timeline: auto !important;
+}
+
+@media (max-width: 760px) {
+  main.landing-shell .landing-frame {
+    background: rgba(250, 247, 239, .86);
+  }
+
+  .landing-shell .landing-trust-section,
+  .landing-shell .landing-content-section {
+    background: rgba(255, 253, 248, .92);
+  }
+}
