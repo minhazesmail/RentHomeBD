@@ -4,6 +4,12 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/lib/supabase/database.types";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
+const PROTECTED_ROUTE_PREFIXES = ["/saved", "/messages", "/dashboard", "/owner", "/account", "/moderation"];
+
+function isProtectedRoute(pathname: string) {
+  return PROTECTED_ROUTE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -29,6 +35,18 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getClaims();
+  const { data: claimsData } = await supabase.auth.getClaims();
+  if (!claimsData?.claims?.sub && isProtectedRoute(request.nextUrl.pathname)) {
+    const loginUrl = request.nextUrl.clone();
+    const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+    loginUrl.pathname = "/login";
+    loginUrl.search = "";
+    loginUrl.searchParams.set("next", nextPath);
+
+    const redirectResponse = NextResponse.redirect(loginUrl);
+    response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
+  }
+
   return response;
 }
