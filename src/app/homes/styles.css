@@ -1,0 +1,4 @@
+/* Canonical style manifest for the /homes route family. */
+@import "./homes.css";
+@import "./homes-redesign.css";
+@import "./property-detail-redesign.css";
