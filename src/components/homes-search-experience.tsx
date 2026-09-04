@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { MobileMapModel } from "@/components/mobile-map-model";
 import { ProductNavigation } from "@/components/product-navigation";
@@ -36,7 +37,7 @@ const EMPTY_PERSONALIZATION: PersonalizationState = {
 };
 
 export function HomesSearchExperience({ children, initialSearch }: { children: ReactNode; initialSearch: InitialSearch }) {
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [personalization, setPersonalization] = useState<PersonalizationState>(EMPTY_PERSONALIZATION);
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export function HomesSearchExperience({ children, initialSearch }: { children: R
       if (cancelled) return;
       setPersonalization({
         userId,
-        savedPropertyIds: (savedRows ?? []).map((row) => row.property_id),
+        savedPropertyIds: (savedRows ?? []).map((row) => row.property_id as string),
         preferredTenantType: normalizeTenantType(profile?.preferred_tenant_type),
         canList: profile?.primary_role === "owner" || profile?.primary_role === "agent",
       });
