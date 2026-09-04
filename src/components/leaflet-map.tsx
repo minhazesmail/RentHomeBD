@@ -39,6 +39,14 @@ type ListingCluster = {
   listings: MapListing[];
 };
 
+type WorkingCluster = {
+  listings: MapListing[];
+  x: number;
+  y: number;
+  cellX: number;
+  cellY: number;
+};
+
 function FitToResults({ listings, center, liveTracking }: { listings: MapListing[]; center: [number, number]; liveTracking: boolean }) {
   const map = useMap();
   const centerRef = useRef(center);
@@ -158,6 +166,10 @@ function markerIcon(label: string, tone: ReturnType<typeof tenantTone>, selected
   });
 }
 
+function clusterBucketKey(cellX: number, cellY: number) {
+  return `${cellX}:${cellY}`;
+}
+
 function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapListing[]; selectedId: string | null; onSelect: (id: string) => void }) {
   const map = useMap();
   const [zoom, setZoom] = useState(() => map.getZoom());
@@ -172,23 +184,55 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
 
     const selectedListing = selectedId ? listings.find((listing) => listing.id === selectedId) ?? null : null;
     const clusterableListings = selectedListing ? listings.filter((listing) => listing.id !== selectedListing.id) : listings;
-    const working: Array<{ listings: MapListing[]; x: number; y: number }> = [];
+    const working: WorkingCluster[] = [];
+    const buckets = new Map<string, WorkingCluster[]>();
+
+    function addToBucket(cluster: WorkingCluster) {
+      const key = clusterBucketKey(cluster.cellX, cluster.cellY);
+      const bucket = buckets.get(key);
+      if (bucket) bucket.push(cluster);
+      else buckets.set(key, [cluster]);
+    }
+
+    function moveBucket(cluster: WorkingCluster, nextCellX: number, nextCellY: number) {
+      if (cluster.cellX === nextCellX && cluster.cellY === nextCellY) return;
+      const previousKey = clusterBucketKey(cluster.cellX, cluster.cellY);
+      const previousBucket = buckets.get(previousKey);
+      if (previousBucket) {
+        const index = previousBucket.indexOf(cluster);
+        if (index >= 0) previousBucket.splice(index, 1);
+        if (previousBucket.length === 0) buckets.delete(previousKey);
+      }
+      cluster.cellX = nextCellX;
+      cluster.cellY = nextCellY;
+      addToBucket(cluster);
+    }
 
     for (const listing of clusterableListings) {
       const point = map.project([listing.latitude, listing.longitude], zoom);
-      let nearest: { listings: MapListing[]; x: number; y: number } | null = null;
+      const cellX = Math.floor(point.x / clusterRadius);
+      const cellY = Math.floor(point.y / clusterRadius);
+      let nearest: WorkingCluster | null = null;
       let nearestDistance = Number.POSITIVE_INFINITY;
 
-      for (const candidate of working) {
-        const distance = Math.hypot(point.x - candidate.x, point.y - candidate.y);
-        if (distance <= clusterRadius && distance < nearestDistance) {
-          nearest = candidate;
-          nearestDistance = distance;
+      for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+        for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+          const bucket = buckets.get(clusterBucketKey(cellX + offsetX, cellY + offsetY));
+          if (!bucket) continue;
+          for (const candidate of bucket) {
+            const distance = Math.hypot(point.x - candidate.x, point.y - candidate.y);
+            if (distance <= clusterRadius && distance < nearestDistance) {
+              nearest = candidate;
+              nearestDistance = distance;
+            }
+          }
         }
       }
 
       if (!nearest) {
-        working.push({ listings: [listing], x: point.x, y: point.y });
+        const cluster: WorkingCluster = { listings: [listing], x: point.x, y: point.y, cellX, cellY };
+        working.push(cluster);
+        addToBucket(cluster);
         continue;
       }
 
@@ -196,6 +240,7 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
       nearest.listings.push(listing);
       nearest.x = (nearest.x * previousCount + point.x) / (previousCount + 1);
       nearest.y = (nearest.y * previousCount + point.y) / (previousCount + 1);
+      moveBucket(nearest, Math.floor(nearest.x / clusterRadius), Math.floor(nearest.y / clusterRadius));
     }
 
     const grouped = working.map((cluster) => ({
