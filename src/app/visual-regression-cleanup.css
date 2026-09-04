@@ -151,17 +151,17 @@
 /* Final responsive fixes discovered after the performance layer. */
 @media (max-width: 920px) {
   /* Once the hero becomes single-column the desktop perspective tilt reads as accidental. */
-  .landing-visual {
-    transform: none !important;
+  .landing-shell .landing-visual {
+    transform: none;
     transform-origin: center;
   }
 }
 
 @media (max-width: 767px) {
-  /* performance-optimizations.css removes blur on mobile; preserve the landing nav's dark identity. */
-  .landing-nav {
+  /* Preserve the landing nav's dark identity after the mobile performance layer. */
+  .landing-shell .landing-nav {
     border-color: rgba(255,255,255,.13);
-    background: rgba(8,35,27,.97) !important;
+    background: rgba(8,35,27,.97);
     color: #fff;
     box-shadow: 0 12px 34px rgba(7,31,24,.18);
   }
@@ -173,12 +173,12 @@
     color: #fff;
   }
 
-  .landing-visual {
+  .landing-shell .landing-visual {
     min-height: 0;
   }
 
-  .landing-trust-grid .landing-trust-card > div {
-    margin-top: 32px !important;
+  .landing-trust-section .landing-trust-grid .landing-trust-card > div {
+    margin-top: 32px;
   }
 
   /* Avoid nested edge-to-edge surfaces looking like accidental double cards. */
@@ -251,7 +251,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing-visual {
-    transform: none !important;
+  .landing-shell .landing-visual {
+    transform: none;
   }
 }
