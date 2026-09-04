@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, CheckCircle2, Clock3, FileEdit, Home, MessageSquareText, Plus, ShieldCheck } from "lucide-react";
 
+import { ActionButton, ActionLink } from "@/components/action";
 import { ListingFreshnessActions } from "@/components/listing-freshness-actions";
 import { ProductNavigation } from "@/components/product-navigation";
 import { requireOwnerOrAgent } from "@/lib/auth";
@@ -204,7 +205,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
           <p className="intro">See what is live, what needs attention, and what NearBasha needs from you next. Available listings are reconfirmed every 14 days to keep renter search fresh.</p>
         </div>
         <div className="owner-header-actions">
-          <Link className="primary-button link-button" href="/owner/properties/new"><Plus size={16} aria-hidden="true" /> Add property</Link>
+          <ActionLink href="/owner/properties/new"><Plus size={16} aria-hidden="true" /> Add property</ActionLink>
         </div>
       </header>
 
@@ -255,8 +256,8 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
               </select>
             </label>
             <div className={styles.ownerPortfolioActions}>
-              <button className="secondary-button" type="submit">Apply</button>
-              {hasPortfolioFilters && <Link className="text-link" href="/owner">Clear</Link>}
+              <ActionButton variant="secondary" type="submit">Apply</ActionButton>
+              {hasPortfolioFilters && <ActionLink variant="text" href="/owner">Clear</ActionLink>}
             </div>
           </form>
         )}
@@ -266,13 +267,13 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
             <div className="empty-icon">⌂</div>
             <h2>No properties yet</h2>
             <p>Start with a draft. You can leave it incomplete, save your progress, and return whenever you are ready.</p>
-            <Link className="primary-button link-button" href="/owner/properties/new">Create first listing</Link>
+            <ActionLink href="/owner/properties/new">Create first listing</ActionLink>
           </div>
         ) : !visibleListings.length ? (
           <div className={styles.ownerPortfolioEmptyFiltered}>
             <h3>No listings match these portfolio filters</h3>
             <p>Try another search term or status, or clear the controls to see your full portfolio.</p>
-            <Link className="secondary-button link-button" href="/owner">Clear portfolio filters</Link>
+            <ActionLink variant="secondary" href="/owner">Clear portfolio filters</ActionLink>
           </div>
         ) : (
           <>
