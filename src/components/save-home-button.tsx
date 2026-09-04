@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useMemo, useOptimistic, useState } from "react";
+import { startTransition, useEffect, useMemo, useOptimistic, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -23,6 +23,10 @@ export function SaveHomeButton({
   const [optimisticSaved, setOptimisticSaved] = useOptimistic(saved, (_current, next: boolean) => next);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!busy) setSaved(initialSaved);
+  }, [busy, initialSaved]);
 
   function toggle() {
     if (!userId) {
