@@ -1,0 +1,107 @@
+.mapSurface {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255, 255, 255, 0.88), transparent 28%),
+    linear-gradient(135deg, rgba(227, 235, 226, 0.96), rgba(239, 230, 209, 0.95));
+  isolation: isolate;
+}
+
+.mapSurface::before,
+.mapSurface::after {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+}
+
+.mapSurface::before {
+  background:
+    linear-gradient(26deg, transparent 47%, rgba(255, 255, 255, 0.72) 48%, rgba(255, 255, 255, 0.72) 51%, transparent 52%),
+    linear-gradient(104deg, transparent 45%, rgba(255, 255, 255, 0.62) 46%, rgba(255, 255, 255, 0.62) 49%, transparent 50%),
+    linear-gradient(154deg, transparent 47%, rgba(255, 255, 255, 0.55) 48%, rgba(255, 255, 255, 0.55) 50%, transparent 51%);
+  background-size: 180px 150px, 220px 180px, 260px 210px;
+  opacity: 0.9;
+}
+
+.mapSurface::after {
+  background:
+    radial-gradient(circle at 30% 70%, rgba(41, 91, 72, 0.12), transparent 16%),
+    radial-gradient(circle at 74% 28%, rgba(154, 117, 70, 0.12), transparent 18%),
+    radial-gradient(circle at 68% 78%, rgba(45, 83, 112, 0.09), transparent 14%);
+}
+
+.mapLabel {
+  position: absolute;
+  z-index: 2;
+  padding: 0.36rem 0.62rem;
+  border: 1px solid rgba(18, 62, 48, 0.09);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: rgba(18, 62, 48, 0.7);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+}
+
+.pinLink {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, -100%);
+  text-decoration: none;
+}
+
+.pin {
+  display: grid;
+  width: 2.1rem;
+  height: 2.1rem;
+  place-items: center;
+  border: 3px solid rgba(255, 255, 255, 0.94);
+  border-radius: 50% 50% 50% 14%;
+  background: #123e30;
+  box-shadow: 0 10px 24px rgba(18, 62, 48, 0.2);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  transform: rotate(-45deg);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.pin > span {
+  transform: rotate(45deg);
+}
+
+.pinLink:hover .pin,
+.pinLink:focus-visible .pin {
+  transform: rotate(-45deg) translateY(-3px);
+  box-shadow: 0 14px 30px rgba(18, 62, 48, 0.28);
+}
+
+.pinLink:focus-visible {
+  outline: none;
+}
+
+.emptyState {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  z-index: 2;
+  width: min(82%, 21rem);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.emptyState strong {
+  display: block;
+  color: #123e30;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+}
+
+.emptyState span {
+  display: block;
+  margin-top: 0.35rem;
+  color: rgba(18, 62, 48, 0.66);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
