@@ -200,9 +200,8 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
       <ProductNavigation authenticated canList current="properties" />
       <header className="owner-header owner-management-header">
         <div>
-          <p className="eyebrow">Owner workspace</p>
           <h1 className="owner-title">Manage your properties</h1>
-          <p className="intro">See what is live, what needs attention, and what NearBasha needs from you next. Available listings are reconfirmed every 14 days to keep renter search fresh.</p>
+          <p className="intro">See what is live and what needs your attention.</p>
         </div>
         <div className="owner-header-actions">
           <ActionLink href="/owner/properties/new"><Plus size={16} aria-hidden="true" /> Add property</ActionLink>
@@ -224,9 +223,8 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
       <section className="property-list-panel owner-property-panel">
         <div className="owner-property-panel-heading">
           <div>
-            <p className="eyebrow">Property portfolio</p>
             <h2>{listings.length ? `${listings.length} ${listings.length === 1 ? "listing" : "listings"}` : "Your listings"}</h2>
-            {!!listings.length && <p className={styles.ownerPortfolioPolicy}>Live listings need a quick availability confirmation every 14 days. Each card shows one current status and what it means.</p>}
+            {!!listings.length && <p className={styles.ownerPortfolioPolicy}>Live listings need availability confirmation every 14 days.</p>}
           </div>
           {!!attentionCount && <span className="owner-attention-count"><AlertTriangle size={14} aria-hidden="true" /> {attentionCount} need{attentionCount === 1 ? "s" : ""} action</span>}
         </div>
@@ -266,13 +264,13 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
           <div className="empty-state owner-empty-state">
             <div className="empty-icon">⌂</div>
             <h2>No properties yet</h2>
-            <p>Start with a draft. You can leave it incomplete, save your progress, and return whenever you are ready.</p>
+            <p>Start a draft and finish it when you are ready.</p>
             <ActionLink href="/owner/properties/new">Create first listing</ActionLink>
           </div>
         ) : !visibleListings.length ? (
           <div className={styles.ownerPortfolioEmptyFiltered}>
-            <h3>No listings match these portfolio filters</h3>
-            <p>Try another search term or status, or clear the controls to see your full portfolio.</p>
+            <h3>No listings match these filters</h3>
+            <p>Try another search or status.</p>
             <ActionLink variant="secondary" href="/owner">Clear portfolio filters</ActionLink>
           </div>
         ) : (
