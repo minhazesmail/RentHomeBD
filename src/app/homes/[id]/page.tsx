@@ -12,6 +12,7 @@ import { ReportListingButton } from "@/components/report-listing-button";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
 import { getAuthContext } from "@/lib/auth";
+import { isUuid } from "@/lib/routing";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeTenantType, normalizeTenantTypes, TENANT_PROFILE_LABELS, tenantCompatibility } from "@/lib/tenant-match";
 type Amenity = { slug: string; name: string };
@@ -62,6 +63,8 @@ function availabilityLabel(availableFrom: string | null) {
 
 export default async function PublicPropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!isUuid(id)) notFound();
+
   const supabase = (await createClient()) as unknown as SupabaseClient;
   const auth = await getAuthContext();
   const { data, error } = await supabase.rpc("get_public_property_detail", { property_uuid: id });
@@ -113,7 +116,7 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
           <div className="property-detail-hero-main">
             <div className="property-detail-hero-kicker"><p className="eyebrow">{label(property.property_type)}</p><span className="property-detail-availability"><CircleCheck size={13} />{availability}</span></div>
             <h1>{property.title || "Rental property"}</h1>
-            <p className="property-detail-address"><MapPin size={17} aria-hidden="true" />{property.address_text || "Exact location shown below"}</p>
+            <p className="property-detail-address"><MapPin size={17} aria-hidden="true" />{property.address_text || "Approximate public location shown below"}</p>
           </div>
           <div className="property-detail-price"><span className="property-detail-price-label">Monthly rent</span><strong>{property.rent_bdt ? `৳${property.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>per month</span><small>{property.deposit_bdt > 0 ? `Deposit ৳${property.deposit_bdt.toLocaleString("en-BD")}` : "No deposit listed"}</small></div>
         </section>
@@ -135,12 +138,12 @@ export default async function PublicPropertyPage({ params }: { params: Promise<{
 
             <section className="property-detail-section"><div className="property-section-heading"><div><h2>Amenities & included utilities</h2><p className="section-copy">A quick scan of what comes with the property and what may already be covered in rent.</p></div></div><div className="property-tag-groups"><div><h3>Amenities</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} />{amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} />None listed</span>}</div></div><div><h3>Utilities included</h3><div className="amenity-grid utility-grid">{property.utilities_included.length ? property.utilities_included.map((utility) => <span className="amenity-item" key={utility}><Zap size={15} />{label(utility)}</span>) : <span className="amenity-item"><Zap size={15} />None listed</span>}</div></div></div></section>
 
-            <section className="property-detail-section"><div className="property-section-heading"><div><h2>Exact location</h2><p className="section-copy">The owner pinned this exact property location during listing creation.</p></div><MapPin size={20} aria-hidden="true" /></div><div className="property-map"><iframe title="Exact property location" src={mapUrl} loading="lazy" /></div><PropertyLocationActions latitude={property.latitude} longitude={property.longitude} /></section>
+            <section className="property-detail-section"><div className="property-section-heading"><div><h2>Approximate public location</h2><p className="section-copy">NearBasha rounds published coordinates for public discovery. Confirm the exact address directly before visiting or paying.</p></div><MapPin size={20} aria-hidden="true" /></div><div className="property-map"><iframe title="Approximate property location" src={mapUrl} loading="lazy" /></div><PropertyLocationActions latitude={property.latitude} longitude={property.longitude} /></section>
             <section className="property-detail-section property-trust-section" id="trust">
               <div className="trust-section-heading"><div><h2>Trust & safety</h2><p className="section-copy">NearBasha surfaces the checks that matter before you contact a landlord, so you can understand what has been verified at a glance.</p></div><div className="trust-shield" aria-hidden="true"><ShieldCheck size={23} /></div></div>
               <div className="trust-signal-grid">
                 <div className="trust-signal"><div className="trust-signal-icon"><CircleCheck size={17} /></div><div className="trust-signal-copy"><strong>Listing reviewed</strong><span>This listing passed the platform moderation flow before appearing publicly.</span></div></div>
-                <div className="trust-signal"><div className="trust-signal-icon"><MapPin size={17} /></div><div className="trust-signal-copy"><strong>Exact map pin</strong><span>The owner pinned the property location during listing creation.</span></div></div>
+                <div className="trust-signal"><div className="trust-signal-icon"><MapPin size={17} /></div><div className="trust-signal-copy"><strong>Approximate public map pin</strong><span>The owner submits an exact pin for moderation; public discovery receives rounded coordinates instead.</span></div></div>
                 <div className="trust-signal"><div className="trust-signal-icon"><Clock size={17} /></div><div className="trust-signal-copy"><strong>Freshness tracked</strong><span>Availability has a reconfirmation lifecycle to reduce stale listings.</span></div></div>
                 <div className="trust-signal"><div className="trust-signal-icon"><MessageCircle size={17} /></div><div className="trust-signal-copy"><strong>Private contact first</strong><span>You can start with in-app messaging instead of exposing your phone number immediately.</span></div></div>
                 <div className="trust-signal"><div className="trust-signal-icon"><Phone size={17} /></div><div className="trust-signal-copy"><strong>{ownerPhoneVerified ? "Owner phone verified" : "Phone verification pending"}</strong><span>{ownerPhoneVerified ? "The listing account has completed phone verification." : "This owner has not completed the phone verification signal yet."}</span></div></div>
