@@ -54,10 +54,10 @@ export default async function DashboardPage({
             <h1 className="dashboard-title">Welcome{auth.profile.display_name ? `, ${auth.profile.display_name}` : ""}.</h1>
             <p className="intro">
               {isRenter
-                ? "Continue your home search, saved shortlist, and conversations."
+                ? "Continue your search and conversations."
                 : canList
-                  ? "Manage your properties and renter conversations from here."
-                  : "Your account tools and conversations are ready."}
+                  ? "Manage properties and messages."
+                  : "Your account tools are ready."}
             </p>
           </div>
           <form action="/auth/signout" method="post">
@@ -74,17 +74,17 @@ export default async function DashboardPage({
               <article>
                 <span>Saved homes</span>
                 <strong>{savedHomeCount ?? 0}</strong>
-                <p>Homes kept for comparison.</p>
+                <p>Ready to compare.</p>
               </article>
               <article>
                 <span>Saved searches</span>
                 <strong>{savedSearchCount ?? 0}</strong>
-                <p>Map searches ready to reopen.</p>
+                <p>Ready to reopen.</p>
               </article>
               <article className={preferredTenant ? "complete" : "attention"}>
                 <span>Renter fit</span>
                 <strong>{preferredTenant ? tenantLabels[preferredTenant] ?? preferredTenant.replaceAll("_", " ") : "Optional"}</strong>
-                <p>{preferredTenant ? "Used to rank compatible homes first." : "Add this later if you want personalized ranking."}</p>
+                <p>{preferredTenant ? "Used for ranking." : "Add later for personalized ranking."}</p>
               </article>
             </section>
 
@@ -93,7 +93,6 @@ export default async function DashboardPage({
                 <div className="renter-journey-copy">
                   <span className="renter-journey-kicker">Continue your search</span>
                   <h2>Pick up where you left off.</h2>
-                  <p>Search the live map, compare your saved homes, or continue a conversation without working through account setup first.</p>
                 </div>
                 <div className="renter-journey-actions">
                   <ActionLink href="/homes">Browse live map</ActionLink>
@@ -103,18 +102,18 @@ export default async function DashboardPage({
               </div>
 
               <div className="renter-journey-card">
-                <div className="section-heading"><span>✓</span><div><h2>Personalize renter fit</h2><p>Optional. Your renter type is a soft matching signal and does not hide homes unless you explicitly apply a renter filter on the map.</p></div></div>
+                <div className="section-heading"><span>✓</span><div><h2>Personalize renter fit</h2><p>Optional. Helps rank compatible homes first.</p></div></div>
                 <RenterPreferenceForm userId={auth.userId} initialPreference={preferredTenant ?? null} />
               </div>
 
               <div className="renter-journey-card">
                 <div className="renter-journey-copy">
                   <span className="renter-journey-kicker">Account trust</span>
-                  <h2>{phoneVerified ? "Phone verified" : "Phone verification is optional until you need protected contact sharing."}</h2>
-                  <p>{phoneVerified ? "Your phone trust signal is active." : "Verify when you want to use protected phone reveal with a verified property owner."}</p>
+                  <h2>{phoneVerified ? "Phone verified" : "Phone verification is optional."}</h2>
+                  <p>{phoneVerified ? "Your phone trust signal is active." : "Verify when protected contact sharing requires it."}</p>
                 </div>
                 <div className="renter-journey-actions">
-                  <ActionLink variant="text" href="/account/phone">{phoneVerified ? "Manage verified phone →" : "Verify phone when needed →"}</ActionLink>
+                  <ActionLink variant="text" href="/account/phone">{phoneVerified ? "Manage phone →" : "Verify phone →"}</ActionLink>
                 </div>
               </div>
             </section>
@@ -125,8 +124,7 @@ export default async function DashboardPage({
           <section className="owner-dashboard-workspace">
             <div className="owner-dashboard-priority">
               <div className="owner-dashboard-section-kicker">Owner workspace</div>
-              <h2>Manage listings and renter conversations from one starting point.</h2>
-              <p>Open your property portfolio for listing work, respond to renter messages, or check the renter-facing market when you need context.</p>
+              <h2>Manage listings and conversations.</h2>
               <div className="owner-dashboard-priority-actions">
                 <ActionLink href="/owner">Manage properties</ActionLink>
                 <ActionLink variant="secondary" href="/messages">Open messages</ActionLink>
@@ -152,7 +150,7 @@ export default async function DashboardPage({
 
         {!isRenter && !canList && (
           <section className="listing-section dashboard-trust-section">
-            <div className="section-heading"><span>✓</span><div><h2>Trust status</h2><p>These signals are tied to your authenticated account and moderator review history.</p></div></div>
+            <div className="section-heading"><span>✓</span><div><h2>Trust status</h2><p>Account verification signals.</p></div></div>
             <div className="property-tags">
               <span>{phoneVerified ? "Phone verified" : "Phone not verified"}</span>
             </div>
