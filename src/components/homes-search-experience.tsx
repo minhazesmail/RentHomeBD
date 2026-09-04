@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 import { MobileMapModel } from "@/components/mobile-map-model";
@@ -34,7 +35,7 @@ const EMPTY_PERSONALIZATION: PersonalizationState = {
   canList: false,
 };
 
-export function HomesSearchExperience({ initialSearch }: { initialSearch: InitialSearch }) {
+export function HomesSearchExperience({ children, initialSearch }: { children: ReactNode; initialSearch: InitialSearch }) {
   const supabase = useMemo(() => createClient(), []);
   const [personalization, setPersonalization] = useState<PersonalizationState>(EMPTY_PERSONALIZATION);
 
@@ -71,6 +72,7 @@ export function HomesSearchExperience({ initialSearch }: { initialSearch: Initia
   return (
     <>
       <ProductNavigation authenticated={Boolean(personalization.userId)} canList={personalization.canList} current="explore" />
+      {children}
       <MobileMapModel>
         <RenterMapSearch
           userId={personalization.userId}
