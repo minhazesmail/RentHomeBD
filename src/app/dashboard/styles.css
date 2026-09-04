@@ -1,0 +1,3 @@
+/* Canonical style manifest for the /dashboard route. */
+@import "./dashboard.css";
+@import "./dashboard-redesign.css";
