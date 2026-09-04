@@ -8,7 +8,7 @@ type AuditFunctions = {
   replace_property_listing_relations: {
     Args: {
       property_uuid: string;
-      tenant_values: Database["public"]["Enums"]["tenant_type"][];
+      tenant_values: string[];
       amenity_values: string[];
     };
     Returns: undefined;
