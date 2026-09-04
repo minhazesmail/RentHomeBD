@@ -1,0 +1,166 @@
+/* Targeted landing-page fixes for the regressions called out in the UI review.
+   This file is intentionally imported after landing.css, landing-alignment.css,
+   and landing-redesign.css so these corrections cannot be undone by the older
+   competing landing style generations. */
+
+/* Map caption: this is a light glass overlay, so its typography must use the
+   light-surface palette rather than the older white-on-dark map treatment. */
+.landing-shell .landing-map-caption {
+  position: absolute;
+  z-index: 15;
+  top: 34px;
+  right: 34px;
+  left: 34px;
+  display: flex;
+  min-height: 54px;
+  margin: 0;
+  padding: 8px 10px 8px 14px;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid rgba(11, 35, 27, .10);
+  border-radius: 16px;
+  background: rgba(255, 253, 248, .97);
+  color: #0b231b;
+  box-shadow: 0 12px 34px rgba(17, 45, 35, .12);
+  backdrop-filter: blur(18px);
+}
+
+.landing-shell .landing-map-caption > div {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 1px;
+}
+
+.landing-shell .landing-map-caption strong {
+  color: #0b231b;
+}
+
+.landing-shell .landing-map-caption small {
+  color: #66756d;
+}
+
+.landing-shell .landing-map-caption a {
+  display: inline-flex;
+  min-height: 42px;
+  padding: 9px 12px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 10px;
+  background: #0b231b;
+  color: #b9f227;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Mid-sized desktop is the failure range in the screenshot: the viewport is
+   wide, but the left hero column is not. Make the search UI fit the column it
+   actually receives instead of forcing four controls into a single row. */
+@media (min-width: 1121px) and (max-width: 1500px) {
+  main.landing-shell .landing-hero-reference {
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+  }
+
+  .landing-hero-reference .landing-copy {
+    padding-inline: clamp(30px, 3.2vw, 48px);
+  }
+
+  .landing-shell .landing-search-console {
+    width: 100%;
+    max-width: none;
+  }
+
+  .landing-shell .landing-search-console-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    overflow: visible;
+  }
+
+  .landing-shell .landing-search-console-area {
+    grid-column: 1 / -1;
+  }
+
+  .landing-shell .landing-search-console-field:nth-of-type(3) {
+    display: grid;
+  }
+
+  .landing-shell .landing-search-console-field > span {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  .landing-shell .landing-search-submit {
+    grid-column: 1 / -1;
+    min-height: 52px;
+    margin: 0;
+  }
+
+  /* The perspective tilt pushes the right panel into the clipped shell at this
+     width. Remove it here so the map remains fully visible and aligned. */
+  .landing-shell .landing-visual {
+    transform: none;
+  }
+}
+
+/* Footer: use the open desktop space and restore contrast on the dark footer. */
+.landing-shell .landing-footer-brand p,
+.landing-shell .landing-footer-links strong {
+  color: #fff;
+}
+
+.landing-shell .landing-footer-brand > span,
+.landing-shell .landing-footer-links a,
+.landing-shell .landing-footer-bottom {
+  color: rgba(255, 255, 255, .70);
+}
+
+.landing-shell .landing-footer-links a:hover {
+  color: #fff;
+}
+
+@media (min-width: 980px) {
+  .landing-shell .landing-footer {
+    display: grid;
+    grid-template-columns: minmax(300px, .85fr) minmax(0, 1.15fr);
+    column-gap: clamp(56px, 7vw, 104px);
+    row-gap: 0;
+    padding-inline: clamp(30px, 4vw, 56px);
+    align-items: start;
+  }
+
+  .landing-shell .landing-footer-brand {
+    grid-column: 1;
+    max-width: 390px;
+  }
+
+  .landing-shell .landing-footer-links {
+    grid-column: 2;
+    grid-row: 1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(24px, 4vw, 52px);
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .landing-shell .landing-footer-bottom {
+    grid-column: 1 / -1;
+    margin-top: 46px;
+  }
+}
+
+@media (max-width: 760px) {
+  .landing-shell .landing-map-caption {
+    top: 22px;
+    right: 22px;
+    left: 22px;
+  }
+
+  .landing-shell .landing-map-caption a {
+    min-width: 42px;
+    padding-inline: 10px;
+  }
+}
