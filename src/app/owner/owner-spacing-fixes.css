@@ -29,6 +29,16 @@
   letter-spacing: -.05em;
 }
 
+/* Batch 7 — section headings and operational cards should preserve a clear
+   hierarchy between title and supporting copy. */
+.listing-section .section-heading h2 {
+  margin-bottom: 8px;
+}
+
+.owner-property-address {
+  margin-top: 6px;
+}
+
 /* Listing validation/save feedback is already a direct item in the form grid.
    Let the form gap create separation rather than stacking extra margins. */
 .listing-form > .auth-message,
