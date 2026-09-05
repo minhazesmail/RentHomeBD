@@ -44,6 +44,18 @@
   line-height: 1.55;
 }
 
+/* Batch 5 — large auth and verification titles should keep a premium display
+   treatment without compressing multiline copy into adjacent lines. */
+.auth-title {
+  line-height: .96;
+  letter-spacing: -.05em;
+}
+
+.verification-page-header .listing-page-title {
+  line-height: .97;
+  letter-spacing: -.05em;
+}
+
 /* Auth feedback sits after the active flow and should never collide with the
    mode switch or form controls. */
 .auth-card > .auth-message {
@@ -67,6 +79,12 @@
   .auth-form > label + .form-hint,
   .auth-form > div > .form-hint {
     margin-top: 7px;
+  }
+
+  .auth-title,
+  .verification-page-header .listing-page-title {
+    line-height: .98;
+    letter-spacing: -.045em;
   }
 
   .auth-card > .auth-message {
