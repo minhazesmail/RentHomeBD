@@ -4,3 +4,4 @@
 @import "./property-detail-redesign.css" layer(route-detail);
 @import "./property-detail-spacing-fixes.css" layer(route-fixes);
 @import "./homes-spacing-fixes.css" layer(route-fixes);
+@import "./property-detail-flow-redesign.css" layer(route-contrast);

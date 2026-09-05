@@ -1,0 +1,209 @@
+/* Property detail continuation: one continuous story surface plus a mobile action dock. */
+.property-detail-page .property-detail-main {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgba(16, 37, 29, .1);
+  border-radius: 28px;
+  background: rgba(255, 253, 248, .92);
+  box-shadow: 0 18px 58px rgba(16, 43, 33, .065);
+}
+
+.property-detail-page .property-detail-main > .property-detail-section {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.property-detail-page .property-detail-main > .property-detail-section::after {
+  content: none;
+}
+
+.property-detail-page .property-detail-main > .property-detail-section + .property-detail-section {
+  border-top: 1px solid rgba(16, 37, 29, .085);
+}
+
+.property-detail-page .property-detail-main > .property-summary-grid {
+  background:
+    linear-gradient(135deg, rgba(237, 246, 234, .76), rgba(255, 253, 248, .9));
+}
+
+.property-detail-page .property-detail-main > .tenant-compatibility-card {
+  background:
+    radial-gradient(circle at 92% -20%, rgba(185, 242, 39, .13), transparent 16rem),
+    rgba(247, 251, 245, .72);
+}
+
+.property-detail-page .property-detail-main > .property-trust-section {
+  background: rgba(247, 249, 245, .62);
+}
+
+.property-detail-page .property-map {
+  box-shadow: 0 10px 28px rgba(16, 43, 33, .06);
+}
+
+.property-detail-page .property-contact-card {
+  border-radius: 24px;
+}
+
+@media (max-width: 1120px) {
+  /* Keep the property story first. Contact identity now follows the content,
+     while the fixed action dock keeps conversion actions immediately available. */
+  .property-detail-page .property-contact-card {
+    order: 0;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 760px) {
+  .property-detail-page .property-detail-shell {
+    padding-bottom: calc(116px + env(safe-area-inset-bottom));
+  }
+
+  .property-detail-page .property-detail-main {
+    border-radius: 22px;
+  }
+
+  .property-detail-page .property-detail-main > .property-detail-section {
+    padding: 21px 18px;
+  }
+
+  .property-detail-page .property-detail-main > .property-summary-grid {
+    padding: 0;
+  }
+
+  .property-detail-page .property-contact-card {
+    position: relative;
+    top: auto;
+    z-index: auto;
+    margin-top: 14px;
+    padding: 20px 18px;
+    box-shadow: 0 12px 34px rgba(8, 44, 33, .07);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* Rent is already prominent in the hero. Keep this lower card focused on
+     owner identity, verification, sharing, and listing freshness. */
+  .property-detail-page .property-contact-card > .contact-price-summary {
+    display: none;
+  }
+
+  /* The contact card pseudo-element becomes the dock surface on small screens. */
+  .property-detail-page .property-contact-card::after {
+    position: fixed;
+    z-index: 1600;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: calc(72px + env(safe-area-inset-bottom));
+    border: 0;
+    border-top: 1px solid rgba(16, 37, 29, .12);
+    border-radius: 0;
+    background: rgba(255, 253, 248, .94);
+    box-shadow: 0 -14px 38px rgba(8, 44, 33, .1);
+    backdrop-filter: blur(18px) saturate(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(1.08);
+    content: "";
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack {
+    position: fixed;
+    z-index: 1602;
+    left: max(8px, env(safe-area-inset-left));
+    right: calc(33.333% + 5px);
+    bottom: max(8px, env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack > .contact-action-stack,
+  .property-detail-page .property-contact-card > .contact-action-stack .phone-reveal-gate {
+    display: contents;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack .property-contact-button,
+  .property-detail-page .property-contact-card > .contact-action-stack .primary-button,
+  .property-detail-page .property-contact-card > .contact-action-stack .secondary-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    margin: 0;
+    padding: 7px 8px;
+    border-radius: 14px;
+    font-size: .74rem;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .property-detail-page .property-contact-card > .save-home-wrap {
+    position: fixed;
+    z-index: 1602;
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    width: calc(33.333% - 13px);
+    margin: 0;
+  }
+
+  .property-detail-page .property-contact-card > .save-home-wrap .save-home-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    padding: 7px 8px;
+    border: 1px solid rgba(13, 95, 67, .16);
+    border-radius: 14px;
+    background: #f4f8f1;
+    box-shadow: none;
+    font-size: .74rem;
+    line-height: 1.15;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack .contact-note {
+    display: none;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack .contact-error,
+  .property-detail-page .property-contact-card > .contact-action-stack .phone-reveal-result {
+    position: fixed;
+    z-index: 1604;
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: calc(78px + env(safe-area-inset-bottom));
+    margin: 0;
+    padding: 11px 13px;
+    border: 1px solid rgba(16, 37, 29, .12);
+    border-radius: 13px;
+    background: rgba(255, 253, 248, .98);
+    box-shadow: 0 12px 34px rgba(8, 44, 33, .14);
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack .phone-reveal-result {
+    display: grid;
+    gap: 3px;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack .phone-reveal-result a {
+    color: var(--emerald-800);
+    font-weight: 850;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack .phone-reveal-result small {
+    display: none;
+  }
+}
+
+@media (max-width: 430px) {
+  .property-detail-page .property-contact-card > .contact-action-stack .property-contact-button,
+  .property-detail-page .property-contact-card > .contact-action-stack .primary-button,
+  .property-detail-page .property-contact-card > .contact-action-stack .secondary-button,
+  .property-detail-page .property-contact-card > .save-home-wrap .save-home-button {
+    padding-inline: 5px;
+    font-size: .68rem;
+  }
+}
