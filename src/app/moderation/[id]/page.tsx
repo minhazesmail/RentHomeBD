@@ -41,7 +41,7 @@ export default async function ModerationDetailPage({
     { data: queueRows },
     counts,
   ] = await Promise.all([
-    typedSupabase
+    supabase
       .from("profiles")
       .select("display_name, primary_role, phone_verified_at, role_verified_at, role_verified_role")
       .eq("id", property.owner_id)
