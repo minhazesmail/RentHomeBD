@@ -1,186 +1,148 @@
-/* Guided listing editor layout. Keeps the owner workflow focused on one step at a time. */
-.editorLayout {
+/* Guided listing editor shell. The navigation owns step visibility while this module creates the three-column workspace. */
+.editorShell {
   display: grid;
-  grid-template-columns: minmax(176px, .72fr) minmax(0, 2.35fr) minmax(260px, .98fr);
+  grid-template-columns: minmax(176px, .72fr) minmax(0, 3.35fr);
   gap: 18px;
   align-items: start;
 }
 
-.editorMain {
+.editorShell :global(.listing-form) {
   min-width: 0;
   display: grid;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 310px);
+  gap: 18px;
+  align-items: start;
 }
 
-.stepPanel[hidden] {
+.editorShell :global(.listing-form > .review-note),
+.editorShell :global(.listing-form > .auth-message),
+.editorShell :global(.listing-form > .listing-actions) {
+  grid-column: 1 / -1;
+}
+
+.editorShell :global(.listing-form > .listing-section) {
+  grid-column: 1;
+  min-width: 0;
+  margin: 0;
+  scroll-margin-top: 116px;
+}
+
+.editorShell :global(.listing-form[data-guided-editor="true"] > .listing-section[hidden]) {
   display: none;
 }
 
-.stepPanel {
-  min-width: 0;
-  margin: 0;
-}
-
-.stepIntro {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 4px 4px 0;
-}
-
-.stepIntro span {
-  color: var(--muted);
-  font-size: .72rem;
-  font-weight: 850;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.stepIntro strong {
-  display: block;
-  margin-top: 5px;
-  color: var(--ink);
-  font-size: .88rem;
-  line-height: 1.4;
-}
-
-.readinessRail {
+.editorShell :global(.listing-form > .listing-readiness) {
   position: sticky;
-  top: 98px;
-  min-width: 0;
-}
-
-.readinessRail :global(.listing-readiness) {
+  top: 94px;
+  grid-column: 2;
+  grid-row: 1 / span 8;
+  align-self: start;
   gap: 14px;
   padding: 18px;
   border-radius: 20px;
   box-shadow: 0 12px 30px rgba(8, 44, 33, .055);
 }
 
-.readinessRail :global(.listing-readiness-head) {
+.editorShell :global(.listing-readiness-head) {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 12px;
 }
 
-.readinessRail :global(.listing-readiness-head p) {
+.editorShell :global(.listing-readiness-head p) {
   font-size: .78rem;
   line-height: 1.5;
 }
 
-.readinessRail :global(.listing-readiness-columns) {
+.editorShell :global(.listing-readiness-columns) {
   grid-template-columns: 1fr;
   gap: 14px;
 }
 
-.readinessRail :global(.listing-check) {
+.editorShell :global(.listing-check) {
   grid-template-columns: 24px 1fr;
   gap: 8px;
   padding: 9px;
 }
 
-.readinessRail :global(.listing-check > span) {
+.editorShell :global(.listing-check > span) {
   width: 24px;
   height: 24px;
 }
 
-.readinessRail :global(.listing-check p) {
+.editorShell :global(.listing-check p) {
   display: none;
 }
 
-.editorActions {
+.editorShell :global(.listing-actions) {
   position: sticky;
   bottom: 12px;
   z-index: 35;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border: 1px solid rgba(16, 37, 29, .11);
+  margin-top: 2px;
   border-radius: 18px;
-  background: rgba(255, 253, 248, .95);
-  box-shadow: 0 18px 42px rgba(8, 44, 33, .12);
-  backdrop-filter: blur(18px);
 }
 
-.editorActionsPrimary {
-  display: flex;
-  justify-content: flex-end;
-  gap: 9px;
+.editorShell :global(.listing-location-section .location-grid) {
+  grid-template-columns: minmax(190px, .55fr) minmax(0, 1.45fr);
 }
 
-.editorProgress {
-  justify-self: center;
-  color: var(--muted);
-  font-size: .74rem;
-  font-weight: 780;
-}
-
-.editorMessage {
-  margin: 0;
-}
-
-.lockedLayout {
-  grid-template-columns: minmax(170px, .62fr) minmax(0, 2.7fr);
-}
-
-.lockedLayout .readinessRail {
-  display: none;
+.editorShell :global(.listing-location-section .owner-location-map),
+.editorShell :global(.listing-location-section .owner-location-map-canvas) {
+  min-height: 440px;
 }
 
 @media (max-width: 1120px) {
-  .editorLayout,
-  .lockedLayout {
+  .editorShell {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .editorShell :global(.listing-form) {
     grid-template-columns: 1fr;
   }
 
-  .readinessRail {
+  .editorShell :global(.listing-form > .listing-section),
+  .editorShell :global(.listing-form > .listing-readiness),
+  .editorShell :global(.listing-form > .review-note),
+  .editorShell :global(.listing-form > .auth-message),
+  .editorShell :global(.listing-form > .listing-actions) {
+    grid-column: 1;
+  }
+
+  .editorShell :global(.listing-form > .listing-readiness) {
     position: static;
+    grid-row: auto;
     order: 3;
   }
 
-  .readinessRail :global(.listing-readiness-columns) {
+  .editorShell :global(.listing-readiness-columns) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .readinessRail :global(.listing-check p) {
+  .editorShell :global(.listing-check p) {
     display: block;
   }
 }
 
-@media (max-width: 680px) {
-  .editorLayout {
+@media (max-width: 700px) {
+  .editorShell {
     gap: 12px;
   }
 
-  .stepIntro {
-    padding-inline: 2px;
-  }
-
-  .readinessRail :global(.listing-readiness-columns) {
+  .editorShell :global(.listing-readiness-columns) {
     grid-template-columns: 1fr;
   }
 
-  .editorActions {
+  .editorShell :global(.listing-location-section .location-grid) {
+    grid-template-columns: 1fr;
+  }
+
+  .editorShell :global(.listing-location-section .owner-location-map),
+  .editorShell :global(.listing-location-section .owner-location-map-canvas) {
+    min-height: 380px;
+  }
+
+  .editorShell :global(.listing-actions) {
     bottom: 7px;
-    grid-template-columns: 1fr;
-    border-radius: 16px;
-  }
-
-  .editorProgress {
-    grid-row: 1;
-  }
-
-  .editorActions > button,
-  .editorActionsPrimary,
-  .editorActionsPrimary > button {
-    width: 100%;
-  }
-
-  .editorActionsPrimary {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
   }
 }
