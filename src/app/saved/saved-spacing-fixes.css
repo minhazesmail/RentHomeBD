@@ -1,0 +1,13 @@
+/* Batch 5 typography-spacing normalization for the saved homes hero. */
+
+.saved-page .saved-hero h1 {
+  line-height: .96;
+  letter-spacing: -.05em;
+}
+
+@media (max-width: 640px) {
+  .saved-page .saved-hero h1 {
+    line-height: .98;
+    letter-spacing: -.045em;
+  }
+}
