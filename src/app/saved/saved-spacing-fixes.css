@@ -9,16 +9,28 @@
    supporting location/detail line the same readable rhythm as other product
    cards instead of the tighter 5px stack. */
 .saved-page .saved-home-heading {
-  gap: 7px;
+  gap: var(--text-gap-control);
 }
 
 .saved-page .saved-search-card > div:first-child {
-  gap: 8px;
+  gap: var(--text-gap-control);
 }
 
 @media (max-width: 640px) {
   .saved-page .saved-hero h1 {
     line-height: .98;
     letter-spacing: -.045em;
+  }
+
+  /* Batch 9 mobile text review — the saved hero collapses to one column and the
+     title can wrap on narrow devices. Keep the intro clearly subordinate and
+     readable without adding a full desktop-sized block gap. */
+  .saved-page .saved-hero h1 + .intro {
+    margin-top: var(--text-gap-related);
+    line-height: var(--leading-body);
+  }
+
+  .saved-page .saved-section-heading h2 + p {
+    margin-top: var(--text-gap-control);
   }
 }
