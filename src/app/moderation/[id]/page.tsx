@@ -1,39 +1,74 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { ModerationDecisionForm } from "@/components/moderation-decision-form";
+import { ModerationWorkbenchNav } from "@/components/moderation-workbench-nav";
 import { requireModerator } from "@/lib/auth";
+import { getModerationQueueCounts } from "@/lib/moderation-queue-counts";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function ModerationDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ModerationDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ notice?: string }>;
+}) {
   const auth = await requireModerator();
   const { id } = await params;
-  const supabase = await createClient();
+  const query = await searchParams;
+  const typedSupabase = await createClient();
+  const supabase = typedSupabase as unknown as SupabaseClient;
 
   const [{ data: property }, { data: tenants }, { data: amenityRows }, { data: mediaRows }] = await Promise.all([
-    supabase.from("properties").select("id, owner_id, title, description, address_text, property_type, rent_bdt, deposit_bdt, utilities_included, size_sqft, bedrooms, bathrooms, floor_number, total_floors, furnishing, gender_preference, available_from, latitude, longitude, status, updated_at").eq("id", id).maybeSingle(),
-    supabase.from("property_tenant_types").select("tenant_type").eq("property_id", id),
-    supabase.from("property_amenities").select("amenity_slug").eq("property_id", id),
-    supabase.from("property_media").select("id, storage_path, media_type, sort_order").eq("property_id", id).order("sort_order"),
+    typedSupabase.from("properties").select("id, owner_id, title, description, address_text, property_type, rent_bdt, deposit_bdt, utilities_included, size_sqft, bedrooms, bathrooms, floor_number, total_floors, furnishing, gender_preference, available_from, latitude, longitude, status, updated_at").eq("id", id).maybeSingle(),
+    typedSupabase.from("property_tenant_types").select("tenant_type").eq("property_id", id),
+    typedSupabase.from("property_amenities").select("amenity_slug").eq("property_id", id),
+    typedSupabase.from("property_media").select("id, storage_path, media_type, sort_order").eq("property_id", id).order("sort_order"),
   ]);
 
   if (!property || property.status !== "pending_review") notFound();
 
-  const [{ data: owner }, { data: amenities }] = await Promise.all([
-    supabase.from("profiles").select("display_name, primary_role").eq("id", property.owner_id).maybeSingle(),
-    supabase.from("amenities").select("slug, name").in("slug", (amenityRows ?? []).map((row) => row.amenity_slug)),
+  const [
+    { data: owner },
+    { data: amenities },
+    reportCountResult,
+    { data: queueRows },
+    counts,
+  ] = await Promise.all([
+    typedSupabase
+      .from("profiles")
+      .select("display_name, primary_role, phone_verified_at, role_verified_at, role_verified_role")
+      .eq("id", property.owner_id)
+      .maybeSingle(),
+    typedSupabase.from("amenities").select("slug, name").in("slug", (amenityRows ?? []).map((row) => row.amenity_slug)),
+    supabase.from("listing_reports").select("id", { count: "exact", head: true }).eq("property_id", id),
+    typedSupabase.from("properties").select("id").eq("status", "pending_review").order("updated_at", { ascending: true }),
+    getModerationQueueCounts(supabase),
   ]);
 
   const media = await Promise.all((mediaRows ?? []).map(async (item) => {
-    const { data } = await supabase.storage.from("property-media").createSignedUrl(item.storage_path, 1800);
+    const { data } = await typedSupabase.storage.from("property-media").createSignedUrl(item.storage_path, 1800);
     return { ...item, signedUrl: data?.signedUrl ?? null };
   }));
 
-  const mapUrl = property.latitude !== null && property.longitude !== null
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude - 0.008}%2C${property.latitude - 0.005}%2C${property.longitude + 0.008}%2C${property.latitude + 0.005}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`
+  const queueIds = (queueRows ?? []).map((row) => row.id);
+  const queueIndex = queueIds.indexOf(id);
+  const previousPropertyId = queueIndex > 0 ? queueIds[queueIndex - 1] : null;
+  const nextPropertyId = queueIndex >= 0 && queueIndex < queueIds.length - 1 ? queueIds[queueIndex + 1] : null;
+  const photoCount = (mediaRows ?? []).filter((item) => item.media_type === "photo").length;
+  const reportCount = reportCountResult.count ?? 0;
+  const hasExactPin = property.latitude !== null && property.longitude !== null;
+  const descriptionLength = property.description?.trim().length ?? 0;
+  const roleVerified = Boolean(owner?.role_verified_at && owner.role_verified_role === owner.primary_role);
+
+  const mapUrl = hasExactPin
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude! - 0.008}%2C${property.latitude! - 0.005}%2C${property.longitude! + 0.008}%2C${property.latitude! + 0.005}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}`
     : null;
 
   return (
@@ -47,6 +82,20 @@ export default async function ModerationDetailPage({ params }: { params: Promise
         </div>
         <Link className="text-link" href="/moderation">Back to queue</Link>
       </header>
+
+      <ModerationWorkbenchNav current="listings" counts={counts} />
+
+      {query.notice === "approved" && <div className="success-message">Previous listing approved. Continue with this review.</div>}
+      {query.notice === "rejected" && <div className="success-message">Previous listing returned to its owner. Continue with this review.</div>}
+
+      <section className="moderation-attention-summary" aria-label="Review attention summary">
+        <div className={`moderation-attention-signal${owner?.phone_verified_at ? " is-good" : " is-alert"}`}><span>Phone</span><strong>{owner?.phone_verified_at ? "Verified" : "Not verified"}</strong></div>
+        <div className={`moderation-attention-signal${roleVerified ? " is-good" : " is-alert"}`}><span>Role badge</span><strong>{roleVerified ? `Verified ${owner?.primary_role}` : "Not verified"}</strong></div>
+        <div className={`moderation-attention-signal${reportCount ? " is-risk" : " is-good"}`}><span>Reports</span><strong>{reportCount ? `${reportCount} prior ${reportCount === 1 ? "report" : "reports"}` : "No prior reports"}</strong></div>
+        <div className={`moderation-attention-signal${hasExactPin ? " is-good" : " is-alert"}`}><span>Location</span><strong>{hasExactPin ? "Exact pin present" : "Pin missing"}</strong></div>
+        <div className={`moderation-attention-signal${photoCount >= 3 ? " is-good" : " is-alert"}`}><span>Media</span><strong>{photoCount} {photoCount === 1 ? "photo" : "photos"}</strong></div>
+        <div className={`moderation-attention-signal${descriptionLength >= 120 ? " is-good" : " is-alert"}`}><span>Description</span><strong>{descriptionLength >= 120 ? "Detailed" : "Review short copy"}</strong></div>
+      </section>
 
       <section className="moderation-review-grid moderation-inspection-grid">
         <div className="listing-form moderation-inspection-stack">
@@ -91,7 +140,12 @@ export default async function ModerationDetailPage({ params }: { params: Promise
         </div>
 
         <aside className="moderation-sidebar moderation-decision-rail">
-          <ModerationDecisionForm propertyId={property.id} reviewerId={auth.userId} />
+          <ModerationDecisionForm propertyId={property.id} reviewerId={auth.userId} nextPropertyId={nextPropertyId} />
+          <div className="moderation-review-progress" aria-label="Review queue navigation">
+            {previousPropertyId ? <Link href={`/moderation/${previousPropertyId}`}><ArrowLeft size={14} aria-hidden="true" /> Previous</Link> : <span className="is-disabled"><ArrowLeft size={14} aria-hidden="true" /> Previous</span>}
+            <span>{queueIndex + 1} of {queueIds.length}</span>
+            {nextPropertyId ? <Link href={`/moderation/${nextPropertyId}`}>Next <ArrowRight size={14} aria-hidden="true" /></Link> : <span className="is-disabled">Next <ArrowRight size={14} aria-hidden="true" /></span>}
+          </div>
         </aside>
       </section>
     </main>
