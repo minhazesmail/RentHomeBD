@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { ListingDraftGuard } from "@/components/listing-draft-guard";
+import editorStyles from "@/components/listing-editor.module.css";
 import { ListingWorkflowNav } from "@/components/listing-workflow-nav";
+import { ProductNavigation } from "@/components/product-navigation";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -14,21 +16,24 @@ export default async function NewPropertyPage() {
   const { data: amenities } = await supabase.from("amenities").select("slug, name").order("name");
 
   return (
-    <main className="listing-shell">
-      <header className="listing-page-header">
+    <main className="listing-shell listing-editor-page">
+      <ProductNavigation authenticated canList current="properties" />
+      <header className="listing-page-header listing-editor-header">
         <div>
-          <Link className="brand-link compact-brand" href="/">NearBasha</Link>
-          <p className="eyebrow">Owner workspace</p>
+          <p className="eyebrow">Owner workspace · New listing</p>
           <h1 className="listing-page-title">Create a rental listing</h1>
-          <p className="intro">Build a trustworthy listing in five guided steps. Save an incomplete draft anytime; review requirements apply only when you submit.</p>
+          <p className="intro">Work through one renter-facing step at a time. Your readiness panel stays visible as the listing becomes ready for review.</p>
         </div>
         <Link className="text-link" href="/owner">Back to properties</Link>
       </header>
 
-      <ListingWorkflowNav mode="creation" />
-
-      <ListingDraftGuard userId={auth.userId} />
-      <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} />
+      <div className={editorStyles.editorShell}>
+        <ListingWorkflowNav mode="creation" />
+        <div>
+          <ListingDraftGuard userId={auth.userId} />
+          <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} />
+        </div>
+      </div>
     </main>
   );
 }
