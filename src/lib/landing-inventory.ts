@@ -23,7 +23,7 @@ type PropertyRow = {
 type TenantRow = { property_id: string; tenant_type: TenantType };
 type MediaRow = { property_id: string; storage_path: string; sort_order: number; created_at: string };
 
-export type LandingFeaturedListing = PropertyRow & {
+type LandingFeaturedListing = PropertyRow & {
   imageUrl: string | null;
   tenantLabel: string;
   tenantTypes: TenantType[];

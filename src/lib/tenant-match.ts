@@ -11,18 +11,6 @@ export const TENANT_PROFILE_LABELS: Record<TenantType, string> = {
   everyone: "Everyone",
 };
 
-// Keep one canonical set of user-facing renter-type names across search, profiles,
-// listing creation, map markers, and property details.
-export const TENANT_LABELS = TENANT_PROFILE_LABELS;
-
-export const TENANT_COLORS: Record<TenantTone, { stroke: string; fill: string }> = {
-  family: { stroke: "#145c43", fill: "#20795a" },
-  bachelor: { stroke: "#315f9d", fill: "#4f7db8" },
-  student: { stroke: "#7452a3", fill: "#956fc2" },
-  everyone: { stroke: "#3f7467", fill: "#5e9184" },
-  neutral: { stroke: "#49645a", fill: "#6f8a80" },
-};
-
 export function normalizeTenantTypes(value: unknown): TenantType[] {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is TenantType =>
