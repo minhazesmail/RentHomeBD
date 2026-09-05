@@ -23,6 +23,13 @@
   line-height: 1.55;
 }
 
+/* Batch 6 — small uppercase field labels need a clear visual break before the
+   selected/input value. The earlier 2px offset made label and value read as one
+   compressed line, especially at mid-width desktop sizes. */
+.landing-shell .landing-search-console-field > span {
+  margin-bottom: 5px;
+}
+
 @media (min-width: 1121px) {
   .landing-shell .landing-hero-reference {
     min-height: auto;
@@ -55,5 +62,9 @@
 
   .landing-shell .landing-search-console > .form-hint {
     margin: 10px 2px 0;
+  }
+
+  .landing-shell .landing-search-console-field > span {
+    margin-bottom: 4px;
   }
 }
