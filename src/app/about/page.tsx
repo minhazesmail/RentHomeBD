@@ -1,20 +1,12 @@
 import Link from "next/link";
 
-import { BrandLogo } from "@/components/brand-logo";
+import { MarketingNavigation } from "@/components/marketing-navigation";
 
 export default function AboutPage() {
   return (
     <main className="info-page info-about">
       <section className="info-shell">
-        <header className="info-topbar">
-          <BrandLogo />
-          <nav aria-label="Information navigation">
-            <Link href="/about" aria-current="page">About</Link>
-            <Link href="/contact">Contact</Link>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
-          </nav>
-        </header>
+        <MarketingNavigation current="about" />
 
         <section className="info-hero">
           <div>

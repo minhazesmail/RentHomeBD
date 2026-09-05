@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { ModerationWorkbenchNav } from "@/components/moderation-workbench-nav";
 import { requireModerator } from "@/lib/auth";
+import { getModerationQueueCounts } from "@/lib/moderation-queue-counts";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +23,14 @@ export default async function ReportQueuePage({ searchParams }: { searchParams: 
   await requireModerator();
   const params = await searchParams;
   const supabase = (await createClient()) as unknown as SupabaseClient;
-  const { data: reports } = await supabase.from("listing_reports").select("id, property_id, reason, details, created_at").eq("status", "open").order("created_at", { ascending: true });
+  const [{ data: reports }, counts] = await Promise.all([
+    supabase
+      .from("listing_reports")
+      .select("id, property_id, reason, details, created_at")
+      .eq("status", "open")
+      .order("created_at", { ascending: true }),
+    getModerationQueueCounts(supabase),
+  ]);
 
   const propertyIds = [...new Set((reports ?? []).map((report) => report.property_id))];
   const { data: properties } = propertyIds.length
@@ -32,19 +41,45 @@ export default async function ReportQueuePage({ searchParams }: { searchParams: 
   return (
     <main className="owner-shell moderation-shell moderation-reports-shell">
       <header className="owner-header moderation-header">
-        <div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">Trust & safety</p><h1 className="owner-title">Listing reports</h1><p className="intro">Review renter-submitted safety and accuracy reports. Hiding a listing removes it from public search immediately.</p></div>
-        <div className="owner-header-actions moderation-nav"><Link className="secondary-button link-button" href="/moderation">Listing reviews</Link><Link className="secondary-button link-button" href="/dashboard">Dashboard</Link></div>
+        <div>
+          <Link className="brand-link compact-brand" href="/">NearBasha</Link>
+          <p className="eyebrow">Trust & safety</p>
+          <h1 className="owner-title">Listing reports</h1>
+          <p className="intro">Review renter-submitted safety and accuracy reports. Hiding a listing removes it from public search immediately.</p>
+        </div>
       </header>
+
+      <ModerationWorkbenchNav current="reports" counts={counts} />
 
       {params.notice === "hide_listing" && <div className="success-message">Listing hidden and report closed.</div>}
       {(params.notice === "dismiss" || params.notice === "resolve") && <div className="success-message">Report closed and decision recorded.</div>}
 
+      <div className="moderation-queue-context">
+        <strong>{counts.reports} open {counts.reports === 1 ? "report" : "reports"}</strong>
+        <span>Oldest reports appear first.</span>
+      </div>
+
       <section className="property-list-panel moderation-report-panel">
-        {!reports?.length ? <div className="empty-state"><div className="empty-icon">✓</div><h2>No open reports</h2><p>The trust and safety queue is clear.</p></div> : (
-          <div className="property-list moderation-list">{reports.map((report) => {
-            const property = propertyById.get(report.property_id);
-            return <Link className="property-row moderation-row moderation-report-row" href={`/moderation/reports/${report.id}`} key={report.id}><div className="property-row-main"><strong>{property?.title || "Reported listing"}</strong><span>{reasonLabels[report.reason] || report.reason}{report.details ? ` · ${report.details}` : ""}</span></div><div className="property-row-meta"><span className="status-pill status-rejected">Open report</span><span>{new Date(report.created_at).toLocaleDateString("en-BD")}</span></div></Link>;
-          })}</div>
+        {!reports?.length ? (
+          <div className="empty-state"><div className="empty-icon">✓</div><h2>No open reports</h2><p>The trust and safety queue is clear.</p></div>
+        ) : (
+          <div className="property-list moderation-list">
+            {reports.map((report) => {
+              const property = propertyById.get(report.property_id);
+              return (
+                <Link className="property-row moderation-row moderation-report-row" href={`/moderation/reports/${report.id}`} key={report.id}>
+                  <div className="property-row-main">
+                    <strong>{property?.title || "Reported listing"}</strong>
+                    <span>{reasonLabels[report.reason] || report.reason}{report.details ? ` · ${report.details}` : ""}</span>
+                  </div>
+                  <div className="property-row-meta">
+                    <span className="status-pill status-rejected">Open report</span>
+                    <span>{new Date(report.created_at).toLocaleDateString("en-BD")}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         )}
       </section>
     </main>

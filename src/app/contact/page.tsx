@@ -1,34 +1,26 @@
 import Link from "next/link";
 
-import { BrandLogo } from "@/components/brand-logo";
+import { MarketingNavigation } from "@/components/marketing-navigation";
 
 export default function ContactPage() {
   return (
     <main className="info-page info-contact">
       <section className="info-shell">
-        <header className="info-topbar">
-          <BrandLogo />
-          <nav aria-label="Information navigation">
-            <Link href="/about">About</Link>
-            <Link href="/contact" aria-current="page">Contact</Link>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
-          </nav>
-        </header>
+        <MarketingNavigation current="contact" />
 
         <section className="info-hero compact">
           <div>
             <p className="eyebrow">Contact & support</p>
             <h1>Get help through the right NearBasha flow.</h1>
-            <p className="intro">The fastest route depends on what you need help with. Reports stay connected to the exact listing, while account and verification issues stay tied to your signed-in account.</p>
+            <p className="intro">For listing safety or accuracy issues, reporting from the property page is the fastest route because the exact home is attached automatically. Account help stays connected to your signed-in profile.</p>
           </div>
-          <div className="info-hero-note"><span>Support</span><strong>Context matters.</strong><p>Using the product’s built-in reporting and account flows gives moderation the information needed to act.</p></div>
+          <div className="info-hero-note"><span>Support</span><strong>Keep the context attached.</strong><p>Built-in reporting and account flows give moderation the listing or profile context needed to act without asking you to reconstruct it later.</p></div>
         </section>
 
-        <section className="info-support-grid">
-          <article><span>Listing issue</span><h2>Report a property</h2><p>Open the property and use “Report this listing” so the correct listing is attached automatically.</p><Link className="text-link" href="/homes">Find a listing →</Link></article>
-          <article><span>Account access</span><h2>Sign in first</h2><p>Use the account and verification screens for phone, role, or access-related issues.</p><Link className="text-link" href="/login">Sign in →</Link></article>
-          <article><span>Marketplace guidance</span><h2>Review the policies</h2><p>Privacy and marketplace terms explain how data, listings, and platform moderation are handled.</p><div className="info-inline-links"><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div></article>
+        <section className="info-support-grid info-support-priority-grid">
+          <article className="info-support-primary"><span>Primary safety route</span><h2>Report from the property page</h2><p>Open the property and use “Report this listing.” The listing, reason, and your supporting details stay connected in the moderation queue.</p><Link className="primary-button link-button" href="/homes">Find the property</Link></article>
+          <article><span>Account access</span><h2>Sign in for account help</h2><p>Use the account and phone-verification screens for access, phone, or trust-signal issues tied to your profile.</p><Link className="text-link" href="/login">Sign in →</Link></article>
+          <article><span>Marketplace guidance</span><h2>Review the policies</h2><p>Privacy and marketplace terms explain how data, listings, trust signals, and platform moderation are handled.</p><div className="info-inline-links"><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div></article>
         </section>
 
         <section className="info-cta-band subtle"><div><p className="eyebrow">Need to continue?</p><h2>Return to the marketplace and pick up where you left off.</h2></div><div className="hero-actions"><Link className="primary-button link-button" href="/homes">Browse homes</Link><Link className="secondary-button link-button" href="/">Back home</Link></div></section>
