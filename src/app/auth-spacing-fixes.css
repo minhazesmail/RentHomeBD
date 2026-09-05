@@ -1,0 +1,56 @@
+/* Batch 2 typography-spacing normalization for authentication flows.
+   The auth redesign still applies a negative margin to helper copy. Replace
+   that with explicit positive rhythm while preserving the existing 17px form
+   cadence for normal controls. */
+
+.auth-form {
+  row-gap: 0;
+}
+
+.auth-form > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.auth-form > * + * {
+  margin-top: 17px;
+}
+
+.auth-form .form-hint {
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* Guidance that belongs to a field should sit close enough to read as part of
+   that field, without being pulled into the control with a negative margin. */
+.auth-form > label + .form-hint {
+  margin-top: 8px;
+}
+
+.auth-form > div > .form-hint {
+  margin-top: 8px;
+}
+
+/* Role, renter-type and password guidance already live inside grid labels; the
+   label's 8px gap supplies the separation, so no extra margin is needed. */
+.auth-form label > .form-hint {
+  margin: 0;
+}
+
+/* Intro guidance is a separate hierarchy level between the card heading and
+   the authentication-method tabs. */
+.auth-flow-heading > .form-hint {
+  margin: 8px 0 16px;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .auth-form > * + * {
+    margin-top: 15px;
+  }
+
+  .auth-form > label + .form-hint,
+  .auth-form > div > .form-hint {
+    margin-top: 7px;
+  }
+}
