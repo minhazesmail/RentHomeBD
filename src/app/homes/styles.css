@@ -2,3 +2,4 @@
 @import "./homes.css" layer(route-base);
 @import "./homes-redesign.css" layer(route-redesign);
 @import "./property-detail-redesign.css" layer(route-detail);
+@import "./property-detail-spacing-fixes.css" layer(route-fixes);
