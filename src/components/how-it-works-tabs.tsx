@@ -6,6 +6,7 @@ import { useRef, useState, type KeyboardEvent } from "react";
 type Persona = "renter" | "owner";
 
 type Step = {
+  stage: string;
   title: string;
   description: string;
   icon: "map" | "match" | "message" | "pin" | "people" | "publish";
@@ -14,15 +15,15 @@ type Step = {
 const LIST_PROPERTY_HREF = "/login?intent=list-property&next=%2Fowner%2Fproperties%2Fnew";
 
 const renterSteps: Step[] = [
-  { title: "Search the map", description: "Choose the area that matters to you and see homes at their real pinned locations.", icon: "map" },
-  { title: "See who it fits", description: "Check tenant type, rent, bedrooms, and key details before making contact.", icon: "match" },
-  { title: "Message the owner", description: "Open the listing and contact the owner directly when the home looks right.", icon: "message" },
+  { stage: "Search", title: "Search the map", description: "Choose the area that matters to you and see homes at their real pinned locations.", icon: "map" },
+  { stage: "Match", title: "See who it fits", description: "Check tenant type, rent, bedrooms, and key details before making contact.", icon: "match" },
+  { stage: "Contact", title: "Message the owner", description: "Open the listing and contact the owner directly when the home looks right.", icon: "message" },
 ];
 
 const ownerSteps: Step[] = [
-  { title: "Pin your property", description: "Place the home on the map and add the structured details renters need.", icon: "pin" },
-  { title: "Set who it is for", description: "Choose the tenant types that fit the property so expectations are clear upfront.", icon: "people" },
-  { title: "Reach matched renters", description: "Publish a moderated listing that renters can discover through map search.", icon: "publish" },
+  { stage: "Pin", title: "Pin your property", description: "Place the home on the map and add the structured details renters need.", icon: "pin" },
+  { stage: "Fit", title: "Set who it is for", description: "Choose the tenant types that fit the property so expectations are clear upfront.", icon: "people" },
+  { stage: "Publish", title: "Reach matched renters", description: "Publish a moderated listing that renters can discover through map search.", icon: "publish" },
 ];
 
 function StepIcon({ name }: { name: Step["icon"] }) {
@@ -40,6 +41,11 @@ export function HowItWorksTabs() {
   const ownerTabRef = useRef<HTMLButtonElement | null>(null);
   const isRenter = persona === "renter";
   const steps = isRenter ? renterSteps : ownerSteps;
+  const actionHref = isRenter ? "/homes" : LIST_PROPERTY_HREF;
+  const actionLabel = isRenter ? "Explore homes" : "List a property";
+  const outcome = isRenter
+    ? "From map search to first message in three clear steps."
+    : "Pin, match, and publish without unnecessary friction.";
 
   function activateTab(nextPersona: Persona) {
     setPersona(nextPersona);
@@ -65,36 +71,43 @@ export function HowItWorksTabs() {
   }
 
   return (
-    <div className="landing-how-tabs-shell">
-      <div className="landing-persona-tabs" role="tablist" aria-label="Choose renter or owner steps">
-        <button
-          ref={renterTabRef}
-          id="landing-persona-tab-renter"
-          type="button"
-          role="tab"
-          aria-selected={isRenter}
-          aria-controls="landing-persona-panel"
-          tabIndex={isRenter ? 0 : -1}
-          className={isRenter ? "active" : ""}
-          onClick={() => setPersona("renter")}
-          onKeyDown={handleTabKeyDown}
-        >
-          I am a renter
-        </button>
-        <button
-          ref={ownerTabRef}
-          id="landing-persona-tab-owner"
-          type="button"
-          role="tab"
-          aria-selected={!isRenter}
-          aria-controls="landing-persona-panel"
-          tabIndex={!isRenter ? 0 : -1}
-          className={!isRenter ? "active" : ""}
-          onClick={() => setPersona("owner")}
-          onKeyDown={handleTabKeyDown}
-        >
-          I am an owner
-        </button>
+    <div className={`landing-how-tabs-shell ${persona}`}>
+      <div className="landing-how-controls">
+        <div className="landing-persona-tabs" role="tablist" aria-label="Choose renter or owner steps">
+          <button
+            ref={renterTabRef}
+            id="landing-persona-tab-renter"
+            type="button"
+            role="tab"
+            aria-selected={isRenter}
+            aria-controls="landing-persona-panel"
+            tabIndex={isRenter ? 0 : -1}
+            className={isRenter ? "active" : ""}
+            onClick={() => setPersona("renter")}
+            onKeyDown={handleTabKeyDown}
+          >
+            I am a renter
+          </button>
+          <button
+            ref={ownerTabRef}
+            id="landing-persona-tab-owner"
+            type="button"
+            role="tab"
+            aria-selected={!isRenter}
+            aria-controls="landing-persona-panel"
+            tabIndex={!isRenter ? 0 : -1}
+            className={!isRenter ? "active" : ""}
+            onClick={() => setPersona("owner")}
+            onKeyDown={handleTabKeyDown}
+          >
+            I am an owner
+          </button>
+        </div>
+
+        <Link className="landing-how-primary-link" href={actionHref}>
+          <span>{actionLabel}</span>
+          <span aria-hidden="true">→</span>
+        </Link>
       </div>
 
       <article
@@ -108,21 +121,30 @@ export function HowItWorksTabs() {
             <span className="landing-persona-kicker">{isRenter ? "Find with confidence" : "List with clarity"}</span>
             <h3>{isRenter ? "Find a home that actually fits." : "Publish once, match more clearly."}</h3>
           </div>
-          <Link className="text-link" href={isRenter ? "/homes" : LIST_PROPERTY_HREF}>{isRenter ? "Start searching →" : "List your property →"}</Link>
         </div>
 
-        <ol className="landing-step-cards">
+        <ol className="landing-step-cards" aria-label={isRenter ? "Renter journey" : "Owner journey"}>
           {steps.map((step, index) => (
             <li key={step.title}>
-              <div className="landing-step-icon"><StepIcon name={step.icon} /></div>
+              <div className="landing-step-topline">
+                <div className="landing-step-icon"><StepIcon name={step.icon} /></div>
+                <div className="landing-step-meta">
+                  <span>0{index + 1}</span>
+                  <small>{step.stage}</small>
+                </div>
+              </div>
               <div className="landing-step-copy">
-                <span>0{index + 1}</span>
                 <strong>{step.title}</strong>
                 <p>{step.description}</p>
               </div>
             </li>
           ))}
         </ol>
+
+        <div className="landing-how-outcome">
+          <span aria-hidden="true" />
+          <p>{outcome}</p>
+        </div>
       </article>
     </div>
   );
