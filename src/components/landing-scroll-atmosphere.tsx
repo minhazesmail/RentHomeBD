@@ -4,6 +4,7 @@ import "@/app/landing.css";
 import "@/app/landing-alignment.css";
 import "@/app/landing-redesign.css";
 import "@/app/landing-pointed-fixes.css";
+import "@/app/landing-trust-contrast-fix.css";
 import { useEffect } from "react";
 
 export function LandingScrollAtmosphere() {
