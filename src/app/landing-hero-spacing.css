@@ -8,6 +8,14 @@
   padding-block: 0;
 }
 
+/* The helper paragraph follows a full-width primary action, not an individual
+   input. Give it its own breathing room instead of inheriting the compact
+   control-level helper rhythm used elsewhere. */
+.landing-shell .landing-search-console > .form-hint {
+  margin: 12px 4px 0;
+  line-height: 1.55;
+}
+
 @media (min-width: 1121px) {
   .landing-shell .landing-hero-reference {
     min-height: auto;
@@ -29,5 +37,11 @@
 @media (max-width: 1120px) {
   .landing-shell .landing-hero-reference {
     padding-top: clamp(42px, 7vw, 64px);
+  }
+}
+
+@media (max-width: 600px) {
+  .landing-shell .landing-search-console > .form-hint {
+    margin: 10px 2px 0;
   }
 }
