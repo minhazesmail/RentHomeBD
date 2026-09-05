@@ -1,3 +1,4 @@
 /* Canonical layered style manifest for the /moderation route family. */
 @import "./moderation-redesign.css" layer(route-redesign);
+@import "./moderation-workbench.css" layer(route-detail);
 @import "./moderation-spacing-fixes.css" layer(route-fixes);
