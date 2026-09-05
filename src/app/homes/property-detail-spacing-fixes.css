@@ -15,9 +15,29 @@
   margin-top: 8px;
 }
 
+/* Batch 8 — phone-reveal guidance is explanatory copy for a full-width contact
+   action. Keep it clearly subordinate without letting it cling to the button. */
+.property-detail-page .phone-reveal-gate > .contact-note {
+  margin: 10px 0 0;
+  line-height: 1.55;
+}
+
+.property-detail-page .phone-reveal-gate > .contact-error {
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+
 @media (max-width: 720px) {
   .property-detail-page .property-detail-hero h1 {
     line-height: .98;
     letter-spacing: -.045em;
+  }
+
+  .property-detail-page .phone-reveal-gate > .contact-note {
+    margin-top: 8px;
+  }
+
+  .property-detail-page .phone-reveal-gate > .contact-error {
+    margin-top: 7px;
   }
 }
