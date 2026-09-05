@@ -55,13 +55,6 @@ export function PhoneVerificationForm({
     return () => window.clearInterval(timer);
   }, [resendSeconds]);
 
-  useEffect(() => {
-    if (isVerified && stage !== "code") {
-      setVerifiedPhone(currentPhone);
-      setStage("verified");
-    }
-  }, [currentPhone, isVerified, stage]);
-
   async function requestCode(event?: FormEvent) {
     event?.preventDefault();
     const phone = normalizeBangladeshPhone(phoneInput);
