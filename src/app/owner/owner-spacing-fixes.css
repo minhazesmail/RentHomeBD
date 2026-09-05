@@ -4,7 +4,7 @@
 
 .listing-form .form-hint {
   margin: 0;
-  line-height: 1.55;
+  line-height: var(--leading-helper);
 }
 
 /* The location guidance sits inside the existing 14px location-fields grid.
@@ -17,7 +17,7 @@
 /* Media guidance is a direct block sibling of the uploader/gallery, so it needs
    explicit separation from the large upload target. */
 .listing-section > .form-hint {
-  margin: 12px 0 0;
+  margin: var(--text-gap-related) 0 0;
   max-width: 68ch;
 }
 
@@ -32,11 +32,11 @@
 /* Batch 7 — section headings and operational cards should preserve a clear
    hierarchy between title and supporting copy. */
 .listing-section .section-heading h2 {
-  margin-bottom: 8px;
+  margin-bottom: var(--text-gap-control);
 }
 
 .owner-property-address {
-  margin-top: 6px;
+  margin-top: var(--text-gap-tight);
 }
 
 /* Listing validation/save feedback is already a direct item in the form grid.
@@ -52,18 +52,23 @@
    block of breathing room below them without ever moving upward. */
 .owner-shell > .success-message,
 .listing-shell > .success-message {
-  margin: 0 0 16px;
+  margin: 0 0 var(--text-gap-block);
   line-height: 1.5;
 }
 
 @media (max-width: 640px) {
-  .listing-section > .form-hint {
-    margin-top: 10px;
-  }
-
   .owner-management-header .owner-title,
   .listing-page-header .listing-page-title {
     line-height: .98;
     letter-spacing: -.045em;
+  }
+
+  /* Batch 9 mobile text review — owner/listing headers become stacked blocks on
+     phones, so keep their supporting copy connected to the title without
+     inheriting desktop whitespace. */
+  .owner-management-header .owner-title + .intro,
+  .listing-page-header .listing-page-title + .intro {
+    margin-top: var(--text-gap-related);
+    line-height: var(--leading-body);
   }
 }
