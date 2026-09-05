@@ -12,18 +12,18 @@
    route default. */
 .property-detail-page .section-copy,
 .property-detail-page .tenant-compatibility-card p {
-  margin-top: 8px;
+  margin-top: var(--text-gap-control);
 }
 
 /* Batch 8 — phone-reveal guidance is explanatory copy for a full-width contact
    action. Keep it clearly subordinate without letting it cling to the button. */
 .property-detail-page .phone-reveal-gate > .contact-note {
-  margin: 10px 0 0;
-  line-height: 1.55;
+  margin: var(--text-gap-action) 0 0;
+  line-height: var(--leading-helper);
 }
 
 .property-detail-page .phone-reveal-gate > .contact-error {
-  margin: 8px 0 0;
+  margin: var(--text-gap-control) 0 0;
   line-height: 1.5;
 }
 
@@ -33,11 +33,16 @@
     letter-spacing: -.045em;
   }
 
-  .property-detail-page .phone-reveal-gate > .contact-note {
-    margin-top: 8px;
+  /* Batch 9 mobile text review — long listing titles and addresses are both
+     dynamic. Keep enough separation for wrapped text while retaining the
+     compact mobile hero and section-card density. */
+  .property-detail-page .property-detail-address {
+    margin-top: var(--text-gap-related);
+    line-height: var(--leading-helper);
   }
 
-  .property-detail-page .phone-reveal-gate > .contact-error {
-    margin-top: 7px;
+  .property-detail-page .section-copy,
+  .property-detail-page .tenant-compatibility-card p {
+    line-height: var(--leading-body);
   }
 }
