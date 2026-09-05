@@ -1,0 +1,11 @@
+/* Trust section contrast repair.
+   The scroll-performance pass intentionally removed backdrop blur, but it also
+   replaced the trust section's dark editorial surface with a light translucent
+   background while leaving its white-on-dark typography unchanged. Restore the
+   original solid dark surface without reintroducing any blur, filters, or
+   scroll-linked rendering work. */
+
+section[data-scroll-theme="trust"] {
+  background: #073f31 !important;
+  color: #ffffff;
+}
