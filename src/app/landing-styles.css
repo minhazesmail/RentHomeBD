@@ -6,5 +6,6 @@
 @import "./landing-redesign.css" layer(route-redesign);
 @import "./landing-pointed-fixes.css" layer(route-fixes);
 @import "./landing-trust-contrast-fix.css" layer(route-contrast);
+@import "./landing-footer-redesign.css" layer(route-contrast);
 @import "./landing-atmosphere.css" layer(route-atmosphere);
 @import "./landing-hero-spacing.css" layer(route-atmosphere);
