@@ -21,6 +21,23 @@
   max-width: 68ch;
 }
 
+/* Listing validation/save feedback is already a direct item in the form grid.
+   Let the form gap create separation rather than stacking extra margins. */
+.listing-form > .auth-message,
+.listing-form > .success-message,
+.listing-form > .review-note {
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Owner-level confirmations that sit outside the listing grid keep one clear
+   block of breathing room below them without ever moving upward. */
+.owner-shell > .success-message,
+.listing-shell > .success-message {
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
 @media (max-width: 640px) {
   .listing-section > .form-hint {
     margin-top: 10px;
