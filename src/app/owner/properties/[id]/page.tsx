@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ListingDraftGuard } from "@/components/listing-draft-guard";
+import editorStyles from "@/components/listing-editor.module.css";
 import { ListingWorkflowNav } from "@/components/listing-workflow-nav";
+import { ProductNavigation } from "@/components/product-navigation";
 import { PropertyListingForm } from "@/components/property-listing-form";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -40,21 +42,24 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
   const editable = ["draft", "pending_review", "rejected"].includes(property.status);
 
   return (
-    <main className="listing-shell">
-      <header className="listing-page-header">
+    <main className="listing-shell listing-editor-page">
+      <ProductNavigation authenticated canList current="properties" />
+      <header className="listing-page-header listing-editor-header">
         <div>
-          <Link className="brand-link compact-brand" href="/">NearBasha</Link>
-          <p className="eyebrow">Owner workspace</p>
+          <p className="eyebrow">Owner workspace · Edit listing</p>
           <h1 className="listing-page-title">Edit listing</h1>
-          <p className="intro">Review the same five renter-facing areas before resubmitting. Changes stay private until the listing passes moderation.</p>
+          <p className="intro">Review one renter-facing step at a time. Changes stay private until the listing passes moderation again.</p>
         </div>
         <Link className="text-link" href="/owner">Back to properties</Link>
       </header>
 
-      <ListingWorkflowNav mode="editing" />
-
-      {editable && <ListingDraftGuard userId={auth.userId} propertyId={id} />}
-      <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} property={formProperty} />
+      <div className={editorStyles.editorShell}>
+        <ListingWorkflowNav mode="editing" />
+        <div>
+          {editable && <ListingDraftGuard userId={auth.userId} propertyId={id} />}
+          <PropertyListingForm userId={auth.userId} amenities={amenities ?? []} property={formProperty} />
+        </div>
+      </div>
     </main>
   );
 }
