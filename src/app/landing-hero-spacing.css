@@ -1,0 +1,33 @@
+/* Hero spacing ownership.
+   Older landing generations still contribute vertical padding to .landing-copy,
+   while the redesign also pads the hero itself. That stacked spacing creates a
+   large empty band below the navigation and pushes the map far down the page. */
+
+/* Let the hero own vertical rhythm; copy keeps only its existing inline padding. */
+.landing-shell .landing-copy {
+  padding-block: 0;
+}
+
+@media (min-width: 1121px) {
+  .landing-shell .landing-hero-reference {
+    min-height: auto;
+    padding-top: clamp(44px, 4.2vw, 64px);
+    padding-bottom: clamp(60px, 5.5vw, 84px);
+    align-items: start;
+  }
+
+  .landing-shell .landing-hero-reference .landing-copy,
+  .landing-shell .landing-hero-reference .landing-visual {
+    align-self: start;
+  }
+
+  .landing-shell .landing-hero-reference .landing-visual {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 1120px) {
+  .landing-shell .landing-hero-reference {
+    padding-top: clamp(42px, 7vw, 64px);
+  }
+}
