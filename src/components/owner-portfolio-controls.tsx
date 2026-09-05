@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
 import styles from "./owner-portfolio-controls.module.css";
@@ -39,15 +38,12 @@ function ownerHref({ query = "", status = "all", sort = "updated-desc" }: { quer
 
 export function OwnerPortfolioControls({ query, status, sort, visibleCount, totalCount }: Props) {
   const router = useRouter();
-  const [searchText, setSearchText] = useState(query);
-
-  useEffect(() => {
-    setSearchText(query);
-  }, [query]);
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    router.push(ownerHref({ query: searchText, status, sort }));
+    const formData = new FormData(event.currentTarget);
+    const nextQuery = String(formData.get("q") ?? "").slice(0, 120);
+    router.push(ownerHref({ query: nextQuery, status, sort }));
   }
 
   return (
@@ -58,10 +54,11 @@ export function OwnerPortfolioControls({ query, status, sort, visibleCount, tota
           <span className={styles.searchShell}>
             <Search size={16} aria-hidden="true" />
             <input
+              key={query}
               id="owner-portfolio-search"
+              name="q"
               type="search"
-              value={searchText}
-              onChange={(event) => setSearchText(event.target.value.slice(0, 120))}
+              defaultValue={query}
               placeholder="Search title or location"
               maxLength={120}
             />
