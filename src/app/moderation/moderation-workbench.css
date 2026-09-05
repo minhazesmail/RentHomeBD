@@ -1,0 +1,205 @@
+/* Moderation workbench layer: navigation, attention summary, and queue traversal. */
+
+.moderation-workbench-nav {
+  position: sticky;
+  top: 12px;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 0 20px;
+  padding: 8px;
+  border: 1px solid var(--moderation-line);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, .92);
+  box-shadow: 0 10px 30px rgba(16, 37, 29, .06);
+  backdrop-filter: blur(16px);
+}
+
+.moderation-workbench-nav-main {
+  display: flex;
+  min-width: 0;
+  gap: 5px;
+}
+
+.moderation-workbench-nav-main a,
+.moderation-workbench-dashboard {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 11px;
+  border-radius: 9px;
+  color: var(--moderation-muted);
+  font-size: .76rem;
+  font-weight: 780;
+  text-decoration: none;
+}
+
+.moderation-workbench-nav-main a strong {
+  display: grid;
+  min-width: 24px;
+  height: 24px;
+  place-items: center;
+  padding: 0 6px;
+  border: 1px solid rgba(16, 37, 29, .09);
+  border-radius: 999px;
+  background: #edf2eb;
+  color: var(--moderation-ink);
+  font-size: .69rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.moderation-workbench-nav-main a:hover,
+.moderation-workbench-nav-main a.is-active {
+  background: var(--moderation-ink);
+  color: white;
+}
+
+.moderation-workbench-nav-main a.is-active strong {
+  border-color: rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .12);
+  color: white;
+}
+
+.moderation-workbench-dashboard {
+  flex: 0 0 auto;
+  border-left: 1px solid var(--moderation-line);
+  border-radius: 0 9px 9px 0;
+}
+
+.moderation-attention-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0 0 18px;
+  overflow: hidden;
+  border: 1px solid var(--moderation-line);
+  border-radius: 14px;
+  background: var(--moderation-line);
+}
+
+.moderation-attention-signal {
+  min-height: 78px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 13px 14px;
+  background: rgba(255, 253, 248, .96);
+}
+
+.moderation-attention-signal span {
+  color: #7a877f;
+  font-size: .62rem;
+  font-weight: 830;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.moderation-attention-signal strong {
+  color: var(--moderation-ink);
+  font-size: .8rem;
+  line-height: 1.35;
+}
+
+.moderation-attention-signal.is-good {
+  box-shadow: inset 0 3px 0 #4d8568;
+}
+
+.moderation-attention-signal.is-alert {
+  background: #fff8ef;
+  box-shadow: inset 0 3px 0 #b46f2a;
+}
+
+.moderation-attention-signal.is-risk {
+  background: #fbf2f0;
+  box-shadow: inset 0 3px 0 #9b4f43;
+}
+
+.moderation-review-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--moderation-line);
+}
+
+.moderation-review-progress a,
+.moderation-review-progress span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--moderation-muted);
+  font-size: .72rem;
+  font-weight: 760;
+  text-decoration: none;
+}
+
+.moderation-review-progress a:hover {
+  color: var(--moderation-ink);
+}
+
+.moderation-review-progress .is-disabled {
+  opacity: .4;
+}
+
+.moderation-queue-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 12px;
+  color: var(--moderation-muted);
+  font-size: .78rem;
+}
+
+.moderation-queue-context strong {
+  color: var(--moderation-ink);
+}
+
+@media (max-width: 980px) {
+  .moderation-attention-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .moderation-workbench-nav {
+    position: static;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .moderation-workbench-nav-main {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .moderation-workbench-nav-main::-webkit-scrollbar {
+    display: none;
+  }
+
+  .moderation-workbench-nav-main a {
+    flex: 0 0 auto;
+  }
+
+  .moderation-workbench-dashboard {
+    justify-content: center;
+    border-top: 1px solid var(--moderation-line);
+    border-left: 0;
+    border-radius: 0 0 9px 9px;
+  }
+
+  .moderation-attention-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .moderation-attention-summary {
+    grid-template-columns: 1fr;
+  }
+}
