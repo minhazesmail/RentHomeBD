@@ -6,7 +6,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 
-export function ModerationDecisionForm({ propertyId, reviewerId }: { propertyId: string; reviewerId: string }) {
+export function ModerationDecisionForm({
+  propertyId,
+  reviewerId,
+  nextPropertyId = null,
+}: {
+  propertyId: string;
+  reviewerId: string;
+  nextPropertyId?: string | null;
+}) {
   const router = useRouter();
   const supabase = createClient() as unknown as SupabaseClient;
   const [notes, setNotes] = useState("");
@@ -35,7 +43,8 @@ export function ModerationDecisionForm({ propertyId, reviewerId }: { propertyId:
       return;
     }
 
-    router.replace(`/moderation?notice=${decision === "approve" ? "approved" : "rejected"}`);
+    const notice = decision === "approve" ? "approved" : "rejected";
+    router.replace(nextPropertyId ? `/moderation/${nextPropertyId}?notice=${notice}` : `/moderation?notice=${notice}`);
     router.refresh();
   }
 
@@ -52,7 +61,7 @@ export function ModerationDecisionForm({ propertyId, reviewerId }: { propertyId:
           {busy === "reject" ? "Rejecting…" : "Reject with notes"}
         </button>
         <button className="primary-button" type="button" disabled={busy !== null} onClick={() => void submit("approve")}>
-          {busy === "approve" ? "Approving…" : "Approve listing"}
+          {busy === "approve" ? "Approving…" : nextPropertyId ? "Approve & next" : "Approve listing"}
         </button>
       </div>
     </section>
