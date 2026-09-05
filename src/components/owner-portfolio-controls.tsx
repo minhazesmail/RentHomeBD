@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import type { FormEvent } from "react";
 
 import styles from "./owner-portfolio-controls.module.css";
 
@@ -40,7 +41,7 @@ export function OwnerPortfolioControls({ query, status, sort, visibleCount, tota
   const router = useRouter();
   const [searchText, setSearchText] = useState(query);
 
-  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
+  function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     router.push(ownerHref({ query: searchText, status, sort }));
   }
