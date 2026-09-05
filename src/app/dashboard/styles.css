@@ -1,3 +1,4 @@
 /* Canonical layered style manifest for the /dashboard route. */
 @import "./dashboard.css" layer(route-base);
 @import "./dashboard-redesign.css" layer(route-redesign);
+@import "./dashboard-spacing-fixes.css" layer(route-fixes);
