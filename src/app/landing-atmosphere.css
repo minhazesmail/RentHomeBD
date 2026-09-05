@@ -1,0 +1,282 @@
+/* Living Atmosphere — route-last landing background system.
+   The page uses one fixed atmospheric canvas that changes only when the active
+   section changes. The visual language is soft editorial light, not map/grid
+   geometry. Motion is limited to compositor-friendly opacity/transform changes. */
+
+/* The global marketing shell still carries an older map-grid treatment. The
+   landing page now owns its background, so remove those duplicate layers. */
+.nb-global-shell--marketing > .nb-shell-atmosphere,
+.nb-global-shell--marketing > .nb-shell-grid {
+  display: none !important;
+}
+
+main.landing-shell {
+  --atm-base: #f7f3e9;
+  --atm-warm-opacity: .30;
+  --atm-cool-opacity: .18;
+  --atm-depth-opacity: .07;
+  --atm-warm-x: -8%;
+  --atm-warm-y: -5%;
+  --atm-warm-scale: 1.02;
+  --atm-cool-x: 8%;
+  --atm-cool-y: 2%;
+  --atm-cool-scale: 1.05;
+  --atm-direction-shift: 14px;
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+main.landing-shell[data-scroll-direction="up"] {
+  --atm-direction-shift: -14px;
+}
+
+main.landing-shell[data-scroll-direction="down"] {
+  --atm-direction-shift: 14px;
+}
+
+/* One fixed canvas, three quiet light layers. There is no looping animation,
+   requestAnimationFrame work, backdrop blur, canvas, or WebGL. */
+.site-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: var(--atm-base);
+  transition: background-color 880ms cubic-bezier(.22, 1, .36, 1);
+  contain: strict;
+}
+
+.site-atmosphere__layer {
+  position: absolute;
+  inset: -18%;
+  pointer-events: none;
+  backface-visibility: hidden;
+  transition:
+    opacity 820ms cubic-bezier(.22, 1, .36, 1),
+    transform 980ms cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Fixed brand-tinted light fields. Theme changes only reposition/crossfade
+   these rasterized gradients rather than animating gradient definitions. */
+.site-atmosphere__warm {
+  color: #d6ad68;
+  opacity: var(--atm-warm-opacity);
+  background: radial-gradient(ellipse at 25% 24%, currentColor 0%, transparent 58%);
+  transform: translate3d(
+      var(--atm-warm-x),
+      calc(var(--atm-warm-y) + var(--atm-direction-shift)),
+      0
+    ) scale(var(--atm-warm-scale));
+  will-change: transform, opacity;
+}
+
+.site-atmosphere__cool {
+  color: #4b9577;
+  opacity: var(--atm-cool-opacity);
+  background: radial-gradient(ellipse at 76% 60%, currentColor 0%, transparent 60%);
+  transform: translate3d(
+      var(--atm-cool-x),
+      calc(var(--atm-cool-y) + var(--atm-direction-shift)),
+      0
+    ) scale(var(--atm-cool-scale));
+  will-change: transform, opacity;
+}
+
+.site-atmosphere__depth {
+  color: #0b231b;
+  opacity: var(--atm-depth-opacity);
+  background: linear-gradient(180deg, transparent 34%, currentColor 112%);
+  transition: opacity 880ms cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Editorial section moods. The palette changes by moving through related
+   ivory, sage, champagne and emerald environments rather than obvious shapes. */
+main.landing-shell[data-atmosphere="hero"] {
+  --atm-base: #f7f3e9;
+  --atm-warm-opacity: .30;
+  --atm-cool-opacity: .18;
+  --atm-depth-opacity: .06;
+  --atm-warm-x: -9%;
+  --atm-warm-y: -6%;
+  --atm-warm-scale: 1.02;
+  --atm-cool-x: 9%;
+  --atm-cool-y: 1%;
+  --atm-cool-scale: 1.06;
+}
+
+main.landing-shell[data-atmosphere="trust"] {
+  --atm-base: #123a30;
+  --atm-warm-opacity: .11;
+  --atm-cool-opacity: .24;
+  --atm-depth-opacity: .30;
+  --atm-warm-x: 10%;
+  --atm-warm-y: -8%;
+  --atm-warm-scale: 1.08;
+  --atm-cool-x: -5%;
+  --atm-cool-y: 9%;
+  --atm-cool-scale: 1.10;
+}
+
+main.landing-shell[data-atmosphere="journey"] {
+  --atm-base: #edf0e8;
+  --atm-warm-opacity: .22;
+  --atm-cool-opacity: .16;
+  --atm-depth-opacity: .05;
+  --atm-warm-x: -4%;
+  --atm-warm-y: 5%;
+  --atm-warm-scale: 1.04;
+  --atm-cool-x: 7%;
+  --atm-cool-y: -4%;
+  --atm-cool-scale: 1.03;
+}
+
+main.landing-shell[data-atmosphere="homes"] {
+  --atm-base: #f3eee3;
+  --atm-warm-opacity: .31;
+  --atm-cool-opacity: .14;
+  --atm-depth-opacity: .055;
+  --atm-warm-x: 6%;
+  --atm-warm-y: -3%;
+  --atm-warm-scale: 1.08;
+  --atm-cool-x: -7%;
+  --atm-cool-y: 7%;
+  --atm-cool-scale: 1.06;
+}
+
+main.landing-shell[data-atmosphere="local"] {
+  --atm-base: #eaf0e8;
+  --atm-warm-opacity: .18;
+  --atm-cool-opacity: .20;
+  --atm-depth-opacity: .05;
+  --atm-warm-x: -3%;
+  --atm-warm-y: -2%;
+  --atm-cool-x: 8%;
+  --atm-cool-y: 8%;
+}
+
+main.landing-shell[data-atmosphere="clarity"] {
+  --atm-base: #eff1ed;
+  --atm-warm-opacity: .14;
+  --atm-cool-opacity: .18;
+  --atm-depth-opacity: .045;
+  --atm-warm-x: -8%;
+  --atm-warm-y: 5%;
+  --atm-warm-scale: 1.03;
+  --atm-cool-x: 5%;
+  --atm-cool-y: -6%;
+  --atm-cool-scale: 1.08;
+}
+
+main.landing-shell[data-atmosphere="action"] {
+  --atm-base: #15382e;
+  --atm-warm-opacity: .20;
+  --atm-cool-opacity: .24;
+  --atm-depth-opacity: .25;
+  --atm-warm-x: 8%;
+  --atm-warm-y: -7%;
+  --atm-warm-scale: 1.09;
+  --atm-cool-x: -6%;
+  --atm-cool-y: 8%;
+  --atm-cool-scale: 1.08;
+}
+
+main.landing-shell[data-atmosphere="footer"] {
+  --atm-base: #0b211b;
+  --atm-warm-opacity: .10;
+  --atm-cool-opacity: .16;
+  --atm-depth-opacity: .36;
+  --atm-warm-x: 11%;
+  --atm-warm-y: -4%;
+  --atm-warm-scale: 1.06;
+  --atm-cool-x: -8%;
+  --atm-cool-y: 4%;
+  --atm-cool-scale: 1.10;
+}
+
+/* Retire every older decorative map/grid scene so the new light field is the
+   only page background system. Product map UI remains untouched. */
+.landing-shell::before,
+.landing-shell::after,
+.landing-shell .landing-scroll-atmosphere::before,
+.landing-shell .landing-scroll-atmosphere::after,
+.landing-shell .landing-scroll-scene,
+.landing-shell .landing-scroll-scene::before,
+.landing-shell .landing-scroll-scene::after {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Let the atmosphere read through the page without reintroducing expensive
+   live blur. Content surfaces stay opaque enough for text contrast. */
+main.landing-shell .landing-frame {
+  background: transparent !important;
+}
+
+.landing-shell .landing-content-section {
+  background: rgba(255, 253, 248, .70) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.landing-shell .landing-trust-section {
+  background: #073f31 !important;
+  color: #fff;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.landing-shell .landing-footer {
+  background: transparent !important;
+  border-top-color: rgba(255, 255, 255, .14) !important;
+}
+
+.landing-shell .landing-footer-bottom {
+  border-top-color: rgba(255, 255, 255, .14) !important;
+}
+
+/* Mobile uses a simpler two-light composition with less overscan and a shorter
+   travel distance. */
+@media (max-width: 760px) {
+  main.landing-shell {
+    --atm-direction-shift: 8px;
+  }
+
+  main.landing-shell[data-scroll-direction="up"] {
+    --atm-direction-shift: -8px;
+  }
+
+  .site-atmosphere__layer {
+    inset: -10%;
+    transition-duration: 680ms;
+  }
+
+  .site-atmosphere__depth {
+    display: none;
+  }
+
+  .landing-shell .landing-content-section {
+    background: rgba(255, 253, 248, .82) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main.landing-shell {
+    --atm-direction-shift: 0px;
+  }
+
+  .site-atmosphere,
+  .site-atmosphere__layer {
+    transition: none !important;
+  }
+
+  .site-atmosphere__warm,
+  .site-atmosphere__cool {
+    will-change: auto;
+  }
+}
