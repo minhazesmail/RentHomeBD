@@ -56,6 +56,13 @@
   letter-spacing: -.05em;
 }
 
+/* Batch 7 — verification cards use the shared section-heading primitive, but
+   their route redesign left only 6px between heading and description. Give the
+   two text levels a clearer, consistent break without changing card density. */
+.verification-shell .section-heading h2 {
+  margin-bottom: 8px;
+}
+
 /* Auth feedback sits after the active flow and should never collide with the
    mode switch or form controls. */
 .auth-card > .auth-message {

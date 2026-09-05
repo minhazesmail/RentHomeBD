@@ -30,6 +30,15 @@
   margin-bottom: 5px;
 }
 
+/* Batch 7 — section headings and their supporting copy sit side-by-side on
+   desktop, but collapse into one column on narrower layouts. Keep neutral
+   margins here, then add a deliberate vertical break only when that collapse
+   happens so the description never sticks to the heading. */
+.landing-shell .landing-trust-heading > p,
+.landing-shell .landing-section-intro > p:last-child {
+  margin-bottom: 0;
+}
+
 @media (min-width: 1121px) {
   .landing-shell .landing-hero-reference {
     min-height: auto;
@@ -51,6 +60,16 @@
 @media (max-width: 1120px) {
   .landing-shell .landing-hero-reference {
     padding-top: clamp(42px, 7vw, 64px);
+  }
+}
+
+@media (max-width: 820px) {
+  .landing-shell .landing-trust-heading > p {
+    margin: 16px 0 0;
+  }
+
+  .landing-shell .landing-section-intro > p:last-child {
+    margin: 14px 0 0;
   }
 }
 

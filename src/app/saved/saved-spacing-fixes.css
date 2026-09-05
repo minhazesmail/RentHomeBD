@@ -5,6 +5,17 @@
   letter-spacing: -.05em;
 }
 
+/* Batch 7 — saved-home cards use a nested heading block. Give the title and
+   supporting location/detail line the same readable rhythm as other product
+   cards instead of the tighter 5px stack. */
+.saved-page .saved-home-heading {
+  gap: 7px;
+}
+
+.saved-page .saved-search-card > div:first-child {
+  gap: 8px;
+}
+
 @media (max-width: 640px) {
   .saved-page .saved-hero h1 {
     line-height: .98;

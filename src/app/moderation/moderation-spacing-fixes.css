@@ -15,6 +15,20 @@
   margin: 0;
 }
 
+/* Batch 7 — inspection/account/decision section copy and queue-card metadata
+   need a consistent visual break from their headings. */
+.moderation-shell .section-heading h2 {
+  margin-bottom: 7px;
+}
+
+.moderation-shell .moderation-row .property-row-main {
+  gap: 6px;
+}
+
+.moderation-shell .review-description p {
+  margin-top: 8px;
+}
+
 @media (max-width: 720px) {
   .moderation-shell .auth-message {
     margin-bottom: 12px;
