@@ -7,6 +7,14 @@
   letter-spacing: -.05em;
 }
 
+/* Batch 7 — detail sections and compatibility cards should separate their
+   heading from supporting copy consistently instead of using the tighter 6px
+   route default. */
+.property-detail-page .section-copy,
+.property-detail-page .tenant-compatibility-card p {
+  margin-top: 8px;
+}
+
 @media (max-width: 720px) {
   .property-detail-page .property-detail-hero h1 {
     line-height: .98;
