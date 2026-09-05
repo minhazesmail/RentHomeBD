@@ -80,7 +80,6 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
           className={filtersOpen ? styles.active : styles.filterButton}
           type="button"
           aria-expanded={filtersOpen}
-          aria-controls="mobile-search-filters"
           onClick={toggleFilters}
         >
           <SlidersHorizontal size={17} aria-hidden="true" />
