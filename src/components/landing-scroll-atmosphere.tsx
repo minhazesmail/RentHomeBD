@@ -49,9 +49,9 @@ export function SiteAtmosphere({
       if (!visibleSections.size) return;
 
       const viewportCenter = window.innerHeight / 2;
-      let nextSection: HTMLElement | null = null;
       let nextIndex = activeIndex;
       let closestDistance = Number.POSITIVE_INFINITY;
+      let foundCandidate = false;
 
       sections.forEach((section, index) => {
         if (!visibleSections.has(section)) return;
@@ -61,15 +61,15 @@ export function SiteAtmosphere({
 
         if (distance < closestDistance) {
           closestDistance = distance;
-          nextSection = section;
           nextIndex = index;
+          foundCandidate = true;
         }
       });
 
-      if (!nextSection || nextIndex === activeIndex) return;
+      if (!foundCandidate || nextIndex === activeIndex) return;
 
       root.dataset.scrollDirection = nextIndex > activeIndex ? "down" : "up";
-      const nextTheme = nextSection.dataset.scrollTheme;
+      const nextTheme = sections[nextIndex]?.dataset.scrollTheme;
       if (nextTheme) root.dataset.atmosphere = nextTheme;
       activeIndex = nextIndex;
     };
