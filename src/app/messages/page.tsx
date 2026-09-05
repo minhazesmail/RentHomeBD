@@ -1,29 +1,8 @@
-import Link from "next/link";
-import type { SupabaseClient } from "@supabase/supabase-js";
-
+import { MessagesInboxPane } from "@/components/messages-inbox-pane";
 import { ProductNavigation } from "@/components/product-navigation";
 import { requireUser } from "@/lib/auth";
-import { formatExactMessageTime, formatInboxMessageTime } from "@/lib/message-time";
-import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
-
-const INBOX_PAGE_SIZE = 20;
-const MESSAGE_MEDIA_TTL_SECONDS = 300;
-
-type ConversationSummary = {
-  id: string;
-  property_id: string;
-  renter_id: string;
-  owner_id: string;
-  renter_display_name: string | null;
-  owner_display_name: string | null;
-  property_title: string | null;
-  created_at: string;
-  last_message_at: string | null;
-  last_message_body: string | null;
-  unread_count: number | string;
-};
 
 type InboxSearchParams = {
   page?: string | string[];
@@ -40,121 +19,25 @@ function pageNumber(value: string | string[] | undefined) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 }
 
-function inboxHref({ page = 1, query = "", unreadOnly = false }: { page?: number; query?: string; unreadOnly?: boolean }) {
-  const params = new URLSearchParams();
-  if (query) params.set("q", query);
-  if (unreadOnly) params.set("filter", "unread");
-  if (page > 1) params.set("page", String(page));
-  const search = params.toString();
-  return search ? `/messages?${search}` : "/messages";
-}
-
 export default async function MessagesPage({ searchParams }: { searchParams: Promise<InboxSearchParams> }) {
   const auth = await requireUser();
   const canList = auth.profile.primary_role === "owner" || auth.profile.primary_role === "agent";
-  const supabase = (await createClient()) as unknown as SupabaseClient;
   const resolvedSearchParams = await searchParams;
   const page = pageNumber(resolvedSearchParams.page);
   const query = (firstValue(resolvedSearchParams.q) || "").trim().slice(0, 120);
   const unreadOnly = firstValue(resolvedSearchParams.filter) === "unread";
-  const offset = (page - 1) * INBOX_PAGE_SIZE;
-  const renderedAt = new Date();
-
-  const { data, error } = await supabase
-    .rpc("get_message_inbox", { search_text: query || null, unread_only: unreadOnly })
-    .range(offset, offset + INBOX_PAGE_SIZE);
-  if (error) throw error;
-
-  const pageRows = (data ?? []) as ConversationSummary[];
-  const hasNextPage = pageRows.length > INBOX_PAGE_SIZE;
-  const conversations = pageRows.slice(0, INBOX_PAGE_SIZE);
-  const hasOrganizationFilters = Boolean(query || unreadOnly);
-  const firstPageHref = inboxHref({ query, unreadOnly });
-
-  const propertyIds = Array.from(new Set(conversations.map((conversation) => conversation.property_id)));
-  const { data: mediaRows } = propertyIds.length
-    ? await supabase
-        .from("property_media")
-        .select("property_id, storage_path, sort_order")
-        .in("property_id", propertyIds)
-        .eq("media_type", "photo")
-        .order("sort_order", { ascending: true })
-    : { data: [] };
-
-  const coverPathByProperty = new Map<string, string>();
-  for (const media of mediaRows ?? []) {
-    const propertyId = media.property_id as string;
-    if (!coverPathByProperty.has(propertyId) && media.storage_path) coverPathByProperty.set(propertyId, media.storage_path as string);
-  }
-
-  const coverEntries = await Promise.all(
-    Array.from(coverPathByProperty.entries()).map(async ([propertyId, storagePath]) => {
-      const { data: signed } = await supabase.storage.from("property-media").createSignedUrl(storagePath, MESSAGE_MEDIA_TTL_SECONDS);
-      return [propertyId, signed?.signedUrl ?? null] as const;
-    }),
-  );
-  const coverUrlByProperty = new Map(coverEntries);
 
   return (
-    <main className="messages-page">
+    <main className="messages-page messages-inbox-route">
       <ProductNavigation authenticated canList={canList} current="messages" />
-      <div className="messages-shell">
-        <header className="messages-header">
-          <h1>Messages</h1>
-        </header>
-
-        <section className="messages-organization" aria-label="Organize conversations">
-          <form className="messages-search-form" action="/messages" method="get">
-            <label className="sr-only" htmlFor="message-search">Search conversations</label>
-            <input id="message-search" name="q" type="search" defaultValue={query} maxLength={120} placeholder="Search conversations" />
-            {unreadOnly && <input type="hidden" name="filter" value="unread" />}
-            <button className="secondary-button" type="submit">Search</button>
-            {query && <Link className="text-link" href={inboxHref({ unreadOnly })}>Clear</Link>}
-          </form>
-          <nav className="messages-filter-tabs" aria-label="Conversation filters">
-            <Link className={!unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query })} aria-current={!unreadOnly ? "page" : undefined}>All</Link>
-            <Link className={unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query, unreadOnly: true })} aria-current={unreadOnly ? "page" : undefined}>Unread</Link>
-          </nav>
+      <div className="messages-workspace-shell">
+        <MessagesInboxPane userId={auth.userId} page={page} query={query} unreadOnly={unreadOnly} />
+        <section className="messages-workspace-empty" aria-label="Conversation workspace">
+          <div className="messages-workspace-empty-mark" aria-hidden="true"><span /><span /><span /></div>
+          <p className="eyebrow">Rental conversations</p>
+          <h2>Select a conversation to keep the property and the discussion side by side.</h2>
+          <p>Messages stay tied to the home you are discussing, so rent, listing context, and the conversation remain easy to reference without jumping between pages.</p>
         </section>
-
-        {!conversations.length ? (
-          page > 1 ? (
-            <div className="empty-conversations">No conversations on this page. <Link className="text-link" href={firstPageHref}>Return to the first page</Link>.</div>
-          ) : hasOrganizationFilters ? (
-            <div className="empty-conversations">No conversations match these filters. <Link className="text-link" href="/messages">Show all</Link>.</div>
-          ) : (
-            <div className="empty-conversations">No conversations yet. Open a property and choose <strong>Message owner</strong> to start one.</div>
-          )
-        ) : (
-          <>
-            <div className="messages-list">
-              {conversations.map((conversation) => {
-                const unread = Number(conversation.unread_count);
-                const otherName = auth.userId === conversation.renter_id ? conversation.owner_display_name : conversation.renter_display_name;
-                const timestamp = conversation.last_message_at || conversation.created_at;
-                const propertyTitle = conversation.property_title || "Rental property";
-                const coverUrl = coverUrlByProperty.get(conversation.property_id);
-                return (
-                  <Link className="conversation-card" href={`/messages/${conversation.id}`} key={conversation.id}>
-                    <span className="conversation-property-media" aria-hidden="true">
-                      {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <span>Home</span>}
-                    </span>
-                    <div className="conversation-main"><strong>{otherName || "NearBasha user"}</strong><span>{propertyTitle}</span><small>{conversation.last_message_body || "Conversation started — send the first message."}</small></div>
-                    <div className="conversation-meta">{unread > 0 && <span className="unread-badge">{unread}</span>}<time dateTime={timestamp} title={formatExactMessageTime(timestamp)}>{formatInboxMessageTime(timestamp, renderedAt)}</time></div>
-                  </Link>
-                );
-              })}
-            </div>
-
-            {(page > 1 || hasNextPage) && (
-              <nav className="messages-pagination" aria-label="Messages pages">
-                {page > 1 ? <Link className="secondary-button link-button" href={inboxHref({ page: page - 1, query, unreadOnly })}>Newer</Link> : <span />}
-                <span className="messages-page-number">Page {page}</span>
-                {hasNextPage ? <Link className="secondary-button link-button" href={inboxHref({ page: page + 1, query, unreadOnly })}>Older</Link> : <span />}
-              </nav>
-            )}
-          </>
-        )}
       </div>
     </main>
   );
