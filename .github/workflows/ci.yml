@@ -23,5 +23,7 @@ jobs:
         run: npm run typecheck
       - name: Lint
         run: npm run lint
+      - name: Dead code
+        run: npm run deadcode
       - name: Build
         run: npm run build
