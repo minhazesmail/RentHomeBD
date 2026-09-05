@@ -12,4 +12,18 @@
     line-height: .98;
     letter-spacing: -.045em;
   }
+
+  /* Batch 9 mobile text review — editorial hero copy and support-card body text
+     need a visible hierarchy when the desktop compositions collapse to one
+     column. Use the shared text contract rather than route-specific pixels. */
+  .info-page .info-hero h1 + .intro,
+  .info-page .info-legal-hero h1 + .intro {
+    margin-top: var(--text-gap-block);
+    line-height: var(--leading-body);
+  }
+
+  .info-page .info-support-grid article h2 + p,
+  .info-page .info-hero-note strong + p {
+    margin-top: var(--text-gap-control);
+  }
 }
