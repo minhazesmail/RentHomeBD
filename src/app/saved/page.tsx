@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { ProductNavigation } from "@/components/product-navigation";
-import { SaveHomeButton } from "@/components/save-home-button";
+import { SavedHomesWorkspace, type SavedHome } from "@/components/saved-homes-workspace";
 import { SavedSearchCard } from "@/components/saved-search-card";
 import { requireUser } from "@/lib/auth";
 import { describeMapCenter } from "@/lib/location-presets";
@@ -115,14 +115,17 @@ export default async function SavedPage() {
     return [search.id as string, error || !row ? null : { currentCount: Number(row.current_count), newCount: Number(row.new_count) }] as const;
   }));
   const matchStateBySearch = new Map(matchStateEntries);
+  const newMatchCount = Array.from(matchStateBySearch.values()).reduce((total, state) => total + (state?.newCount ?? 0), 0);
+  const orderedSearches = [...(searches ?? [])].sort((a, b) => (matchStateBySearch.get(b.id as string)?.newCount ?? 0) - (matchStateBySearch.get(a.id as string)?.newCount ?? 0));
 
   const propertyIds = (savedRows ?? []).map((row) => row.property_id as string);
-  const [{ data: properties }, { data: mediaRows }] = propertyIds.length
+  const [{ data: properties }, { data: mediaRows }, { data: tenantRows }] = propertyIds.length
     ? await Promise.all([
         supabase.from("properties").select("id, title, address_text, rent_bdt, bedrooms, bathrooms, size_sqft, furnishing, property_type, status").in("id", propertyIds),
         supabase.from("property_media").select("property_id, storage_path, media_type, sort_order").in("property_id", propertyIds).eq("media_type", "photo").order("sort_order", { ascending: true }),
+        supabase.from("property_tenant_types").select("property_id, tenant_type").in("property_id", propertyIds),
       ])
-    : [{ data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }];
   const propertyMap = new Map((properties ?? []).map((property) => [property.id as string, property]));
   const availableSavedRows = (savedRows ?? []).filter((saved) => propertyMap.has(saved.property_id as string));
   const unavailableSavedRows = (savedRows ?? []).filter((saved) => !propertyMap.has(saved.property_id as string));
@@ -141,79 +144,77 @@ export default async function SavedPage() {
   );
   const coverUrlByProperty = new Map(coverEntries);
 
+  const renterFitByProperty = new Map<string, string[]>();
+  for (const row of tenantRows ?? []) {
+    const propertyId = row.property_id as string;
+    const tenantLabel = renterTypeLabel(row.tenant_type);
+    if (!tenantLabel) continue;
+    const current = renterFitByProperty.get(propertyId) ?? [];
+    if (!current.includes(tenantLabel)) current.push(tenantLabel);
+    renterFitByProperty.set(propertyId, current);
+  }
+
+  const availableHomes: SavedHome[] = availableSavedRows.map((saved) => {
+    const propertyId = saved.property_id as string;
+    const property = propertyMap.get(propertyId)!;
+    return {
+      id: propertyId,
+      title: (property.title as string | null) || "Rental property",
+      address: (property.address_text as string | null) || "Location shown on map",
+      rentBdt: property.rent_bdt == null ? null : Number(property.rent_bdt),
+      bedrooms: property.bedrooms == null ? null : Number(property.bedrooms),
+      bathrooms: property.bathrooms == null ? null : Number(property.bathrooms),
+      sizeSqft: property.size_sqft == null ? null : Number(property.size_sqft),
+      propertyType: propertyLabel(property.property_type),
+      furnishing: propertyLabel(property.furnishing),
+      renterFit: renterFitByProperty.get(propertyId) ?? [],
+      coverUrl: coverUrlByProperty.get(propertyId) ?? null,
+    };
+  });
+
   return (
     <main className="saved-page">
       <ProductNavigation authenticated canList={canList} current="saved" />
 
       <div className="saved-shell">
         <div className="saved-hero">
+          <p className="eyebrow">Shortlist workspace</p>
           <h1>Saved homes & searches</h1>
-          <p className="intro">Compare homes and reopen saved map searches.</p>
+          <p className="intro">Compare the homes you already like, keep unavailable ones out of the way, and return first to searches with new matches.</p>
+          <div className="saved-hero-metrics" aria-label="Saved workspace summary">
+            <div><strong>{availableHomes.length}</strong><span>homes live</span></div>
+            <div><strong>{searches?.length ?? 0}</strong><span>saved searches</span></div>
+            <div className={newMatchCount > 0 ? "has-new" : undefined}><strong>{newMatchCount}</strong><span>new matches</span></div>
+          </div>
         </div>
 
-        <section className="saved-section">
-          <div className="saved-section-heading"><div><h2>Available saved homes</h2><p>Still live in renter search.</p></div><span>{availableSavedRows.length}</span></div>
-          {!availableSavedRows.length ? (
-            <div className="saved-empty">No saved homes are currently available. Save homes from the map or a property page.</div>
-          ) : (
-            <div className="saved-home-grid">
-              {availableSavedRows.map((saved) => {
-                const propertyId = saved.property_id as string;
-                const property = propertyMap.get(propertyId)!;
-                const coverUrl = coverUrlByProperty.get(propertyId);
-                return (
-                  <div className="saved-home-card" key={property.id as string}>
-                    <Link href={`/homes/${property.id}`}>
-                      <div className="saved-home-media" aria-hidden={!coverUrl}>
-                        {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <span>No photo yet</span>}
-                      </div>
-                      <div className="saved-home-copy">
-                        <div className="saved-home-heading">
-                          <strong>{property.title || "Rental property"}</strong>
-                          <span>{property.address_text || "Location shown on map"}</span>
-                        </div>
-                        <div className="saved-home-price">{property.rent_bdt ? `৳${Number(property.rent_bdt).toLocaleString("en-BD")}/mo` : "Rent on request"}</div>
-                        <div className="saved-home-metadata" aria-label="Home comparison details">
-                          <span><b>{property.bedrooms ?? "—"}</b> bed</span>
-                          <span><b>{property.bathrooms ?? "—"}</b> bath</span>
-                          <span><b>{property.size_sqft ? Number(property.size_sqft).toLocaleString("en-BD") : "—"}</b> sq ft</span>
-                          <span>{propertyLabel(property.property_type)}</span>
-                          <span>{propertyLabel(property.furnishing)}</span>
-                        </div>
-                      </div>
-                    </Link>
-                    <SaveHomeButton propertyId={property.id as string} userId={auth.userId} initialSaved compact />
-                  </div>
-                );
-              })}
-            </div>
-          )}
+        <nav className="saved-workspace-nav" aria-label="Saved workspace sections">
+          <a href="#saved-homes"><span>Homes</span><strong>{availableHomes.length}</strong></a>
+          <a href="#saved-searches"><span>Searches</span><strong>{searches?.length ?? 0}</strong>{newMatchCount > 0 && <small>{newMatchCount} new</small>}</a>
+        </nav>
+
+        <section className="saved-section" id="saved-homes">
+          <div className="saved-section-heading">
+            <div><h2>Your shortlist</h2><p>Select two to four live homes to compare rent, size, furnishing, location, and renter fit side by side.</p></div>
+            <span>{availableHomes.length}</span>
+          </div>
+          <SavedHomesWorkspace
+            userId={auth.userId}
+            homes={availableHomes}
+            unavailablePropertyIds={unavailableSavedRows.map((saved) => saved.property_id as string)}
+          />
         </section>
 
-        {unavailableSavedRows.length > 0 && (
-          <section className="saved-section">
-            <div className="saved-section-heading"><div><h2>Unavailable saved homes</h2><p>No longer visible to renters.</p></div><span>{unavailableSavedRows.length}</span></div>
-            <div className="saved-home-grid">
-              {unavailableSavedRows.map((saved) => {
-                const propertyId = saved.property_id as string;
-                return (
-                  <div className="saved-home-card unavailable" key={propertyId}>
-                    <div><strong>No longer available</strong><span>Remove it when you no longer need it in your shortlist.</span></div>
-                    <SaveHomeButton propertyId={propertyId} userId={auth.userId} initialSaved />
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        <section className="saved-section">
-          <div className="saved-section-heading"><div><h2>Saved searches</h2><p>Current and new matches at a glance.</p></div><span>{searches?.length ?? 0}</span></div>
+        <section className="saved-section" id="saved-searches">
+          <div className="saved-section-heading">
+            <div><h2>Saved searches</h2><p>Searches with new matches rise to the top so you can reopen the most useful areas first.</p></div>
+            <div className="saved-section-counts"><span>{searches?.length ?? 0}</span>{newMatchCount > 0 && <small>{newMatchCount} new</small>}</div>
+          </div>
           {!searches?.length ? (
-            <div className="saved-empty">No saved searches yet. Save a filter set from the map.</div>
+            <div className="saved-empty"><strong>No saved searches yet.</strong><span>Save a radius, budget, bedrooms, and renter-fit combination from the live map.</span><Link className="primary-button link-button" href="/homes">Explore the map</Link></div>
           ) : (
             <div className="saved-search-list">
-              {searches.map((search) => (
+              {orderedSearches.map((search) => (
                 <SavedSearchCard
                   key={search.id as string}
                   userId={auth.userId}
