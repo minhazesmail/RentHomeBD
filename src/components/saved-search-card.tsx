@@ -56,6 +56,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
   const [maxRent, setMaxRent] = useState(search.max_rent == null ? "" : String(search.max_rent));
   const [tenantType, setTenantType] = useState<TenantType | "">(search.tenant_type ?? "");
   const [bedrooms, setBedrooms] = useState(search.min_bedrooms == null ? "" : String(search.min_bedrooms));
+  const hasNewMatches = (matchState?.newCount ?? 0) > 0;
 
   function resetForm() {
     setName(search.name);
@@ -155,7 +156,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
   }
 
   return (
-    <div className={`saved-search-card${editing ? " is-editing" : ""}`}>
+    <div className={`saved-search-card${editing ? " is-editing" : ""}${hasNewMatches ? " has-new-matches" : ""}`}>
       <div className="saved-search-copy">
         <strong>{displayTitle}</strong>
         <span>{displayArea}</span>
@@ -209,7 +210,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
       ) : (
         <div className="saved-search-controls">
           <div className="saved-search-actions">
-            <Link className="primary-button link-button" href={runHref}>Run search</Link>
+            <Link className="primary-button link-button" href={runHref}>{hasNewMatches ? `View ${matchState!.newCount} new ${matchState!.newCount === 1 ? "match" : "matches"}` : "Run search"}</Link>
             <button className="secondary-button" type="button" onClick={() => { setStatus(null); setEditing(true); }} disabled={busyAction !== null}>Edit</button>
             <button className="text-button" type="button" onClick={() => void duplicate()} disabled={busyAction !== null}>{busyAction === "duplicate" ? "Duplicating…" : "Duplicate"}</button>
             <button className="text-button" type="button" onClick={() => void remove()} disabled={busyAction !== null}>{busyAction === "delete" ? "Deleting…" : "Delete"}</button>
