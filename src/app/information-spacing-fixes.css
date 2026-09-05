@@ -1,0 +1,15 @@
+/* Batch 5 typography-spacing normalization for editorial and legal heroes. */
+
+.info-page .info-hero h1,
+.info-page .info-legal-hero h1 {
+  line-height: .96;
+  letter-spacing: -.05em;
+}
+
+@media (max-width: 680px) {
+  .info-page .info-hero h1,
+  .info-page .info-legal-hero h1 {
+    line-height: .98;
+    letter-spacing: -.045em;
+  }
+}

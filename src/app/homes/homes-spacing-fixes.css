@@ -1,0 +1,22 @@
+/* Batch 5 typography and micro-spacing normalization for /homes. */
+
+/* Keep the renter workspace title aligned with the calmer product-wide display
+   rhythm without changing its size or hierarchy. */
+.shell-renter .renter-search-heading h1 {
+  line-height: .97;
+  letter-spacing: -.05em;
+}
+
+/* Result cards previously stacked title, location and supporting metadata at a
+   4px cadence. Give those semantic levels a little more separation while
+   preserving the compact map-first list density. */
+.shell-renter .renter-result-copy {
+  gap: 6px;
+}
+
+@media (max-width: 720px) {
+  .shell-renter .renter-search-heading h1 {
+    line-height: .99;
+    letter-spacing: -.045em;
+  }
+}

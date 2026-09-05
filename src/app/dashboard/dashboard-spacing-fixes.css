@@ -1,0 +1,13 @@
+/* Batch 5 typography-spacing normalization for the dashboard hero. */
+
+.owner-dashboard-header .dashboard-title {
+  line-height: .96;
+  letter-spacing: -.05em;
+}
+
+@media (max-width: 700px) {
+  .owner-dashboard-header .dashboard-title {
+    line-height: .98;
+    letter-spacing: -.045em;
+  }
+}
