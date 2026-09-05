@@ -1,0 +1,76 @@
+/* Landing background motion kill switch.
+   The homepage should retain its visual identity without any scroll-reactive,
+   looping, drifting, pulsing, or transitioning background artwork. */
+
+/* One permanent background for the entire landing page. Section changes no
+   longer swap the page atmosphere as the user scrolls. */
+.landing-shell .landing-scroll-atmosphere,
+.landing-shell[data-landing-theme] .landing-scroll-atmosphere {
+  background:
+    radial-gradient(circle at 12% 16%, rgba(217, 166, 63, .20), transparent 32rem),
+    radial-gradient(circle at 86% 24%, rgba(62, 159, 117, .16), transparent 36rem),
+    linear-gradient(145deg, #fbf5e8, #e8f0e7) !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Keep the subtle map grid, but make every layer completely static. */
+.landing-shell .landing-scroll-atmosphere::before {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.landing-shell .landing-scroll-atmosphere::after {
+  opacity: .12;
+  background-image:
+    linear-gradient(rgba(11, 35, 27, .10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 35, 27, .10) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: none;
+  -webkit-mask-image: none;
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Older landing generations still define animated scene nodes and decorative
+   pseudo-elements. Keep them permanently inert even if they reappear in the DOM. */
+.landing-shell .landing-scroll-scene,
+.landing-shell .landing-scroll-scene::before,
+.landing-shell .landing-scroll-scene::after,
+.landing-shell::before,
+.landing-shell::after {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  will-change: auto !important;
+}
+
+.landing-shell .landing-scroll-scene,
+.landing-shell .landing-scroll-scene::before,
+.landing-shell .landing-scroll-scene::after,
+.landing-shell::before,
+.landing-shell::after {
+  display: none !important;
+}
+
+/* Decorative background ornaments inside sections must also remain still. */
+.landing-shell .landing-hero::before,
+.landing-shell .landing-hero-reference::before,
+.landing-shell .landing-trust-section::before,
+.landing-shell .landing-content-section::before,
+.landing-shell .landing-featured::before,
+.landing-shell .landing-cta-band::after,
+.landing-shell .landing-footer::before,
+.landing-shell .landing-footer::after {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
