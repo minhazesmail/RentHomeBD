@@ -2,8 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { getLandingInventory } from "@/lib/landing-inventory";
+import { DEFAULT_RENTER_SEARCH_RADIUS } from "@/lib/search-defaults";
 
 const LIST_PROPERTY_HREF = "/login?intent=list-property&next=%2Fowner%2Fproperties%2Fnew";
+
+const launchAreas = [
+  { label: "Dhanmondi", query: "Dhanmondi" },
+  { label: "Banani", query: "Banani" },
+  { label: "Uttara", query: "Uttara" },
+  { label: "Gulshan", query: "Gulshan" },
+  { label: "Near BUET", query: "BUET" },
+] as const;
 
 function label(value: string | null | undefined) {
   return value ? value.replaceAll("_", " ") : "—";
@@ -19,7 +28,11 @@ export async function LandingFeaturedSection() {
           <p className="eyebrow">Live homes</p>
           <h2 id="featured-heading">See the home, the fit, and the location signal at a glance.</h2>
         </div>
-        <p>{availableCount} currently available moderated {availableCount === 1 ? "listing" : "listings"}. This section only shows real published inventory.</p>
+        <p>
+          {availableCount} currently available moderated {availableCount === 1 ? "listing" : "listings"}. {availableCount > 0
+            ? "This section only shows real published inventory."
+            : "Inventory updates automatically as real Dhaka homes pass moderation."}
+        </p>
       </div>
 
       {featuredListings.length ? (
@@ -60,13 +73,53 @@ export async function LandingFeaturedSection() {
           ))}
         </div>
       ) : (
-        <div className="landing-featured-empty">
-          <p className="eyebrow">Dhaka launch inventory</p>
-          <strong>No moderated homes are live right now.</strong>
-          <p>NearBasha only shows real, currently available listings here—never demo properties to make the marketplace look fuller. New homes will appear automatically as owners publish listings and moderation approves them.</p>
-          <div className="landing-featured-action">
-            <Link className="secondary-button link-button" href="/homes">Open the live map</Link>
-            <Link className="primary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link>
+        <div className="landing-launch-discovery">
+          <div className="landing-launch-primary">
+            <div className="landing-launch-copy">
+              <p className="eyebrow">Dhaka launch market</p>
+              <strong>Explore the areas that matter now. Real homes will fill the map as they go live.</strong>
+              <p>There are no moderated homes live at this moment, so NearBasha is not filling the page with demo listings. You can still explore supported Dhaka locations, set up the search you care about, or publish a real property.</p>
+
+              <div className="landing-launch-areas" aria-label="Explore supported Dhaka locations">
+                {launchAreas.map((area) => (
+                  <Link key={area.label} href={`/homes?area=${encodeURIComponent(area.query)}&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>{area.label}</Link>
+                ))}
+              </div>
+
+              <div className="landing-featured-action landing-launch-actions">
+                <Link className="secondary-button link-button" href="/homes">Explore the live map</Link>
+                <Link className="primary-button link-button" href={LIST_PROPERTY_HREF}>List a real property</Link>
+              </div>
+            </div>
+
+            <div className="landing-launch-map" aria-hidden="true">
+              <span className="landing-launch-road landing-launch-road-one" />
+              <span className="landing-launch-road landing-launch-road-two" />
+              <span className="landing-launch-road landing-launch-road-three" />
+              <span className="landing-launch-pin landing-launch-pin-one" />
+              <span className="landing-launch-pin landing-launch-pin-two" />
+              <span className="landing-launch-pin landing-launch-pin-three" />
+              <div className="landing-launch-map-card">
+                <small>Launch map</small>
+                <strong>Supported Dhaka search areas</strong>
+                <span>Move the full map anywhere, then refine your radius.</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="landing-launch-paths">
+            <article>
+              <span>For renters</span>
+              <strong>Set up the search before the listing appears.</strong>
+              <p>Explore the area and save the radius, budget, bedrooms, and renter-fit filters you want to revisit.</p>
+              <Link href="/homes">Explore & save a search <span aria-hidden="true">→</span></Link>
+            </article>
+            <article>
+              <span>For owners</span>
+              <strong>Become part of the first real Dhaka inventory.</strong>
+              <p>Create a complete listing with an exact map pin, renter fit, photos, and moderation before it becomes discoverable.</p>
+              <Link href={LIST_PROPERTY_HREF}>Create a listing <span aria-hidden="true">→</span></Link>
+            </article>
           </div>
         </div>
       )}
