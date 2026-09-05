@@ -9,12 +9,25 @@
    explanatory body needs a visible break from the card heading. */
 .owner-dashboard-status p,
 .owner-dashboard-action-card p {
-  margin-top: 7px;
+  margin-top: var(--text-gap-control);
 }
 
 @media (max-width: 700px) {
   .owner-dashboard-header .dashboard-title {
     line-height: .98;
     letter-spacing: -.045em;
+  }
+
+  /* Batch 9 mobile text review — the header, journey cards and trust summaries
+     stack vertically on small screens, so preserve a readable title/body break
+     without making the cards feel loose. */
+  .renter-dashboard-header .dashboard-title + .intro {
+    margin-top: var(--text-gap-related);
+    line-height: var(--leading-body);
+  }
+
+  .renter-journey-copy h2 + p,
+  .owner-dashboard-status strong + p {
+    margin-top: var(--text-gap-control);
   }
 }
