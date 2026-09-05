@@ -1,3 +1,4 @@
 /* Canonical layered style manifest for authentication and account verification. */
 @import "./auth.css" layer(route-base);
 @import "./auth-verification-redesign.css" layer(route-redesign);
+@import "./auth-spacing-fixes.css" layer(route-fixes);
