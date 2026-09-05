@@ -44,6 +44,21 @@
   line-height: 1.55;
 }
 
+/* Auth feedback sits after the active flow and should never collide with the
+   mode switch or form controls. */
+.auth-card > .auth-message {
+  margin: 16px 0 0;
+  line-height: 1.5;
+}
+
+/* Verification feedback participates in a two-column grid that already owns
+   its inter-item gap. Reset inherited margins so notices align with the cards. */
+.verification-shell .success-message,
+.verification-shell .auth-message {
+  margin: 0;
+  line-height: 1.5;
+}
+
 @media (max-width: 640px) {
   .auth-form > * + * {
     margin-top: 15px;
@@ -52,5 +67,9 @@
   .auth-form > label + .form-hint,
   .auth-form > div > .form-hint {
     margin-top: 7px;
+  }
+
+  .auth-card > .auth-message {
+    margin-top: 14px;
   }
 }
