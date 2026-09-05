@@ -1,0 +1,15 @@
+/* Batch 4 typography-spacing normalization for dynamic property titles.
+   Listing titles are user-generated and may wrap unpredictably, so keep the
+   display treatment premium without compressing adjacent lines or glyphs. */
+
+.property-detail-page .property-detail-hero h1 {
+  line-height: .96;
+  letter-spacing: -.05em;
+}
+
+@media (max-width: 720px) {
+  .property-detail-page .property-detail-hero h1 {
+    line-height: .98;
+    letter-spacing: -.045em;
+  }
+}

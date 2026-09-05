@@ -8,6 +8,13 @@
   padding-block: 0;
 }
 
+/* Batch 4 — preserve the editorial serif treatment without compressing large
+   multiline copy so tightly that adjacent lines and glyphs visually collide. */
+.landing-shell .landing-copy > h1 {
+  line-height: .93;
+  letter-spacing: -.055em;
+}
+
 /* The helper paragraph follows a full-width primary action, not an individual
    input. Give it its own breathing room instead of inheriting the compact
    control-level helper rhythm used elsewhere. */
@@ -41,6 +48,11 @@
 }
 
 @media (max-width: 600px) {
+  .landing-shell .landing-copy > h1 {
+    line-height: .95;
+    letter-spacing: -.05em;
+  }
+
   .landing-shell .landing-search-console > .form-hint {
     margin: 10px 2px 0;
   }
