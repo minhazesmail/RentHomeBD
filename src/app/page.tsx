@@ -52,7 +52,7 @@ const faqs = [
 // TODO(i18n): Treat each major marketing copy block on this page as a future translation target.
 export default function HomePage() {
   return (
-    <main className="landing-shell" data-landing-theme="hero">
+    <main className="landing-shell" data-landing-theme="hero" data-atmosphere="hero" data-scroll-direction="down">
       <LandingScrollAtmosphere />
       <div className="landing-frame">
         <nav className="landing-nav">
