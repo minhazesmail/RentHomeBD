@@ -1,8 +1,16 @@
 /* Site-wide text-spacing normalization.
-   Shared helper copy should never rely on negative margins to attach itself to
-   the control above it. Route/component styles can add deliberate positive
-   spacing where their local hierarchy needs more separation. */
+   Shared helper and status copy should never rely on negative margins to attach
+   itself to the control above it. Route/component styles can add deliberate
+   positive spacing where their local hierarchy needs more separation. */
 
 .form-hint {
   margin: 0;
+}
+
+/* Legacy success feedback used a -16px top margin, which could pull messages
+   into the control or heading above them. Keep the shared default neutral and
+   let route layouts own any additional spacing. */
+.success-message {
+  margin: 0 0 16px;
+  line-height: 1.5;
 }
