@@ -5,6 +5,26 @@
 
 .form-hint {
   margin: 0;
+  line-height: 1.55;
+}
+
+/* Batch 8 — control-level helper copy should have a predictable relationship
+   to the field or action it explains. Nested field helpers inherit the field's
+   grid gap with a tiny optical adjustment; adjacent helpers get a clear break. */
+.field > .form-hint {
+  margin-top: 1px;
+}
+
+:where(input, select, textarea) + .form-hint,
+.field + .form-hint {
+  margin-top: 8px;
+}
+
+/* Explanatory/status copy immediately after an action should never appear
+   attached to the button edge. Route-specific rules can still override this
+   for larger action groups or deliberately compact controls. */
+:where(button, .primary-button, .secondary-button, .text-button, .link-button) + .form-hint {
+  margin-top: 10px;
 }
 
 /* Legacy success feedback used a -16px top margin, which could pull messages
@@ -13,4 +33,15 @@
 .success-message {
   margin: 0 0 16px;
   line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  :where(input, select, textarea) + .form-hint,
+  .field + .form-hint {
+    margin-top: 7px;
+  }
+
+  :where(button, .primary-button, .secondary-button, .text-button, .link-button) + .form-hint {
+    margin-top: 8px;
+  }
 }
