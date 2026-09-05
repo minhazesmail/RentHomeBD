@@ -5,7 +5,7 @@
 /* Explicit cascade order. Route manifests reuse these named layers. The order
    mirrors the application's existing load order so this architecture repair
    does not silently restyle production screens. */
-@layer tokens, globals, primitives, foundation, shells, brand, motion, responsive, accessibility, performance, cleanup, route-base, route-polish, route-redesign, route-detail, route-fixes, route-contrast, route-atmosphere;
+@layer tokens, globals, primitives, foundation, shells, brand, motion, responsive, accessibility, performance, cleanup, spacing, route-base, route-polish, route-redesign, route-detail, route-fixes, route-contrast, route-atmosphere;
 
 /* Design system foundation */
 @import "./tokens.css" layer(tokens);
@@ -21,3 +21,4 @@
 @import "./accessibility-audit.css" layer(accessibility);
 @import "./performance-optimizations.css" layer(performance);
 @import "./visual-regression-cleanup.css" layer(cleanup);
+@import "./spacing-normalization.css" layer(spacing);
