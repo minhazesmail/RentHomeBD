@@ -25,5 +25,7 @@ jobs:
         run: npm run lint
       - name: Dead code
         run: npm run deadcode
+      - name: Deep unused-code audit
+        run: npx --yes knip --no-progress
       - name: Build
         run: npm run build
