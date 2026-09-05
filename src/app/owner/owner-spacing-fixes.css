@@ -1,0 +1,28 @@
+/* Batch 2 typography-spacing normalization for owner/listing workflows.
+   Helper copy should follow the local component rhythm rather than inheriting
+   legacy negative or zero-margin behavior from generic form utilities. */
+
+.listing-form .form-hint {
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* The location guidance sits inside the existing 14px location-fields grid.
+   Keep it aligned with that rhythm and readable when it wraps. */
+.location-fields > .form-hint {
+  margin: 0;
+  max-width: 62ch;
+}
+
+/* Media guidance is a direct block sibling of the uploader/gallery, so it needs
+   explicit separation from the large upload target. */
+.listing-section > .form-hint {
+  margin: 12px 0 0;
+  max-width: 68ch;
+}
+
+@media (max-width: 640px) {
+  .listing-section > .form-hint {
+    margin-top: 10px;
+  }
+}
