@@ -5,7 +5,7 @@
 
 .form-hint {
   margin: 0;
-  line-height: 1.55;
+  line-height: var(--leading-helper);
 }
 
 /* Batch 8 — control-level helper copy should have a predictable relationship
@@ -17,31 +17,24 @@
 
 :where(input, select, textarea) + .form-hint,
 .field + .form-hint {
-  margin-top: 8px;
+  margin-top: var(--text-gap-control);
 }
 
 /* Explanatory/status copy immediately after an action should never appear
    attached to the button edge. Route-specific rules can still override this
    for larger action groups or deliberately compact controls. */
 :where(button, .primary-button, .secondary-button, .text-button, .link-button) + .form-hint {
-  margin-top: 10px;
+  margin-top: var(--text-gap-action);
 }
+
+/* Batch 9 — the shared spacing contract lives in tokens.css. Mobile values are
+   tuned there, so controls and helper copy keep the same semantic relationship
+   across breakpoints without duplicating hard-coded pixel overrides here. */
 
 /* Legacy success feedback used a -16px top margin, which could pull messages
    into the control or heading above them. Keep the shared default neutral and
    let route layouts own any additional spacing. */
 .success-message {
-  margin: 0 0 16px;
+  margin: 0 0 var(--text-gap-block);
   line-height: 1.5;
-}
-
-@media (max-width: 640px) {
-  :where(input, select, textarea) + .form-hint,
-  .field + .form-hint {
-    margin-top: 7px;
-  }
-
-  :where(button, .primary-button, .secondary-button, .text-button, .link-button) + .form-hint {
-    margin-top: 8px;
-  }
 }
