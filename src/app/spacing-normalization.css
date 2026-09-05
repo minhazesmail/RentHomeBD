@@ -1,0 +1,8 @@
+/* Site-wide text-spacing normalization.
+   Shared helper copy should never rely on negative margins to attach itself to
+   the control above it. Route/component styles can add deliberate positive
+   spacing where their local hierarchy needs more separation. */
+
+.form-hint {
+  margin: 0;
+}
