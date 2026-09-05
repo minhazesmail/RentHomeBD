@@ -25,5 +25,7 @@ jobs:
         run: npm run lint
       - name: Dead code
         run: npm run deadcode
+      - name: UI regression QA
+        run: npm run uiqa
       - name: Build
         run: npm run build

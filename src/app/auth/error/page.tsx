@@ -1,16 +1,16 @@
 import Link from "next/link";
 
+import { RecoveryState } from "@/components/recovery-state";
+
 export default function AuthErrorPage() {
   return (
-    <main className="shell auth-shell">
-      <section className="dashboard-card">
-        <p className="eyebrow">Authentication error</p>
-        <h1 className="dashboard-title">We could not complete that sign-in.</h1>
-        <p className="intro">The confirmation link may have expired or already been used. Try signing in again.</p>
-        <div className="dashboard-actions">
-          <Link className="primary-button link-button" href="/login">Return to sign in</Link>
-        </div>
-      </section>
-    </main>
+    <RecoveryState
+      eyebrow="Account recovery"
+      title="That sign-in link is no longer available."
+      description="The confirmation or recovery link may have expired or already been used. Return to sign in to continue, or request a new password reset link if you were recovering your account."
+      primaryAction={<Link href="/login">Return to sign in</Link>}
+      secondaryAction={<Link href="/">Back to home</Link>}
+      headingId="auth-recovery-heading"
+    />
   );
 }

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "node scripts/check-css-collisions.mjs && eslint .",
     "deadcode": "node scripts/check-dead-code.mjs",
+    "uiqa": "node scripts/check-ui-regressions.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

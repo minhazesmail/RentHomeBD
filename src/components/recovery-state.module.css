@@ -1,11 +1,11 @@
-.recoveryShell {
+.shell {
   min-height: min(760px, calc(100vh - 40px));
   display: grid;
   place-items: center;
   padding: clamp(28px, 7vw, 84px) 24px;
 }
 
-.recoveryCard {
+.card {
   position: relative;
   width: min(760px, 100%);
   overflow: hidden;
@@ -19,7 +19,7 @@
   color: var(--emerald-50);
 }
 
-.recoveryCard::before {
+.card::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -31,24 +31,24 @@
   mask-image: linear-gradient(to bottom right, black, transparent 74%);
 }
 
-.recoveryContent {
+.content {
   position: relative;
   z-index: 1;
 }
 
-.recoveryLogo {
+.logo {
   display: inline-flex;
   width: min(190px, 56vw);
   margin-bottom: clamp(44px, 8vw, 76px);
 }
 
-.recoveryLogo img {
+.logo img {
   width: 100%;
   height: auto;
   filter: brightness(0) invert(1);
 }
 
-.recoveryEyebrow {
+.eyebrow {
   margin: 0 0 12px;
   color: var(--lime-300);
   font-size: .76rem;
@@ -57,7 +57,7 @@
   text-transform: uppercase;
 }
 
-.recoveryTitle {
+.title {
   max-width: 640px;
   margin: 0;
   color: white;
@@ -66,7 +66,7 @@
   letter-spacing: -.05em;
 }
 
-.recoveryCopy {
+.copy {
   max-width: 580px;
   margin: 20px 0 0;
   color: rgba(237, 248, 243, .74);
@@ -74,63 +74,83 @@
   line-height: 1.7;
 }
 
-.recoveryActions {
+.actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 30px;
 }
 
-.recoveryPrimary,
-.recoverySecondary {
+.primary,
+.secondary {
+  display: contents;
+}
+
+.actions :global(a),
+.actions :global(button) {
   min-height: 46px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 11px 18px;
   border-radius: var(--radius-pill);
+  font: inherit;
   font-weight: 800;
   text-decoration: none;
 }
 
-.recoveryPrimary {
+.primary :global(a),
+.primary :global(button) {
   border: 1px solid var(--lime-300);
   background: var(--lime-300);
   color: var(--emerald-1000);
 }
 
-.recoverySecondary {
+.secondary :global(a),
+.secondary :global(button) {
   border: 1px solid rgba(237, 248, 243, .2);
   background: rgba(255, 255, 255, .06);
   color: var(--emerald-50);
 }
 
-button.recoveryPrimary {
+.actions :global(button) {
   cursor: pointer;
-  font: inherit;
+}
+
+.actions :global(a:focus-visible),
+.actions :global(button:focus-visible) {
+  outline: 3px solid rgba(185, 242, 39, .55);
+  outline-offset: 3px;
 }
 
 @media (max-width: 560px) {
-  .recoveryShell {
+  .shell {
     min-height: calc(100vh - 20px);
     padding: 18px 14px;
   }
 
-  .recoveryCard {
+  .card {
     padding: 28px 22px;
     border-radius: var(--radius-xl);
   }
 
-  .recoveryLogo {
+  .logo {
     margin-bottom: 48px;
   }
 
-  .recoveryActions {
+  .actions {
     display: grid;
   }
 
-  .recoveryPrimary,
-  .recoverySecondary {
+  .actions :global(a),
+  .actions :global(button) {
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .actions :global(a),
+  .actions :global(button) {
+    scroll-behavior: auto;
   }
 }
