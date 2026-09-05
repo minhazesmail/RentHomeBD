@@ -5,7 +5,7 @@
 
 /* Other moderation feedback should use explicit, non-overlapping spacing. */
 .moderation-shell .auth-message {
-  margin: 0 0 14px;
+  margin: 0 0 var(--text-gap-block);
   line-height: 1.5;
 }
 
@@ -18,19 +18,28 @@
 /* Batch 7 — inspection/account/decision section copy and queue-card metadata
    need a consistent visual break from their headings. */
 .moderation-shell .section-heading h2 {
-  margin-bottom: 7px;
+  margin-bottom: var(--text-gap-control);
 }
 
 .moderation-shell .moderation-row .property-row-main {
-  gap: 6px;
+  gap: var(--text-gap-tight);
 }
 
 .moderation-shell .review-description p {
-  margin-top: 8px;
+  margin-top: var(--text-gap-control);
 }
 
 @media (max-width: 720px) {
-  .moderation-shell .auth-message {
-    margin-bottom: 12px;
+  /* Batch 9 mobile text review — moderation headers and empty-state copy can
+     wrap aggressively on phones, so preserve the title/body relationship while
+     keeping operational density intact. */
+  .moderation-shell .moderation-header .owner-title + .intro {
+    margin-top: var(--text-gap-related);
+    line-height: var(--leading-body);
+  }
+
+  .moderation-shell .empty-state h2 + p {
+    margin-top: var(--text-gap-control);
+    line-height: var(--leading-body);
   }
 }
