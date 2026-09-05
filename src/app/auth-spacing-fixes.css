@@ -18,17 +18,17 @@
 
 .auth-form .form-hint {
   margin: 0;
-  line-height: 1.55;
+  line-height: var(--leading-helper);
 }
 
 /* Guidance that belongs to a field should sit close enough to read as part of
    that field, without being pulled into the control with a negative margin. */
 .auth-form > label + .form-hint {
-  margin-top: 8px;
+  margin-top: var(--text-gap-control);
 }
 
 .auth-form > div > .form-hint {
-  margin-top: 8px;
+  margin-top: var(--text-gap-control);
 }
 
 /* Role, renter-type and password guidance already live inside grid labels; the
@@ -40,8 +40,8 @@
 /* Intro guidance is a separate hierarchy level between the card heading and
    the authentication-method tabs. */
 .auth-flow-heading > .form-hint {
-  margin: 8px 0 16px;
-  line-height: 1.55;
+  margin: var(--text-gap-control) 0 var(--text-gap-block);
+  line-height: var(--leading-helper);
 }
 
 /* Batch 5 — large auth and verification titles should keep a premium display
@@ -60,13 +60,13 @@
    their route redesign left only 6px between heading and description. Give the
    two text levels a clearer, consistent break without changing card density. */
 .verification-shell .section-heading h2 {
-  margin-bottom: 8px;
+  margin-bottom: var(--text-gap-control);
 }
 
 /* Auth feedback sits after the active flow and should never collide with the
    mode switch or form controls. */
 .auth-card > .auth-message {
-  margin: 16px 0 0;
+  margin: var(--text-gap-block) 0 0;
   line-height: 1.5;
 }
 
@@ -83,18 +83,20 @@
     margin-top: 15px;
   }
 
-  .auth-form > label + .form-hint,
-  .auth-form > div > .form-hint {
-    margin-top: 7px;
-  }
-
   .auth-title,
   .verification-page-header .listing-page-title {
     line-height: .98;
     letter-spacing: -.045em;
   }
 
-  .auth-card > .auth-message {
-    margin-top: 14px;
+  /* Batch 9 mobile text review — keep the intro attached to the title, but not
+     so tightly that a wrapped title and paragraph read as one text block. */
+  .auth-intro-panel .auth-title + .intro {
+    margin-top: var(--text-gap-related);
+    line-height: var(--leading-body);
+  }
+
+  .auth-intro-panel .auth-benefits + .form-hint {
+    margin-top: var(--text-gap-related);
   }
 }

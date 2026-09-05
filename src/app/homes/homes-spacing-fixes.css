@@ -11,27 +11,27 @@
    4px cadence. Give those semantic levels a little more separation while
    preserving the compact map-first list density. */
 .shell-renter .renter-result-copy {
-  gap: 6px;
+  gap: var(--text-gap-tight);
 }
 
 /* Batch 8 — the renter filter grid and save-search control row are both full
    control groups, so their explanatory copy needs a deliberate break instead
    of inheriting the neutral generic helper margin. */
 .shell-renter .renter-filter-grid + .form-hint {
-  margin-top: 9px;
-  line-height: 1.55;
+  margin-top: var(--text-gap-action);
+  line-height: var(--leading-helper);
 }
 
 .shell-renter .save-search-row + .form-hint {
-  margin-top: 8px;
-  line-height: 1.55;
+  margin-top: var(--text-gap-control);
+  line-height: var(--leading-helper);
 }
 
 /* Reporting feedback can render immediately after the collapsed report action
    or after the expanded form. Keep it visually separate in both states. */
 .property-detail-page .trust-report-control > .form-hint {
-  margin-top: 10px;
-  line-height: 1.55;
+  margin-top: var(--text-gap-action);
+  line-height: var(--leading-helper);
 }
 
 @media (max-width: 720px) {
@@ -40,9 +40,15 @@
     letter-spacing: -.045em;
   }
 
-  .shell-renter .renter-filter-grid + .form-hint,
-  .shell-renter .save-search-row + .form-hint,
-  .property-detail-page .trust-report-control > .form-hint {
-    margin-top: 8px;
+  /* Batch 9 mobile text review — once the map workspace becomes a vertical
+     stack, give the search heading and its explanation a clear but compact
+     break before the controls begin. */
+  .shell-renter .renter-search-heading h1 + p {
+    margin-top: var(--text-gap-related);
+    line-height: var(--leading-body);
+  }
+
+  .shell-renter .renter-results-header {
+    row-gap: var(--text-gap-tight);
   }
 }
