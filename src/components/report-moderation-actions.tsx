@@ -6,7 +6,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 
-export function ReportModerationActions({ reportId, reviewerId }: { reportId: string; reviewerId: string }) {
+export function ReportModerationActions({
+  reportId,
+  reviewerId,
+  nextReportId = null,
+}: {
+  reportId: string;
+  reviewerId: string;
+  nextReportId?: string | null;
+}) {
   const router = useRouter();
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [notes, setNotes] = useState("");
@@ -31,7 +39,7 @@ export function ReportModerationActions({ reportId, reviewerId }: { reportId: st
       setBusy(false);
       return;
     }
-    router.push(`/moderation/reports?notice=${action}`);
+    router.push(nextReportId ? `/moderation/reports/${nextReportId}?notice=${action}` : `/moderation/reports?notice=${action}`);
     router.refresh();
   }
 
@@ -42,8 +50,8 @@ export function ReportModerationActions({ reportId, reviewerId }: { reportId: st
       {message && <div className="auth-message">{message}</div>}
       <div className="dashboard-actions">
         <button className="secondary-button" type="button" disabled={busy} onClick={() => void decide("dismiss")}>Dismiss report</button>
-        <button className="secondary-button" type="button" disabled={busy} onClick={() => void decide("resolve")}>Resolve</button>
-        <button className="primary-button" type="button" disabled={busy} onClick={() => void decide("hide_listing")}>Hide listing</button>
+        <button className="secondary-button" type="button" disabled={busy} onClick={() => void decide("resolve")}>{nextReportId ? "Resolve & next" : "Resolve"}</button>
+        <button className="primary-button" type="button" disabled={busy} onClick={() => void decide("hide_listing")}>{nextReportId ? "Hide listing & next" : "Hide listing"}</button>
       </div>
     </div>
   );
