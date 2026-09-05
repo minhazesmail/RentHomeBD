@@ -151,8 +151,18 @@
   --leading-tight: 1.04;
   --leading-heading: 1.12;
   --leading-body: 1.62;
+  --leading-helper: 1.55;
   --tracking-display: -0.052em;
   --tracking-heading: -0.03em;
+
+  /* Shared text-spacing contract. These tokens describe relationships between
+     text levels rather than component geometry, so route fixes can share one
+     rhythm without flattening their individual layouts. */
+  --text-gap-tight: 0.375rem;
+  --text-gap-control: 0.5rem;
+  --text-gap-action: 0.625rem;
+  --text-gap-related: 0.75rem;
+  --text-gap-block: 1rem;
 
   /* Motion */
   --motion-instant: 100ms;
@@ -171,6 +181,16 @@
   --z-sticky: 20;
   --z-overlay: 40;
   --z-modal: 60;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --text-gap-tight: 0.3125rem;
+    --text-gap-control: 0.4375rem;
+    --text-gap-action: 0.5rem;
+    --text-gap-related: 0.625rem;
+    --text-gap-block: 0.875rem;
+  }
 }
 
 @theme inline {
