@@ -21,3 +21,4 @@
 @import "./accessibility-audit.css" layer(accessibility);
 @import "./performance-optimizations.css" layer(performance);
 @import "./visual-regression-cleanup.css" layer(cleanup);
+@import "./spacing-normalization.css" layer(cleanup);
