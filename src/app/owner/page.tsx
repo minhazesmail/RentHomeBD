@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, Clock3, FileEdit, Home, MessageSquareText, Plus, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, Clock3, FileEdit, Home, MessageSquareText, Plus, ShieldCheck } from "lucide-react";
 
-import { ActionButton, ActionLink } from "@/components/action";
+import { ActionLink } from "@/components/action";
 import { ListingFreshnessActions } from "@/components/listing-freshness-actions";
+import { OwnerPortfolioControls } from "@/components/owner-portfolio-controls";
 import { ProductNavigation } from "@/components/product-navigation";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -189,9 +190,9 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
     }),
   );
   const coverUrlByProperty = new Map(coverEntries);
-  const hasPortfolioFilters = Boolean(query || status !== "all" || sort !== "updated-desc");
   const liveCount = listings.filter((property) => property.status === "available").length;
-  const attentionCount = listings.filter((property) => ["pending_confirmation", "rejected"].includes(property.status)).length;
+  const attentionListings = listings.filter((property) => ["pending_confirmation", "rejected"].includes(property.status));
+  const attentionCount = attentionListings.length;
   const reviewCount = listings.filter((property) => property.status === "pending_review").length;
   const draftCount = listings.filter((property) => property.status === "draft").length;
 
@@ -201,7 +202,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
       <header className="owner-header owner-management-header">
         <div>
           <h1 className="owner-title">Manage your properties</h1>
-          <p className="intro">See what is live and what needs your attention.</p>
+          <p className="intro">See what is live, resolve what needs attention, and keep your portfolio current.</p>
         </div>
         <div className="owner-header-actions">
           <ActionLink href="/owner/properties/new"><Plus size={16} aria-hidden="true" /> Add property</ActionLink>
@@ -213,10 +214,48 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
 
       {!!listings.length && (
         <section className="owner-portfolio-summary" aria-label="Property portfolio summary">
-          <div className="owner-summary-card is-live"><span><Home size={18} aria-hidden="true" /></span><div><strong>{liveCount}</strong><small>Live listings</small></div></div>
-          <div className={`owner-summary-card${attentionCount ? " is-attention" : ""}`}><span><AlertTriangle size={18} aria-hidden="true" /></span><div><strong>{attentionCount}</strong><small>Need attention</small></div></div>
-          <div className="owner-summary-card"><span><ShieldCheck size={18} aria-hidden="true" /></span><div><strong>{reviewCount}</strong><small>In moderation</small></div></div>
-          <div className="owner-summary-card"><span><FileEdit size={18} aria-hidden="true" /></span><div><strong>{draftCount}</strong><small>Drafts</small></div></div>
+          <Link className={`owner-summary-card owner-summary-link is-live${status === "available" ? " is-active" : ""}`} href="/owner?status=available">
+            <span><Home size={18} aria-hidden="true" /></span><div><strong>{liveCount}</strong><small>Live listings</small></div><ArrowRight className="owner-summary-arrow" size={16} aria-hidden="true" />
+          </Link>
+          <Link className={`owner-summary-card owner-summary-link${attentionCount ? " is-attention" : ""}${status === "attention" ? " is-active" : ""}`} href="/owner?status=attention">
+            <span><AlertTriangle size={18} aria-hidden="true" /></span><div><strong>{attentionCount}</strong><small>Need attention</small></div><ArrowRight className="owner-summary-arrow" size={16} aria-hidden="true" />
+          </Link>
+          <Link className={`owner-summary-card owner-summary-link${status === "pending_review" ? " is-active" : ""}`} href="/owner?status=pending_review">
+            <span><ShieldCheck size={18} aria-hidden="true" /></span><div><strong>{reviewCount}</strong><small>In moderation</small></div><ArrowRight className="owner-summary-arrow" size={16} aria-hidden="true" />
+          </Link>
+          <Link className={`owner-summary-card owner-summary-link${status === "draft" ? " is-active" : ""}`} href="/owner?status=draft">
+            <span><FileEdit size={18} aria-hidden="true" /></span><div><strong>{draftCount}</strong><small>Drafts</small></div><ArrowRight className="owner-summary-arrow" size={16} aria-hidden="true" />
+          </Link>
+        </section>
+      )}
+
+      {!!attentionListings.length && (
+        <section className="owner-attention-workbench" aria-labelledby="owner-attention-heading">
+          <div className="owner-attention-workbench-heading">
+            <div>
+              <p className="eyebrow">Priority queue</p>
+              <h2 id="owner-attention-heading">Needs action now</h2>
+              <p>Resolve these listings first so renters are not blocked by stale availability or moderation issues.</p>
+            </div>
+            <Link className="text-link" href="/owner?status=attention">View all {attentionCount}</Link>
+          </div>
+          <div className="owner-attention-items">
+            {attentionListings.slice(0, 3).map((property) => {
+              const presentation = listingStatusPresentation(property.status, property.expires_at);
+              const actionLabel = property.status === "pending_confirmation" ? "Confirm availability" : "Review requested changes";
+              return (
+                <Link className="owner-attention-item" href={`/owner/properties/${property.id}`} key={property.id}>
+                  <span className="owner-attention-item-icon"><AlertTriangle size={16} aria-hidden="true" /></span>
+                  <span className="owner-attention-item-copy">
+                    <strong>{property.title || "Untitled draft"}</strong>
+                    <small>{presentation.label}</small>
+                    <span>{presentation.detail}</span>
+                  </span>
+                  <span className="owner-attention-item-action">{actionLabel}<ArrowRight size={14} aria-hidden="true" /></span>
+                </Link>
+              );
+            })}
+          </div>
         </section>
       )}
 
@@ -226,38 +265,16 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
             <h2>{listings.length ? `${listings.length} ${listings.length === 1 ? "listing" : "listings"}` : "Your listings"}</h2>
             {!!listings.length && <p className={styles.ownerPortfolioPolicy}>Live listings need availability confirmation every 14 days.</p>}
           </div>
-          {!!attentionCount && <span className="owner-attention-count"><AlertTriangle size={14} aria-hidden="true" /> {attentionCount} need{attentionCount === 1 ? "s" : ""} action</span>}
         </div>
 
         {!!listings.length && (
-          <form className={styles.ownerPortfolioToolbar} action="/owner" method="get" aria-label="Search, filter and sort property portfolio">
-            <label className={styles.ownerPortfolioField}>
-              Search properties
-              <input name="q" type="search" defaultValue={query} maxLength={120} placeholder="Title or location" />
-            </label>
-            <label className={styles.ownerPortfolioField}>
-              Status
-              <select name="status" defaultValue={status}>
-                <option value="all">All statuses</option>
-                <option value="attention">Needs attention</option>
-                {sortableStatuses.map((value) => <option value={value} key={value}>{statusLabels[value]}</option>)}
-              </select>
-            </label>
-            <label className={styles.ownerPortfolioField}>
-              Sort by
-              <select name="sort" defaultValue={sort}>
-                <option value="updated-desc">Recently updated</option>
-                <option value="updated-asc">Oldest updated</option>
-                <option value="rent-high">Rent: high to low</option>
-                <option value="rent-low">Rent: low to high</option>
-                <option value="title">Title A–Z</option>
-              </select>
-            </label>
-            <div className={styles.ownerPortfolioActions}>
-              <ActionButton variant="secondary" type="submit">Apply</ActionButton>
-              {hasPortfolioFilters && <ActionLink variant="text" href="/owner">Clear</ActionLink>}
-            </div>
-          </form>
+          <OwnerPortfolioControls
+            query={query}
+            status={status}
+            sort={sort}
+            visibleCount={visibleListings.length}
+            totalCount={listings.length}
+          />
         )}
 
         {!listings.length ? (
@@ -274,52 +291,49 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
             <ActionLink variant="secondary" href="/owner">Clear portfolio filters</ActionLink>
           </div>
         ) : (
-          <>
-            {hasPortfolioFilters && <p className={styles.ownerPortfolioResultNote}>Showing {visibleListings.length} of {listings.length} listings.</p>}
-            <div className="property-list owner-property-list">
-              {visibleListings.map((property) => {
-                const statusPresentation = listingStatusPresentation(property.status, property.expires_at);
-                const hasFeedback = property.status === "rejected" && Boolean(property.moderation_notes?.trim());
-                const coverUrl = coverUrlByProperty.get(property.id);
-                const StatusIcon = statusPresentation.tone === "good"
-                  ? CheckCircle2
-                  : statusPresentation.tone === "urgent" || statusPresentation.tone === "attention"
-                    ? AlertTriangle
-                    : Clock3;
-                return (
-                  <article className={`property-row property-row-with-actions owner-property-card status-card-${property.status}`} key={property.id}>
-                    <Link className="property-row-link owner-property-card-link" href={`/owner/properties/${property.id}`}>
-                      <div className={styles.ownerPortfolioListingBody}>
-                        <div className={styles.ownerPortfolioThumbnail} aria-hidden="true">
-                          {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <Home size={22} aria-hidden="true" />}
-                        </div>
-                        <div className="property-row-main owner-property-main">
-                          <div className="owner-property-title-row">
-                            <strong>{property.title || "Untitled draft"}</strong>
-                          </div>
-                          <span className="owner-property-address">{property.address_text || "Location not added yet"}</span>
-                          <div className={`${styles.ownerPortfolioStatusSummary} ${styles[`ownerPortfolioStatus_${statusPresentation.tone}`]}`}>
-                            <StatusIcon size={15} aria-hidden="true" />
-                            <div>
-                              <strong>{statusPresentation.label}</strong>
-                              <span>{statusPresentation.detail}</span>
-                            </div>
-                          </div>
-                          {hasFeedback && <div className="owner-moderation-feedback"><MessageSquareText size={15} aria-hidden="true" /><div><strong>Moderator feedback</strong><span>{property.moderation_notes}</span></div></div>}
-                        </div>
+          <div className="property-list owner-property-list">
+            {visibleListings.map((property) => {
+              const statusPresentation = listingStatusPresentation(property.status, property.expires_at);
+              const hasFeedback = property.status === "rejected" && Boolean(property.moderation_notes?.trim());
+              const coverUrl = coverUrlByProperty.get(property.id);
+              const StatusIcon = statusPresentation.tone === "good"
+                ? CheckCircle2
+                : statusPresentation.tone === "urgent" || statusPresentation.tone === "attention"
+                  ? AlertTriangle
+                  : Clock3;
+              return (
+                <article className={`property-row property-row-with-actions owner-property-card status-card-${property.status}`} key={property.id}>
+                  <Link className="property-row-link owner-property-card-link" href={`/owner/properties/${property.id}`}>
+                    <div className={styles.ownerPortfolioListingBody}>
+                      <div className={styles.ownerPortfolioThumbnail} aria-hidden="true">
+                        {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <Home size={22} aria-hidden="true" />}
                       </div>
-                      <div className="property-row-meta owner-property-meta">
-                        <strong>{property.rent_bdt ? `৳${property.rent_bdt.toLocaleString("en-BD")}` : "—"}</strong>
-                        <span>{property.rent_bdt ? "per month" : "Rent not set"}</span>
-                        <small>Updated {new Date(property.updated_at).toLocaleDateString("en-BD")}</small>
+                      <div className="property-row-main owner-property-main">
+                        <div className="owner-property-title-row">
+                          <strong>{property.title || "Untitled draft"}</strong>
+                        </div>
+                        <span className="owner-property-address">{property.address_text || "Location not added yet"}</span>
+                        <div className={`${styles.ownerPortfolioStatusSummary} ${styles[`ownerPortfolioStatus_${statusPresentation.tone}`]}`}>
+                          <StatusIcon size={15} aria-hidden="true" />
+                          <div>
+                            <strong>{statusPresentation.label}</strong>
+                            <span>{statusPresentation.detail}</span>
+                          </div>
+                        </div>
+                        {hasFeedback && <div className="owner-moderation-feedback"><MessageSquareText size={15} aria-hidden="true" /><div><strong>Moderator feedback</strong><span>{property.moderation_notes}</span></div></div>}
                       </div>
-                    </Link>
-                    <ListingFreshnessActions propertyId={property.id} status={property.status} />
-                  </article>
-                );
-              })}
-            </div>
-          </>
+                    </div>
+                    <div className="property-row-meta owner-property-meta">
+                      <strong>{property.rent_bdt ? `৳${property.rent_bdt.toLocaleString("en-BD")}` : "—"}</strong>
+                      <span>{property.rent_bdt ? "per month" : "Rent not set"}</span>
+                      <small>Updated {new Date(property.updated_at).toLocaleDateString("en-BD")}</small>
+                    </div>
+                  </Link>
+                  <ListingFreshnessActions propertyId={property.id} status={property.status} />
+                </article>
+              );
+            })}
+          </div>
         )}
       </section>
     </main>
