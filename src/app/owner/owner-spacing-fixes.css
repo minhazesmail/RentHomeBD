@@ -21,6 +21,14 @@
   max-width: 68ch;
 }
 
+/* Batch 5 — owner portfolio and listing-workflow titles share one readable
+   display rhythm instead of the previous compressed .92 / -.065em treatment. */
+.owner-management-header .owner-title,
+.listing-page-header .listing-page-title {
+  line-height: .96;
+  letter-spacing: -.05em;
+}
+
 /* Listing validation/save feedback is already a direct item in the form grid.
    Let the form gap create separation rather than stacking extra margins. */
 .listing-form > .auth-message,
@@ -41,5 +49,11 @@
 @media (max-width: 640px) {
   .listing-section > .form-hint {
     margin-top: 10px;
+  }
+
+  .owner-management-header .owner-title,
+  .listing-page-header .listing-page-title {
+    line-height: .98;
+    letter-spacing: -.045em;
   }
 }
