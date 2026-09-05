@@ -1,0 +1,23 @@
+/* Batch 3 status-message spacing normalization for moderation workflows. */
+
+/* Moderation feedback previously inherited the shared -16px success-message
+   top margin and only replaced the bottom margin. Make the full spacing intent
+   explicit so confirmations never overlap the header or preceding controls. */
+.moderation-shell .success-message,
+.moderation-shell .auth-message {
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+/* Decision/review notes live inside already-spaced operational grids. Do not
+   add hidden vertical offsets on top of the parent layout gap. */
+.moderation-shell .review-note {
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .moderation-shell .success-message,
+  .moderation-shell .auth-message {
+    margin-bottom: 12px;
+  }
+}
