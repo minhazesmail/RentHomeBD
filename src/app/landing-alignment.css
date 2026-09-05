@@ -12,9 +12,11 @@
   flex: 0 0 46px;
 }
 
+/* Keep the icon visually connected to its heading. The previous 54px offset
+   made the evidence card read as two unrelated blocks. */
 .landing-trust-grid .landing-trust-card > div {
   width: 100%;
-  margin-top: 54px !important;
+  margin-top: 28px !important;
 }
 
 .landing-trust-grid .landing-trust-card > div > strong {
@@ -57,7 +59,7 @@
 
 @media (max-width: 700px) {
   .landing-trust-grid .landing-trust-card > div {
-    margin-top: 28px !important;
+    margin-top: 22px !important;
   }
 
   .landing-footer-bottom {
