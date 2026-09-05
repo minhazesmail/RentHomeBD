@@ -19,8 +19,12 @@ const statusTabs = [
   { value: "all", label: "All" },
   { value: "attention", label: "Needs action" },
   { value: "available", label: "Live" },
+  { value: "pending_confirmation", label: "Needs confirmation" },
+  { value: "rejected", label: "Needs changes" },
   { value: "pending_review", label: "In review" },
   { value: "draft", label: "Drafts" },
+  { value: "rented", label: "Rented" },
+  { value: "expired", label: "Expired" },
 ] as const;
 
 function ownerHref({ query = "", status = "all", sort = "updated-desc" }: { query?: string; status?: string; sort?: string }) {
