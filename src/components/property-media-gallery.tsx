@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Camera, ChevronLeft, ChevronRight, Play, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import styles from "./property-media-gallery.module.css";
 
@@ -14,7 +14,7 @@ export type PropertyGalleryMedia = {
 };
 
 export function PropertyMediaGallery({ media, propertyTitle }: { media: PropertyGalleryMedia[]; propertyTitle: string }) {
-  const orderedMedia = [...media].sort((a, b) => a.sort_order - b.sort_order);
+  const orderedMedia = useMemo(() => [...media].sort((a, b) => a.sort_order - b.sort_order), [media]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const lightboxRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -26,23 +26,23 @@ export function PropertyMediaGallery({ media, propertyTitle }: { media: Property
     setActiveIndex(index);
   }
 
-  function closeGallery() {
+  const closeGallery = useCallback(() => {
     setActiveIndex(null);
     window.setTimeout(() => lastTriggerRef.current?.focus(), 0);
-  }
+  }, []);
 
-  function showPrevious() {
+  const showPrevious = useCallback(() => {
     setActiveIndex((current) => current === null ? null : (current - 1 + orderedMedia.length) % orderedMedia.length);
-  }
+  }, [orderedMedia.length]);
 
-  function showNext() {
+  const showNext = useCallback(() => {
     setActiveIndex((current) => current === null ? null : (current + 1) % orderedMedia.length);
-  }
+  }, [orderedMedia.length]);
 
   useEffect(() => {
     if (activeIndex === null) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const previousOverflow = document.body.style.getPropertyValue("overflow");
+    document.body.style.setProperty("overflow", "hidden");
     closeButtonRef.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -88,9 +88,10 @@ export function PropertyMediaGallery({ media, propertyTitle }: { media: Property
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
+      if (previousOverflow) document.body.style.setProperty("overflow", previousOverflow);
+      else document.body.style.removeProperty("overflow");
     };
-  }, [activeIndex, orderedMedia.length]);
+  }, [activeIndex, closeGallery, orderedMedia.length, showNext, showPrevious]);
 
   if (!orderedMedia.length) {
     return <section className={styles.empty} aria-label="Property media">No property photos or videos are available.</section>;

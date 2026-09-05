@@ -96,10 +96,16 @@ export function ListingDraftGuard({ userId, propertyId }: Props) {
     const form = document.querySelector<HTMLFormElement>("form.listing-form");
     if (!form) return;
 
+    let recoveryTimer: number | null = null;
     const stored = parseDraft(window.localStorage.getItem(key));
     if (stored) {
       recoverableRef.current = stored;
-      setRecoverable(stored);
+      // Defer the UI notification until after the synchronization effect has
+      // installed its listeners. This avoids a cascading render inside the
+      // effect while keeping the localStorage recovery source authoritative.
+      recoveryTimer = window.setTimeout(() => {
+        if (recoverableRef.current === stored) setRecoverable(stored);
+      }, 0);
     } else {
       window.localStorage.removeItem(key);
     }
@@ -178,6 +184,7 @@ export function ListingDraftGuard({ userId, propertyId }: Props) {
     document.addEventListener("click", onDocumentClick, true);
 
     return () => {
+      if (recoveryTimer !== null) window.clearTimeout(recoveryTimer);
       if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current);
       if (dirtyRef.current) persist();
       const params = new URLSearchParams(window.location.search);
