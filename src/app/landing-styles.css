@@ -1,0 +1,9 @@
+/* Canonical layered style manifest for the landing page.
+   The final three layers preserve the deliberate post-redesign reconciliation
+   order used by the production homepage. */
+@import "./landing.css" layer(route-base);
+@import "./landing-alignment.css" layer(route-polish);
+@import "./landing-redesign.css" layer(route-redesign);
+@import "./landing-pointed-fixes.css" layer(route-fixes);
+@import "./landing-trust-contrast-fix.css" layer(route-contrast);
+@import "./landing-atmosphere.css" layer(route-atmosphere);

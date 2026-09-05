@@ -1,0 +1,2 @@
+/* Canonical layered style manifest for editorial information routes. */
+@import "./information-redesign.css" layer(route-redesign);
