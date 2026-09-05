@@ -17,7 +17,7 @@ type SiteAtmosphereProps = {
  * compositor-friendly opacity/transform changes. There is no scroll handler,
  * requestAnimationFrame loop, canvas, WebGL, or continuously animated background.
  */
-export function SiteAtmosphere({
+function SiteAtmosphere({
   rootSelector = ".landing-shell",
   sectionSelector = "[data-scroll-theme]",
   initialTheme = "hero",
