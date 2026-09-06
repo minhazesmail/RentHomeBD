@@ -93,6 +93,14 @@ requireText("src/components/marketing-navigation.module.css", "@media (max-width
 requireText("src/components/marketing-navigation.module.css", "@media (max-width: 600px)", "phone marketing-nav breakpoint");
 requireText("src/components/marketing-navigation.module.css", "overflow-x: auto", "horizontal marketing-nav overflow handling");
 
+// The shared marketing navigation owns the landing palette so CSS-module load
+// order cannot make dark information-page links disappear on the dark header.
+requireText("src/components/marketing-navigation.tsx", "styles.landing", "explicit landing marketing-nav variant");
+requireRegex("src/components/marketing-navigation.module.css", /\.landing\s+\.center a,\s*\.landing\s+\.actions :global\(\.text-link\)\s*\{[\s\S]*?color:\s*rgba\(255,\s*255,\s*255,\s*\.82\);/, "light landing marketing-nav text palette");
+requireRegex("src/components/marketing-navigation.module.css", /\.landing\s+\.center a::after\s*\{[\s\S]*?background:\s*var\(--landing-lime,\s*#b9f227\);/, "lime landing marketing-nav active indicator");
+requireRegex("src/components/marketing-navigation.module.css", /\.landing\s+\.center a:hover,[\s\S]*?\.landing\s+\.center a:focus-visible,[\s\S]*?color:\s*#fff;/, "white landing marketing-nav interaction states");
+forbidRegex("src/app/landing-redesign.css", /\.landing-nav-center a,\s*\.landing-nav-actions \.text-link\s*\{/, "landing marketing-nav link palette must be component-owned");
+
 // Core mobile interaction models from the redesign program.
 requireText("src/components/mobile-map-model.tsx", "data-mobile-view", "explicit mobile map/list state");
 requireText("src/components/mobile-map-model.tsx", "aria-pressed", "map/list pressed-state semantics");

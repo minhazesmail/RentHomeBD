@@ -23,7 +23,7 @@ export function MarketingNavigation({
   const nav = dictionary.navigation;
 
   return (
-    <nav className={`${styles.nav} ${landing ? "landing-nav" : styles.infoNav}`} aria-label={nav.primaryNavigationAria}>
+    <nav className={`${styles.nav} ${landing ? `${styles.landing} landing-nav` : styles.infoNav}`} aria-label={nav.primaryNavigationAria}>
       <BrandLogo />
       <div className={`${styles.center} ${landing ? "landing-nav-center" : ""}`}>
         <Link href="/homes">{nav.findOnMap}</Link>
