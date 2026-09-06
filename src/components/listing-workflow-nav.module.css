@@ -6,10 +6,10 @@
   gap: 14px;
   min-width: 0;
   padding: 16px;
-  border: 1px solid rgba(16, 37, 29, .11);
+  border: 1px solid var(--border);
   border-radius: 20px;
-  background: rgba(255, 253, 248, .95);
-  box-shadow: 0 14px 34px rgba(8, 44, 33, .07);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-sm);
   backdrop-filter: blur(18px);
 }
 
@@ -19,7 +19,7 @@
   justify-content: space-between;
   gap: 10px;
   padding-bottom: 12px;
-  border-bottom: 1px solid rgba(16, 37, 29, .08);
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .workflowHead span,
@@ -61,7 +61,7 @@
   border: 1px solid transparent;
   border-radius: 13px;
   background: transparent;
-  color: #607168;
+  color: var(--ink-soft);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -69,21 +69,21 @@
 }
 
 .step:hover {
-  border-color: rgba(15, 107, 77, .10);
-  background: rgba(15, 107, 77, .045);
-  color: var(--emerald-900);
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--ink);
   transform: translateX(2px);
 }
 
 .step:focus-visible {
-  outline: 3px solid rgba(15, 107, 77, .20);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 .step[aria-current="step"] {
-  border-color: rgba(15, 107, 77, .15);
-  background: rgba(15, 107, 77, .085);
-  color: var(--emerald-950);
+  border-color: var(--control-border-hover);
+  background: var(--accent-soft);
+  color: var(--accent-contrast);
 }
 
 .number {
@@ -92,19 +92,19 @@
   height: 30px;
   place-items: center;
   border-radius: 10px;
-  background: #eaf1ec;
-  color: var(--emerald-850, var(--emerald-800));
+  background: var(--surface-muted);
+  color: var(--accent);
   font-size: .7rem;
   font-weight: 900;
 }
 
 .step[aria-current="step"] .number {
-  background: var(--emerald-950);
-  color: white;
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
 }
 
 .step[data-complete="true"] .number {
-  background: var(--lime-100);
+  background: var(--accent-bright-soft);
   color: var(--emerald-950);
 }
 
@@ -144,9 +144,9 @@
   justify-content: center;
   gap: 4px;
   padding: 0 9px;
-  border: 1px solid rgba(16, 37, 29, .11);
+  border: 1px solid var(--control-border);
   border-radius: 11px;
-  background: white;
+  background: var(--control-background);
   color: var(--ink);
   font: inherit;
   font-size: .7rem;
@@ -155,9 +155,9 @@
 }
 
 .stepActions button:last-child {
-  border-color: var(--emerald-950);
-  background: var(--emerald-950);
-  color: white;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--text-inverse);
 }
 
 .stepActions button:disabled {
