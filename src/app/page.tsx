@@ -3,6 +3,7 @@ import { ArrowRight, BedDouble, Building2, MapPin, Search, ShieldCheck } from "l
 
 import { BrandLogo } from "@/components/brand-logo";
 import { HowItWorksTabs } from "@/components/how-it-works-tabs";
+import { LandingFaqSection } from "@/components/landing-faq-section";
 import { LandingFeaturedSection } from "@/components/landing-featured-section";
 import { LandingMapPreview } from "@/components/landing-map-preview";
 import { LandingScrollAtmosphere } from "@/components/landing-scroll-atmosphere";
@@ -40,14 +41,6 @@ function TrustIcon({ type }: { type: string }) {
   if (type === "pin") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>;
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M18.3 15.6A7.5 7.5 0 1 1 19 8l1 4"/><path d="m9.5 12 1.7 1.7 3.5-3.7"/></svg>;
 }
-
-const faqs = [
-  ["Where is NearBasha available?", "NearBasha is a Bangladesh-focused rental marketplace launching first in Dhaka. The current location search supports the Dhaka areas and landmarks shown in the product; broader Bangladesh coverage can expand as local inventory and location support grow."],
-  ["Are listings verified?", "NearBasha uses moderation and account-verification signals to improve trust. Verification status can vary by listing, so renters should still review listing details carefully before making payments or commitments."],
-  ["How does NearBasha help prevent scams or fake listings?", "The product includes phone OTP, listing moderation, reporting tools, and freshness controls. These reduce risk, but renters should still avoid sending money before they are satisfied with the property and the person they are dealing with."],
-  ["What does NearBasha cost right now?", "NearBasha is free to browse and list during the current launch phase. There is no NearBasha checkout in the product today. If paid features are introduced later, their price and what they include will be shown before you choose to pay."],
-  ["How does renter-type matching work?", "Owners specify which renter types a property is suitable for, such as Family, Bachelor, Student, or Job holder. Renters can use those structured preferences to avoid listings that are not a good fit."],
-];
 
 // TODO(i18n): Treat each major marketing copy block on this page as a future translation target.
 export default function HomePage() {
@@ -162,14 +155,7 @@ export default function HomePage() {
 
         <LandingFeaturedSection />
 
-        <section className="landing-content-section landing-faq" data-scroll-theme="clarity" aria-labelledby="faq-heading">
-          <div className="landing-section-intro"><p className="eyebrow">Questions, answered</p><h2 id="faq-heading">What to know before you start.</h2><p>Coverage, trust, pricing, and renter matching in one place.</p></div>
-          <div className="landing-faq-list">
-            {faqs.map(([question, answer]) => (
-              <details key={question} className="landing-faq-item"><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>
-            ))}
-          </div>
-        </section>
+        <LandingFaqSection />
 
         <section className="landing-cta-band" data-scroll-theme="action" aria-label="Start using NearBasha">
           <div><p className="eyebrow">Ready when you are</p><h2>Start with the map.</h2><p>Browse current Dhaka homes, or add a property for renters to discover.</p></div>
