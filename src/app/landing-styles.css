@@ -12,3 +12,4 @@
 @import "./landing-atmosphere.css" layer(route-atmosphere);
 @import "./landing-hero-spacing.css" layer(route-atmosphere);
 @import "./landing-faq-redesign.css" layer(route-atmosphere);
+@import "./landing-faq-open-contrast-fix.css" layer(route-atmosphere);
