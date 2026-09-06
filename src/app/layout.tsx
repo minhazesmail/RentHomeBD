@@ -33,7 +33,8 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [locale, themePreference] = await Promise.all([getLocale(), getThemePreference()]);
+  const locale = await getLocale();
+  const themePreference = await getThemePreference();
 
   return (
     <html lang={locale} data-theme={themePreference} className={`${inter.variable} ${hindSiliguri.variable}`}>
