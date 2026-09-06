@@ -43,13 +43,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const initialResolvedTheme = themePreference === "dark" ? "dark" : "light";
 
   return (
-    <html
-      lang={locale}
-      data-theme={themePreference}
-      data-resolved-theme={initialResolvedTheme}
-      className={`${inter.variable} ${hindSiliguri.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang={locale} data-theme={themePreference} data-resolved-theme={initialResolvedTheme} className={`${inter.variable} ${hindSiliguri.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
