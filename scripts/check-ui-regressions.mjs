@@ -110,6 +110,13 @@ requireText("src/app/landing-faq-redesign.css", "@media (max-width: 820px)", "FA
 requireText("src/app/landing-faq-redesign.css", "overflow-x: auto", "mobile FAQ topic overflow handling");
 requireText("src/app/landing-faq-redesign.css", "prefers-reduced-motion", "FAQ reduced-motion support");
 
+// Open FAQ rows must keep readable semantic colors despite legacy accordion rules
+// that color every summary span white.
+requireText("src/app/landing-styles.css", "landing-faq-open-contrast-fix.css", "FAQ open-state contrast fix layer");
+requireRegex("src/app/landing-faq-open-contrast-fix.css", /landing-faq-editorial-item\[open\][\s\S]*?landing-faq-question[\s\S]*?color:\s*var\(--landing-ink\)/, "dark open FAQ question text");
+requireRegex("src/app/landing-faq-open-contrast-fix.css", /landing-faq-editorial-item\[open\][\s\S]*?landing-faq-number[\s\S]*?color:\s*rgba\(8,\s*118,\s*83,\s*\.82\)/, "visible open FAQ number color");
+requireRegex("src/app/landing-faq-open-contrast-fix.css", /landing-faq-editorial-item\[open\][\s\S]*?landing-faq-disclosure[\s\S]*?color:\s*#fff/, "white open FAQ disclosure icon");
+
 if (failures.length) {
   console.error("UI regression check failed:\n");
   for (const failure of failures) console.error(`- ${failure}`);
