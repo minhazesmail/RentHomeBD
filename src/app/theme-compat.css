@@ -1,0 +1,33 @@
+/* Compatibility aliases for older route generations. Raw brand palette tokens
+   stay stable; only names that already encode UI meaning are remapped here. */
+
+:root {
+  --nb-ink: var(--ink);
+  --nb-ink-soft: var(--ink-soft);
+  --nb-emerald: var(--accent);
+  --nb-emerald-deep: var(--accent-dark);
+  --nb-line: var(--border);
+  --nb-line-strong: var(--border-strong);
+  --nb-saffron: var(--accent-warm);
+  --nb-shadow-sm: var(--shadow-sm);
+}
+
+html[data-theme="dark"] {
+  --accent-dark: #50cc98;
+  --accent-bright-soft: rgba(157, 216, 76, .15);
+  --highlight-soft: rgba(197, 165, 116, .13);
+  --verified: #7dd8d0;
+  --verified-soft: rgba(36, 153, 143, .16);
+  --nb-emerald-deep: #50cc98;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] {
+    --accent-dark: #50cc98;
+    --accent-bright-soft: rgba(157, 216, 76, .15);
+    --highlight-soft: rgba(197, 165, 116, .13);
+    --verified: #7dd8d0;
+    --verified-soft: rgba(36, 153, 143, .16);
+    --nb-emerald-deep: #50cc98;
+  }
+}

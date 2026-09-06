@@ -13,11 +13,11 @@
   place-items: center;
   width: 26px;
   height: 26px;
-  border: 3px solid #ffffff;
+  border: 3px solid var(--map-user-ring);
   border-radius: 999px;
-  background: #126b4d;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(11, 61, 46, 0.28);
+  background: var(--map-area-fill);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
   font-size: 11px;
   font-weight: 800;
   line-height: 1;

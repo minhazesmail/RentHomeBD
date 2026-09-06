@@ -4,7 +4,7 @@
   align-items: center;
   gap: 28px;
   min-height: 76px;
-  border-bottom: 1px solid rgba(16, 37, 29, .11);
+  border-bottom: 1px solid var(--nav-border);
 }
 
 .center {
@@ -22,7 +22,7 @@
 
 .center a {
   position: relative;
-  color: var(--nb-ink-soft, #4b5d54);
+  color: var(--ink-soft);
   font-size: .79rem;
   font-weight: 760;
   text-decoration: none;
@@ -36,7 +36,7 @@
   width: 0;
   height: 2px;
   border-radius: 999px;
-  background: var(--nb-emerald, #087653);
+  background: var(--accent);
   content: "";
   transform: translateX(-50%);
   transition: width 160ms ease;
@@ -44,7 +44,7 @@
 
 .center a:hover,
 .center a[aria-current="page"] {
-  color: var(--nb-ink, #10251d);
+  color: var(--ink);
 }
 
 .center a:hover::after,
@@ -77,7 +77,7 @@
   min-width: 0;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 10px;
 }
 
 .infoNav {
@@ -131,7 +131,7 @@
   }
 
   .actions {
-    gap: 7px;
+    gap: 6px;
   }
 
   .actions :global(.text-link) {

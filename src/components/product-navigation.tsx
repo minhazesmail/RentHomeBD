@@ -5,6 +5,7 @@ import { Bookmark, Building2, Compass, LayoutDashboard, LogIn, MessageCircle } f
 
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { useLocale } from "@/i18n/use-locale";
 import styles from "./product-navigation.module.css";
 
@@ -61,6 +62,7 @@ export function ProductNavigation({
         </nav>
         <div className={styles.productNavAccount}>
           <LanguageSwitcher />
+          <ThemeSwitcher compact />
           <Link
             className={current === "dashboard" ? styles.productNavAccountActive : styles.productNavAccountLink}
             href={authenticated ? "/dashboard" : "/login"}

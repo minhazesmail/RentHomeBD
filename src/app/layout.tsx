@@ -7,6 +7,8 @@ import { GlobalShell } from "@/components/global-shell";
 import { LocalizedSkipLink } from "@/components/localized-skip-link";
 import { getLocale } from "@/i18n/get-locale";
 import { LocaleProvider } from "@/i18n/locale-provider";
+import { getThemePreference } from "@/theme/get-theme";
+import { ThemeProvider } from "@/theme/theme-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -32,15 +34,18 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
+  const themePreference = await getThemePreference();
 
   return (
-    <html lang={locale} className={`${inter.variable} ${hindSiliguri.variable}`}>
+    <html lang={locale} data-theme={themePreference} className={`${inter.variable} ${hindSiliguri.variable}`}>
       <body>
         <LocaleProvider initialLocale={locale}>
-          <LocalizedSkipLink />
-          <div id="main-content" tabIndex={-1}>
-            <GlobalShell>{children}</GlobalShell>
-          </div>
+          <ThemeProvider initialPreference={themePreference}>
+            <LocalizedSkipLink />
+            <div id="main-content" tabIndex={-1}>
+              <GlobalShell>{children}</GlobalShell>
+            </div>
+          </ThemeProvider>
         </LocaleProvider>
       </body>
     </html>

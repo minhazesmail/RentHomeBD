@@ -1,0 +1,83 @@
+/* CSS Modules are intentionally unlayered and therefore outrank normal layered
+   declarations. These route-scoped important overrides are reserved for
+   theme-sensitive module surfaces that cannot inherit semantic tokens yet.
+   Keep selectors attribute/element based so component class ownership remains
+   with the module that defines layout and behavior. */
+
+[data-route="/saved"] article {
+  border-color: var(--border) !important;
+  background: var(--surface-solid) !important;
+  color: var(--foreground) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+[data-route="/saved"] article:hover {
+  border-color: var(--control-border-hover) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+[data-route="/saved"] article :where(strong, b, a) {
+  color: var(--ink) !important;
+}
+
+[data-route="/saved"] article :where(span, small) {
+  color: var(--muted) !important;
+}
+
+[data-route="/saved"] article label span {
+  border-color: var(--control-border) !important;
+  background: var(--control-background) !important;
+  color: var(--ink-soft) !important;
+}
+
+[data-route="/saved"] article label input:checked + span {
+  border-color: var(--accent) !important;
+  background: var(--accent) !important;
+  color: var(--text-inverse) !important;
+}
+
+[data-route="/saved"] section[aria-labelledby="saved-comparison-heading"],
+[data-route="/saved"] details {
+  border-color: var(--border) !important;
+  background: var(--surface-solid) !important;
+  color: var(--foreground) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+[data-route="/saved"] table {
+  background: var(--surface-solid) !important;
+  color: var(--foreground) !important;
+}
+
+[data-route="/saved"] :where(th, td) {
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+[data-route="/saved"] tbody th,
+[data-route="/saved"] thead th:first-child {
+  background: var(--surface-soft) !important;
+  color: var(--muted) !important;
+}
+
+[data-route="/saved"] table button {
+  background: var(--surface-muted) !important;
+  color: var(--muted) !important;
+}
+
+/* Keep native/lightweight module controls readable across authenticated routes. */
+[data-route^="/owner"] :where(input, select, textarea),
+[data-route^="/dashboard"] :where(input, select, textarea),
+[data-route^="/messages"] :where(input, select, textarea),
+[data-route^="/moderation"] :where(input, select, textarea) {
+  border-color: var(--control-border) !important;
+  background-color: var(--control-background) !important;
+  color: var(--foreground) !important;
+}
+
+[data-route^="/owner"] :where(input, select, textarea):focus,
+[data-route^="/dashboard"] :where(input, select, textarea):focus,
+[data-route^="/messages"] :where(input, select, textarea):focus,
+[data-route^="/moderation"] :where(input, select, textarea):focus {
+  border-color: var(--accent) !important;
+}

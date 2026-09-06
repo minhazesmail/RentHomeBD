@@ -7,7 +7,8 @@ const appDir = path.resolve("src/app");
 // Preserve the runtime cascade that already exists today: global foundations and
 // audit layers load first, then route-local styles refine them. Landing-specific
 // reconciliation layers intentionally come last because they repair older style
-// generations without forcing large rewrites of stable CSS.
+// generations without forcing large rewrites of stable CSS. Theme is final so
+// semantic appearance overrides can safely beat legacy route color literals.
 const requiredLayerOrder = [
   "tokens",
   "globals",
@@ -27,6 +28,7 @@ const requiredLayerOrder = [
   "route-fixes",
   "route-contrast",
   "route-atmosphere",
+  "theme",
 ];
 const allowedLayers = new Set(requiredLayerOrder);
 

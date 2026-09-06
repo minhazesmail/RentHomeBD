@@ -15,7 +15,7 @@
   overflow: hidden;
   border: 0;
   border-radius: 18px;
-  background: #dfe7df;
+  background: var(--surface-muted);
   cursor: zoom-in;
   padding: 0;
 }
@@ -78,8 +78,8 @@
   min-height: 240px;
   place-items: center;
   border-radius: 18px;
-  background: #edf1ec;
-  color: #53655c;
+  background: var(--surface-muted);
+  color: var(--muted);
 }
 
 .lightbox {
@@ -192,7 +192,7 @@
 }
 
 .activeThumbnail {
-  border-color: #d8ee9b;
+  border-color: var(--lime-300);
   opacity: 1;
 }
 

@@ -1,0 +1,765 @@
+/* Final semantic appearance layer.
+   It intentionally sits after route polish/fix layers so legacy light literals
+   cannot defeat the selected appearance. Keep structural/layout rules in their
+   owning stylesheets; this file only owns color, surface, border and elevation. */
+
+html {
+  background: var(--background);
+  scrollbar-color: var(--border-strong) var(--background);
+}
+
+body {
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at 12% -8%, color-mix(in srgb, var(--accent-bright) 9%, transparent), transparent 30rem),
+    radial-gradient(circle at 88% 2%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 34rem),
+    var(--background);
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline-color: var(--focus-ring);
+}
+
+:where(input, select, textarea) {
+  color: var(--foreground);
+  background-color: var(--control-background);
+  border-color: var(--control-border);
+  accent-color: var(--accent);
+}
+
+:where(input, textarea)::placeholder {
+  color: var(--muted-faint);
+  opacity: 1;
+}
+
+:where(select option) {
+  color: var(--foreground);
+  background: var(--surface-solid);
+}
+
+:where(input, textarea):-webkit-autofill,
+:where(input, textarea):-webkit-autofill:hover,
+:where(input, textarea):-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--foreground);
+  box-shadow: 0 0 0 1000px var(--control-background) inset;
+  caret-color: var(--foreground);
+}
+
+:where(dialog, [role="dialog"]) {
+  color: var(--foreground);
+}
+
+/* Shared primitives */
+.field { color: var(--ink-soft); }
+.field input,
+.field select,
+.field textarea {
+  border-color: var(--control-border);
+  background: var(--control-background);
+  color: var(--foreground);
+  box-shadow: none;
+}
+.field input:hover,
+.field select:hover,
+.field textarea:hover {
+  border-color: var(--control-border-hover);
+  background: var(--control-background-hover);
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+  background: var(--control-background-hover);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled {
+  background: var(--surface-muted);
+  color: var(--muted);
+}
+
+.primary-button {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-button);
+}
+.primary-button:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-button-hover);
+}
+.secondary-button {
+  border-color: var(--control-border);
+  background: var(--control-background);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+.secondary-button:hover {
+  border-color: var(--control-border-hover);
+  background: var(--control-background-hover);
+  color: var(--ink);
+}
+.text-link,
+.text-button { color: var(--accent); }
+.text-link:hover,
+.text-button:hover { color: var(--accent-hover); }
+
+.status-pill {
+  border-color: var(--border-soft);
+  background: var(--surface-muted);
+  color: var(--ink-soft);
+}
+.media-card {
+  border-color: var(--border);
+  background: var(--surface-solid);
+}
+.success-message,
+.status-available {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+  color: var(--success);
+}
+.review-note,
+.status-pending_review {
+  border-color: var(--warning-border);
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.status-rejected {
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.status-rented,
+.status-expired {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--muted);
+}
+
+.nb-surface,
+.nb-surface-soft,
+.nb-surface-glass {
+  border-color: var(--border);
+}
+.nb-surface { background: var(--surface); box-shadow: var(--shadow-sm); }
+.nb-surface-soft { background: var(--surface-soft); }
+.nb-surface-glass {
+  border-color: var(--border-strong);
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-md);
+}
+.nb-surface-dark {
+  border-color: var(--border-dark);
+  background: #08261c;
+  color: #f3f8f5;
+}
+
+/* Shared route shells */
+.nb-global-shell,
+.nb-global-shell--neutral { background: var(--background); }
+.nb-global-shell--marketing {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-solid) 42%, transparent), transparent),
+    var(--background);
+}
+.nb-global-shell--renter {
+  background:
+    radial-gradient(circle at 76% 8%, color-mix(in srgb, var(--accent-bright) 8%, transparent), transparent 24rem),
+    var(--background);
+}
+.nb-global-shell--owner {
+  background:
+    linear-gradient(var(--blueprint-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--blueprint-line) 1px, transparent 1px),
+    var(--background);
+  background-size: 64px 64px, 64px 64px, auto;
+}
+.nb-global-shell--auth {
+  background:
+    radial-gradient(circle at 50% 15%, color-mix(in srgb, var(--accent-bright) 7%, transparent), transparent 25rem),
+    var(--background);
+}
+.nb-shell-grid {
+  background-image:
+    linear-gradient(var(--map-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--map-line) 1px, transparent 1px);
+}
+.nb-shell-atmosphere {
+  background:
+    radial-gradient(circle at 13% 9%, color-mix(in srgb, var(--accent-bright) 12%, transparent), transparent 24rem),
+    radial-gradient(circle at 87% 7%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 30rem),
+    radial-gradient(circle at 74% 82%, color-mix(in srgb, var(--accent-warm) 7%, transparent), transparent 26rem);
+}
+
+/* Shared product navigation. The root carries a stable data attribute so these
+   rules remain valid even though its internal classes are CSS-module scoped. */
+[data-product-navigation] {
+  border-color: var(--nav-border);
+  background: var(--nav-background);
+  box-shadow: var(--shadow-sm);
+}
+[data-product-navigation] nav {
+  border-color: var(--border-soft);
+  background: var(--surface-glass);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 5%, transparent);
+}
+[data-product-navigation] a {
+  color: var(--ink-soft);
+}
+[data-product-navigation] a:hover {
+  color: var(--ink);
+  background: var(--surface-soft);
+}
+[data-product-navigation] a[aria-current="page"] {
+  border-color: var(--border-strong);
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+[data-product-navigation] a[href="/dashboard"],
+[data-product-navigation] a[href="/login"] {
+  border-color: var(--control-border);
+  background: var(--control-background);
+}
+[data-product-navigation] a[href="/dashboard"][aria-current="page"] {
+  background: var(--accent-soft);
+  color: var(--accent-contrast);
+}
+
+[data-marketing-navigation]:not(.landing-nav) {
+  border-color: var(--nav-border);
+}
+[data-marketing-navigation]:not(.landing-nav) a {
+  color: var(--ink-soft);
+}
+[data-marketing-navigation]:not(.landing-nav) a:hover,
+[data-marketing-navigation]:not(.landing-nav) a[aria-current="page"] {
+  color: var(--ink);
+}
+
+/* Marketing / landing */
+.landing-shell {
+  --landing-ink: var(--ink);
+  --landing-ink-soft: var(--ink-soft);
+  --landing-emerald: var(--accent);
+  --landing-emerald-deep: var(--accent-contrast);
+  --landing-sand: var(--background-warm);
+  --landing-paper: var(--surface-solid);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 9% 3%, color-mix(in srgb, var(--accent-bright) 10%, transparent), transparent 27rem),
+    radial-gradient(circle at 84% 13%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 34rem),
+    var(--background);
+}
+.landing-shell::before {
+  background-image:
+    linear-gradient(var(--map-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--map-line) 1px, transparent 1px);
+}
+.landing-live-kicker,
+.landing-search-console,
+.landing-search-console-field,
+.landing-how-card,
+.landing-inventory-card,
+.landing-feature-card,
+.landing-faq-editorial-item,
+.landing-trust-card {
+  border-color: var(--border);
+  background: var(--surface-glass);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+.landing-search-console {
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-md);
+}
+.landing-search-console-heading,
+.landing-search-console-field {
+  border-color: var(--border-soft);
+}
+.landing-search-console-heading span,
+.landing-shell .intro,
+.landing-shell :where(p, small):not(.eyebrow) {
+  color: var(--ink-soft);
+}
+.landing-shell :where(input, select) {
+  color: var(--foreground);
+  background: transparent;
+}
+.landing-nav {
+  border-color: rgba(255,255,255,.16);
+  background: rgba(6, 29, 22, .94);
+  color: #fff;
+  box-shadow: 0 18px 58px rgba(0,0,0,.22);
+}
+
+/* Renter map search */
+.shell-renter .homes-page,
+.homes-page {
+  background:
+    radial-gradient(circle at 18% 10%, color-mix(in srgb, var(--accent-bright) 7%, transparent), transparent 30rem),
+    var(--background);
+}
+.shell-renter .homes-topbar,
+.homes-topbar {
+  border-color: var(--nav-border);
+  background: var(--nav-background);
+  box-shadow: var(--shadow-sm);
+}
+.shell-renter .homes-topbar-nav {
+  border-color: var(--border);
+  background: var(--surface-glass);
+  box-shadow: none;
+}
+.shell-renter .homes-topbar-nav a,
+.shell-renter .homes-topbar-actions > .text-link {
+  color: var(--ink-soft);
+}
+.shell-renter .homes-topbar-nav a:hover,
+.shell-renter .homes-topbar-actions > .text-link:hover {
+  color: var(--ink);
+  background: var(--surface-soft);
+}
+.shell-renter .homes-topbar-nav a.is-active {
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+}
+.shell-renter .homes-live-status {
+  border-color: var(--border) !important;
+  background: var(--surface-glass) !important;
+  color: var(--ink-soft) !important;
+  box-shadow: none;
+}
+.shell-renter .renter-search-sidebar {
+  border-color: var(--border);
+  background:
+    linear-gradient(var(--map-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--map-line) 1px, transparent 1px),
+    var(--surface-glass);
+  background-size: 40px 40px, 40px 40px, auto;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.shell-renter .renter-search-heading::before {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--accent);
+}
+.shell-renter .renter-search-heading h1,
+.shell-renter .renter-result-copy strong,
+.renter-result-meta b {
+  color: var(--ink);
+}
+.shell-renter .renter-search-heading > p:last-child,
+.shell-renter .renter-filter-grid .field,
+.renter-result-copy > span,
+.renter-result-copy > small {
+  color: var(--muted);
+}
+.shell-renter .renter-filter-panel,
+.renter-result-card-wrap,
+.renter-empty {
+  border-color: var(--border);
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-sm);
+}
+.shell-renter .renter-filter-grid input,
+.shell-renter .renter-filter-grid select {
+  border-color: var(--control-border);
+  background: var(--control-background);
+  color: var(--foreground);
+  box-shadow: none;
+}
+.shell-renter .renter-filter-grid input:hover,
+.shell-renter .renter-filter-grid select:hover {
+  border-color: var(--control-border-hover);
+  background: var(--control-background-hover);
+}
+.renter-result-card {
+  color: var(--foreground);
+}
+.renter-result-card-wrap.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Leaflet chrome is themed; raster OSM tiles remain untouched for label fidelity. */
+.leaflet-container {
+  background: var(--surface-muted);
+  color: var(--foreground);
+}
+.leaflet-bar a,
+.leaflet-control-layers,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip,
+.leaflet-tooltip,
+.leaflet-control-attribution {
+  border-color: var(--border) !important;
+  background: var(--surface-elevated) !important;
+  color: var(--foreground) !important;
+}
+.leaflet-bar a:hover {
+  background: var(--surface-strong) !important;
+  color: var(--ink) !important;
+}
+.leaflet-control-attribution a { color: var(--accent) !important; }
+.map-popup strong { color: var(--ink); }
+.map-popup span,
+.map-popup small { color: var(--muted); }
+.renthome-marker {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Property detail */
+.property-detail-page {
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at 82% 7%, color-mix(in srgb, var(--accent-bright) 8%, transparent), transparent 27rem),
+    radial-gradient(circle at 9% 18%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 30rem),
+    var(--background);
+}
+.property-detail-page::before {
+  background-image:
+    linear-gradient(var(--map-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--map-line) 1px, transparent 1px),
+    repeating-radial-gradient(ellipse at 92% 14%, transparent 0 42px, var(--contour-line) 43px 44px, transparent 45px 65px);
+}
+.property-detail-topbar {
+  border-color: var(--nav-border);
+  background: var(--nav-background);
+  box-shadow: var(--shadow-sm);
+}
+.property-detail-nav .text-link { color: var(--ink-soft); }
+.property-detail-nav .text-link:hover {
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+.property-detail-availability {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+  color: var(--success);
+}
+.property-detail-hero h1,
+.property-detail-price strong { color: var(--ink); }
+.property-detail-address,
+.property-detail-price small { color: var(--muted); }
+.property-detail-price,
+.property-detail-card,
+.property-detail-panel,
+.property-detail-section,
+.property-detail-sidebar-card,
+.contact-card,
+.owner-card {
+  border-color: var(--border);
+  background: var(--surface-glass);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+.property-gallery {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  box-shadow: var(--shadow-lg);
+}
+.property-gallery-item { background: var(--surface-muted); }
+
+/* Saved homes */
+.saved-page {
+  background:
+    radial-gradient(circle at 12% 7%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 24rem),
+    var(--background);
+}
+.saved-hero {
+  border-color: var(--border);
+  background:
+    radial-gradient(circle at 88% 14%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 18rem),
+    var(--surface-elevated);
+  box-shadow: var(--shadow-sm);
+}
+.saved-hero .intro { color: var(--muted); }
+.saved-hero-metrics > div,
+.saved-workspace-nav {
+  border-color: var(--border);
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-sm);
+}
+.saved-hero-metrics .has-new,
+.saved-workspace-nav a:first-child {
+  border-color: var(--success-border);
+  background: var(--accent-soft);
+}
+.saved-workspace-nav a { color: var(--ink-soft); }
+.saved-workspace-nav a:first-child { color: var(--accent-contrast); }
+.saved-workspace-nav strong { background: var(--surface-strong); }
+.saved-workspace-nav small {
+  background: color-mix(in srgb, var(--accent-bright) 30%, var(--surface-solid));
+  color: var(--ink);
+}
+[data-saved-homes-workspace] :where(article, table, details, [role="status"]) {
+  border-color: var(--border) !important;
+  background-color: var(--surface-solid) !important;
+  color: var(--foreground) !important;
+  box-shadow: var(--shadow-sm);
+}
+[data-saved-homes-workspace] :where(th, td) {
+  border-color: var(--border) !important;
+  color: var(--foreground);
+}
+[data-saved-homes-workspace] :where(span, small) { color: var(--muted); }
+[data-saved-homes-workspace] :where(strong, b, a) { color: var(--ink); }
+
+/* Messages */
+.messages-page.messages-inbox-route,
+.messages-page.messages-thread-route {
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--accent-bright) 6%, transparent), transparent 24rem),
+    radial-gradient(circle at 88% 14%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 28rem),
+    var(--background);
+}
+.messages-workspace-inbox,
+.messages-workspace-empty,
+.messages-thread-pane {
+  border-color: var(--border);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-md);
+}
+.messages-workspace-inbox-head,
+.messages-workspace-inbox .messages-organization {
+  border-color: var(--border);
+}
+.messages-workspace-inbox .messages-organization {
+  background: var(--surface-soft);
+}
+.messages-inbox-page-label {
+  border-color: var(--border);
+  background: var(--accent-soft);
+  color: var(--accent-contrast);
+}
+.messages-workspace-conversation:hover,
+.messages-workspace-conversation[aria-current="page"],
+.conversation-card:hover {
+  background: var(--surface-soft);
+}
+.message-bubble,
+.thread-message,
+.messages-composer,
+.message-composer {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--foreground);
+}
+
+/* Dashboard */
+.dashboard-metric-card,
+.dashboard-card,
+.dashboard-panel,
+.dashboard-secondary-grid > section {
+  border-color: var(--border);
+  background: var(--surface-solid);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+.dashboard-metric-card:hover {
+  border-color: var(--control-border-hover);
+  box-shadow: var(--shadow-md);
+}
+.dashboard-metric-card > strong { color: var(--ink); }
+.dashboard-metric-card > span,
+.dashboard-metric-card > p { color: var(--muted); }
+.dashboard-metric-card.attention {
+  border-color: var(--warning-border);
+  background: var(--warning-bg);
+}
+.renter-preference-compact > div {
+  border-color: var(--border);
+  background: var(--surface-soft);
+}
+/* This is an intentional inverse callout in both appearances. */
+.dashboard-next-action,
+.owner-next-action {
+  border-color: rgba(255,255,255,.1);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(157,216,76,.14), transparent 18rem),
+    linear-gradient(135deg, #0a3327, #071f18);
+  color: #fff;
+  box-shadow: var(--shadow-lg);
+}
+.dashboard-next-action .primary-button {
+  border-color: #fff;
+  background: #fff;
+  color: #06271d;
+}
+
+/* Owner / listing workflow */
+.owner-management-shell::before,
+.listing-shell::before {
+  background:
+    linear-gradient(var(--blueprint-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--blueprint-line) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--blueprint-line) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--blueprint-line) 45%, transparent) 1px, transparent 1px),
+    radial-gradient(circle at 90% 8%, color-mix(in srgb, var(--accent-bright) 6%, transparent), transparent 28rem),
+    var(--background);
+  background-size: 72px 72px, 72px 72px, 18px 18px, 18px 18px, auto, auto;
+}
+.owner-management-header,
+.listing-page-header { border-color: var(--border); }
+.owner-summary-card,
+.owner-property-card,
+.owner-portfolio-card,
+.listing-form-card,
+.listing-section,
+.listing-editor-panel,
+.listing-readiness-card {
+  border-color: var(--border);
+  background: var(--surface-solid);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+.owner-portfolio-summary {
+  border-color: var(--border);
+  background: var(--border-soft);
+  box-shadow: var(--shadow-sm);
+}
+.owner-summary-card strong,
+.owner-management-header .owner-title,
+.listing-page-title { color: var(--ink); }
+.owner-summary-card small,
+.owner-management-header .intro,
+.listing-page-header .intro { color: var(--muted); }
+.owner-summary-card > span { background: var(--accent-soft); color: var(--accent); }
+
+/* Moderation workbench */
+.moderation-shell,
+.moderation-page {
+  color: var(--foreground);
+  background: transparent;
+}
+.moderation-card,
+.moderation-panel,
+.moderation-queue,
+.moderation-workbench,
+.moderation-detail-card,
+.moderation-summary-card {
+  border-color: var(--border);
+  background: var(--surface-solid);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+.moderation-shell :where(table, th, td) { border-color: var(--border); }
+.moderation-shell :where(th) { background: var(--surface-soft); color: var(--ink-soft); }
+.moderation-shell :where(td) { color: var(--foreground); }
+
+/* Authentication, recovery and phone verification */
+.auth-shell,
+.verification-shell {
+  color: var(--foreground);
+  background: transparent;
+}
+.auth-card,
+.auth-intro-panel,
+.auth-owner-note,
+.phone-verification-stage,
+.phone-verification-trust-note,
+.recovery-card {
+  border-color: var(--border);
+  background: var(--surface-elevated);
+  color: var(--foreground);
+  box-shadow: var(--shadow-md);
+}
+.auth-card :where(h1, h2, h3, strong),
+.auth-intro-panel :where(h1, h2, h3, strong),
+.phone-verification-stage :where(h1, h2, h3, strong) {
+  color: var(--ink);
+}
+.auth-card :where(p, small),
+.auth-intro-panel :where(p, small),
+.phone-verification-stage :where(p, small) {
+  color: var(--muted);
+}
+.auth-mode-switch,
+.phone-verification-progress {
+  border-color: var(--border);
+  background: var(--border-soft);
+}
+.phone-verification-progress li {
+  background: var(--surface-solid);
+  color: var(--muted);
+}
+.phone-verification-progress li > span {
+  border-color: var(--border);
+  background: var(--surface-muted);
+}
+.phone-verification-progress li.is-current {
+  background: linear-gradient(135deg, var(--accent-soft), var(--surface-solid));
+}
+.phone-verification-progress li.is-current > span,
+.phone-verification-progress li.is-complete > span {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+
+/* Information pages */
+.information-page,
+.information-shell,
+.info-page {
+  color: var(--foreground);
+  background: transparent;
+}
+.information-card,
+.information-panel,
+.info-card,
+.contact-card,
+.legal-card {
+  border-color: var(--border);
+  background: var(--surface-solid);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Native browser/system surfaces */
+@media (forced-colors: none) {
+  html[data-theme="dark"] :where(img:not([src*="nearbasha-logo"]), video) {
+    color-scheme: dark;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] .brand-logo img {
+    content: url("/nearbasha-logo-on-dark.svg");
+    filter: none;
+  }
+}
+
+html[data-theme="dark"] .brand-logo img {
+  content: url("/nearbasha-logo-on-dark.svg");
+  filter: none;
+}
+
+/* Components intentionally hosted on dark inverse surfaces always use the
+   on-dark mark, even when the global appearance is light. */
+.landing-nav .brand-logo img,
+.landing-footer-brand .brand-logo img,
+.homes-topbar .homes-brand-logo img {
+  content: url("/nearbasha-logo-on-dark.svg");
+  filter: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body,
+  .nb-global-shell,
+  [data-product-navigation],
+  .property-detail-topbar,
+  .homes-topbar {
+    transition: background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard);
+  }
+}
