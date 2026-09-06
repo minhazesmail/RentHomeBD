@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "node scripts/check-css-collisions.mjs && eslint .",
     "deadcode": "node scripts/check-dead-code.mjs",
-    "uiqa": "node scripts/check-ui-regressions.mjs",
+    "uiqa": "node scripts/check-ui-regressions.mjs && node scripts/check-theme.mjs",
+    "themeqa": "node scripts/check-theme.mjs",
     "i18nqa": "node scripts/check-localization.mjs",
     "typecheck": "tsc --noEmit"
   },
