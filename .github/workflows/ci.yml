@@ -19,6 +19,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Install Chromium for theme QA
+        run: npx playwright install --with-deps chromium
       - name: Typecheck
         run: npm run typecheck
       - name: Localization QA
@@ -31,3 +33,25 @@ jobs:
         run: npm run uiqa
       - name: Build
         run: npm run build
+      - name: Start production server
+        run: |
+          npm run start > /tmp/nearbasha-next.log 2>&1 &
+          echo $! > /tmp/nearbasha-next.pid
+          for i in {1..45}; do
+            if curl --fail --silent http://127.0.0.1:3000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/nearbasha-next.log
+          exit 1
+      - name: Rendered theme QA
+        run: npm run themebrowser
+      - name: Upload theme QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: theme-browser-${{ github.run_id }}
+          path: artifacts/theme-browser
+          if-no-files-found: ignore
+          retention-days: 14
