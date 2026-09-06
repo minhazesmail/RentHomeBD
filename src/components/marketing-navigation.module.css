@@ -52,6 +52,26 @@
   width: 22px;
 }
 
+.landing .center a,
+.landing .actions :global(.text-link) {
+  color: rgba(255, 255, 255, .82);
+  font-size: .84rem;
+  font-weight: 720;
+  letter-spacing: -.01em;
+}
+
+.landing .center a::after {
+  background: var(--landing-lime, #b9f227);
+}
+
+.landing .center a:hover,
+.landing .center a[aria-current="page"],
+.landing .center a:focus-visible,
+.landing .actions :global(.text-link:hover),
+.landing .actions :global(.text-link:focus-visible) {
+  color: #fff;
+}
+
 .actions {
   display: flex;
   min-width: 0;
@@ -102,6 +122,11 @@
   }
 
   .center a {
+    font-size: .75rem;
+  }
+
+  .landing .center a,
+  .landing .actions :global(.text-link) {
     font-size: .75rem;
   }
 
