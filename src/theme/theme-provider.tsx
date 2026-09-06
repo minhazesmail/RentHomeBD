@@ -22,6 +22,10 @@ function systemTheme(): ResolvedTheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+function applyResolvedTheme(theme: ResolvedTheme) {
+  document.documentElement.dataset.resolvedTheme = theme;
+}
+
 export function ThemeProvider({
   initialPreference,
   children,
@@ -37,7 +41,9 @@ export function ThemeProvider({
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const syncResolvedTheme = () => {
-      setResolvedTheme(preference === "system" ? (media.matches ? "dark" : "light") : preference);
+      const nextResolvedTheme = preference === "system" ? (media.matches ? "dark" : "light") : preference;
+      applyResolvedTheme(nextResolvedTheme);
+      setResolvedTheme(nextResolvedTheme);
     };
 
     syncResolvedTheme();
@@ -48,10 +54,14 @@ export function ThemeProvider({
   }, [preference]);
 
   const setPreference = useCallback((nextPreference: ThemePreference) => {
+    const nextResolvedTheme = nextPreference === "system" ? systemTheme() : nextPreference;
+
     document.documentElement.dataset.theme = nextPreference;
+    applyResolvedTheme(nextResolvedTheme);
     document.cookie = `${THEME_COOKIE_NAME}=${nextPreference}; Path=/; Max-Age=${THEME_COOKIE_MAX_AGE}; SameSite=Lax`;
+
     setPreferenceState(nextPreference);
-    setResolvedTheme(nextPreference === "system" ? systemTheme() : nextPreference);
+    setResolvedTheme(nextResolvedTheme);
   }, []);
 
   const value = useMemo<ThemeContextValue>(
