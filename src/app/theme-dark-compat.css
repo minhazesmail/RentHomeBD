@@ -1,15 +1,12 @@
-/* Dark-mode compatibility for older route styles that still assign deep
-   emerald palette values directly to headings. Theme-aware route migrations
-   should prefer semantic `--ink`; this fallback prevents unreadable headings
-   while those legacy declarations are retired over time. */
+/* Dark-only compatibility for legacy route headings that still use fixed deep
+   emerald text colors. The resolved-theme guard prevents these important rules
+   from ever repainting the original light UI. */
 
-html[data-theme="dark"] [data-route] :where(h1, h2, h3, h4, h5, h6) {
+html[data-resolved-theme="dark"] [data-route] :where(h1, h2, h3, h4, h5, h6) {
   color: var(--ink) !important;
 }
 
-/* Intentionally inverse product callouts keep white heading copy. Attribute
-   selectors avoid taking class ownership away from the component stylesheet. */
-html[data-theme="dark"] [data-route] :where(
+html[data-resolved-theme="dark"] [data-route] :where(
   [class*="next-action"],
   [class*="surface-dark"],
   [class*="landing-nav"],
@@ -17,20 +14,4 @@ html[data-theme="dark"] [data-route] :where(
   [class*="recovery"]
 ) :where(h1, h2, h3, h4, h5, h6) {
   color: #fff !important;
-}
-
-@media (prefers-color-scheme: dark) {
-  html[data-theme="system"] [data-route] :where(h1, h2, h3, h4, h5, h6) {
-    color: var(--ink) !important;
-  }
-
-  html[data-theme="system"] [data-route] :where(
-    [class*="next-action"],
-    [class*="surface-dark"],
-    [class*="landing-nav"],
-    [class*="landing-footer"],
-    [class*="recovery"]
-  ) :where(h1, h2, h3, h4, h5, h6) {
-    color: #fff !important;
-  }
 }

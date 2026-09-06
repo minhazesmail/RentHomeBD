@@ -35,9 +35,10 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
   const themePreference = await getThemePreference();
+  const initialResolvedTheme = themePreference === "dark" ? "dark" : "light";
 
   return (
-    <html lang={locale} data-theme={themePreference} className={`${inter.variable} ${hindSiliguri.variable}`}>
+    <html lang={locale} data-theme={themePreference} data-resolved-theme={initialResolvedTheme} className={`${inter.variable} ${hindSiliguri.variable}`}>
       <body>
         <LocaleProvider initialLocale={locale}>
           <ThemeProvider initialPreference={themePreference}>
