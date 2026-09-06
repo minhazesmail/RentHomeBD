@@ -5,3 +5,4 @@
 @import "./auth-login-polish.css" layer(route-fixes);
 @import "./auth-phone-flow.css" layer(route-atmosphere);
 @import "./auth-localization.css" layer(route-contrast);
+@import "./auth-theme.css" layer(theme);
