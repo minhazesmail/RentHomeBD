@@ -29,7 +29,7 @@ export default async function HomePage() {
   const dictionary = getDictionary(locale);
   const landing = dictionary.landing;
   const hero = landing.hero;
-  const radius = formatNumber(DEFAULT_RENTER_SEARCH_RADIUS, locale, { maximumFractionDigits: 1 });
+  const radius = formatNumber(Number(DEFAULT_RENTER_SEARCH_RADIUS), locale, { maximumFractionDigits: 1 });
   const trustSignals = [
     { title: landing.trust.phoneTitle, description: landing.trust.phoneDescription, icon: "phone" },
     { title: landing.trust.moderationTitle, description: landing.trust.moderationDescription, icon: "shield" },
