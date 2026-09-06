@@ -5,7 +5,7 @@
   align-items: end;
   padding: 18px 26px;
   border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, .62);
+  background: var(--surface-glass);
 }
 
 .ownerPortfolioField {
@@ -22,9 +22,9 @@
   width: 100%;
   min-height: 44px;
   padding: 9px 11px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 12px;
-  background: white;
+  background: var(--control-background);
   color: var(--foreground);
   font: inherit;
   font-size: .84rem;
@@ -35,7 +35,7 @@
 .ownerPortfolioField select:focus {
   border-color: var(--accent);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(22, 121, 75, .1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 13%, transparent);
 }
 
 .ownerPortfolioActions {
@@ -49,7 +49,7 @@
   margin: 0;
   padding: 12px 26px;
   border-bottom: 1px solid var(--border);
-  background: var(--sand-50);
+  background: var(--surface-soft);
   color: var(--muted);
   font-size: .78rem;
 }
@@ -94,7 +94,7 @@
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: var(--sand-50);
+  background: var(--surface-soft);
   color: var(--muted);
 }
 
@@ -114,7 +114,7 @@
   padding: 10px 11px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: rgba(255, 255, 255, .66);
+  background: var(--surface-glass);
   color: var(--muted);
 }
 
@@ -138,25 +138,25 @@
 }
 
 .ownerPortfolioStatus_good {
-  border-color: color-mix(in srgb, var(--verified) 24%, var(--border));
-  background: color-mix(in srgb, var(--verified-soft) 70%, white);
+  border-color: var(--success-border);
+  background: var(--success-bg);
 }
 
 .ownerPortfolioStatus_good > svg {
-  color: var(--verified);
+  color: var(--success);
 }
 
 .ownerPortfolioStatus_attention {
-  border-color: rgba(217, 166, 63, .3);
-  background: #fff8e8;
+  border-color: var(--warning-border);
+  background: var(--warning-bg);
 }
 
 .ownerPortfolioStatus_attention > svg {
-  color: #8a6414;
+  color: var(--warning);
 }
 
 .ownerPortfolioStatus_urgent {
-  border-color: rgba(200, 109, 93, .28);
+  border-color: var(--danger-border);
   background: var(--high-demand-soft);
 }
 
