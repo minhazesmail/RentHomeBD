@@ -105,7 +105,7 @@
 
 .step[data-complete="true"] .number {
   background: var(--accent-bright-soft);
-  color: var(--emerald-950);
+  color: var(--accent-contrast);
 }
 
 .label {
