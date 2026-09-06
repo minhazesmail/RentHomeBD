@@ -1,0 +1,115 @@
+/* Dashboard appearance bridge. */
+
+html[data-resolved-theme="dark"] :where(.dashboard-shell, .dashboard-page) {
+  background:
+    radial-gradient(circle at 95% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 26rem),
+    var(--background);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] :where(.dashboard-card, .renter-dashboard-card) {
+  border-color: var(--border);
+  background: var(--surface-glass);
+  color: var(--foreground);
+  box-shadow: var(--shadow-md);
+}
+
+html[data-resolved-theme="dark"] .renter-dashboard-header {
+  border-color: var(--border);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .renter-account-summary article,
+  .renter-account-summary > *,
+  .renter-journey-card,
+  .dashboard-metric-card,
+  .renter-preference-control,
+  .renter-preference-compact > div,
+  .dashboard-trust-card
+) {
+  border-color: var(--border);
+  background: var(--surface-solid);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-resolved-theme="dark"] .renter-journey-card:hover,
+html[data-resolved-theme="dark"] .dashboard-metric-card:hover {
+  border-color: var(--control-border-hover);
+  background: var(--surface-hover);
+  box-shadow: var(--shadow-md);
+}
+
+/* This call-to-action is intentionally inverse in both appearances. */
+html[data-resolved-theme="dark"] :where(.dashboard-next-action, .renter-journey-primary) {
+  border-color: var(--border-dark);
+  background:
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--accent-bright) 16%, transparent), transparent 18rem),
+    var(--surface-dark);
+  color: #fff;
+}
+
+html[data-resolved-theme="dark"] :where(.dashboard-next-action, .renter-journey-primary) :where(h1, h2, h3, strong) {
+  color: #fff !important;
+}
+
+html[data-resolved-theme="dark"] :where(.dashboard-next-action, .renter-journey-primary) :where(p, span) {
+  color: rgba(255, 255, 255, .74);
+}
+
+html[data-resolved-theme="dark"] .dashboard-next-action .primary-button {
+  border-color: var(--surface-inverse);
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+}
+
+html[data-resolved-theme="dark"] .dashboard-metric-card.attention,
+html[data-resolved-theme="dark"] .owner-dashboard-action-card.needs-attention {
+  border-color: var(--warning-border);
+  background: color-mix(in srgb, var(--warning-bg) 72%, var(--surface-solid));
+}
+
+html[data-resolved-theme="dark"] :where(
+  .renter-account-summary span,
+  .renter-account-summary p,
+  .renter-journey-kicker,
+  .renter-journey-copy p,
+  .dashboard-metric-card > span,
+  .dashboard-metric-card > p,
+  .renter-preference-compact > div span
+) {
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .renter-account-summary strong,
+  .renter-journey-copy h2,
+  .dashboard-metric-card > strong,
+  .renter-preference-control label > span,
+  .renter-preference-compact > div strong
+) {
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .renter-preference-compact > div strong,
+html[data-resolved-theme="dark"] .renter-preference-compact summary {
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] .renter-preference-control select {
+  border-color: var(--control-border);
+  background: var(--surface-input);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .renter-preference-control select:focus {
+  border-color: var(--accent);
+  background: var(--control-background-hover);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+html[data-resolved-theme="dark"] .renter-preference-compact details,
+html[data-resolved-theme="dark"] .dashboard-account-tools,
+html[data-resolved-theme="dark"] .renter-dashboard-actions {
+  border-color: var(--border);
+}
