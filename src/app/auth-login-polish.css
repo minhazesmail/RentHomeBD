@@ -2,6 +2,18 @@
    Keep long trust guidance out of field-helper typography and preserve clear
    spacing between the sign-in prompt and its account-creation action. */
 
+.auth-language-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.auth-language-row .auth-brand-logo {
+  margin-bottom: 0;
+}
+
 .auth-intro-panel .auth-owner-note {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -15,97 +27,24 @@
   color: var(--nb-ink-soft, #4d6055);
 }
 
-.auth-owner-note-icon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  margin-top: 1px;
-  border: 1px solid rgba(8, 118, 83, .14);
-  border-radius: 11px;
-  background: rgba(255, 253, 248, .82);
-  color: var(--nb-emerald, #087653);
-}
+.auth-owner-note-icon { display: grid; place-items: center; width: 34px; height: 34px; margin-top: 1px; border: 1px solid rgba(8, 118, 83, .14); border-radius: 11px; background: rgba(255, 253, 248, .82); color: var(--nb-emerald, #087653); }
+.auth-owner-note > div { min-width: 0; }
+.auth-owner-note strong { display: block; margin: 0 0 4px; color: var(--nb-ink, #10251d); font-size: .82rem; font-weight: 820; letter-spacing: -.012em; }
+.auth-owner-note p { max-width: 560px; margin: 0; color: #61716a; font-size: .8rem; line-height: 1.58; }
+.auth-intro-panel::after { margin-top: 30px; }
 
-.auth-owner-note > div {
-  min-width: 0;
-}
-
-.auth-owner-note strong {
-  display: block;
-  margin: 0 0 4px;
-  color: var(--nb-ink, #10251d);
-  font-size: .82rem;
-  font-weight: 820;
-  letter-spacing: -.012em;
-}
-
-.auth-owner-note p {
-  max-width: 560px;
-  margin: 0;
-  color: #61716a;
-  font-size: .8rem;
-  line-height: 1.58;
-}
-
-.auth-intro-panel::after {
-  margin-top: 30px;
-}
-
-.auth-card .auth-mode-switch {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: center;
-  column-gap: 6px;
-  row-gap: 3px;
-  margin-top: 14px;
-  color: var(--nb-ink-soft, #4d6055);
-  font-size: .88rem;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.auth-card .auth-mode-switch > span {
-  color: inherit;
-}
-
-.auth-card .auth-mode-switch .text-button {
-  justify-self: auto;
-  min-height: 0;
-  margin: 0;
-  padding: 2px 0;
-  color: var(--nb-emerald, #087653);
-  font: inherit;
-  font-weight: 820;
-  line-height: inherit;
-}
-
-.auth-card .auth-mode-switch .text-button:hover {
-  color: #075943;
-}
-
-.auth-card .auth-mode-switch .text-button:focus-visible {
-  outline: 3px solid rgba(8, 118, 83, .18);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
+.auth-card .auth-mode-switch { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; column-gap: 6px; row-gap: 3px; margin-top: 14px; color: var(--nb-ink-soft, #4d6055); font-size: .88rem; line-height: 1.5; text-align: center; }
+.auth-card .auth-mode-switch > span { color: inherit; }
+.auth-card .auth-mode-switch .text-button { justify-self: auto; min-height: 0; margin: 0; padding: 2px 0; color: var(--nb-emerald, #087653); font: inherit; font-weight: 820; line-height: inherit; }
+.auth-card .auth-mode-switch .text-button:hover { color: #075943; }
+.auth-card .auth-mode-switch .text-button:focus-visible { outline: 3px solid rgba(8, 118, 83, .18); outline-offset: 3px; border-radius: 4px; }
 
 @media (max-width: 640px) {
-  .auth-intro-panel .auth-owner-note {
-    gap: 10px;
-    margin-top: 20px;
-    padding: 14px;
-  }
-
-  .auth-owner-note p {
-    font-size: .78rem;
-  }
+  .auth-language-row { align-items: center; margin-bottom: 18px; }
+  .auth-intro-panel .auth-owner-note { gap: 10px; margin-top: 20px; padding: 14px; }
+  .auth-owner-note p { font-size: .78rem; }
 }
 
 @media (max-width: 480px) {
-  .auth-card .auth-mode-switch {
-    justify-content: flex-start;
-    text-align: left;
-  }
+  .auth-card .auth-mode-switch { justify-content: flex-start; text-align: left; }
 }

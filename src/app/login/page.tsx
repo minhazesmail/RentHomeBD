@@ -1,6 +1,9 @@
 import { ShieldCheck } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { getLocale } from "@/i18n/get-locale";
 import { AuthForm } from "./auth-form";
 
 function safeNext(value: string | string[] | undefined) {
@@ -22,44 +25,27 @@ export default async function LoginPage({
   const nextPath = safeNext(params.next);
   const intent = authIntent(params.intent);
   const listingIntent = intent === "list-property";
+  const locale = await getLocale();
+  const copy = getDictionary(locale).auth.loginIntro;
 
   return (
     <main className="shell auth-shell">
       <section className="auth-layout">
         <div className="auth-intro-panel">
-          <BrandLogo className="auth-brand-logo" />
-          <p className="eyebrow">{listingIntent ? "List your property" : "One account, every side of renting"}</p>
-          <h1 className="auth-title">{listingIntent ? "Create a listing with the right owner profile." : "A calmer way to find and manage a home."}</h1>
-          <p className="intro">
-            {listingIntent
-              ? "Sign in if you already manage properties on NearBasha, or create an owner account and continue directly to listing creation."
-              : "Search exact locations, save the homes that matter, message privately, or publish a listing with built-in moderation and freshness controls."}
-          </p>
+          <div className="auth-language-row"><BrandLogo className="auth-brand-logo" /><LanguageSwitcher /></div>
+          <p className="eyebrow">{listingIntent ? copy.listingEyebrow : copy.regularEyebrow}</p>
+          <h1 className="auth-title">{listingIntent ? copy.listingTitle : copy.regularTitle}</h1>
+          <p className="intro">{listingIntent ? copy.listingDescription : copy.regularDescription}</p>
           <div className="auth-benefits">
             {listingIntent ? (
-              <>
-                <span>Owner role selected for new accounts</span>
-                <span>Continue directly to listing creation</span>
-                <span>Moderation and freshness controls built in</span>
-              </>
+              <><span>{copy.listingBenefit1}</span><span>{copy.listingBenefit2}</span><span>{copy.listingBenefit3}</span></>
             ) : (
-              <>
-                <span>Exact map-based discovery</span>
-                <span>Private renter–owner messaging</span>
-                <span>Moderated, freshness-aware listings</span>
-              </>
+              <><span>{copy.regularBenefit1}</span><span>{copy.regularBenefit2}</span><span>{copy.regularBenefit3}</span></>
             )}
           </div>
-          <aside className="auth-owner-note" aria-label="Phone verification for owners and agents">
-            <span className="auth-owner-note-icon" aria-hidden="true">
-              <ShieldCheck size={18} strokeWidth={1.8} />
-            </span>
-            <div>
-              <strong>Owners and agents</strong>
-              <p>
-                You can verify a Bangladesh mobile number after signup to add a phone-verified trust signal. This confirms control of the number—not identity or property ownership. Listings still go through NearBasha moderation.
-              </p>
-            </div>
+          <aside className="auth-owner-note" aria-label={copy.ownerNoteAria}>
+            <span className="auth-owner-note-icon" aria-hidden="true"><ShieldCheck size={18} strokeWidth={1.8} /></span>
+            <div><strong>{copy.ownerNoteTitle}</strong><p>{copy.ownerNoteDescription}</p></div>
           </aside>
         </div>
         <AuthForm nextPath={nextPath} intent={intent} />

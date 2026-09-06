@@ -41,3 +41,20 @@ html[lang="bn"] .auth-title {
   letter-spacing: -0.025em;
   line-height: 1.12;
 }
+
+html[lang="bn"] .landing-shell h1,
+html[lang="bn"] .landing-shell h2,
+html[lang="bn"] .landing-shell h3 {
+  font-family: var(--font-bangla);
+  letter-spacing: -0.02em;
+  line-height: 1.16;
+}
+
+html[lang="bn"] .landing-shell p,
+html[lang="bn"] .landing-shell li,
+html[lang="bn"] .landing-shell a,
+html[lang="bn"] .landing-shell button,
+html[lang="bn"] .landing-shell label,
+html[lang="bn"] .landing-shell select {
+  line-height: 1.62;
+}
