@@ -1,3 +1,5 @@
+import { ShieldCheck } from "lucide-react";
+
 import { BrandLogo } from "@/components/brand-logo";
 import { AuthForm } from "./auth-form";
 
@@ -48,9 +50,17 @@ export default async function LoginPage({
               </>
             )}
           </div>
-          <p className="form-hint">
-            <strong>Owners and agents:</strong> after signup, you can verify a Bangladesh mobile number to add a phone-verified trust signal to your account. That signal confirms control of the number at verification time; it does not prove legal identity or property ownership, and listings still follow NearBasha moderation.
-          </p>
+          <aside className="auth-owner-note" aria-label="Phone verification for owners and agents">
+            <span className="auth-owner-note-icon" aria-hidden="true">
+              <ShieldCheck size={18} strokeWidth={1.8} />
+            </span>
+            <div>
+              <strong>Owners and agents</strong>
+              <p>
+                You can verify a Bangladesh mobile number after signup to add a phone-verified trust signal. This confirms control of the number—not identity or property ownership. Listings still go through NearBasha moderation.
+              </p>
+            </div>
+          </aside>
         </div>
         <AuthForm nextPath={nextPath} intent={intent} />
       </section>
