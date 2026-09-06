@@ -9,6 +9,7 @@ type RecoveryStateProps = {
   description: string;
   primaryAction: ReactNode;
   secondaryAction?: ReactNode;
+  languageControl?: ReactNode;
   headingId?: string;
 };
 
@@ -18,13 +19,14 @@ export function RecoveryState({
   description,
   primaryAction,
   secondaryAction,
+  languageControl,
   headingId = "recovery-state-heading",
 }: RecoveryStateProps) {
   return (
     <main className={styles.shell}>
       <section className={styles.card} aria-labelledby={headingId}>
         <div className={styles.content}>
-          <BrandLogo className={styles.logo} />
+          {languageControl ? <div className={styles.toolbar}><BrandLogo className={styles.logo} />{languageControl}</div> : <BrandLogo className={styles.logo} />}
           <p className={styles.eyebrow}>{eyebrow}</p>
           <h1 className={styles.title} id={headingId}>{title}</h1>
           <p className={styles.copy}>{description}</p>

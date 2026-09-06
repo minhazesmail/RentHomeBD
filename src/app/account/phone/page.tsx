@@ -2,7 +2,10 @@ import Link from "next/link";
 import { LockKeyhole, ShieldCheck } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { PhoneVerificationForm } from "@/components/phone-verification-form";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { getLocale } from "@/i18n/get-locale";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,12 +13,10 @@ export const dynamic = "force-dynamic";
 
 export default async function PhoneVerificationPage() {
   const auth = await requireUser();
+  const locale = await getLocale();
+  const copy = getDictionary(locale).auth.phoneVerification;
   const supabase = (await createClient()) as unknown as SupabaseClient;
-  const { data: trustProfile } = await supabase
-    .from("profiles")
-    .select("phone_verified_at")
-    .eq("id", auth.userId)
-    .maybeSingle();
+  const { data: trustProfile } = await supabase.from("profiles").select("phone_verified_at").eq("id", auth.userId).maybeSingle();
   const isVerified = Boolean(trustProfile?.phone_verified_at);
 
   return (
@@ -23,35 +24,23 @@ export default async function PhoneVerificationPage() {
       <header className="listing-page-header verification-page-header phone-verification-page-header">
         <div>
           <Link className="brand-link compact-brand" href="/">NearBasha</Link>
-          <p className="eyebrow">Account trust</p>
-          <h1 className="listing-page-title">{isVerified ? "Your phone is verified" : "Verify your phone"}</h1>
-          <p className="intro">Confirm a Bangladesh mobile number you control. Verification adds a clear trust signal while keeping your number private on public listings.</p>
+          <p className="eyebrow">{copy.pageEyebrow}</p>
+          <h1 className="listing-page-title">{isVerified ? copy.pageVerifiedTitle : copy.pageUnverifiedTitle}</h1>
+          <p className="intro">{copy.pageDescription}</p>
         </div>
-        <Link className="text-link" href="/dashboard">Back to dashboard</Link>
+        <div className="phone-verification-header-actions"><LanguageSwitcher /><Link className="text-link" href="/dashboard">{copy.backToDashboard}</Link></div>
       </header>
 
-      <PhoneVerificationForm
-        currentPhone={auth.phone ?? null}
-        isVerified={isVerified}
-      />
+      <PhoneVerificationForm currentPhone={auth.phone ?? null} isVerified={isVerified} />
 
       <section className="phone-verification-trust-note" aria-labelledby="phone-trust-note-heading">
         <div className="phone-verification-trust-note-heading">
           <span><ShieldCheck size={20} aria-hidden="true" /></span>
-          <div>
-            <p className="eyebrow">What the badge means</p>
-            <h2 id="phone-trust-note-heading">A useful signal, not an identity guarantee</h2>
-          </div>
+          <div><p className="eyebrow">{copy.badgeEyebrow}</p><h2 id="phone-trust-note-heading">{copy.badgeTitle}</h2></div>
         </div>
         <div className="phone-verification-trust-grid">
-          <div>
-            <ShieldCheck size={17} aria-hidden="true" />
-            <span><strong>It confirms</strong> that the account controlled the verified mobile number when verification was completed.</span>
-          </div>
-          <div>
-            <LockKeyhole size={17} aria-hidden="true" />
-            <span><strong>It does not confirm</strong> legal identity, property ownership, or whether every listing detail is accurate.</span>
-          </div>
+          <div><ShieldCheck size={17} aria-hidden="true" /><span><strong>{copy.confirmsLabel}</strong> {copy.confirmsText}</span></div>
+          <div><LockKeyhole size={17} aria-hidden="true" /><span><strong>{copy.notConfirmsLabel}</strong> {copy.notConfirmsText}</span></div>
         </div>
       </section>
     </main>
