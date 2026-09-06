@@ -101,6 +101,15 @@ requireRegex("src/app/homes/property-detail-flow-redesign.css", /contact-action-
 requireText("src/app/moderation/styles.css", "moderation-workbench.css", "moderation workbench style layer");
 requireText("src/app/information-styles.css", "information-navigation-redesign.css", "information navigation refinement layer");
 
+// Landing FAQ should remain a compact editorial knowledge layer with native
+// disclosure semantics, topic filtering, horizontal-safe mobile topics, and reduced motion support.
+requireText("src/app/landing-styles.css", "landing-faq-redesign.css", "landing FAQ style layer");
+requireText("src/components/landing-faq-section.tsx", "<details", "native FAQ disclosure semantics");
+requireText("src/components/landing-faq-section.tsx", "aria-pressed", "FAQ topic pressed-state semantics");
+requireText("src/app/landing-faq-redesign.css", "@media (max-width: 820px)", "FAQ tablet/mobile breakpoint");
+requireText("src/app/landing-faq-redesign.css", "overflow-x: auto", "mobile FAQ topic overflow handling");
+requireText("src/app/landing-faq-redesign.css", "prefers-reduced-motion", "FAQ reduced-motion support");
+
 if (failures.length) {
   console.error("UI regression check failed:\n");
   for (const failure of failures) console.error(`- ${failure}`);
