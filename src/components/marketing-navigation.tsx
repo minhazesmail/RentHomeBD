@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { useLocale } from "@/i18n/use-locale";
 import styles from "./marketing-navigation.module.css";
 
@@ -23,7 +24,11 @@ export function MarketingNavigation({
   const nav = dictionary.navigation;
 
   return (
-    <nav className={`${styles.nav} ${landing ? `${styles.landing} landing-nav` : styles.infoNav}`} aria-label={nav.primaryNavigationAria}>
+    <nav
+      className={`${styles.nav} ${landing ? `${styles.landing} landing-nav` : styles.infoNav}`}
+      aria-label={nav.primaryNavigationAria}
+      data-marketing-navigation
+    >
       <BrandLogo />
       <div className={`${styles.center} ${landing ? "landing-nav-center" : ""}`}>
         <Link href="/homes">{nav.findOnMap}</Link>
@@ -35,6 +40,7 @@ export function MarketingNavigation({
       </div>
       <div className={`${styles.actions} ${landing ? "landing-nav-actions" : ""}`}>
         <LanguageSwitcher />
+        <ThemeSwitcher compact />
         <Link className="text-link" href="/login">{nav.signIn}</Link>
         <Link className="primary-button link-button" href={LIST_PROPERTY_HREF}>{nav.listProperty}</Link>
       </div>
