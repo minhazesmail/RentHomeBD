@@ -1,0 +1,177 @@
+/* Owner dashboard + listing editor appearance bridge. */
+
+html[data-resolved-theme="dark"] :where(.owner-page, .listing-page, .owner-shell, .listing-shell) {
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] :where(.owner-header, .listing-page-header) {
+  border-color: var(--border);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .property-list-panel,
+  .listing-section,
+  .listing-readiness,
+  .owner-dashboard-action-card,
+  .owner-dashboard-status article,
+  .owner-dashboard-card,
+  .owner-management-card
+) {
+  border-color: var(--border);
+  background: var(--surface-glass);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-resolved-theme="dark"] .property-row {
+  border-color: var(--border);
+  color: inherit;
+}
+
+html[data-resolved-theme="dark"] .property-row:hover {
+  background: var(--surface-hover);
+}
+
+html[data-resolved-theme="dark"] .choice-chip {
+  border-color: var(--control-border);
+  background: var(--control-background);
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .choice-chip:hover {
+  border-color: var(--control-border-hover);
+  background: var(--control-background-hover);
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .choice-chip:has(input:checked) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: var(--accent-soft);
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] :where(.map-preview, .owner-location-map, .owner-location-map-canvas) {
+  border-color: var(--border);
+  background: var(--surface-muted);
+}
+
+html[data-resolved-theme="dark"] .owner-location-map-tip {
+  border-color: var(--border);
+  background: var(--surface-overlay);
+  box-shadow: var(--shadow-md);
+}
+
+html[data-resolved-theme="dark"] .owner-location-map-tip strong {
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .owner-location-map-tip span {
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .upload-drop {
+  border-color: var(--control-border);
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .upload-drop:hover {
+  border-color: var(--control-border-hover);
+  background: var(--surface-hover);
+}
+
+html[data-resolved-theme="dark"] .upload-drop span {
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .listing-actions {
+  border-color: var(--border);
+  background: var(--surface-overlay);
+  box-shadow: var(--shadow-lg);
+}
+
+html[data-resolved-theme="dark"] .listing-readiness {
+  background: linear-gradient(145deg, var(--surface-solid), var(--surface-muted));
+}
+
+html[data-resolved-theme="dark"] .listing-readiness-score,
+html[data-resolved-theme="dark"] .listing-check {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .listing-readiness-score strong,
+html[data-resolved-theme="dark"] .listing-readiness-eyebrow {
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] .listing-readiness-score span,
+html[data-resolved-theme="dark"] .listing-readiness-head p,
+html[data-resolved-theme="dark"] .listing-check p {
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .listing-check.helpful {
+  border-color: var(--border);
+  background: var(--surface-soft);
+}
+
+html[data-resolved-theme="dark"] .listing-check.done {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+}
+
+html[data-resolved-theme="dark"] .listing-check.helpful > span {
+  background: var(--surface-muted);
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .listing-check.done > span {
+  background: color-mix(in srgb, var(--success-bg) 85%, var(--surface-solid));
+  color: var(--success);
+}
+
+html[data-resolved-theme="dark"] .listing-form :where(input, select, textarea) {
+  border-color: var(--control-border);
+  background: var(--surface-input);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .listing-form :where(input, select, textarea):focus {
+  border-color: var(--accent);
+  background: var(--control-background-hover);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+html[data-resolved-theme="dark"] .coordinate-readout,
+html[data-resolved-theme="dark"] .location-workflow-note {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .coordinate-readout strong {
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .coordinate-readout span,
+html[data-resolved-theme="dark"] .location-workflow-note span {
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .location-workflow-note strong {
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] .owner-dashboard-action-card.needs-attention,
+html[data-resolved-theme="dark"] .owner-attention-card {
+  border-color: var(--warning-border);
+  background: color-mix(in srgb, var(--warning-bg) 72%, var(--surface-solid));
+}
+
+html[data-resolved-theme="dark"] .owner-verification-badge.is-neutral {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--muted);
+}
