@@ -1,0 +1,103 @@
+/* About / Contact / Privacy / Terms appearance bridge. */
+
+html[data-resolved-theme="dark"] .info-page {
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 78% 8%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 25rem),
+    linear-gradient(180deg, var(--background-warm) 0%, var(--background) 48%, var(--surface-muted) 100%);
+}
+
+html[data-resolved-theme="dark"] .info-page::before {
+  opacity: .24;
+  background-image:
+    linear-gradient(var(--blueprint-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--blueprint-line) 1px, transparent 1px);
+}
+
+html[data-resolved-theme="dark"] .info-page::after {
+  border-color: color-mix(in srgb, var(--accent) 14%, transparent);
+  box-shadow:
+    0 0 0 72px color-mix(in srgb, var(--accent) 4%, transparent),
+    0 0 0 152px color-mix(in srgb, var(--accent) 2.5%, transparent),
+    0 0 0 236px color-mix(in srgb, var(--accent) 1.5%, transparent);
+}
+
+html[data-resolved-theme="dark"] .info-topbar {
+  border-color: var(--border);
+}
+
+html[data-resolved-theme="dark"] .info-topbar nav {
+  border-color: var(--border);
+  background: var(--surface-glass);
+}
+
+html[data-resolved-theme="dark"] .info-topbar nav a {
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .info-topbar nav a:hover,
+html[data-resolved-theme="dark"] .info-topbar nav a[aria-current="page"] {
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .info-hero .intro,
+  .info-legal-hero .intro,
+  .info-hero-note p,
+  .info-story-card p,
+  .info-support-grid p,
+  .info-legal-body p
+) {
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .info-hero-note > span,
+  .info-story-card > span,
+  .info-support-grid article > span,
+  .info-legal-body article > span,
+  .info-inline-links a
+) {
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .info-hero-note strong,
+  .info-story-card h2,
+  .info-support-grid h2,
+  .info-legal-body h2
+) {
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .info-hero-note,
+html[data-resolved-theme="dark"] .info-editorial-grid,
+html[data-resolved-theme="dark"] .info-story-card + .info-story-card,
+html[data-resolved-theme="dark"] .info-legal-body,
+html[data-resolved-theme="dark"] .info-legal-body article {
+  border-color: var(--border);
+}
+
+html[data-resolved-theme="dark"] .info-support-grid article,
+html[data-resolved-theme="dark"] .info-cta-band.subtle {
+  border-color: var(--border);
+  background: var(--surface-glass);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .info-cta-band {
+  background:
+    radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--accent-bright) 12%, transparent), transparent 18rem),
+    var(--surface-dark);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+html[data-resolved-theme="dark"] .info-cta-band.subtle {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 7%, transparent), transparent 55%),
+    var(--surface-glass);
+  color: var(--ink);
+  box-shadow: none;
+}
