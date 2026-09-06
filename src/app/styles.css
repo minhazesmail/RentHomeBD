@@ -1,6 +1,8 @@
 /* NearBasha global stylesheet manifest.
    Keep this file limited to design-system foundations and truly cross-product behavior.
-   Route-family styles are imported from their own pages/layouts so unrelated screens do not pay for them. */
+   Nested route-family styles are imported from their own layouts. The landing
+   page is the app root, so its dark appearance bridge is imported here but is
+   fully scoped to `.landing-*` selectors. */
 
 /* Appearance is the final layer. Core palette primitives load in tokens, while
    semantic appearance values load last so legacy globals cannot overwrite dark
@@ -29,3 +31,4 @@
 @import "./theme-tokens.css" layer(theme);
 @import "./theme.css" layer(theme);
 @import "./theme-dark-compat.css" layer(theme);
+@import "./landing-theme.css" layer(theme);
