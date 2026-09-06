@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { createContext, useCallback, useMemo, useState, type ReactNode } from "react";
 
 import {
@@ -35,6 +36,7 @@ export function LocaleProvider({
   initialLocale: Locale;
   children: ReactNode;
 }) {
+  const router = useRouter();
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   const setLocale = useCallback((nextLocale: Locale) => {
@@ -44,7 +46,8 @@ export function LocaleProvider({
     }
 
     setLocaleState(nextLocale);
-  }, []);
+    router.refresh();
+  }, [router]);
 
   const value = useMemo<LocaleContextValue>(
     () => ({
