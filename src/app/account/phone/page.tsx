@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { PhoneVerificationForm } from "@/components/phone-verification-form";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { getLocale } from "@/i18n/get-locale";
 import { requireUser } from "@/lib/auth";
@@ -28,7 +29,7 @@ export default async function PhoneVerificationPage() {
           <h1 className="listing-page-title">{isVerified ? copy.pageVerifiedTitle : copy.pageUnverifiedTitle}</h1>
           <p className="intro">{copy.pageDescription}</p>
         </div>
-        <div className="phone-verification-header-actions"><LanguageSwitcher /><Link className="text-link" href="/dashboard">{copy.backToDashboard}</Link></div>
+        <div className="phone-verification-header-actions"><LanguageSwitcher /><ThemeSwitcher compact /><Link className="text-link" href="/dashboard">{copy.backToDashboard}</Link></div>
       </header>
 
       <PhoneVerificationForm currentPhone={auth.phone ?? null} isVerified={isVerified} />
