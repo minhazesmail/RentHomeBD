@@ -27,4 +27,5 @@
 @import "./visual-regression-cleanup.css" layer(cleanup);
 @import "./spacing-normalization.css" layer(cleanup);
 @import "./theme.css" layer(theme);
+@import "./theme-dark-compat.css" layer(theme);
 @import "./theme-module-overrides.css" layer(theme);
