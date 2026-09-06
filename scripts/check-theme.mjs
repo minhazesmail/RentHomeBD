@@ -84,6 +84,7 @@ requireText("src/app/account/phone/page.tsx", "<ThemeSwitcher compact />", "phon
 requireText("src/app/styles.css", 'route-atmosphere, theme;', "theme as final cascade layer");
 requireText("src/app/styles.css", '@import "./theme-tokens.css" layer(theme);', "appearance tokens in final theme layer");
 requireText("src/app/styles.css", '@import "./theme.css" layer(theme);', "global appearance behavior in final theme layer");
+requireText("src/app/styles.css", '@import "./landing-theme.css" layer(theme);', "root landing appearance bridge");
 forbidText("src/app/styles.css", '@import "./theme-tokens.css" layer(tokens);', "theme tokens must not load before globals");
 forbidText("src/app/styles.css", "theme-compat.css", "unscoped legacy theme compatibility must not load globally");
 forbidText("src/app/styles.css", "theme-module-overrides.css", "unscoped CSS-module repaint overrides must not load globally");
@@ -117,14 +118,30 @@ for (const legacy of ["--nb-ink:", "--nb-emerald:", "--nb-sage-soft:", "--nb-ivo
   requireText("src/app/theme-tokens.css", legacy, `theme-aware compatibility alias ${legacy}`);
 }
 
-/* The global theme sheet must stay route agnostic. */
+/* The global theme sheet must stay route agnostic. The shared marketing nav may
+   reference `.landing-nav`, but route content surfaces must remain local. */
 requireText("src/app/theme.css", 'html[data-resolved-theme="dark"]', "dark-only visual scope");
 requireText("src/app/theme.css", ".leaflet-popup-content-wrapper", "Leaflet popup theming");
 requireText("src/app/theme.css", "Raster OSM tiles remain", "explicit basemap strategy");
 forbidText("src/app/theme.css", "\nbody {", "unscoped body theme rule is forbidden");
 forbidText("src/app/theme.css", "\nhtml {", "unscoped html theme rule is forbidden");
-for (const routePrefix of [".landing-", ".homes-", ".renter-", ".property-", ".saved-", ".messages-", ".dashboard-", ".owner-", ".moderation-", ".auth-", ".info-"]) {
-  forbidText("src/app/theme.css", routePrefix, `global theme sheet must not own route selector ${routePrefix}`);
+for (const routeSelector of [
+  ".landing-shell",
+  ".landing-search-",
+  ".landing-how-",
+  ".landing-listing-",
+  ".homes-",
+  ".renter-",
+  ".property-detail-",
+  ".saved-",
+  ".messages-",
+  ".dashboard-",
+  ".owner-",
+  ".moderation-",
+  ".auth-",
+  ".info-",
+]) {
+  forbidText("src/app/theme.css", routeSelector, `global theme sheet must not own route selector ${routeSelector}`);
 }
 
 /* Every major route family owns its appearance bridge in the final layer. */
@@ -140,6 +157,9 @@ requireText("src/components/saved-homes-workspace.module.css", "var(--control-ba
 requireText("src/components/saved-homes-workspace.module.css", "var(--accent-contrast)", "semantic saved accent text");
 forbidText("src/components/saved-homes-workspace.module.css", "background: #fff;", "saved module contains fixed white surface");
 forbidText("src/components/saved-homes-workspace.module.css", "background: #f6f8f3;", "saved module contains fixed light toolbar surface");
+requireText("src/components/listing-workflow-nav.module.css", "color: var(--accent-contrast);", "semantic completed listing-step contrast");
+requireText("src/components/property-location-actions.module.css", "color: var(--muted);", "semantic property-location helper text");
+forbidText("src/components/property-location-actions.module.css", "--color-text-muted", "undefined property-location text token fallback");
 
 requireText("src/components/brand-logo.tsx", '"brand-logo"', "stable brand-logo theme hook");
 requireText("src/app/theme.css", 'content: url("/nearbasha-logo-on-dark.svg")', "dark logo asset swap");
@@ -158,6 +178,7 @@ requireText(".github/workflows/ci.yml", "playwright install --with-deps chromium
 requireText("scripts/check-theme-browser.mjs", 'preference: "system", colorScheme: "dark", expected: "dark"', "System dark browser scenario");
 requireText("scripts/check-theme-browser.mjs", 'preference: "system", colorScheme: "light", expected: "light"', "System light browser scenario");
 requireText("scripts/check-theme-browser.mjs", "contrastRatio", "computed contrast checks");
+requireText("scripts/check-theme-browser.mjs", "complexBackground", "gradient-aware contrast handling");
 requireText("scripts/check-theme-browser.mjs", "computed-theme-snapshots.json", "computed appearance artifact");
 
 if (failures.length) {
