@@ -2,14 +2,13 @@
    Keep this file limited to design-system foundations and truly cross-product behavior.
    Route-family styles are imported from their own pages/layouts so unrelated screens do not pay for them. */
 
-/* Explicit cascade order. Route manifests reuse these named layers. Theme remains
-   last, but its declarations are strictly scoped to resolved dark mode so the
-   existing light design stays byte-for-byte driven by its original styles. */
+/* Appearance is the final layer. Core palette primitives load in tokens, while
+   semantic appearance values load last so legacy globals cannot overwrite dark
+   or system-resolved values. */
 @layer tokens, globals, primitives, foundation, shells, brand, motion, responsive, accessibility, performance, cleanup, route-base, route-polish, route-redesign, route-detail, route-fixes, route-contrast, route-atmosphere, theme;
 
 /* Design system foundation */
 @import "./tokens.css" layer(tokens);
-@import "./theme-tokens.css" layer(tokens);
 @import "./globals.css" layer(globals);
 @import "./localization.css" layer(globals);
 @import "./primitives.css" layer(primitives);
@@ -24,5 +23,9 @@
 @import "./performance-optimizations.css" layer(performance);
 @import "./visual-regression-cleanup.css" layer(cleanup);
 @import "./spacing-normalization.css" layer(cleanup);
+
+/* Appearance contract must be first inside the final layer so theme.css and
+   route-specific theme files can consume it without redefining tokens. */
+@import "./theme-tokens.css" layer(theme);
 @import "./theme.css" layer(theme);
 @import "./theme-dark-compat.css" layer(theme);
