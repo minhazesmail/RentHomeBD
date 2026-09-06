@@ -54,6 +54,7 @@
 
 .actions {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
@@ -102,6 +103,10 @@
 
   .center a {
     font-size: .75rem;
+  }
+
+  .actions {
+    gap: 7px;
   }
 
   .actions :global(.text-link) {

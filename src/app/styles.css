@@ -10,6 +10,7 @@
 /* Design system foundation */
 @import "./tokens.css" layer(tokens);
 @import "./globals.css" layer(globals);
+@import "./localization.css" layer(globals);
 @import "./primitives.css" layer(primitives);
 @import "./foundation.css" layer(foundation);
 @import "./shells.css" layer(shells);

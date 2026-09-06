@@ -1,0 +1,43 @@
+/* Locale-aware typography stays global because language mode is site-wide. */
+html[lang="bn"] {
+  --font-sans: var(--font-bangla);
+  --font-display: var(--font-bangla);
+  --leading-tight: 1.12;
+  --leading-heading: 1.2;
+  --leading-body: 1.72;
+  --leading-helper: 1.62;
+  --tracking-display: -0.025em;
+  --tracking-heading: -0.015em;
+}
+
+html[lang="bn"] h1,
+html[lang="bn"] h2,
+html[lang="bn"] h3,
+html[lang="bn"] h4,
+html[lang="bn"] h5,
+html[lang="bn"] h6 {
+  font-family: var(--font-bangla);
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--leading-heading);
+}
+
+html[lang="bn"] h1 {
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+}
+
+html[lang="bn"] button,
+html[lang="bn"] input,
+html[lang="bn"] select,
+html[lang="bn"] textarea {
+  font-family: var(--font-bangla);
+  line-height: 1.5;
+}
+
+html[lang="bn"] .landing-display,
+html[lang="bn"] .auth-title {
+  font-family: var(--font-bangla);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
