@@ -7,33 +7,15 @@ import { LandingFaqSection } from "@/components/landing-faq-section";
 import { LandingFeaturedSection } from "@/components/landing-featured-section";
 import { LandingMapPreview } from "@/components/landing-map-preview";
 import { LandingScrollAtmosphere } from "@/components/landing-scroll-atmosphere";
+import { MarketingNavigation } from "@/components/marketing-navigation";
+import { formatCurrency, formatNumber } from "@/i18n/format";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { getLocale } from "@/i18n/get-locale";
+import { interpolate, localizeLocationLabel } from "@/i18n/presentation";
 import { LOCATION_PRESETS } from "@/lib/location-presets";
 import { DEFAULT_RENTER_SEARCH_RADIUS } from "@/lib/search-defaults";
 
 const LIST_PROPERTY_HREF = "/login?intent=list-property&next=%2Fowner%2Fproperties%2Fnew";
-
-const trustSignals = [
-  {
-    title: "Phone OTP verification",
-    description: "Account verification adds a stronger identity signal before people list, save, or contact through the platform.",
-    icon: "phone",
-  },
-  {
-    title: "Moderated before live",
-    description: "Listings can be reviewed before they become discoverable, giving obvious abuse and low-quality submissions another checkpoint.",
-    icon: "shield",
-  },
-  {
-    title: "Exact map pins",
-    description: "Renters can judge the real location around work, university, transport, or family instead of relying only on area names.",
-    icon: "pin",
-  },
-  {
-    title: "Freshness & reporting",
-    description: "Availability checks and reporting tools are designed to reduce stale, misleading, or suspicious listings over time.",
-    icon: "refresh",
-  },
-];
 
 function TrustIcon({ type }: { type: string }) {
   if (type === "phone") return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10 5h4M11 18.5h2"/></svg>;
@@ -42,91 +24,93 @@ function TrustIcon({ type }: { type: string }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M18.3 15.6A7.5 7.5 0 1 1 19 8l1 4"/><path d="m9.5 12 1.7 1.7 3.5-3.7"/></svg>;
 }
 
-// TODO(i18n): Treat each major marketing copy block on this page as a future translation target.
-export default function HomePage() {
+export default async function HomePage() {
+  const locale = await getLocale();
+  const dictionary = getDictionary(locale);
+  const landing = dictionary.landing;
+  const hero = landing.hero;
+  const radius = formatNumber(DEFAULT_RENTER_SEARCH_RADIUS, locale, { maximumFractionDigits: 1 });
+  const trustSignals = [
+    { title: landing.trust.phoneTitle, description: landing.trust.phoneDescription, icon: "phone" },
+    { title: landing.trust.moderationTitle, description: landing.trust.moderationDescription, icon: "shield" },
+    { title: landing.trust.pinTitle, description: landing.trust.pinDescription, icon: "pin" },
+    { title: landing.trust.freshnessTitle, description: landing.trust.freshnessDescription, icon: "refresh" },
+  ];
+
   return (
     <main className="landing-shell" data-landing-theme="hero" data-atmosphere="hero" data-scroll-direction="down">
       <LandingScrollAtmosphere />
       <div className="landing-frame">
-        <nav className="landing-nav">
-          <BrandLogo />
-          <div className="landing-nav-center" aria-label="Primary navigation">
-            <Link href="/homes">Find on map</Link>
-            <a href="#how-heading">How it works</a>
-            <Link href="/about">About</Link>
-          </div>
-          <div className="landing-nav-actions">
-            <Link className="text-link" href="/login">Sign in</Link>
-            <Link className="primary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link>
-          </div>
-        </nav>
+        <MarketingNavigation variant="landing" />
 
         <section className="landing-hero landing-hero-reference" data-scroll-theme="hero">
           <div className="landing-copy">
-            <div className="landing-live-kicker"><span aria-hidden="true" />Bangladesh-focused · launching in Dhaka</div>
-            <h1>Find a home close to the life you already live.</h1>
-            <p className="intro">Search Dhaka around the streets, campuses, offices, and neighborhoods that matter to you. Compare location and renter fit before you visit.</p>
+            <div className="landing-live-kicker"><span aria-hidden="true" />{hero.kicker}</div>
+            <h1>{hero.title}</h1>
+            <p className="intro">{hero.description}</p>
 
             <form className="landing-search-console" action="/homes" method="get" role="search">
               <div className="landing-search-console-heading">
-                <div><span>Start your Dhaka search</span><strong>Where should home be?</strong></div>
-                <ShieldCheck aria-label="Moderated listings" />
+                <div><span>{hero.searchKicker}</span><strong>{hero.searchTitle}</strong></div>
+                <ShieldCheck aria-label={hero.moderatedListings} />
               </div>
               <div className="landing-search-console-fields">
                 <label className="landing-search-console-field landing-search-console-area">
                   <MapPin aria-hidden="true" />
-                  <span>Supported Dhaka area or landmark</span>
+                  <span>{hero.areaLabel}</span>
                   <select name="area" defaultValue="" required aria-describedby="landing-area-help">
-                    <option value="" disabled>Choose a Dhaka location</option>
-                    {LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label}>{location.label}</option>)}
+                    <option value="" disabled>{hero.chooseLocation}</option>
+                    {LOCATION_PRESETS.map((location) => (
+                      <option key={location.label} value={location.label}>{localizeLocationLabel(location.label, dictionary)}</option>
+                    ))}
                   </select>
                 </label>
                 <label className="landing-search-console-field">
                   <Building2 aria-hidden="true" />
-                  <span>Monthly budget</span>
+                  <span>{hero.budgetLabel}</span>
                   <select name="maxRent" defaultValue="">
-                    <option value="">Any budget</option>
-                    <option value="15000">Up to ৳15,000</option>
-                    <option value="25000">Up to ৳25,000</option>
-                    <option value="40000">Up to ৳40,000</option>
-                    <option value="60000">Up to ৳60,000</option>
+                    <option value="">{hero.anyBudget}</option>
+                    {[15000, 25000, 40000, 60000].map((amount) => (
+                      <option value={amount} key={amount}>{hero.upTo} {formatCurrency(amount, locale)}</option>
+                    ))}
                   </select>
                 </label>
                 <label className="landing-search-console-field">
                   <BedDouble aria-hidden="true" />
-                  <span>Bedrooms</span>
+                  <span>{hero.bedroomsLabel}</span>
                   <select name="bedrooms" defaultValue="">
-                    <option value="">Any size</option>
-                    <option value="1">1+ bedroom</option>
-                    <option value="2">2+ bedrooms</option>
-                    <option value="3">3+ bedrooms</option>
+                    <option value="">{hero.anySize}</option>
+                    <option value="1">{hero.bedroomOne}</option>
+                    {[2, 3].map((count) => (
+                      <option value={count} key={count}>{interpolate(hero.bedroomMany, { count: formatNumber(count, locale, { useGrouping: false }) })}</option>
+                    ))}
                   </select>
                 </label>
                 <input type="hidden" name="radius" value={DEFAULT_RENTER_SEARCH_RADIUS} />
-                <button className="landing-search-submit" type="submit"><Search aria-hidden="true" /><span>Search map</span><ArrowRight aria-hidden="true" /></button>
+                <button className="landing-search-submit" type="submit"><Search aria-hidden="true" /><span>{hero.searchMap}</span><ArrowRight aria-hidden="true" /></button>
               </div>
-              <p className="form-hint" id="landing-area-help">Current location search supports the Dhaka areas and landmarks listed here. Searches start within {DEFAULT_RENTER_SEARCH_RADIUS} km; refine the radius or move the full map manually.</p>
+              <p className="form-hint" id="landing-area-help">{interpolate(hero.areaHelp, { radius })}</p>
             </form>
 
             <div className="landing-popular-searches">
-              <span>Popular in Dhaka:</span>
-              <Link href={`/homes?area=Dhanmondi&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Dhanmondi</Link>
-              <Link href={`/homes?area=Banani&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Banani</Link>
-              <Link href={`/homes?area=Uttara&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Uttara</Link>
-              <Link href={`/homes?area=BUET&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>Near BUET</Link>
+              <span>{hero.popular}</span>
+              <Link href={`/homes?area=Dhanmondi&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>{dictionary.common.locations.dhanmondi}</Link>
+              <Link href={`/homes?area=Banani&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>{dictionary.common.locations.banani}</Link>
+              <Link href={`/homes?area=Uttara&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>{dictionary.common.locations.uttara}</Link>
+              <Link href={`/homes?area=BUET&radius=${DEFAULT_RENTER_SEARCH_RADIUS}`}>{hero.nearBuet}</Link>
             </div>
 
-            <div className="landing-confidence-row" aria-label="NearBasha marketplace safeguards">
-              <div><strong>Exact map pins</strong><span>See the real neighborhood</span></div>
-              <div><strong>Renter-fit signals</strong><span>Know who each home suits</span></div>
-              <div><strong>Freshness checks</strong><span>Less time on stale listings</span></div>
+            <div className="landing-confidence-row" aria-label={hero.safeguardsAria}>
+              <div><strong>{hero.exactPinsTitle}</strong><span>{hero.exactPinsDescription}</span></div>
+              <div><strong>{hero.renterFitTitle}</strong><span>{hero.renterFitDescription}</span></div>
+              <div><strong>{hero.freshnessTitle}</strong><span>{hero.freshnessDescription}</span></div>
             </div>
           </div>
           <div className="landing-visual">
             <div className="landing-map-caption">
               <span className="landing-map-caption-dot" aria-hidden="true" />
-              <div><strong>Explore Dhaka visually</strong><small>Move the map, then refine your radius</small></div>
-              <Link href="/homes">Open full map <ArrowRight aria-hidden="true" /></Link>
+              <div><strong>{hero.mapTitle}</strong><small>{hero.mapDescription}</small></div>
+              <Link href="/homes">{hero.openFullMap} <ArrowRight aria-hidden="true" /></Link>
             </div>
             <LandingMapPreview />
           </div>
@@ -134,8 +118,8 @@ export default function HomePage() {
 
         <section className="landing-trust-section" data-scroll-theme="trust" aria-labelledby="trust-heading">
           <div className="landing-trust-heading">
-            <div><p className="eyebrow">Built for higher-trust renting</p><h2 id="trust-heading">More context before you commit.</h2></div>
-            <p>Verification signals, moderation, precise location, and freshness controls help both sides make better-informed decisions.</p>
+            <div><p className="eyebrow">{landing.trust.eyebrow}</p><h2 id="trust-heading">{landing.trust.title}</h2></div>
+            <p>{landing.trust.description}</p>
           </div>
           <div className="landing-trust-grid">
             {trustSignals.map((signal) => (
@@ -145,37 +129,36 @@ export default function HomePage() {
               </article>
             ))}
           </div>
-          <div className="landing-trust-note"><strong>No inflated marketplace claims.</strong><span>NearBasha uses live marketplace inventory on this page instead of fabricated listing counts or sample property claims.</span></div>
+          <div className="landing-trust-note"><strong>{landing.trust.noteTitle}</strong><span>{landing.trust.noteDescription}</span></div>
         </section>
 
         <section className="landing-content-section landing-how" data-scroll-theme="journey" aria-labelledby="how-heading">
-          <div className="landing-section-intro"><p className="eyebrow">How it works</p><h2 id="how-heading">A clearer path for both sides of the rental.</h2><p>Choose your side to see only the steps that matter to you.</p></div>
+          <div className="landing-section-intro"><p className="eyebrow">{landing.how.eyebrow}</p><h2 id="how-heading">{landing.how.title}</h2><p>{landing.how.description}</p></div>
           <HowItWorksTabs />
         </section>
 
         <LandingFeaturedSection />
-
         <LandingFaqSection />
 
-        <section className="landing-cta-band" data-scroll-theme="action" aria-label="Start using NearBasha">
-          <div><p className="eyebrow">Ready when you are</p><h2>Start with the map.</h2><p>Browse current Dhaka homes, or add a property for renters to discover.</p></div>
-          <div className="landing-cta-actions"><Link className="primary-button link-button" href="/homes">Browse the live map</Link><Link className="secondary-button link-button" href={LIST_PROPERTY_HREF}>List a property</Link></div>
+        <section className="landing-cta-band" data-scroll-theme="action" aria-label={landing.cta.aria}>
+          <div><p className="eyebrow">{landing.cta.eyebrow}</p><h2>{landing.cta.title}</h2><p>{landing.cta.description}</p></div>
+          <div className="landing-cta-actions"><Link className="primary-button link-button" href="/homes">{landing.cta.browseMap}</Link><Link className="secondary-button link-button" href={LIST_PROPERTY_HREF}>{landing.cta.listProperty}</Link></div>
         </section>
 
         <footer className="landing-footer" data-scroll-theme="footer">
-          <div className="landing-footer-brand"><BrandLogo /><p>Bangladesh-focused rental discovery, launching first in Dhaka.</p></div>
+          <div className="landing-footer-brand"><BrandLogo /><p>{landing.footer.tagline}</p></div>
           <div className="landing-footer-links">
-            <div><strong>Product</strong><Link href="/homes">Browse homes</Link><Link href={LIST_PROPERTY_HREF}>List a property</Link><Link href="/login">Sign in</Link></div>
-            <div><strong>Company</strong><Link href="/about">About</Link><Link href="/contact">Contact</Link></div>
-            <div><strong>Legal</strong><Link href="/terms">Terms</Link><Link href="/privacy">Privacy</Link></div>
+            <div><strong>{landing.footer.product}</strong><Link href="/homes">{landing.footer.browseHomes}</Link><Link href={LIST_PROPERTY_HREF}>{landing.footer.listProperty}</Link><Link href="/login">{landing.footer.signIn}</Link></div>
+            <div><strong>{landing.footer.company}</strong><Link href="/about">{landing.footer.about}</Link><Link href="/contact">{landing.footer.contact}</Link></div>
+            <div><strong>{landing.footer.legal}</strong><Link href="/terms">{landing.footer.terms}</Link><Link href="/privacy">{landing.footer.privacy}</Link></div>
           </div>
           <div className="landing-footer-bottom">
-            <span>Dhaka launch market</span>
-            <div className="landing-footer-studio" aria-label="Built by Hemilin Studio">
+            <span>{landing.footer.launchMarket}</span>
+            <div className="landing-footer-studio" aria-label={landing.footer.builtByAria}>
               <img src="/hemilin-studio.svg" alt="Hemilin Studio" className="landing-footer-studio-logo" />
-              <span>By Hemilin Studio</span>
+              <span>{landing.footer.byStudio}</span>
             </div>
-            <span>© 2026 NearBasha. All rights reserved.</span>
+            <span>{interpolate(landing.footer.copyright, { year: formatNumber(2026, locale, { useGrouping: false }) })}</span>
           </div>
         </footer>
       </div>
