@@ -38,15 +38,42 @@ export function ThemeSwitcher({ compact = false }: { compact?: boolean }) {
     if (detailsRef.current) detailsRef.current.open = false;
   }
 
+  function menuOptions() {
+    return Array.from(detailsRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]') ?? []);
+  }
+
   return (
     <details
       className={`${styles.root} ${compact ? styles.compact : ""}`}
       ref={detailsRef}
+      onToggle={(event) => {
+        if (!event.currentTarget.open) return;
+        requestAnimationFrame(() => {
+          const options = menuOptions();
+          (options.find((option) => option.getAttribute("aria-checked") === "true") ?? options[0])?.focus();
+        });
+      }}
       onKeyDown={(event) => {
         if (event.key === "Escape" && detailsRef.current) {
+          event.preventDefault();
           detailsRef.current.open = false;
           detailsRef.current.querySelector("summary")?.focus();
+          return;
         }
+
+        if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+        const options = menuOptions();
+        if (!options.length) return;
+        event.preventDefault();
+        const currentIndex = options.indexOf(document.activeElement as HTMLButtonElement);
+        const nextIndex = event.key === "Home"
+          ? 0
+          : event.key === "End"
+            ? options.length - 1
+            : event.key === "ArrowDown"
+              ? (Math.max(currentIndex, -1) + 1) % options.length
+              : (currentIndex <= 0 ? options.length : currentIndex) - 1;
+        options[nextIndex]?.focus();
       }}
     >
       <summary className={styles.trigger} aria-label={copy.changeAppearance} aria-haspopup="menu">
