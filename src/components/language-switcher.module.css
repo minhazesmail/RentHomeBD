@@ -3,9 +3,9 @@
   align-items: center;
   min-height: 36px;
   padding: 3px 5px;
-  border: 1px solid rgba(16, 37, 29, .1);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 252, .72);
+  background: var(--control-background);
   color: var(--ink-soft);
   white-space: nowrap;
 }
@@ -35,21 +35,37 @@
 }
 
 .activeChoice {
-  background: var(--emerald-950);
-  color: #fff;
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
   cursor: default;
 }
 
 .separator {
-  color: var(--stone-400);
+  color: var(--muted-faint);
   font-size: .68rem;
   user-select: none;
 }
 
 .choice:focus-visible,
 .activeChoice:focus-visible {
-  outline: 3px solid rgba(157, 216, 76, .52);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+:global(.landing-nav) .switcher {
+  border-color: rgba(255, 255, 255, .16);
+  background: rgba(255, 255, 255, .08);
+  color: rgba(255, 255, 255, .88);
+}
+
+:global(.landing-nav) .choice:hover {
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+}
+
+:global(.landing-nav) .activeChoice {
+  background: rgba(185, 242, 39, .18);
+  color: #fff;
 }
 
 @media (max-width: 600px) {
