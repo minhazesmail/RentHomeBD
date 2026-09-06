@@ -6,18 +6,27 @@
   gap: 10px;
 }
 
+html[lang="bn"] .auth-title,
+html[lang="bn"] .auth-card h2 {
+  font-family: var(--font-bangla);
+  letter-spacing: -.018em;
+  line-height: 1.16;
+}
+
+html[lang="bn"] .auth-intro-panel .eyebrow,
+html[lang="bn"] .auth-card .eyebrow,
+html[lang="bn"] .phone-verification-stage .eyebrow,
+html[lang="bn"] .phone-verification-trust-note .eyebrow {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 html[lang="bn"] .phone-verification-stage h2,
 html[lang="bn"] .phone-verification-trust-note h2,
 html[lang="bn"] .phone-verification-page-header h1 {
   font-family: var(--font-bangla);
   letter-spacing: -.015em;
   line-height: 1.18;
-}
-
-html[lang="bn"] .phone-verification-stage .eyebrow,
-html[lang="bn"] .phone-verification-trust-note .eyebrow {
-  letter-spacing: 0;
-  text-transform: none;
 }
 
 html[lang="bn"] .phone-verification-progress small {
