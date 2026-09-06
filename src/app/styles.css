@@ -11,6 +11,7 @@
 /* Design system foundation */
 @import "./tokens.css" layer(tokens);
 @import "./theme-tokens.css" layer(tokens);
+@import "./theme-compat.css" layer(tokens);
 @import "./globals.css" layer(globals);
 @import "./localization.css" layer(globals);
 @import "./primitives.css" layer(primitives);
