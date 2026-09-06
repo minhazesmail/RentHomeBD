@@ -11,3 +11,4 @@
 @import "./landing-inventory-redesign.css" layer(route-contrast);
 @import "./landing-atmosphere.css" layer(route-atmosphere);
 @import "./landing-hero-spacing.css" layer(route-atmosphere);
+@import "./landing-faq-redesign.css" layer(route-atmosphere);
