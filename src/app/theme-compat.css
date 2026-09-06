@@ -14,6 +14,8 @@
 
 html[data-theme="dark"] {
   --accent-dark: #50cc98;
+  --accent-bright-soft: rgba(157, 216, 76, .15);
+  --highlight-soft: rgba(197, 165, 116, .13);
   --verified: #7dd8d0;
   --verified-soft: rgba(36, 153, 143, .16);
   --nb-emerald-deep: #50cc98;
@@ -22,6 +24,8 @@ html[data-theme="dark"] {
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"] {
     --accent-dark: #50cc98;
+    --accent-bright-soft: rgba(157, 216, 76, .15);
+    --highlight-soft: rgba(197, 165, 116, .13);
     --verified: #7dd8d0;
     --verified-soft: rgba(36, 153, 143, .16);
     --nb-emerald-deep: #50cc98;
