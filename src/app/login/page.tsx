@@ -2,6 +2,7 @@ import { ShieldCheck } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { getLocale } from "@/i18n/get-locale";
 import { AuthForm } from "./auth-form";
@@ -32,7 +33,7 @@ export default async function LoginPage({
     <main className="shell auth-shell">
       <section className="auth-layout">
         <div className="auth-intro-panel">
-          <div className="auth-language-row"><BrandLogo className="auth-brand-logo" /><LanguageSwitcher /></div>
+          <div className="auth-language-row"><BrandLogo className="auth-brand-logo" /><div className="auth-preference-controls"><LanguageSwitcher /><ThemeSwitcher compact /></div></div>
           <p className="eyebrow">{listingIntent ? copy.listingEyebrow : copy.regularEyebrow}</p>
           <h1 className="auth-title">{listingIntent ? copy.listingTitle : copy.regularTitle}</h1>
           <p className="intro">{listingIntent ? copy.listingDescription : copy.regularDescription}</p>
