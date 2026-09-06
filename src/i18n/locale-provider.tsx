@@ -7,13 +7,23 @@ import {
   LOCALE_COOKIE_NAME,
   type Locale,
 } from "./config";
-import { getDictionary } from "./get-dictionary";
 import type { Dictionary } from "./dictionaries/en";
+import {
+  formatCurrency as formatCurrencyValue,
+  formatDate as formatDateValue,
+  formatNumber as formatNumberValue,
+  formatRelativeTime as formatRelativeTimeValue,
+} from "./format";
+import { getDictionary } from "./get-dictionary";
 
 export type LocaleContextValue = {
   locale: Locale;
   dictionary: Dictionary;
   setLocale: (locale: Locale) => void;
+  formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string;
+  formatCurrency: (value: number) => string;
+  formatDate: (value: Date | number | string, options?: Intl.DateTimeFormatOptions) => string;
+  formatRelativeTime: (value: number, unit: Intl.RelativeTimeFormatUnit) => string;
 };
 
 export const LocaleContext = createContext<LocaleContextValue | null>(null);
@@ -41,6 +51,10 @@ export function LocaleProvider({
       locale,
       dictionary: getDictionary(locale),
       setLocale,
+      formatNumber: (number, options) => formatNumberValue(number, locale, options),
+      formatCurrency: (number) => formatCurrencyValue(number, locale),
+      formatDate: (date, options) => formatDateValue(date, locale, options),
+      formatRelativeTime: (number, unit) => formatRelativeTimeValue(number, unit, locale),
     }),
     [locale, setLocale],
   );
