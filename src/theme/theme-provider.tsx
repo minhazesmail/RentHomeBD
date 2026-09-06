@@ -22,8 +22,14 @@ function systemTheme(): ResolvedTheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+function currentDocumentTheme(fallback: ResolvedTheme): ResolvedTheme {
+  if (typeof document === "undefined") return fallback;
+  return document.documentElement.dataset.resolvedTheme === "dark" ? "dark" : "light";
+}
+
 function applyResolvedTheme(theme: ResolvedTheme) {
   document.documentElement.dataset.resolvedTheme = theme;
+  document.documentElement.dataset.themeReady = "true";
 }
 
 export function ThemeProvider({
@@ -33,9 +39,10 @@ export function ThemeProvider({
   initialPreference: ThemePreference;
   children: ReactNode;
 }) {
+  const fallbackResolvedTheme: ResolvedTheme = initialPreference === "dark" ? "dark" : "light";
   const [preference, setPreferenceState] = useState<ThemePreference>(initialPreference);
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
-    initialPreference === "dark" ? "dark" : "light",
+    currentDocumentTheme(fallbackResolvedTheme),
   );
 
   useEffect(() => {
