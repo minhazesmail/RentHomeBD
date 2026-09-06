@@ -39,19 +39,6 @@
 .auth-card .auth-mode-switch .text-button:hover { color: #075943; }
 .auth-card .auth-mode-switch .text-button:focus-visible { outline: 3px solid rgba(8, 118, 83, .18); outline-offset: 3px; border-radius: 4px; }
 
-html[lang="bn"] .auth-title,
-html[lang="bn"] .auth-card h2 {
-  font-family: var(--font-bangla);
-  letter-spacing: -.018em;
-  line-height: 1.16;
-}
-
-html[lang="bn"] .auth-intro-panel .eyebrow,
-html[lang="bn"] .auth-card .eyebrow {
-  letter-spacing: 0;
-  text-transform: none;
-}
-
 @media (max-width: 640px) {
   .auth-language-row { align-items: center; margin-bottom: 18px; }
   .auth-intro-panel .auth-owner-note { gap: 10px; margin-top: 20px; padding: 14px; }
