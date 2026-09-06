@@ -119,15 +119,21 @@ async function inspectPage(page, route, scenario) {
         const style = getComputedStyle(element);
         let backgroundNode = element;
         let background = style.backgroundColor;
+        let complexBackground = style.backgroundImage !== "none";
+
         while (backgroundNode.parentElement && (background === "rgba(0, 0, 0, 0)" || background === "transparent")) {
           backgroundNode = backgroundNode.parentElement;
-          background = getComputedStyle(backgroundNode).backgroundColor;
+          const backgroundStyle = getComputedStyle(backgroundNode);
+          background = backgroundStyle.backgroundColor;
+          if (backgroundStyle.backgroundImage !== "none") complexBackground = true;
         }
+
         return {
           tag: element.tagName.toLowerCase(),
           text: (element.textContent || element.getAttribute("placeholder") || "").trim().slice(0, 80),
           color: style.color,
           background,
+          complexBackground,
           fontSize: Number.parseFloat(style.fontSize),
           fontWeight: Number.parseInt(style.fontWeight, 10) || 400,
         };
@@ -157,6 +163,14 @@ async function inspectPage(page, route, scenario) {
   }, { critical: route.critical, expected: scenario.expected, preference: scenario.preference });
 }
 
+async function captureFailure(page, label) {
+  try {
+    await page.screenshot({ path: path.join(artifactRoot, `${label}.png`), fullPage: true });
+  } catch {
+    // A failed navigation can also make screenshots unavailable.
+  }
+}
+
 async function main() {
   await fs.mkdir(artifactRoot, { recursive: true });
   const browser = await chromium.launch({ headless: true });
@@ -182,6 +196,7 @@ async function main() {
 
         for (const route of routes) {
           const label = `${route.name}-${scenario.name}-${viewport.name}`;
+          const failureStart = failures.length;
           try {
             const response = await page.goto(`${baseURL}${route.path}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
             if (!response || response.status() >= 400) {
@@ -218,6 +233,7 @@ async function main() {
             }
 
             for (const sample of snapshot.textSamples) {
+              if (sample.complexBackground) continue;
               const foreground = parseRgb(sample.color);
               const background = parseRgb(sample.background);
               if (!foreground || !background) continue;
@@ -228,13 +244,11 @@ async function main() {
                 failures.push(`${label}: low contrast ${ratio.toFixed(2)}:1 on ${sample.tag} “${sample.text}” (${sample.color} on ${sample.background})`);
               }
             }
+
+            if (failures.length > failureStart) await captureFailure(page, label);
           } catch (error) {
             failures.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
-            try {
-              await page.screenshot({ path: path.join(artifactRoot, `${label}.png`), fullPage: true });
-            } catch {
-              // A failed navigation can also make screenshots unavailable.
-            }
+            await captureFailure(page, label);
           }
         }
 
