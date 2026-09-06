@@ -59,7 +59,7 @@ requireText("src/app/layout.tsx", "data-theme={themePreference}", "SSR preferenc
 requireText("src/app/layout.tsx", "data-resolved-theme={initialResolvedTheme}", "SSR resolved-theme attribute");
 requireText("src/app/layout.tsx", "suppressHydrationWarning", "prepaint system hydration safety");
 requireText("src/app/layout.tsx", "themeBootstrap", "prepaint system appearance bootstrap");
-requireText("src/app/layout.tsx", 'matchMedia(\\"(prefers-color-scheme: dark)\\")', "bootstrap OS appearance resolution");
+requireText("src/app/layout.tsx", 'matchMedia("(prefers-color-scheme: dark)")', "bootstrap OS appearance resolution");
 requireText("src/app/layout.tsx", "themeReady", "bootstrap readiness marker");
 requireText("src/app/layout.tsx", "<ThemeProvider initialPreference={themePreference}>", "theme provider");
 
