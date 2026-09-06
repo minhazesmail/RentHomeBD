@@ -4,6 +4,9 @@ import "leaflet/dist/leaflet.css";
 import "./styles.css";
 
 import { GlobalShell } from "@/components/global-shell";
+import { LocalizedSkipLink } from "@/components/localized-skip-link";
+import { getLocale } from "@/i18n/get-locale";
+import { LocaleProvider } from "@/i18n/locale-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,7 +15,7 @@ const inter = Inter({
 });
 
 const hindSiliguri = Hind_Siliguri({
-  subsets: ["bengali"],
+  subsets: ["bengali", "latin"],
   weight: ["400", "600"],
   display: "swap",
   preload: false,
@@ -27,14 +30,18 @@ export const metadata: Metadata = {
   description: "Search moderated rental homes on a live map in Dhaka. NearBasha is a Bangladesh-focused rental marketplace launching first in Dhaka.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" className={`${inter.variable} ${hindSiliguri.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${hindSiliguri.variable}`}>
       <body>
-        <a className="skip-link" href="#main-content">Skip to main content</a>
-        <div id="main-content" tabIndex={-1}>
-          <GlobalShell>{children}</GlobalShell>
-        </div>
+        <LocaleProvider initialLocale={locale}>
+          <LocalizedSkipLink />
+          <div id="main-content" tabIndex={-1}>
+            <GlobalShell>{children}</GlobalShell>
+          </div>
+        </LocaleProvider>
       </body>
     </html>
   );

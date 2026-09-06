@@ -85,7 +85,10 @@
 
 .productNavAccount {
   display: flex;
+  min-width: 0;
+  align-items: center;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 .productNavAccountLink,
@@ -118,6 +121,10 @@
     grid-template-columns: 1fr auto;
     gap: 7px 10px;
     padding: 8px 0 9px;
+  }
+
+  .productNavAccount {
+    gap: 6px;
   }
 
   .productNavLinks {
