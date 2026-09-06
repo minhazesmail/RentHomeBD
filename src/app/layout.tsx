@@ -32,13 +32,27 @@ export const metadata: Metadata = {
   description: "Search moderated rental homes on a live map in Dhaka. NearBasha is a Bangladesh-focused rental marketplace launching first in Dhaka.",
 };
 
+/* Runs synchronously while the document is parsed. This is intentionally tiny:
+   System mode must resolve before paint so a dark OS never flashes or hydrates
+   through the light palette. Explicit Light/Dark do not depend on matchMedia. */
+const themeBootstrap = `(()=>{try{const e=document.documentElement,p=e.dataset.theme||"system";const r=p==="dark"||(p==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";e.dataset.resolvedTheme=r;e.dataset.themeReady="true"}catch{}})();`;
+
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const locale = await getLocale();
   const themePreference = await getThemePreference();
   const initialResolvedTheme = themePreference === "dark" ? "dark" : "light";
 
   return (
-    <html lang={locale} data-theme={themePreference} data-resolved-theme={initialResolvedTheme} className={`${inter.variable} ${hindSiliguri.variable}`}>
+    <html
+      lang={locale}
+      data-theme={themePreference}
+      data-resolved-theme={initialResolvedTheme}
+      className={`${inter.variable} ${hindSiliguri.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body>
         <LocaleProvider initialLocale={locale}>
           <ThemeProvider initialPreference={themePreference}>
