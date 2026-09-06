@@ -23,6 +23,11 @@ function requireRegex(relativePath, regex, label) {
   if (!regex.test(source)) failures.push(`${relativePath}: missing ${label}`);
 }
 
+function forbidRegex(relativePath, regex, label) {
+  const source = read(relativePath);
+  if (regex.test(source)) failures.push(`${relativePath}: ${label}`);
+}
+
 function collectFiles(directory, predicate) {
   const output = [];
   if (!fs.existsSync(directory)) return output;
@@ -70,6 +75,15 @@ for (const route of ["src/app/error.tsx", "src/app/not-found.tsx", "src/app/auth
 }
 requireText("src/components/recovery-state.module.css", "@media (max-width: 560px)", "mobile recovery breakpoint");
 requireText("src/components/recovery-state.module.css", "focus-visible", "visible keyboard focus treatment");
+
+// Login trust guidance is not field-helper copy, and the account-mode switch
+// must retain explicit separation between prompt and action at every width.
+requireText("src/app/auth-styles.css", "auth-login-polish.css", "auth login polish style layer");
+requireText("src/app/login/page.tsx", "className=\"auth-owner-note\"", "dedicated owner trust note");
+forbidRegex("src/app/login/page.tsx", /className=\"form-hint\"[\s\S]{0,320}Owners and agents/i, "owner trust guidance must not use form-hint styling");
+requireRegex("src/app/auth-login-polish.css", /\.auth-card\s+\.auth-mode-switch\s*\{[\s\S]*?column-gap:\s*6px;/, "auth mode-switch prompt/action gap");
+requireRegex("src/app/auth-login-polish.css", /\.auth-owner-note\s+p\s*\{[\s\S]*?line-height:\s*1\.58;/, "readable owner trust-note leading");
+requireText("src/app/auth-login-polish.css", "@media (max-width: 480px)", "mobile auth mode-switch alignment");
 
 // Product and marketing navigation must remain horizontally safe at narrow widths.
 requireText("src/components/product-navigation.module.css", "@media (max-width: 860px)", "tablet product-nav breakpoint");
