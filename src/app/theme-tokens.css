@@ -1,32 +1,67 @@
-/* Theme-only semantic additions.
-   IMPORTANT: light mode intentionally does not replace the original NearBasha
-   variables from tokens.css. That preserves the pre-theme UI exactly. Dark mode
-   overrides those same semantic variables only while the resolved mode is dark. */
+/* Canonical appearance contract.
+   This file is loaded in the final `theme` cascade layer so appearance tokens
+   cannot be overwritten by historical route/global styles. Raw palette tokens
+   remain stable; components consume the semantic roles below. */
 
 :root {
   color-scheme: light;
 
-  /* Additional semantic roles used by theme-aware components. Their light
-     values mirror the existing NearBasha design system rather than redefining it. */
+  /* Light-mode roles mirror the current production appearance. */
   --surface-elevated: var(--surface-solid);
   --surface-inverse: var(--ink);
-  --control-background: rgba(255, 255, 252, 0.82);
+  --surface-input: #fffefa;
+  --surface-hover: #f4f7f3;
+  --surface-selected: #edf8f3;
+  --surface-overlay: rgba(255, 254, 251, 0.97);
+  --surface-scrim: rgba(4, 26, 20, 0.42);
+
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-soft);
+  --text-muted: var(--muted);
+  --text-subtle: var(--muted-faint);
+  --text-inverse: #f3f8f5;
+
+  --control-background: rgba(255, 255, 252, 0.86);
   --control-background-hover: var(--surface-solid);
   --control-border: rgba(22, 32, 27, 0.12);
   --control-border-hover: rgba(15, 107, 77, 0.28);
+  --control-disabled: rgba(22, 32, 27, 0.055);
+
   --nav-background: rgba(247, 249, 244, 0.93);
   --nav-border: rgba(16, 37, 29, 0.09);
-  --text-inverse: #f3f8f5;
+
+  --accent-contrast: var(--accent-dark);
+  --accent-soft-strong: color-mix(in srgb, var(--accent) 18%, var(--surface-solid));
   --focus-ring: var(--accent-bright);
   --selection-bg: rgba(157, 216, 76, 0.34);
   --selection-text: var(--emerald-1000);
+
   --success-border: rgba(22, 125, 120, 0.23);
   --warning-border: rgba(128, 99, 20, 0.22);
   --danger-border: rgba(154, 52, 45, 0.20);
+
   --map-area-stroke: #126b4d;
   --map-area-fill: #126b4d;
   --map-user-location: #167d78;
   --map-user-ring: #ffffff;
+
+  /* Compatibility aliases. Historical CSS may keep these names while route
+     files migrate, but they now follow the active semantic appearance. */
+  --nb-ink: var(--ink);
+  --nb-ink-soft: var(--ink-soft);
+  --nb-emerald: var(--accent);
+  --nb-emerald-deep: var(--accent-dark);
+  --nb-emerald-bright: var(--accent-hover);
+  --nb-sage: var(--surface-muted);
+  --nb-sage-soft: var(--surface-soft);
+  --nb-ivory: var(--background);
+  --nb-paper: var(--surface-solid);
+  --nb-white: var(--surface-solid);
+  --nb-line: var(--border);
+  --nb-line-strong: var(--border-strong);
+  --nb-shadow-sm: var(--shadow-sm);
+  --nb-shadow-md: var(--shadow-md);
+  --nb-shadow-lg: var(--shadow-lg);
 }
 
 html[data-theme="light"] {
@@ -42,151 +77,221 @@ html[data-resolved-theme="dark"] {
 
   --background: #07130f;
   --background-warm: #0a1812;
-  --foreground: #f1f6f3;
+  --background-dark: #040d0a;
+  --foreground: #edf6f1;
   --ink: #f4f8f6;
-  --ink-soft: #bed0c7;
-  --muted: #95aa9f;
-  --muted-faint: #7f978b;
+  --ink-soft: #c0d1c8;
+  --muted: #99aea3;
+  --muted-faint: #80968b;
 
-  --surface: rgba(13, 36, 27, 0.94);
+  --surface: rgba(13, 36, 27, 0.95);
   --surface-solid: #0d241b;
   --surface-soft: rgba(18, 49, 39, 0.76);
   --surface-muted: #102b21;
   --surface-strong: #16382c;
-  --surface-glass: rgba(13, 36, 27, 0.78);
+  --surface-glass: rgba(13, 36, 27, 0.82);
   --surface-elevated: #123127;
   --surface-inverse: #eaf5ef;
-  --surface-dark: rgba(4, 26, 20, 0.96);
+  --surface-input: #102b21;
+  --surface-hover: #173b2e;
+  --surface-selected: #123e2d;
+  --surface-overlay: rgba(14, 38, 29, 0.98);
+  --surface-scrim: rgba(0, 0, 0, 0.64);
+  --surface-dark: rgba(4, 26, 20, 0.98);
   --surface-dark-soft: rgba(10, 58, 43, 0.82);
 
-  --border: rgba(225, 239, 232, 0.13);
-  --border-soft: rgba(225, 239, 232, 0.08);
-  --border-strong: rgba(225, 239, 232, 0.22);
-  --border-dark: rgba(225, 239, 232, 0.15);
+  --border: rgba(225, 239, 232, 0.14);
+  --border-soft: rgba(225, 239, 232, 0.085);
+  --border-strong: rgba(225, 239, 232, 0.24);
+  --border-dark: rgba(225, 239, 232, 0.16);
 
-  --accent: #35b985;
-  --accent-dark: #50cc98;
-  --accent-hover: #50cc98;
-  --accent-soft: rgba(53, 185, 133, 0.14);
-  --accent-bright-soft: rgba(157, 216, 76, 0.15);
-  --highlight-soft: rgba(197, 165, 116, 0.13);
+  --accent: #42c58f;
+  --accent-dark: #65d8a8;
+  --accent-hover: #62d4a4;
+  --accent-soft: rgba(66, 197, 143, 0.14);
+  --accent-soft-strong: rgba(66, 197, 143, 0.22);
+  --accent-contrast: #79dfb2;
+  --accent-bright: #b2e665;
+  --accent-bright-soft: rgba(178, 230, 101, 0.15);
+  --accent-warm: #d8b681;
+  --accent-warm-dark: #e4c795;
+  --highlight: #d8b681;
+  --highlight-soft: rgba(216, 182, 129, 0.14);
 
   --verified: #7dd8d0;
   --verified-soft: rgba(36, 153, 143, 0.16);
   --success-bg: rgba(36, 153, 143, 0.16);
-  --success: #7dd8d0;
-  --warning-bg: rgba(183, 137, 38, 0.16);
-  --warning: #e5c975;
-  --danger-bg: rgba(174, 70, 61, 0.17);
-  --danger: #ef9b93;
-  --high-demand: #f0a59a;
-  --high-demand-soft: rgba(200, 109, 93, 0.16);
+  --success: #86ded6;
+  --warning-bg: rgba(183, 137, 38, 0.17);
+  --warning: #efd37d;
+  --danger-bg: rgba(174, 70, 61, 0.18);
+  --danger: #f0a29a;
+  --high-demand: #f1aaa0;
+  --high-demand-soft: rgba(200, 109, 93, 0.17);
 
-  --map-line: rgba(205, 235, 220, 0.065);
-  --map-line-strong: rgba(205, 235, 220, 0.12);
+  --map-line: rgba(205, 235, 220, 0.07);
+  --map-line-strong: rgba(205, 235, 220, 0.13);
   --map-node: rgba(177, 226, 96, 0.82);
   --map-node-soft: rgba(177, 226, 96, 0.14);
-  --contour-line: rgba(205, 235, 220, 0.055);
-  --blueprint-line: rgba(205, 235, 220, 0.07);
+  --contour-line: rgba(205, 235, 220, 0.06);
+  --blueprint-line: rgba(205, 235, 220, 0.075);
 
-  --shadow-xs: 0 1px 1px rgba(0, 0, 0, 0.16);
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.14), 0 12px 30px rgba(0, 0, 0, 0.20);
-  --shadow-md: 0 20px 58px rgba(0, 0, 0, 0.28);
-  --shadow-lg: 0 34px 94px rgba(0, 0, 0, 0.34);
-  --shadow-float: 0 22px 72px rgba(0, 0, 0, 0.42);
-  --shadow-button: 0 10px 24px rgba(0, 0, 0, 0.20);
-  --shadow-button-hover: 0 16px 34px rgba(0, 0, 0, 0.28);
+  --shadow-xs: 0 1px 1px rgba(0, 0, 0, 0.18);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.16), 0 12px 30px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 20px 58px rgba(0, 0, 0, 0.30);
+  --shadow-lg: 0 34px 94px rgba(0, 0, 0, 0.36);
+  --shadow-float: 0 22px 72px rgba(0, 0, 0, 0.44);
+  --shadow-button: 0 10px 24px rgba(0, 0, 0, 0.22);
+  --shadow-button-hover: 0 16px 34px rgba(0, 0, 0, 0.30);
 
-  --control-background: rgba(16, 43, 33, 0.88);
-  --control-background-hover: #16382c;
-  --control-border: rgba(225, 239, 232, 0.16);
-  --control-border-hover: rgba(93, 205, 154, 0.45);
-  --nav-background: rgba(8, 25, 18, 0.93);
-  --nav-border: rgba(225, 239, 232, 0.12);
+  --control-background: rgba(16, 43, 33, 0.92);
+  --control-background-hover: #173b2e;
+  --control-border: rgba(225, 239, 232, 0.17);
+  --control-border-hover: rgba(101, 216, 168, 0.48);
+  --control-disabled: rgba(225, 239, 232, 0.07);
+  --nav-background: rgba(8, 25, 18, 0.95);
+  --nav-border: rgba(225, 239, 232, 0.13);
+
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-soft);
+  --text-muted: var(--muted);
+  --text-subtle: var(--muted-faint);
   --text-inverse: #07130f;
-  --focus-ring: #a9df5c;
-  --selection-bg: rgba(157, 216, 76, 0.28);
+  --focus-ring: #b2e665;
+  --selection-bg: rgba(178, 230, 101, 0.28);
   --selection-text: #f4f8f6;
-  --success-border: rgba(85, 202, 193, 0.28);
-  --warning-border: rgba(229, 201, 117, 0.25);
-  --danger-border: rgba(239, 155, 147, 0.26);
-  --map-area-stroke: #55c997;
-  --map-area-fill: #36a97b;
-  --map-user-location: #55c9c1;
+
+  --success-border: rgba(85, 202, 193, 0.30);
+  --warning-border: rgba(239, 211, 125, 0.28);
+  --danger-border: rgba(240, 162, 154, 0.29);
+  --map-area-stroke: #65d8a8;
+  --map-area-fill: #42b987;
+  --map-user-location: #66d4cc;
   --map-user-ring: #07130f;
+
+  /* Dark compatibility for historical NearBasha variables. */
+  --nb-ink: var(--ink);
+  --nb-ink-soft: var(--ink-soft);
+  --nb-emerald: var(--accent);
+  --nb-emerald-deep: var(--accent-dark);
+  --nb-emerald-bright: var(--accent-hover);
+  --nb-sage: var(--surface-muted);
+  --nb-sage-soft: var(--surface-soft);
+  --nb-ivory: var(--background);
+  --nb-paper: var(--surface-solid);
+  --nb-white: var(--surface-solid);
+  --nb-saffron: var(--accent-warm);
+  --nb-line: var(--border);
+  --nb-line-strong: var(--border-strong);
+  --nb-shadow-sm: var(--shadow-sm);
+  --nb-shadow-md: var(--shadow-md);
+  --nb-shadow-lg: var(--shadow-lg);
 }
 
-/* Before hydration, system preference can still theme token-driven surfaces via
-   the media query. ThemeProvider then writes data-resolved-theme for legacy
-   route overrides and keeps it live when the OS preference changes. */
+/* No-JS / pre-hydration fallback for System. This block lives in the final
+   cascade layer, so it cannot lose to historical globals. The inline bootstrap
+   in layout.tsx writes data-resolved-theme before paint when JavaScript runs. */
 @media (prefers-color-scheme: dark) {
   html[data-theme="system"] {
     --background: #07130f;
     --background-warm: #0a1812;
-    --foreground: #f1f6f3;
+    --background-dark: #040d0a;
+    --foreground: #edf6f1;
     --ink: #f4f8f6;
-    --ink-soft: #bed0c7;
-    --muted: #95aa9f;
-    --muted-faint: #7f978b;
-    --surface: rgba(13, 36, 27, 0.94);
+    --ink-soft: #c0d1c8;
+    --muted: #99aea3;
+    --muted-faint: #80968b;
+    --surface: rgba(13, 36, 27, 0.95);
     --surface-solid: #0d241b;
     --surface-soft: rgba(18, 49, 39, 0.76);
     --surface-muted: #102b21;
     --surface-strong: #16382c;
-    --surface-glass: rgba(13, 36, 27, 0.78);
+    --surface-glass: rgba(13, 36, 27, 0.82);
     --surface-elevated: #123127;
     --surface-inverse: #eaf5ef;
-    --surface-dark: rgba(4, 26, 20, 0.96);
+    --surface-input: #102b21;
+    --surface-hover: #173b2e;
+    --surface-selected: #123e2d;
+    --surface-overlay: rgba(14, 38, 29, 0.98);
+    --surface-scrim: rgba(0, 0, 0, 0.64);
+    --surface-dark: rgba(4, 26, 20, 0.98);
     --surface-dark-soft: rgba(10, 58, 43, 0.82);
-    --border: rgba(225, 239, 232, 0.13);
-    --border-soft: rgba(225, 239, 232, 0.08);
-    --border-strong: rgba(225, 239, 232, 0.22);
-    --border-dark: rgba(225, 239, 232, 0.15);
-    --accent: #35b985;
-    --accent-dark: #50cc98;
-    --accent-hover: #50cc98;
-    --accent-soft: rgba(53, 185, 133, 0.14);
-    --accent-bright-soft: rgba(157, 216, 76, 0.15);
-    --highlight-soft: rgba(197, 165, 116, 0.13);
+    --border: rgba(225, 239, 232, 0.14);
+    --border-soft: rgba(225, 239, 232, 0.085);
+    --border-strong: rgba(225, 239, 232, 0.24);
+    --border-dark: rgba(225, 239, 232, 0.16);
+    --accent: #42c58f;
+    --accent-dark: #65d8a8;
+    --accent-hover: #62d4a4;
+    --accent-soft: rgba(66, 197, 143, 0.14);
+    --accent-soft-strong: rgba(66, 197, 143, 0.22);
+    --accent-contrast: #79dfb2;
+    --accent-bright: #b2e665;
+    --accent-bright-soft: rgba(178, 230, 101, 0.15);
+    --accent-warm: #d8b681;
+    --accent-warm-dark: #e4c795;
+    --highlight: #d8b681;
+    --highlight-soft: rgba(216, 182, 129, 0.14);
     --verified: #7dd8d0;
     --verified-soft: rgba(36, 153, 143, 0.16);
     --success-bg: rgba(36, 153, 143, 0.16);
-    --success: #7dd8d0;
-    --warning-bg: rgba(183, 137, 38, 0.16);
-    --warning: #e5c975;
-    --danger-bg: rgba(174, 70, 61, 0.17);
-    --danger: #ef9b93;
-    --high-demand: #f0a59a;
-    --high-demand-soft: rgba(200, 109, 93, 0.16);
-    --map-line: rgba(205, 235, 220, 0.065);
-    --map-line-strong: rgba(205, 235, 220, 0.12);
+    --success: #86ded6;
+    --warning-bg: rgba(183, 137, 38, 0.17);
+    --warning: #efd37d;
+    --danger-bg: rgba(174, 70, 61, 0.18);
+    --danger: #f0a29a;
+    --high-demand: #f1aaa0;
+    --high-demand-soft: rgba(200, 109, 93, 0.17);
+    --map-line: rgba(205, 235, 220, 0.07);
+    --map-line-strong: rgba(205, 235, 220, 0.13);
     --map-node: rgba(177, 226, 96, 0.82);
     --map-node-soft: rgba(177, 226, 96, 0.14);
-    --contour-line: rgba(205, 235, 220, 0.055);
-    --blueprint-line: rgba(205, 235, 220, 0.07);
-    --shadow-xs: 0 1px 1px rgba(0, 0, 0, 0.16);
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.14), 0 12px 30px rgba(0, 0, 0, 0.20);
-    --shadow-md: 0 20px 58px rgba(0, 0, 0, 0.28);
-    --shadow-lg: 0 34px 94px rgba(0, 0, 0, 0.34);
-    --shadow-float: 0 22px 72px rgba(0, 0, 0, 0.42);
-    --shadow-button: 0 10px 24px rgba(0, 0, 0, 0.20);
-    --shadow-button-hover: 0 16px 34px rgba(0, 0, 0, 0.28);
-    --control-background: rgba(16, 43, 33, 0.88);
-    --control-background-hover: #16382c;
-    --control-border: rgba(225, 239, 232, 0.16);
-    --control-border-hover: rgba(93, 205, 154, 0.45);
-    --nav-background: rgba(8, 25, 18, 0.93);
-    --nav-border: rgba(225, 239, 232, 0.12);
+    --contour-line: rgba(205, 235, 220, 0.06);
+    --blueprint-line: rgba(205, 235, 220, 0.075);
+    --shadow-xs: 0 1px 1px rgba(0, 0, 0, 0.18);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.16), 0 12px 30px rgba(0, 0, 0, 0.22);
+    --shadow-md: 0 20px 58px rgba(0, 0, 0, 0.30);
+    --shadow-lg: 0 34px 94px rgba(0, 0, 0, 0.36);
+    --shadow-float: 0 22px 72px rgba(0, 0, 0, 0.44);
+    --shadow-button: 0 10px 24px rgba(0, 0, 0, 0.22);
+    --shadow-button-hover: 0 16px 34px rgba(0, 0, 0, 0.30);
+    --control-background: rgba(16, 43, 33, 0.92);
+    --control-background-hover: #173b2e;
+    --control-border: rgba(225, 239, 232, 0.17);
+    --control-border-hover: rgba(101, 216, 168, 0.48);
+    --control-disabled: rgba(225, 239, 232, 0.07);
+    --nav-background: rgba(8, 25, 18, 0.95);
+    --nav-border: rgba(225, 239, 232, 0.13);
+    --text-primary: var(--ink);
+    --text-secondary: var(--ink-soft);
+    --text-muted: var(--muted);
+    --text-subtle: var(--muted-faint);
     --text-inverse: #07130f;
-    --focus-ring: #a9df5c;
-    --selection-bg: rgba(157, 216, 76, 0.28);
+    --focus-ring: #b2e665;
+    --selection-bg: rgba(178, 230, 101, 0.28);
     --selection-text: #f4f8f6;
-    --success-border: rgba(85, 202, 193, 0.28);
-    --warning-border: rgba(229, 201, 117, 0.25);
-    --danger-border: rgba(239, 155, 147, 0.26);
-    --map-area-stroke: #55c997;
-    --map-area-fill: #36a97b;
-    --map-user-location: #55c9c1;
+    --success-border: rgba(85, 202, 193, 0.30);
+    --warning-border: rgba(239, 211, 125, 0.28);
+    --danger-border: rgba(240, 162, 154, 0.29);
+    --map-area-stroke: #65d8a8;
+    --map-area-fill: #42b987;
+    --map-user-location: #66d4cc;
     --map-user-ring: #07130f;
+    --nb-ink: var(--ink);
+    --nb-ink-soft: var(--ink-soft);
+    --nb-emerald: var(--accent);
+    --nb-emerald-deep: var(--accent-dark);
+    --nb-emerald-bright: var(--accent-hover);
+    --nb-sage: var(--surface-muted);
+    --nb-sage-soft: var(--surface-soft);
+    --nb-ivory: var(--background);
+    --nb-paper: var(--surface-solid);
+    --nb-white: var(--surface-solid);
+    --nb-saffron: var(--accent-warm);
+    --nb-line: var(--border);
+    --nb-line-strong: var(--border-strong);
+    --nb-shadow-sm: var(--shadow-sm);
+    --nb-shadow-md: var(--shadow-md);
+    --nb-shadow-lg: var(--shadow-lg);
   }
 }
