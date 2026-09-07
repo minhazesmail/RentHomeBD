@@ -107,6 +107,15 @@ html[data-resolved-theme="dark"] .landing-content-section {
   color: var(--landing-ink);
 }
 
+/* WCAG fixes on the retained light paper surfaces. */
+html[data-resolved-theme="dark"] .landing-search-console > .form-hint {
+  color: #5d6f66;
+}
+
+html[data-resolved-theme="dark"] .landing-launch-actions .primary-button {
+  color: #fff;
+}
+
 /* Trust, CTA, map frame, navigation and footer already own intentional dark
    surfaces in the landing design, so they are deliberately left to their
    route styles instead of being repainted here. */
