@@ -9,12 +9,13 @@ const routes = [
   {
     name: "landing",
     path: "/",
-    critical: [".landing-frame", ".landing-search-console", ".landing-how-card"],
+    critical: [".landing-frame", ".landing-search-console", ".landing-how-panel"],
   },
   {
     name: "homes",
     path: "/homes",
-    critical: [".homes-page", ".renter-search-sidebar", ".renter-filter-panel", ".renter-map-panel"],
+    critical: [".homes-page", "[data-mobile-view]", ".renter-map-panel"],
+    desktopCritical: [".renter-search-sidebar", ".renter-filter-panel"],
   },
   {
     name: "login",
@@ -24,22 +25,22 @@ const routes = [
   {
     name: "about",
     path: "/about",
-    critical: [".info-page", ".info-topbar"],
+    critical: [".info-page", "[data-marketing-navigation]"],
   },
   {
     name: "contact",
     path: "/contact",
-    critical: [".info-page", ".info-topbar"],
+    critical: [".info-page", "[data-marketing-navigation]"],
   },
   {
     name: "privacy",
     path: "/privacy",
-    critical: [".info-page", ".info-topbar", ".info-legal-body"],
+    critical: [".info-page", "[data-marketing-navigation]", ".info-legal-body"],
   },
   {
     name: "terms",
     path: "/terms",
-    critical: [".info-page", ".info-topbar", ".info-legal-body"],
+    critical: [".info-page", "[data-marketing-navigation]", ".info-legal-body"],
   },
 ];
 
@@ -79,7 +80,7 @@ function parseRgb(value) {
   return [Number(match[1]), Number(match[2]), Number(match[3])];
 }
 
-async function inspectPage(page, route, scenario) {
+async function inspectPage(page, critical, scenario) {
   return page.evaluate(({ critical, expected, preference }) => {
     const root = document.documentElement;
     const body = document.body;
@@ -105,6 +106,26 @@ async function inspectPage(page, route, scenario) {
       };
     });
 
+    const appearanceDetails = Array.from(document.querySelectorAll("details"))
+      .find((details) => details.querySelector('summary[aria-haspopup="menu"]'));
+    const appearanceMenu = appearanceDetails?.querySelector('[role="menu"]');
+    const appearanceMenuStyle = appearanceMenu ? getComputedStyle(appearanceMenu) : null;
+    const appearanceMenuRect = appearanceMenu?.getBoundingClientRect();
+    const appearanceDisclosure = appearanceDetails ? {
+      exists: true,
+      open: appearanceDetails.open,
+      menuVisible: Boolean(
+        appearanceMenu &&
+        appearanceMenuStyle &&
+        appearanceMenuStyle.display !== "none" &&
+        appearanceMenuStyle.visibility !== "hidden" &&
+        Number(appearanceMenuStyle.opacity) > 0.2 &&
+        appearanceMenuRect &&
+        appearanceMenuRect.width > 2 &&
+        appearanceMenuRect.height > 2
+      ),
+    } : { exists: false, open: false, menuVisible: false };
+
     const textSamples = Array.from(document.querySelectorAll("h1, h2, h3, p, button, a, label, input, select, textarea"))
       .filter((element) => {
         const rect = element.getBoundingClientRect();
@@ -114,7 +135,7 @@ async function inspectPage(page, route, scenario) {
           : element.textContent;
         return Boolean(text?.trim()) && rect.width > 2 && rect.height > 2 && style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) > 0.2;
       })
-      .slice(0, 180)
+      .slice(0, 220)
       .map((element) => {
         const style = getComputedStyle(element);
         let backgroundNode = element;
@@ -157,10 +178,11 @@ async function inspectPage(page, route, scenario) {
         color: bodyStyle.color,
         backgroundColor: bodyStyle.backgroundColor,
       },
+      appearanceDisclosure,
       criticalState,
       textSamples,
     };
-  }, { critical: route.critical, expected: scenario.expected, preference: scenario.preference });
+  }, { critical, expected: scenario.expected, preference: scenario.preference });
 }
 
 async function captureFailure(page, label) {
@@ -197,15 +219,20 @@ async function main() {
         for (const route of routes) {
           const label = `${route.name}-${scenario.name}-${viewport.name}`;
           const failureStart = failures.length;
+          const critical = [
+            ...route.critical,
+            ...(viewport.name === "desktop" ? (route.desktopCritical ?? []) : (route.mobileCritical ?? [])),
+          ];
+
           try {
             const response = await page.goto(`${baseURL}${route.path}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
             if (!response || response.status() >= 400) {
               throw new Error(`HTTP ${response?.status() ?? "no response"}`);
             }
             await page.waitForFunction(() => document.documentElement.dataset.themeReady === "true", null, { timeout: 8_000 });
-            await page.waitForTimeout(120);
+            await page.waitForTimeout(160);
 
-            const snapshot = await inspectPage(page, route, scenario);
+            const snapshot = await inspectPage(page, critical, scenario);
             snapshots.push({ label, ...snapshot });
 
             if (snapshot.preference !== scenario.preference) {
@@ -222,13 +249,17 @@ async function main() {
               if (!value) failures.push(`${label}: semantic token ${token} is unresolved`);
             }
 
-            for (const critical of snapshot.criticalState) {
-              if (!critical.exists) {
-                failures.push(`${label}: missing critical surface ${critical.selector}`);
+            if (snapshot.appearanceDisclosure.exists && !snapshot.appearanceDisclosure.open && snapshot.appearanceDisclosure.menuVisible) {
+              failures.push(`${label}: closed appearance menu is still visibly rendered`);
+            }
+
+            for (const criticalSurface of snapshot.criticalState) {
+              if (!criticalSurface.exists) {
+                failures.push(`${label}: missing critical surface ${criticalSurface.selector}`);
                 continue;
               }
-              if (critical.display === "none" || critical.visibility === "hidden" || critical.opacity < 0.2 || critical.width < 2 || critical.height < 2) {
-                failures.push(`${label}: critical surface ${critical.selector} is effectively invisible`);
+              if (criticalSurface.display === "none" || criticalSurface.visibility === "hidden" || criticalSurface.opacity < 0.2 || criticalSurface.width < 2 || criticalSurface.height < 2) {
+                failures.push(`${label}: critical surface ${criticalSurface.selector} is effectively invisible`);
               }
             }
 
