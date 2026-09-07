@@ -9,11 +9,19 @@ const routes = [
   {
     name: "landing",
     path: "/",
-    critical: [".landing-frame", ".landing-search-console", ".landing-how-panel"],
+    locale: "en",
+    critical: [".landing-frame", ".landing-search-console", ".landing-how-panel", ".landing-map-rail"],
+  },
+  {
+    name: "landing-bn",
+    path: "/",
+    locale: "bn",
+    critical: [".landing-frame", ".landing-search-console", ".landing-how-panel", ".landing-map-rail"],
   },
   {
     name: "homes",
     path: "/homes",
+    locale: "en",
     critical: [".homes-page", ".renter-map-panel"],
     desktopCritical: [".renter-search-sidebar", ".renter-filter-panel"],
     mobileCritical: ["[data-mobile-view]"],
@@ -21,26 +29,31 @@ const routes = [
   {
     name: "login",
     path: "/login",
+    locale: "en",
     critical: [".auth-shell", ".auth-card"],
   },
   {
     name: "about",
     path: "/about",
+    locale: "en",
     critical: [".info-page", "[data-marketing-navigation]"],
   },
   {
     name: "contact",
     path: "/contact",
+    locale: "en",
     critical: [".info-page", "[data-marketing-navigation]"],
   },
   {
     name: "privacy",
     path: "/privacy",
+    locale: "en",
     critical: [".info-page", "[data-marketing-navigation]", ".info-legal-body"],
   },
   {
     name: "terms",
     path: "/terms",
+    locale: "en",
     critical: [".info-page", "[data-marketing-navigation]", ".info-legal-body"],
   },
 ];
@@ -127,6 +140,20 @@ async function inspectPage(page, critical, scenario) {
       ),
     } : { exists: false, open: false, menuVisible: false };
 
+    const landingShell = document.querySelector(".landing-shell");
+    const landingAtmosphere = document.querySelector(".site-atmosphere");
+    const landingHeroTitle = document.querySelector(".landing-copy > h1");
+    const landingMapRail = document.querySelector(".landing-map-rail");
+    const landingAppearance = landingShell && landingAtmosphere && landingHeroTitle && landingMapRail
+      ? {
+          atmosphereBase: getComputedStyle(landingShell).getPropertyValue("--atm-base").trim(),
+          atmosphereBackground: getComputedStyle(landingAtmosphere).backgroundColor,
+          heroColor: getComputedStyle(landingHeroTitle).color,
+          mapRailBackground: getComputedStyle(landingMapRail).backgroundColor,
+          mapRailColor: getComputedStyle(landingMapRail).color,
+        }
+      : null;
+
     const textSamples = Array.from(document.querySelectorAll("h1, h2, h3, p, button, a, label, input, select, textarea"))
       .filter((element) => {
         const rect = element.getBoundingClientRect();
@@ -162,6 +189,7 @@ async function inspectPage(page, critical, scenario) {
       });
 
     return {
+      locale: root.lang,
       preference: root.dataset.theme,
       resolved: root.dataset.resolvedTheme,
       ready: root.dataset.themeReady,
@@ -179,6 +207,7 @@ async function inspectPage(page, critical, scenario) {
         color: bodyStyle.color,
         backgroundColor: bodyStyle.backgroundColor,
       },
+      landingAppearance,
       appearanceDisclosure,
       criticalState,
       textSamples,
@@ -226,6 +255,13 @@ async function main() {
           ];
 
           try {
+            await context.addCookies([{
+              name: "nb_locale",
+              value: route.locale,
+              url: baseURL,
+              sameSite: "Lax",
+            }]);
+
             const response = await page.goto(`${baseURL}${route.path}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
             if (!response || response.status() >= 400) {
               throw new Error(`HTTP ${response?.status() ?? "no response"}`);
@@ -236,6 +272,9 @@ async function main() {
             const snapshot = await inspectPage(page, critical, scenario);
             snapshots.push({ label, ...snapshot });
 
+            if (snapshot.locale !== route.locale) {
+              failures.push(`${label}: html lang=${snapshot.locale}, expected ${route.locale}`);
+            }
             if (snapshot.preference !== scenario.preference) {
               failures.push(`${label}: data-theme=${snapshot.preference}, expected ${scenario.preference}`);
             }
@@ -261,6 +300,30 @@ async function main() {
               }
               if (criticalSurface.display === "none" || criticalSurface.visibility === "hidden" || criticalSurface.opacity < 0.2 || criticalSurface.width < 2 || criticalSurface.height < 2) {
                 failures.push(`${label}: critical surface ${criticalSurface.selector} is effectively invisible`);
+              }
+            }
+
+            if (route.name.startsWith("landing") && scenario.expected === "dark") {
+              if (!snapshot.landingAppearance) {
+                failures.push(`${label}: landing appearance probe is unavailable`);
+              } else {
+                const atmosphere = parseRgb(snapshot.landingAppearance.atmosphereBackground);
+                const hero = parseRgb(snapshot.landingAppearance.heroColor);
+                const railBackground = parseRgb(snapshot.landingAppearance.mapRailBackground);
+                const railText = parseRgb(snapshot.landingAppearance.mapRailColor);
+
+                if (!atmosphere || relativeLuminance(atmosphere) > 0.08) {
+                  failures.push(`${label}: resolved-dark atmosphere stayed too light (${snapshot.landingAppearance.atmosphereBase} / ${snapshot.landingAppearance.atmosphereBackground})`);
+                }
+                if (atmosphere && hero && contrastRatio(hero, atmosphere) < 4.5) {
+                  failures.push(`${label}: hero contrast is ${contrastRatio(hero, atmosphere).toFixed(2)}:1 on the resolved-dark atmosphere`);
+                }
+                if (!railBackground || relativeLuminance(railBackground) > 0.18) {
+                  failures.push(`${label}: map rail stayed Light in resolved Dark (${snapshot.landingAppearance.mapRailBackground})`);
+                }
+                if (railBackground && railText && contrastRatio(railText, railBackground) < 4.5) {
+                  failures.push(`${label}: map rail contrast is ${contrastRatio(railText, railBackground).toFixed(2)}:1 in resolved Dark`);
+                }
               }
             }
 
