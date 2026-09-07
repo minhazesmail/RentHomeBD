@@ -80,6 +80,13 @@
   gap: 12px;
 }
 
+/* The navigation's unlayered CSS Module outranks global cascade layers. Keep
+   the dark CTA's foreground semantic here so generic nav link color rules can
+   never wash out the primary action. */
+:global(html[data-resolved-theme="dark"]) .actions :global(.primary-button) {
+  color: var(--text-inverse);
+}
+
 .infoNav {
   position: relative;
   z-index: 3;
