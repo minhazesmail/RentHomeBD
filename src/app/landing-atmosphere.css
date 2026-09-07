@@ -1,10 +1,10 @@
 /* Living Atmosphere — route-last landing background system.
    The page uses one fixed atmospheric canvas that changes only when the active
-   section changes. Motion is limited to compositor-friendly opacity/transform
-   changes. Light remains the reference appearance; Dark only remaps visual roles. */
+   section changes. The visual language is soft editorial light, not map/grid
+   geometry. Motion is limited to compositor-friendly opacity/transform changes. */
 
 /* The global marketing shell still carries an older map-grid treatment. The
-   landing page owns its background, so remove those duplicate layers. */
+   landing page now owns its background, so remove those duplicate layers. */
 .nb-global-shell--marketing > .nb-shell-atmosphere,
 .nb-global-shell--marketing > .nb-shell-grid {
   display: none !important;
@@ -12,9 +12,6 @@
 
 main.landing-shell {
   --atm-base: #f7f3e9;
-  --atm-warm-color: #d6ad68;
-  --atm-cool-color: #4b9577;
-  --atm-depth-color: #0b231b;
   --atm-warm-opacity: .30;
   --atm-cool-opacity: .18;
   --atm-depth-opacity: .07;
@@ -25,15 +22,9 @@ main.landing-shell {
   --atm-cool-y: 2%;
   --atm-cool-scale: 1.05;
   --atm-direction-shift: 14px;
-
-  --landing-content-surface: rgba(255, 253, 248, .70);
-  --landing-content-surface-mobile: rgba(255, 253, 248, .82);
-  --landing-trust-surface: #073f31;
-  --landing-footer-border: rgba(255, 255, 255, .14);
-
   position: relative;
   isolation: isolate;
-  background: transparent;
+  background: transparent !important;
 }
 
 main.landing-shell[data-scroll-direction="up"] {
@@ -44,7 +35,7 @@ main.landing-shell[data-scroll-direction="down"] {
   --atm-direction-shift: 14px;
 }
 
-/* One fixed canvas, three quiet light fields. There is no looping animation,
+/* One fixed canvas, three quiet light layers. There is no looping animation,
    requestAnimationFrame work, backdrop blur, canvas, or WebGL. */
 .site-atmosphere {
   position: fixed;
@@ -67,8 +58,10 @@ main.landing-shell[data-scroll-direction="down"] {
     transform 980ms cubic-bezier(.22, 1, .36, 1);
 }
 
+/* Fixed brand-tinted light fields. Theme changes only reposition/crossfade
+   these rasterized gradients rather than animating gradient definitions. */
 .site-atmosphere__warm {
-  color: var(--atm-warm-color);
+  color: #d6ad68;
   opacity: var(--atm-warm-opacity);
   background: radial-gradient(ellipse at 25% 24%, currentColor 0%, transparent 58%);
   transform: translate3d(
@@ -80,7 +73,7 @@ main.landing-shell[data-scroll-direction="down"] {
 }
 
 .site-atmosphere__cool {
-  color: var(--atm-cool-color);
+  color: #4b9577;
   opacity: var(--atm-cool-opacity);
   background: radial-gradient(ellipse at 76% 60%, currentColor 0%, transparent 60%);
   transform: translate3d(
@@ -92,14 +85,14 @@ main.landing-shell[data-scroll-direction="down"] {
 }
 
 .site-atmosphere__depth {
-  color: var(--atm-depth-color);
+  color: #0b231b;
   opacity: var(--atm-depth-opacity);
   background: linear-gradient(180deg, transparent 34%, currentColor 112%);
   transition: opacity 880ms cubic-bezier(.22, 1, .36, 1);
 }
 
-/* Editorial section moods. Light keeps the existing ivory, sage, champagne
-   and emerald sequence exactly as before. */
+/* Editorial section moods. The palette changes by moving through related
+   ivory, sage, champagne and emerald environments rather than obvious shapes. */
 main.landing-shell[data-atmosphere="hero"] {
   --atm-base: #f7f3e9;
   --atm-warm-opacity: .30;
@@ -202,77 +195,8 @@ main.landing-shell[data-atmosphere="footer"] {
   --atm-cool-scale: 1.10;
 }
 
-/* Dark and System-dark use the same resolved visual system. These overrides
-   intentionally live after every Light atmosphere mood so no Light base can
-   leak back in when the active scroll section changes. */
-html[data-resolved-theme="dark"] main.landing-shell {
-  --atm-warm-color: #b58a52;
-  --atm-cool-color: #2c8a67;
-  --atm-depth-color: #020806;
-  --landing-content-surface: rgba(13, 36, 27, .88);
-  --landing-content-surface-mobile: rgba(13, 36, 27, .94);
-  --landing-trust-surface: #0a2c22;
-  --landing-footer-border: var(--border-dark);
-}
-
-html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="hero"] {
-  --atm-base: #07130f;
-  --atm-warm-opacity: .12;
-  --atm-cool-opacity: .21;
-  --atm-depth-opacity: .22;
-}
-
-html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="trust"] {
-  --atm-base: #081b14;
-  --atm-warm-opacity: .09;
-  --atm-cool-opacity: .22;
-  --atm-depth-opacity: .34;
-}
-
-html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="journey"] {
-  --atm-base: #0a1812;
-  --atm-warm-opacity: .10;
-  --atm-cool-opacity: .16;
-  --atm-depth-opacity: .20;
-}
-
-html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="homes"] {
-  --atm-base: #0b1b14;
-  --atm-warm-opacity: .13;
-  --atm-cool-opacity: .15;
-  --atm-depth-opacity: .22;
-}
-
-html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="local"] {
-  --atm-base: #091912;
-  --atm-warm-opacity: .09;
-  --atm-cool-opacity: .17;
-  --atm-depth-opacity: .21;
-}
-
-html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="clarity"] {
-  --atm-base: #081610;
-  --atm-warm-opacity: .08;
-  --atm-cool-opacity: .15;
-  --atm-depth-opacity: .20;
-}
-
-html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="action"] {
-  --atm-base: #07130f;
-  --atm-warm-opacity: .12;
-  --atm-cool-opacity: .20;
-  --atm-depth-opacity: .34;
-}
-
-html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="footer"] {
-  --atm-base: #040d0a;
-  --atm-warm-opacity: .07;
-  --atm-cool-opacity: .13;
-  --atm-depth-opacity: .42;
-}
-
-/* Retire every older decorative map/grid scene so the atmosphere is the only
-   page background system. Product map UI remains untouched. */
+/* Retire every older decorative map/grid scene so the new light field is the
+   only page background system. Product map UI remains untouched. */
 .landing-shell::before,
 .landing-shell::after,
 .landing-shell .landing-scroll-atmosphere::before,
@@ -289,32 +213,31 @@ html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="footer"] {
 }
 
 /* Let the atmosphere read through the page without reintroducing expensive
-   live blur. These declarations are deliberately non-important so the final
-   theme layer can still own resolved-Dark surfaces. */
+   live blur. Content surfaces stay opaque enough for text contrast. */
 main.landing-shell .landing-frame {
-  background: transparent;
+  background: transparent !important;
 }
 
 .landing-shell .landing-content-section {
-  background: var(--landing-content-surface);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  background: rgba(255, 253, 248, .70) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 .landing-shell .landing-trust-section {
-  background: var(--landing-trust-surface);
+  background: #073f31 !important;
   color: #fff;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 .landing-shell .landing-footer {
-  background: transparent;
-  border-top-color: var(--landing-footer-border);
+  background: transparent !important;
+  border-top-color: rgba(255, 255, 255, .14) !important;
 }
 
 .landing-shell .landing-footer-bottom {
-  border-top-color: var(--landing-footer-border);
+  border-top-color: rgba(255, 255, 255, .14) !important;
 }
 
 /* Mobile uses a simpler two-light composition with less overscan and a shorter
@@ -338,7 +261,7 @@ main.landing-shell .landing-frame {
   }
 
   .landing-shell .landing-content-section {
-    background: var(--landing-content-surface-mobile);
+    background: rgba(255, 253, 248, .82) !important;
   }
 }
 

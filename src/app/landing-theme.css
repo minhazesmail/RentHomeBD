@@ -1,311 +1,112 @@
-/* Landing appearance bridge. The landing redesign keeps its geometry and motion;
-   this file only remaps visual roles when the resolved appearance is dark. */
+/* Landing dark-mode bridge.
+   Keep the established landing components as designed paper/dark islands and
+   change only the page atmosphere plus text that sits directly on that dark
+   atmosphere. Do not remap the legacy --landing-* palette globally: older
+   landing generations still consume those variables and broad remaps create
+   cross-surface contrast regressions. */
 
-html[data-resolved-theme="dark"] .landing-shell {
-  --landing-ink: var(--ink);
-  --landing-ink-soft: var(--ink-soft);
-  --landing-emerald: var(--accent);
-  --landing-lime: var(--accent-bright);
-  --landing-sand: var(--surface-muted);
-  --landing-paper: var(--surface-solid);
-
-  color: var(--ink);
-  background: var(--background);
-}
-
-/* The fixed atmosphere owns the actual page canvas. It must resolve Dark just
-   like the document, otherwise pale hero copy lands on a Light ivory canvas. */
-html[data-resolved-theme="dark"] .landing-scroll-atmosphere,
-html[data-resolved-theme="dark"] .site-atmosphere {
-  background-color: var(--atm-base);
-}
-
-html[data-resolved-theme="dark"] .landing-frame {
-  border-color: var(--border);
-  background: transparent;
-  box-shadow: var(--shadow-lg);
-}
-
-html[data-resolved-theme="dark"] .landing-nav {
-  border-color: var(--border-soft);
-  background: color-mix(in srgb, var(--surface-dark) 90%, transparent);
-}
-
-html[data-resolved-theme="dark"] .landing-nav :where(a, button) {
-  color: var(--ink-soft);
-}
-
-html[data-resolved-theme="dark"] .landing-nav :where(a, button):hover {
-  color: var(--ink);
-}
-
-/* Hero text uses semantic roles directly so both English and Bangla retain
-   contrast regardless of the active atmospheric scroll mood. */
-html[data-resolved-theme="dark"] .landing-copy {
-  color: var(--foreground);
+html[data-resolved-theme="dark"] main.landing-shell {
   background: transparent;
 }
 
+/* The atmosphere element also receives older light `background` shorthands.
+   A single scoped important declaration is intentional here: it clears those
+   background images and guarantees that Dark/System-dark never exposes the
+   ivory canvas beneath pale hero copy. */
+html[data-resolved-theme="dark"] .site-atmosphere.landing-scroll-atmosphere {
+  background: #07130f !important;
+}
+
+/* Keep the ambient fields subtle on the dark canvas rather than replacing the
+   whole landing palette. */
+html[data-resolved-theme="dark"] .site-atmosphere__warm {
+  color: #8b6840;
+  opacity: .10;
+}
+
+html[data-resolved-theme="dark"] .site-atmosphere__cool {
+  color: #2a765b;
+  opacity: .14;
+}
+
+html[data-resolved-theme="dark"] .site-atmosphere__depth {
+  color: #020806;
+  opacity: .18;
+}
+
+/* Only copy rendered directly on the dark atmosphere switches to light text.
+   The search console remains an intentionally light paper surface. */
 html[data-resolved-theme="dark"] .landing-copy > h1 {
-  color: var(--ink);
+  color: #f4f8f6 !important;
 }
 
-html[data-resolved-theme="dark"] .landing-copy > .intro,
-html[data-resolved-theme="dark"] .landing-copy > p,
-html[data-resolved-theme="dark"] .landing-search-console > .form-hint,
-html[data-resolved-theme="dark"] .landing-popular-searches,
-html[data-resolved-theme="dark"] .landing-confidence-row span {
-  color: var(--ink-soft);
+html[data-resolved-theme="dark"] .landing-copy > .intro {
+  color: #bed0c7;
 }
 
-html[data-resolved-theme="dark"] .landing-live-kicker {
-  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
-  background: color-mix(in srgb, var(--surface-elevated) 92%, transparent);
-  color: var(--accent-contrast);
-  box-shadow: var(--shadow-xs);
+html[data-resolved-theme="dark"] .landing-popular-searches {
+  color: #aebfb6;
 }
 
-html[data-resolved-theme="dark"] .landing-content-section,
-html[data-resolved-theme="dark"] .landing-featured,
-html[data-resolved-theme="dark"] .landing-how,
-html[data-resolved-theme="dark"] .landing-trust,
-html[data-resolved-theme="dark"] .landing-faq,
-html[data-resolved-theme="dark"] .landing-inventory {
-  color: var(--foreground);
+html[data-resolved-theme="dark"] .landing-confidence-row {
+  border-color: rgba(255, 255, 255, .15);
 }
 
-html[data-resolved-theme="dark"] .landing-content-section {
-  border-color: var(--border);
-  background: var(--landing-content-surface);
-}
-
-html[data-resolved-theme="dark"] .landing-copy :where(.intro, p),
-html[data-resolved-theme="dark"] .landing-section-intro > p,
-html[data-resolved-theme="dark"] .landing-section-intro-row > p,
-html[data-resolved-theme="dark"] .landing-steps p,
-html[data-resolved-theme="dark"] .landing-listing-title-row p,
-html[data-resolved-theme="dark"] .landing-feature span,
-html[data-resolved-theme="dark"] .landing-trust span,
-html[data-resolved-theme="dark"] .landing-faq-editorial-item p {
-  color: var(--ink-soft);
-}
-
-html[data-resolved-theme="dark"] :where(
-  .landing-search-console,
-  .landing-search-console-field,
-  .landing-how-card,
-  .landing-inventory-card,
-  .landing-listing-card,
-  .landing-feature-card,
-  .landing-faq-editorial-item,
-  .landing-trust-card
-) {
-  border-color: var(--border);
-  background: var(--surface-solid);
-  color: var(--foreground);
-  box-shadow: var(--shadow-sm);
-}
-
-html[data-resolved-theme="dark"] .landing-search-console {
-  border-color: var(--border-strong);
-  background: var(--surface-elevated);
-  box-shadow: var(--shadow-md);
-}
-
-html[data-resolved-theme="dark"] .landing-search-console-heading {
-  border-color: var(--border);
-}
-
-html[data-resolved-theme="dark"] .landing-search-console-heading strong {
-  color: var(--ink);
-}
-
-html[data-resolved-theme="dark"] .landing-search-console-field {
-  border-color: var(--control-border);
-  background: var(--surface-input);
-}
-
-html[data-resolved-theme="dark"] .landing-search-console-field:focus-within {
-  border-color: var(--control-border-hover);
-  background: var(--control-background-hover);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus-ring) 16%, transparent);
-}
-
-html[data-resolved-theme="dark"] .landing-search-console-field :where(span, select) {
-  color: var(--ink-soft);
-}
-
-html[data-resolved-theme="dark"] .landing-search-console-field select {
-  background: transparent;
-  color: var(--ink);
-}
-
-html[data-resolved-theme="dark"] .landing-popular-searches a {
-  border-color: var(--border-soft);
-  background: var(--surface-soft);
-  color: var(--accent-contrast);
-}
-
-html[data-resolved-theme="dark"] .landing-confidence-row,
 html[data-resolved-theme="dark"] .landing-confidence-row > div + div {
-  border-color: var(--border);
+  border-color: rgba(255, 255, 255, .15);
 }
 
 html[data-resolved-theme="dark"] .landing-confidence-row strong {
-  color: var(--ink);
+  color: #f4f8f6;
 }
 
-html[data-resolved-theme="dark"] .landing-stats,
-html[data-resolved-theme="dark"] .landing-strip {
-  border-color: var(--border);
-  background: var(--surface-soft);
+html[data-resolved-theme="dark"] .landing-confidence-row span {
+  color: #aebfb6;
 }
 
-html[data-resolved-theme="dark"] .landing-stats > div,
-html[data-resolved-theme="dark"] .landing-feature {
-  border-color: var(--border);
+/* These are deliberate light "paper" islands in both appearances. Local light
+   semantic roles prevent the global dark compatibility layer from turning
+   headings/controls pale inside a light card while preserving the original
+   landing component colors and geometry. */
+html[data-resolved-theme="dark"] :where(
+  .landing-search-console,
+  .landing-map-caption,
+  .landing-map-rail,
+  .landing-content-section
+) {
+  --background: #f7f3e9;
+  --background-warm: #f7f3e9;
+  --foreground: #10251d;
+  --ink: #10251d;
+  --ink-soft: #53635b;
+  --muted: #718078;
+  --surface-solid: #fffdf8;
+  --surface-elevated: #fffdf8;
+  --surface-muted: #f6f0e4;
+  --surface-soft: #f7f4ec;
+  --surface-strong: #e8eadf;
+  --surface-input: #faf9f4;
+  --surface-overlay: rgba(255, 253, 248, .97);
+  --control-background: #fffdf8;
+  --control-background-hover: #f6f0e4;
+  --control-border: rgba(16, 37, 29, .10);
+  --control-border-hover: rgba(8, 118, 83, .42);
+  --border: rgba(16, 37, 29, .10);
+  --border-soft: rgba(16, 37, 29, .08);
+  --border-strong: rgba(16, 37, 29, .16);
+  --accent: #087653;
+  --accent-hover: #075943;
+  --accent-bright: #b9f227;
+  --accent-contrast: #073f31;
+  --text-primary: #10251d;
+  --text-secondary: #53635b;
+  color-scheme: light;
 }
 
-html[data-resolved-theme="dark"] .landing-stats strong,
-html[data-resolved-theme="dark"] .landing-feature strong,
-html[data-resolved-theme="dark"] .landing-listing-title-row h3,
-html[data-resolved-theme="dark"] .landing-persona-heading h3,
-html[data-resolved-theme="dark"] .landing-steps strong {
-  color: var(--ink);
+html[data-resolved-theme="dark"] .landing-content-section {
+  color: var(--landing-ink);
 }
 
-html[data-resolved-theme="dark"] .landing-listing-title-row > strong,
-html[data-resolved-theme="dark"] .demo-price {
-  color: var(--accent-warm-dark);
-}
-
-html[data-resolved-theme="dark"] .landing-listing-visual,
-html[data-resolved-theme="dark"] .landing-listing-image-empty {
-  background: linear-gradient(145deg, var(--surface-muted), var(--surface-strong));
-}
-
-/* Hero map: keep the intentionally dark map frame, but remove the remaining
-   Light paper rail/panel treatment visible in resolved Dark. */
-html[data-resolved-theme="dark"] .landing-visual,
-html[data-resolved-theme="dark"] .landing-map-preview,
-html[data-resolved-theme="dark"] .landing-map-canvas-shell {
-  border-color: var(--border);
-  background: var(--surface-muted);
-  box-shadow: var(--shadow-sm);
-}
-
-html[data-resolved-theme="dark"] .landing-map-caption {
-  color: var(--ink);
-}
-
-html[data-resolved-theme="dark"] .landing-map-caption strong {
-  color: var(--ink);
-}
-
-html[data-resolved-theme="dark"] .landing-map-caption small {
-  color: var(--ink-soft);
-}
-
-html[data-resolved-theme="dark"] .landing-map-caption a {
-  color: var(--accent-bright);
-}
-
-html[data-resolved-theme="dark"] .landing-map-rail {
-  border-color: var(--border);
-  background: var(--surface-elevated);
-  color: var(--foreground);
-  box-shadow: var(--shadow-md);
-}
-
-html[data-resolved-theme="dark"] .landing-map-rail-heading {
-  border-color: var(--border);
-}
-
-html[data-resolved-theme="dark"] .landing-map-rail-heading span {
-  color: var(--accent-contrast);
-}
-
-html[data-resolved-theme="dark"] .landing-map-rail-heading strong {
-  color: var(--ink);
-}
-
-/* The OSM/static map imagery stays unmodified; only overlay cards/chrome change. */
-html[data-resolved-theme="dark"] .landing-map-preview .demo-card,
-html[data-resolved-theme="dark"] .landing-map-card,
-html[data-resolved-theme="dark"] .landing-map-area-card {
-  border-color: var(--border);
-  background: var(--surface-overlay);
-  color: var(--foreground);
-  box-shadow: var(--shadow-md);
-}
-
-html[data-resolved-theme="dark"] .landing-map-area-card :where(strong, .landing-map-area-number) {
-  color: var(--ink);
-}
-
-html[data-resolved-theme="dark"] .landing-map-area-card small {
-  color: var(--ink-soft);
-}
-
-html[data-resolved-theme="dark"] .landing-map-rail-action {
-  border-color: var(--border);
-  background: var(--accent-soft);
-  color: var(--accent-contrast);
-}
-
-html[data-resolved-theme="dark"] .landing-map-floating-note {
-  border-color: var(--border);
-  background: var(--surface-overlay);
-  color: var(--ink-soft);
-  box-shadow: var(--shadow-sm);
-}
-
-html[data-resolved-theme="dark"] .landing-map-floating-note > span {
-  background: var(--accent-bright);
-}
-
-html[data-resolved-theme="dark"] .demo-meta span,
-html[data-resolved-theme="dark"] .landing-map-meta span {
-  border-color: var(--border-soft);
-  background: var(--surface-soft);
-  color: var(--ink-soft);
-}
-
-html[data-resolved-theme="dark"] .landing-persona-heading,
-html[data-resolved-theme="dark"] .landing-steps li,
-html[data-resolved-theme="dark"] .landing-faq-editorial-item {
-  border-color: var(--border);
-}
-
-html[data-resolved-theme="dark"] .landing-persona-heading > span,
-html[data-resolved-theme="dark"] .landing-step-number,
-html[data-resolved-theme="dark"] .landing-listing-visual span {
-  background: var(--surface-inverse);
-  color: var(--text-inverse);
-}
-
-html[data-resolved-theme="dark"] .landing-persona-heading small,
-html[data-resolved-theme="dark"] .landing-search-console-heading span {
-  color: var(--accent-contrast);
-}
-
-html[data-resolved-theme="dark"] .landing-trust-section {
-  border-color: var(--border-dark);
-  background: var(--landing-trust-surface);
-}
-
-html[data-resolved-theme="dark"] .landing-footer {
-  border-color: var(--border-dark);
-  background: var(--surface-dark);
-  color: #fff;
-}
-
-html[data-resolved-theme="dark"] .landing-footer :where(p, small, a) {
-  color: rgba(255, 255, 255, .72);
-}
-
-@media (max-width: 760px) {
-  html[data-resolved-theme="dark"] .landing-content-section {
-    background: var(--landing-content-surface-mobile);
-  }
-}
+/* Trust, CTA, map frame, navigation and footer already own intentional dark
+   surfaces in the landing design, so they are deliberately left to their
+   route styles instead of being repainted here. */
