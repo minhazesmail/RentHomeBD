@@ -1,7 +1,7 @@
-/* Dark appearance compatibility layer.
-   Light mode is intentionally untouched: its visual system remains owned by the
-   original route/component styles. Every rule in this file is scoped to the
-   resolved dark mode so enabling themes cannot repaint the existing light UI. */
+/* Global appearance behavior only.
+   Route families own their dark visual treatment in their local *-theme.css
+   files. This sheet handles document chrome, shared primitives, navigation,
+   global shells, brand assets, and third-party Leaflet chrome. */
 
 html[data-resolved-theme="dark"] {
   background: var(--background);
@@ -10,7 +10,10 @@ html[data-resolved-theme="dark"] {
 
 html[data-resolved-theme="dark"] body {
   color: var(--foreground);
-  background: var(--background);
+  background:
+    radial-gradient(circle at 8% -10%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 30rem),
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 30rem),
+    var(--background);
 }
 
 html[data-resolved-theme="dark"] ::selection {
@@ -65,7 +68,7 @@ html[data-resolved-theme="dark"] .field :where(input, select, textarea):hover {
 html[data-resolved-theme="dark"] .field :where(input, select, textarea):focus {
   border-color: var(--accent);
   background: var(--control-background-hover);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 html[data-resolved-theme="dark"] .primary-button {
@@ -96,7 +99,7 @@ html[data-resolved-theme="dark"] .secondary-button:hover {
 }
 
 html[data-resolved-theme="dark"] :where(.text-link, .text-button) {
-  color: var(--accent);
+  color: var(--accent-contrast);
 }
 
 html[data-resolved-theme="dark"] :where(.status-pill, .media-card) {
@@ -111,7 +114,7 @@ html[data-resolved-theme="dark"] :where(.success-message, .status-available) {
   color: var(--success);
 }
 
-html[data-resolved-theme="dark"] :where(.review-note, .status-pending_review) {
+html[data-resolved-theme="dark"] :where(.review-note, .status-pending_review, .status-pending_confirmation) {
   border-color: var(--warning-border);
   background: var(--warning-bg);
   color: var(--warning);
@@ -121,6 +124,12 @@ html[data-resolved-theme="dark"] .status-rejected {
   border-color: var(--danger-border);
   background: var(--danger-bg);
   color: var(--danger);
+}
+
+html[data-resolved-theme="dark"] :where(.status-rented, .status-expired) {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--muted);
 }
 
 html[data-resolved-theme="dark"] :where(.nb-surface, .nb-surface-soft, .nb-surface-glass) {
@@ -142,7 +151,13 @@ html[data-resolved-theme="dark"] .nb-surface-glass {
   box-shadow: var(--shadow-md);
 }
 
-html[data-resolved-theme="dark"] :where(.nb-global-shell, .nb-global-shell--neutral, .nb-global-shell--marketing, .nb-global-shell--renter, .nb-global-shell--auth) {
+html[data-resolved-theme="dark"] :where(
+  .nb-global-shell,
+  .nb-global-shell--neutral,
+  .nb-global-shell--marketing,
+  .nb-global-shell--renter,
+  .nb-global-shell--auth
+) {
   background: var(--background);
 }
 
@@ -204,60 +219,8 @@ html[data-resolved-theme="dark"] .brand-logo img {
   content: url("/nearbasha-logo-on-dark.svg");
 }
 
-/* Marketing */
-html[data-resolved-theme="dark"] .landing-shell {
-  --landing-ink: var(--ink);
-  --landing-ink-soft: var(--ink-soft);
-  --landing-emerald: var(--accent);
-  --landing-emerald-deep: var(--accent-dark);
-  --landing-sand: var(--background-warm);
-  --landing-paper: var(--surface-solid);
-  color: var(--ink);
-  background: var(--background);
-}
-
-html[data-resolved-theme="dark"] :where(
-  .landing-search-console,
-  .landing-search-console-field,
-  .landing-how-card,
-  .landing-inventory-card,
-  .landing-feature-card,
-  .landing-faq-editorial-item,
-  .landing-trust-card
-) {
-  border-color: var(--border);
-  background: var(--surface-glass);
-  color: var(--foreground);
-  box-shadow: var(--shadow-sm);
-}
-
-html[data-resolved-theme="dark"] .landing-search-console {
-  background: var(--surface-elevated);
-  box-shadow: var(--shadow-md);
-}
-
-html[data-resolved-theme="dark"] .landing-shell :where(p, small):not(.eyebrow) {
-  color: var(--ink-soft);
-}
-
-/* Renter search */
-html[data-resolved-theme="dark"] .homes-page {
-  background: var(--background);
-  color: var(--foreground);
-}
-
-html[data-resolved-theme="dark"] :where(.homes-topbar, .renter-search-sidebar, .renter-filter-panel, .renter-result-card-wrap, .renter-empty) {
-  border-color: var(--border);
-  background: var(--surface-glass);
-  color: var(--foreground);
-}
-
-html[data-resolved-theme="dark"] .renter-result-card-wrap.active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-/* Leaflet chrome is themed; raster OSM tiles remain untouched for label fidelity. */
+/* Leaflet application chrome is themed globally. Raster OSM tiles remain
+   untouched so street labels and cartography retain their intended contrast. */
 html[data-resolved-theme="dark"] .leaflet-container {
   background: var(--surface-muted);
   color: var(--foreground);
@@ -282,30 +245,5 @@ html[data-resolved-theme="dark"] .leaflet-bar a:hover {
 }
 
 html[data-resolved-theme="dark"] .leaflet-control-attribution a {
-  color: var(--accent) !important;
-}
-
-/* Property detail and authenticated workspaces */
-html[data-resolved-theme="dark"] :where(.property-detail-page, .dashboard-page, .owner-page, .messages-page, .moderation-page) {
-  background: var(--background);
-  color: var(--foreground);
-}
-
-html[data-resolved-theme="dark"] :where(
-  .property-detail-topbar,
-  .property-detail-price,
-  .property-detail-card,
-  .property-detail-panel,
-  .property-detail-section
-) {
-  border-color: var(--border);
-  background: var(--surface-solid);
-  color: var(--foreground);
-  box-shadow: var(--shadow-sm);
-}
-
-html[data-resolved-theme="dark"] [data-route] :where(input, select, textarea) {
-  border-color: var(--control-border);
-  background: var(--control-background);
-  color: var(--foreground);
+  color: var(--accent-contrast) !important;
 }

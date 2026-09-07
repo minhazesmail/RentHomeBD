@@ -3,3 +3,4 @@
 @import "./messages-redesign.css" layer(route-redesign);
 @import "./messages-spacing-fixes.css" layer(route-fixes);
 @import "./messages-workspace-redesign.css" layer(route-contrast);
+@import "./messages-theme.css" layer(theme);

@@ -1,0 +1,200 @@
+/* Messaging appearance bridge. */
+
+html[data-resolved-theme="dark"] .messages-page {
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--accent-bright) 6%, transparent), transparent 24rem),
+    radial-gradient(circle at 88% 14%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 28rem),
+    var(--background);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .messages-list,
+  .messages-organization,
+  .messages-workspace-inbox,
+  .messages-workspace-empty,
+  .messages-thread-pane,
+  .thread-panel,
+  .messages-thread-shell
+) {
+  border-color: var(--border);
+  background: var(--surface-solid);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-resolved-theme="dark"] .messages-workspace-inbox,
+html[data-resolved-theme="dark"] .messages-thread-pane,
+html[data-resolved-theme="dark"] .messages-workspace-empty {
+  background: var(--surface-glass);
+}
+
+html[data-resolved-theme="dark"] .messages-workspace-inbox-head,
+html[data-resolved-theme="dark"] .messages-workspace-inbox .messages-organization,
+html[data-resolved-theme="dark"] .messages-workspace-pagination,
+html[data-resolved-theme="dark"] .message-composer,
+html[data-resolved-theme="dark"] .thread-live-bar {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .messages-search-form input[type="search"],
+html[data-resolved-theme="dark"] .message-input-shell {
+  border-color: var(--control-border);
+  background: var(--surface-input);
+  color: var(--foreground);
+  box-shadow: none;
+}
+
+html[data-resolved-theme="dark"] .messages-search-form input[type="search"]:focus-visible,
+html[data-resolved-theme="dark"] .message-input-shell:focus-within {
+  border-color: var(--accent);
+  background: var(--control-background-hover);
+  outline-color: var(--focus-ring);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+html[data-resolved-theme="dark"] .messages-filter-tabs a,
+html[data-resolved-theme="dark"] .messages-inbox-page-label,
+html[data-resolved-theme="dark"] .message-verified-badge {
+  border-color: var(--control-border);
+  background: var(--control-background);
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .messages-filter-tabs a:hover {
+  border-color: var(--control-border-hover);
+  background: var(--control-background-hover);
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .messages-filter-tabs a.messages-filter-active,
+html[data-resolved-theme="dark"] .messages-inbox-page-label,
+html[data-resolved-theme="dark"] .message-verified-badge {
+  border-color: color-mix(in srgb, var(--accent) 36%, var(--border));
+  background: var(--accent-soft);
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] .conversation-property-media,
+html[data-resolved-theme="dark"] .thread-property-media {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--muted);
+  box-shadow: none;
+}
+
+html[data-resolved-theme="dark"] .thread-property-context {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .thread-property-context:hover {
+  border-color: var(--control-border-hover);
+  background: var(--surface-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-resolved-theme="dark"] .thread-property-copy strong,
+html[data-resolved-theme="dark"] .messages-workspace-conversation .conversation-main strong {
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .thread-property-copy > span,
+html[data-resolved-theme="dark"] .messages-workspace-inbox-head .eyebrow {
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .thread-property-copy small,
+  .messages-workspace-conversation .conversation-main > span,
+  .messages-workspace-conversation .conversation-main small,
+  .messages-workspace-conversation .conversation-meta
+) {
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .messages-workspace-conversation {
+  border-color: transparent;
+  background: transparent;
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .messages-workspace-conversation:hover {
+  background: var(--surface-hover);
+}
+
+html[data-resolved-theme="dark"] .messages-workspace-conversation.is-active {
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border));
+  background: linear-gradient(135deg, var(--accent-soft), var(--surface-solid));
+  box-shadow: inset 3px 0 0 var(--accent), var(--shadow-xs);
+}
+
+html[data-resolved-theme="dark"] .messages-workspace-empty {
+  background:
+    radial-gradient(circle at 75% 18%, color-mix(in srgb, var(--accent-bright) 10%, transparent), transparent 18rem),
+    radial-gradient(circle at 25% 78%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 22rem),
+    var(--surface-glass);
+}
+
+html[data-resolved-theme="dark"] .messages-workspace-empty-mark {
+  border-color: var(--border);
+  background: var(--surface-soft);
+}
+
+html[data-resolved-theme="dark"] .messages-workspace-empty-mark span {
+  background: var(--accent);
+}
+
+html[data-resolved-theme="dark"] .message-list {
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 28rem),
+    linear-gradient(180deg, var(--surface-muted), var(--background));
+}
+
+html[data-resolved-theme="dark"] .message-bubble {
+  border-color: var(--border);
+  background: var(--surface-elevated);
+  color: var(--foreground);
+  box-shadow: var(--shadow-xs);
+}
+
+html[data-resolved-theme="dark"] .message-row.mine .message-bubble,
+html[data-resolved-theme="dark"] .message-bubble.own,
+html[data-resolved-theme="dark"] .message-bubble.is-own {
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+  background: linear-gradient(145deg, var(--accent-soft-strong), var(--surface-selected));
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .message-status,
+html[data-resolved-theme="dark"] .message-composer-footer,
+html[data-resolved-theme="dark"] .thread-live-bar {
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .message-send-button {
+  background: var(--accent);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-button);
+}
+
+html[data-resolved-theme="dark"] .message-send-button:hover {
+  background: var(--accent-hover);
+}
+
+html[data-resolved-theme="dark"] .message-composer textarea {
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .message-composer textarea::placeholder {
+  color: var(--muted-faint);
+}
+
+@media (max-width: 640px) {
+  html[data-resolved-theme="dark"] .message-composer {
+    background: color-mix(in srgb, var(--surface-solid) 96%, transparent);
+  }
+}

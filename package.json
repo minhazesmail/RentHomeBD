@@ -10,6 +10,7 @@
     "deadcode": "node scripts/check-dead-code.mjs",
     "uiqa": "node scripts/check-ui-regressions.mjs && node scripts/check-theme.mjs",
     "themeqa": "node scripts/check-theme.mjs",
+    "themebrowser": "node scripts/check-theme-browser.mjs",
     "i18nqa": "node scripts/check-localization.mjs",
     "typecheck": "tsc --noEmit"
   },
@@ -31,6 +32,7 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "16.3.3",
+    "playwright": "1.63.0",
     "postcss": "^8.0.0",
     "tailwindcss": "^4.1.0",
     "typescript": "^5.9.0"

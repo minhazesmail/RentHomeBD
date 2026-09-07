@@ -1,0 +1,110 @@
+/* Saved workspace appearance bridge. */
+
+html[data-resolved-theme="dark"] .saved-page {
+  background:
+    radial-gradient(circle at 12% 7%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 24rem),
+    var(--background);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .saved-page::before {
+  opacity: .12;
+}
+
+html[data-resolved-theme="dark"] .saved-hero {
+  border-color: var(--border);
+  background:
+    radial-gradient(circle at 88% 14%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 18rem),
+    linear-gradient(135deg, var(--surface-solid), var(--surface-muted));
+  box-shadow: var(--shadow-md);
+}
+
+html[data-resolved-theme="dark"] .saved-hero .eyebrow,
+html[data-resolved-theme="dark"] .saved-hero-metrics .has-new :where(strong, span),
+html[data-resolved-theme="dark"] .saved-workspace-nav a:first-child {
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] .saved-hero .intro,
+html[data-resolved-theme="dark"] .saved-section-heading p {
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .saved-hero-metrics > div,
+html[data-resolved-theme="dark"] .saved-workspace-nav,
+html[data-resolved-theme="dark"] .saved-section,
+html[data-resolved-theme="dark"] .saved-search-card,
+html[data-resolved-theme="dark"] .saved-empty {
+  border-color: var(--border);
+  background: var(--surface-solid);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-resolved-theme="dark"] .saved-hero-metrics > div,
+html[data-resolved-theme="dark"] .saved-workspace-nav,
+html[data-resolved-theme="dark"] .saved-section {
+  background: var(--surface-glass);
+}
+
+html[data-resolved-theme="dark"] .saved-hero-metrics .has-new,
+html[data-resolved-theme="dark"] .saved-workspace-nav a:first-child,
+html[data-resolved-theme="dark"] .saved-section-counts > span {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+  background: var(--accent-soft);
+}
+
+html[data-resolved-theme="dark"] .saved-workspace-nav a {
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .saved-workspace-nav a:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .saved-workspace-nav strong {
+  background: var(--surface-muted);
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .saved-workspace-nav small,
+html[data-resolved-theme="dark"] .saved-section-counts small {
+  background: var(--accent-bright-soft);
+  color: var(--accent-bright);
+}
+
+html[data-resolved-theme="dark"] .saved-section-counts > span {
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] .saved-search-card.has-new-matches {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: linear-gradient(90deg, var(--accent-soft), var(--surface-solid) 32%);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-resolved-theme="dark"] .saved-search-card.has-new-matches::before {
+  background: var(--accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent), 0 0 0 7px var(--accent-soft);
+}
+
+html[data-resolved-theme="dark"] .saved-search-card.has-new-matches .saved-search-actions .primary-button {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-button);
+}
+
+html[data-resolved-theme="dark"] .saved-empty {
+  border-style: dashed;
+  background: var(--surface-soft);
+}
+
+html[data-resolved-theme="dark"] .saved-empty strong {
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .saved-empty span {
+  color: var(--muted);
+}

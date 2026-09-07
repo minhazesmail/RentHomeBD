@@ -1,0 +1,220 @@
+/* Authentication + phone verification appearance bridge. */
+
+html[data-resolved-theme="dark"] .auth-shell {
+  background:
+    radial-gradient(circle at 10% 15%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 26rem),
+    var(--background);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .auth-shell::after {
+  border-color: color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: 0 0 0 70px color-mix(in srgb, var(--accent) 5%, transparent), 0 0 0 150px color-mix(in srgb, var(--accent) 2%, transparent);
+}
+
+html[data-resolved-theme="dark"] .auth-card,
+html[data-resolved-theme="dark"] .recovery-card {
+  border-color: var(--border);
+  background: var(--surface-overlay);
+  color: var(--foreground);
+  box-shadow: var(--shadow-lg);
+}
+
+html[data-resolved-theme="dark"] .auth-title,
+html[data-resolved-theme="dark"] .auth-card :where(h1, h2, h3),
+html[data-resolved-theme="dark"] .auth-form label,
+html[data-resolved-theme="dark"] .auth-benefits span {
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .auth-benefits span::before {
+  background: var(--accent-soft);
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] .auth-tabs {
+  background: var(--surface-muted);
+}
+
+html[data-resolved-theme="dark"] .auth-tabs button {
+  color: var(--muted);
+  background: transparent;
+}
+
+html[data-resolved-theme="dark"] .auth-tabs button:hover {
+  color: var(--ink);
+  background: var(--surface-hover);
+}
+
+html[data-resolved-theme="dark"] .auth-tabs button[aria-selected="true"],
+html[data-resolved-theme="dark"] .auth-tabs button.is-active {
+  background: var(--surface-elevated);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+
+html[data-resolved-theme="dark"] .auth-form :where(input, select),
+html[data-resolved-theme="dark"] .bd-phone-field,
+html[data-resolved-theme="dark"] .auth-password-field input {
+  border-color: var(--control-border);
+  background: var(--surface-input);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] .auth-form :where(input, select):focus,
+html[data-resolved-theme="dark"] .bd-phone-field:focus-within {
+  border-color: var(--accent);
+  background: var(--control-background-hover);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+html[data-resolved-theme="dark"] .auth-form :where(input, select)::placeholder {
+  color: var(--muted-faint);
+}
+
+html[data-resolved-theme="dark"] .auth-password-toggle {
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .auth-password-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] .auth-message {
+  border: 1px solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+html[data-resolved-theme="dark"] :where(.auth-owner-note, .auth-status-note, .auth-mode-switch) {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .auth-mode-switch :where(a, button) {
+  color: var(--accent-contrast);
+}
+
+/* Phone verification */
+html[data-resolved-theme="dark"] .phone-verification-progress {
+  border-color: var(--border);
+  background: var(--border-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-progress li {
+  background: var(--surface-solid);
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-progress li > span {
+  border-color: var(--border);
+  background: var(--surface-muted);
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-progress strong {
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-progress li.is-current {
+  background: linear-gradient(135deg, var(--accent-soft), var(--surface-solid));
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-progress li.is-current > span,
+html[data-resolved-theme="dark"] .phone-verification-progress li.is-complete > span {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-stage,
+html[data-resolved-theme="dark"] .phone-verification-form-card,
+html[data-resolved-theme="dark"] .phone-verification-code-form,
+html[data-resolved-theme="dark"] .phone-verification-trust-note {
+  border-color: var(--border);
+  background: var(--surface-solid);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-stage {
+  background:
+    radial-gradient(circle at 96% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 22rem),
+    var(--surface-overlay);
+  box-shadow: var(--shadow-md);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-stage::after {
+  border-color: color-mix(in srgb, var(--accent) 14%, transparent);
+  box-shadow: 0 0 0 38px color-mix(in srgb, var(--accent) 3%, transparent), 0 0 0 78px color-mix(in srgb, var(--accent) 1.5%, transparent);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-stage-icon,
+html[data-resolved-theme="dark"] .phone-verification-success-icon {
+  background: var(--accent);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-button);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-stage .eyebrow,
+html[data-resolved-theme="dark"] .phone-verification-code-actions .text-button,
+html[data-resolved-theme="dark"] .phone-verification-success-badge {
+  color: var(--accent-contrast);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-stage h2 {
+  color: var(--ink);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .phone-verification-stage-intro > p:not(.eyebrow),
+  .phone-verification-code-stage > p:not(.eyebrow),
+  .phone-verification-success-stage > p:not(.eyebrow)
+) {
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] :where(
+  .phone-verification-privacy-note,
+  .phone-verification-existing-note,
+  .phone-verification-disclaimer,
+  .phone-verification-success-badge
+) {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-success-stage .phone-verification-disclaimer {
+  border-color: var(--warning-border);
+  background: color-mix(in srgb, var(--warning-bg) 65%, var(--surface-solid));
+  color: var(--warning);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-form-card label,
+html[data-resolved-theme="dark"] .phone-verification-code-form label {
+  color: var(--ink-soft);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-number-field,
+html[data-resolved-theme="dark"] .phone-verification-code-form input {
+  border-color: var(--control-border);
+  background: var(--surface-input);
+  color: var(--foreground);
+  box-shadow: none;
+}
+
+html[data-resolved-theme="dark"] .phone-verification-number-field:focus-within,
+html[data-resolved-theme="dark"] .phone-verification-code-form input:focus {
+  border-color: var(--accent);
+  background: var(--control-background-hover);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+html[data-resolved-theme="dark"] .phone-verification-code-form input {
+  color: var(--ink);
+}

@@ -21,6 +21,18 @@ function forbidText(relativePath, text, label = text) {
   if (read(relativePath).includes(text)) failures.push(`${relativePath}: ${label}`);
 }
 
+const routeThemes = [
+  ["src/app/landing-theme.css", "src/app/landing-styles.css", "landing-theme.css"],
+  ["src/app/homes/homes-theme.css", "src/app/homes/styles.css", "homes-theme.css"],
+  ["src/app/saved/saved-theme.css", "src/app/saved/styles.css", "saved-theme.css"],
+  ["src/app/messages/messages-theme.css", "src/app/messages/styles.css", "messages-theme.css"],
+  ["src/app/dashboard/dashboard-theme.css", "src/app/dashboard/styles.css", "dashboard-theme.css"],
+  ["src/app/owner/owner-theme.css", "src/app/owner/styles.css", "owner-theme.css"],
+  ["src/app/moderation/moderation-theme.css", "src/app/moderation/styles.css", "moderation-theme.css"],
+  ["src/app/information-theme.css", "src/app/information-styles.css", "information-theme.css"],
+  ["src/app/auth-theme.css", "src/app/auth-styles.css", "auth-theme.css"],
+];
+
 for (const file of [
   "src/theme/config.ts",
   "src/theme/get-theme.ts",
@@ -31,56 +43,131 @@ for (const file of [
   "src/components/theme-switcher.module.css",
   "src/app/theme-tokens.css",
   "src/app/theme.css",
+  "src/app/theme-dark-compat.css",
+  "scripts/check-theme-browser.mjs",
+  ...routeThemes.map(([themeFile]) => themeFile),
 ]) {
   read(file);
 }
 
+/* Preference/state contract */
 requireText("src/theme/config.ts", '["system", "light", "dark"]', "system/light/dark preference contract");
 requireText("src/theme/config.ts", 'THEME_COOKIE_NAME = "nb_theme"', "theme cookie name");
 requireText("src/theme/get-theme.ts", "await cookies()", "server cookie resolution");
 requireText("src/app/layout.tsx", "getThemePreference()", "server theme preference read");
 requireText("src/app/layout.tsx", "data-theme={themePreference}", "SSR preference attribute");
 requireText("src/app/layout.tsx", "data-resolved-theme={initialResolvedTheme}", "SSR resolved-theme attribute");
+requireText("src/app/layout.tsx", "suppressHydrationWarning", "prepaint system hydration safety");
+requireText("src/app/layout.tsx", "themeBootstrap", "prepaint system appearance bootstrap");
+requireText("src/app/layout.tsx", 'matchMedia("(prefers-color-scheme: dark)")', "bootstrap OS appearance resolution");
+requireText("src/app/layout.tsx", "themeReady", "bootstrap readiness marker");
 requireText("src/app/layout.tsx", "<ThemeProvider initialPreference={themePreference}>", "theme provider");
 
 requireText("src/theme/theme-provider.tsx", 'matchMedia("(prefers-color-scheme: dark)")', "live system preference listener");
+requireText("src/theme/theme-provider.tsx", "currentDocumentTheme", "hydration from prepaint resolved appearance");
 requireText("src/theme/theme-provider.tsx", "document.documentElement.dataset.theme = nextPreference", "instant preference update");
 requireText("src/theme/theme-provider.tsx", "document.documentElement.dataset.resolvedTheme = theme", "resolved visual mode update");
+requireText("src/theme/theme-provider.tsx", "dataset.themeReady", "resolved readiness marker");
 requireText("src/theme/theme-provider.tsx", "SameSite=Lax", "theme cookie safety attributes");
 forbidText("src/theme/theme-provider.tsx", "router.refresh()", "theme changes must not force route refreshes");
 
+/* Accessible switcher */
 requireText("src/components/theme-switcher.tsx", 'role="menuitemradio"', "radio semantics for appearance options");
 requireText("src/components/theme-switcher.tsx", "aria-checked={active}", "selected appearance semantics");
 requireText("src/components/theme-switcher.tsx", 'event.key === "Escape"', "Escape dismissal");
+requireText("src/components/theme-switcher.module.css", ".root:not([open]) .menu", "closed appearance menu hiding contract");
 requireText("src/components/marketing-navigation.tsx", "<ThemeSwitcher compact />", "marketing appearance control");
 requireText("src/components/product-navigation.tsx", "<ThemeSwitcher compact />", "product appearance control");
 requireText("src/app/login/page.tsx", "<ThemeSwitcher compact />", "login appearance control");
 requireText("src/app/account/phone/page.tsx", "<ThemeSwitcher compact />", "phone verification appearance control");
 
-requireText("src/app/styles.css", "theme-tokens.css", "semantic theme-token import");
-requireText("src/app/styles.css", "theme.css", "final dark theme layer import");
-requireText("src/app/styles.css", "route-atmosphere, theme;", "theme as final cascade layer");
+/* Cascade ownership: appearance tokens must be in the final theme layer. */
+requireText("src/app/styles.css", 'route-atmosphere, theme;', "theme as final cascade layer");
+requireText("src/app/styles.css", '@import "./theme-tokens.css" layer(theme);', "appearance tokens in final theme layer");
+requireText("src/app/styles.css", '@import "./theme.css" layer(theme);', "global appearance behavior in final theme layer");
+requireText("src/app/styles.css", '@import "./landing-theme.css" layer(theme);', "root landing appearance bridge");
+forbidText("src/app/styles.css", '@import "./theme-tokens.css" layer(tokens);', "theme tokens must not load before globals");
 forbidText("src/app/styles.css", "theme-compat.css", "unscoped legacy theme compatibility must not load globally");
 forbidText("src/app/styles.css", "theme-module-overrides.css", "unscoped CSS-module repaint overrides must not load globally");
 
+/* Complete semantic token contract. */
+for (const token of [
+  "--surface-elevated:",
+  "--surface-inverse:",
+  "--surface-input:",
+  "--surface-hover:",
+  "--surface-selected:",
+  "--surface-overlay:",
+  "--text-primary:",
+  "--text-secondary:",
+  "--text-inverse:",
+  "--control-background:",
+  "--control-border:",
+  "--accent-contrast:",
+  "--accent-soft-strong:",
+  "--focus-ring:",
+]) {
+  requireText("src/app/theme-tokens.css", token, `semantic token ${token}`);
+}
+
+const themeTokens = read("src/app/theme-tokens.css");
+const lightRoot = themeTokens.match(/:root\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
+for (const legacy of ["--nb-ink:", "--nb-emerald:", "--nb-ivory:", "--nb-paper:", "--nb-line:"]) {
+  if (lightRoot.includes(legacy)) failures.push(`src/app/theme-tokens.css: light :root must not remap legacy alias ${legacy}`);
+}
+
 requireText("src/app/theme-tokens.css", 'html[data-resolved-theme="dark"]', "resolved dark palette");
+requireText("src/app/theme-tokens.css", '@media (prefers-color-scheme: dark)', "system no-JS/pre-hydration fallback");
 requireText("src/app/theme-tokens.css", 'html[data-theme="system"]', "system palette fallback");
 requireText("src/app/theme-tokens.css", "color-scheme: light dark", "native system color scheme");
 requireText("src/app/theme-tokens.css", "--map-area-stroke", "theme-aware map vector color");
-
-const themeTokens = read("src/app/theme-tokens.css");
-const rootTokenBlock = themeTokens.match(/:root\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
-for (const token of ["--background:", "--foreground:", "--ink:", "--surface:", "--surface-solid:", "--border:", "--accent:"]) {
-  if (rootTokenBlock.includes(token)) {
-    failures.push(`src/app/theme-tokens.css: light-mode core token ${token} must remain owned by tokens.css`);
-  }
+for (const legacy of ["--nb-ink:", "--nb-emerald:", "--nb-sage-soft:", "--nb-ivory:", "--nb-paper:", "--nb-line:"]) {
+  requireText("src/app/theme-tokens.css", legacy, `dark compatibility alias ${legacy}`);
 }
 
+/* The global theme sheet must stay route agnostic. The shared marketing nav may
+   reference `.landing-nav`, but route content surfaces must remain local. */
 requireText("src/app/theme.css", 'html[data-resolved-theme="dark"]', "dark-only visual scope");
 requireText("src/app/theme.css", ".leaflet-popup-content-wrapper", "Leaflet popup theming");
-requireText("src/app/theme.css", "raster OSM tiles remain untouched", "explicit basemap strategy");
+requireText("src/app/theme.css", "Raster OSM tiles remain", "explicit basemap strategy");
 forbidText("src/app/theme.css", "\nbody {", "unscoped body theme rule is forbidden");
 forbidText("src/app/theme.css", "\nhtml {", "unscoped html theme rule is forbidden");
+for (const routeSelector of [
+  ".landing-shell",
+  ".landing-search-",
+  ".landing-how-",
+  ".landing-listing-",
+  ".homes-",
+  ".renter-",
+  ".property-detail-",
+  ".saved-",
+  ".messages-",
+  ".dashboard-",
+  ".owner-",
+  ".moderation-",
+  ".auth-",
+  ".info-",
+]) {
+  forbidText("src/app/theme.css", routeSelector, `global theme sheet must not own route selector ${routeSelector}`);
+}
+
+/* Every major route family owns its appearance bridge in the final layer. */
+for (const [themeFile, manifest, importName] of routeThemes) {
+  requireText(themeFile, 'html[data-resolved-theme="dark"]', `${themeFile} dark scope`);
+  requireText(manifest, `@import "./${importName}" layer(theme);`, `${manifest} route-owned appearance import`);
+}
+
+/* CSS Modules must consume semantic tokens themselves rather than depending on
+   global specificity battles. */
+requireText("src/components/saved-homes-workspace.module.css", "var(--surface-solid)", "semantic saved card surface");
+requireText("src/components/saved-homes-workspace.module.css", "var(--control-background)", "semantic saved control surface");
+requireText("src/components/saved-homes-workspace.module.css", "var(--accent-contrast)", "semantic saved accent text");
+forbidText("src/components/saved-homes-workspace.module.css", "background: #fff;", "saved module contains fixed white surface");
+forbidText("src/components/saved-homes-workspace.module.css", "background: #f6f8f3;", "saved module contains fixed light toolbar surface");
+requireText("src/components/listing-workflow-nav.module.css", "color: var(--accent-contrast);", "semantic completed listing-step contrast");
+requireText("src/components/property-location-actions.module.css", "color: var(--muted);", "semantic property-location helper text");
+forbidText("src/components/property-location-actions.module.css", "--color-text-muted", "undefined property-location text token fallback");
+requireText("src/components/marketing-navigation.module.css", ':global(html[data-resolved-theme="dark"]) .actions :global(.primary-button)', "module-owned dark marketing CTA contrast");
 
 requireText("src/components/brand-logo.tsx", '"brand-logo"', "stable brand-logo theme hook");
 requireText("src/app/theme.css", 'content: url("/nearbasha-logo-on-dark.svg")', "dark logo asset swap");
@@ -90,6 +177,18 @@ requireText("src/components/language-switcher.module.css", "var(--control-backgr
 requireText("src/components/mobile-map-model.module.css", "var(--surface-elevated)", "semantic mobile map surface");
 requireText("src/components/listing-workflow-nav.module.css", "var(--surface-elevated)", "semantic listing workflow surface");
 requireText("src/components/owner-portfolio-controls.module.css", "var(--control-background)", "semantic owner controls");
+
+/* Rendered QA must remain in CI. */
+requireText("package.json", '"themebrowser": "node scripts/check-theme-browser.mjs"', "theme browser script");
+requireText("package.json", '"playwright": "1.63.0"', "pinned Playwright browser dependency");
+requireText(".github/workflows/ci.yml", "Rendered theme QA", "rendered theme CI step");
+requireText(".github/workflows/ci.yml", "playwright install --with-deps chromium", "Chromium install for rendered theme QA");
+requireText("scripts/check-theme-browser.mjs", 'preference: "system", colorScheme: "dark", expected: "dark"', "System dark browser scenario");
+requireText("scripts/check-theme-browser.mjs", 'preference: "system", colorScheme: "light", expected: "light"', "System light browser scenario");
+requireText("scripts/check-theme-browser.mjs", "contrastRatio", "computed contrast checks");
+requireText("scripts/check-theme-browser.mjs", "complexBackground", "gradient-aware contrast handling");
+requireText("scripts/check-theme-browser.mjs", "closed appearance menu is still visibly rendered", "closed disclosure browser assertion");
+requireText("scripts/check-theme-browser.mjs", "computed-theme-snapshots.json", "computed appearance artifact");
 
 if (failures.length) {
   console.error("Theme regression check failed:\n");
