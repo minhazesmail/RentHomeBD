@@ -14,8 +14,9 @@ const routes = [
   {
     name: "homes",
     path: "/homes",
-    critical: [".homes-page", "[data-mobile-view]", ".renter-map-panel"],
+    critical: [".homes-page", ".renter-map-panel"],
     desktopCritical: [".renter-search-sidebar", ".renter-filter-panel"],
+    mobileCritical: ["[data-mobile-view]"],
   },
   {
     name: "login",
