@@ -75,6 +75,7 @@ forbidText("src/theme/theme-provider.tsx", "router.refresh()", "theme changes mu
 requireText("src/components/theme-switcher.tsx", 'role="menuitemradio"', "radio semantics for appearance options");
 requireText("src/components/theme-switcher.tsx", "aria-checked={active}", "selected appearance semantics");
 requireText("src/components/theme-switcher.tsx", 'event.key === "Escape"', "Escape dismissal");
+requireText("src/components/theme-switcher.module.css", ".root:not([open]) .menu", "closed appearance menu hiding contract");
 requireText("src/components/marketing-navigation.tsx", "<ThemeSwitcher compact />", "marketing appearance control");
 requireText("src/components/product-navigation.tsx", "<ThemeSwitcher compact />", "product appearance control");
 requireText("src/app/login/page.tsx", "<ThemeSwitcher compact />", "login appearance control");
@@ -109,13 +110,19 @@ for (const token of [
   requireText("src/app/theme-tokens.css", token, `semantic token ${token}`);
 }
 
+const themeTokens = read("src/app/theme-tokens.css");
+const lightRoot = themeTokens.match(/:root\s*\{([\s\S]*?)\n\}/)?.[1] ?? "";
+for (const legacy of ["--nb-ink:", "--nb-emerald:", "--nb-ivory:", "--nb-paper:", "--nb-line:"]) {
+  if (lightRoot.includes(legacy)) failures.push(`src/app/theme-tokens.css: light :root must not remap legacy alias ${legacy}`);
+}
+
 requireText("src/app/theme-tokens.css", 'html[data-resolved-theme="dark"]', "resolved dark palette");
 requireText("src/app/theme-tokens.css", '@media (prefers-color-scheme: dark)', "system no-JS/pre-hydration fallback");
 requireText("src/app/theme-tokens.css", 'html[data-theme="system"]', "system palette fallback");
 requireText("src/app/theme-tokens.css", "color-scheme: light dark", "native system color scheme");
 requireText("src/app/theme-tokens.css", "--map-area-stroke", "theme-aware map vector color");
 for (const legacy of ["--nb-ink:", "--nb-emerald:", "--nb-sage-soft:", "--nb-ivory:", "--nb-paper:", "--nb-line:"]) {
-  requireText("src/app/theme-tokens.css", legacy, `theme-aware compatibility alias ${legacy}`);
+  requireText("src/app/theme-tokens.css", legacy, `dark compatibility alias ${legacy}`);
 }
 
 /* The global theme sheet must stay route agnostic. The shared marketing nav may
@@ -160,6 +167,7 @@ forbidText("src/components/saved-homes-workspace.module.css", "background: #f6f8
 requireText("src/components/listing-workflow-nav.module.css", "color: var(--accent-contrast);", "semantic completed listing-step contrast");
 requireText("src/components/property-location-actions.module.css", "color: var(--muted);", "semantic property-location helper text");
 forbidText("src/components/property-location-actions.module.css", "--color-text-muted", "undefined property-location text token fallback");
+requireText("src/components/marketing-navigation.module.css", ':global(html[data-resolved-theme="dark"]) .actions :global(.primary-button)', "module-owned dark marketing CTA contrast");
 
 requireText("src/components/brand-logo.tsx", '"brand-logo"', "stable brand-logo theme hook");
 requireText("src/app/theme.css", 'content: url("/nearbasha-logo-on-dark.svg")', "dark logo asset swap");
@@ -179,6 +187,7 @@ requireText("scripts/check-theme-browser.mjs", 'preference: "system", colorSchem
 requireText("scripts/check-theme-browser.mjs", 'preference: "system", colorScheme: "light", expected: "light"', "System light browser scenario");
 requireText("scripts/check-theme-browser.mjs", "contrastRatio", "computed contrast checks");
 requireText("scripts/check-theme-browser.mjs", "complexBackground", "gradient-aware contrast handling");
+requireText("scripts/check-theme-browser.mjs", "closed appearance menu is still visibly rendered", "closed disclosure browser assertion");
 requireText("scripts/check-theme-browser.mjs", "computed-theme-snapshots.json", "computed appearance artifact");
 
 if (failures.length) {
