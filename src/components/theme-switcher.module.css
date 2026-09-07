@@ -65,6 +65,12 @@
   -webkit-backdrop-filter: blur(var(--blur-surface));
 }
 
+/* Author display rules override the browser's native closed-details hiding.
+   Keep the menu explicitly absent until the disclosure is open. */
+.root:not([open]) .menu {
+  display: none;
+}
+
 .menuLabel {
   padding: 6px 8px 5px;
   color: var(--muted);
