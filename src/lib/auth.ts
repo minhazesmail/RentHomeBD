@@ -4,7 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/supabase/database.types";
 
-type Profile = Pick<Tables<"profiles">, "id" | "display_name" | "primary_role" | "avatar_path">;
+type Profile = Pick<
+  Tables<"profiles">,
+  "id" | "display_name" | "primary_role" | "avatar_path"
+>;
 
 export type AuthContext = {
   userId: string;
@@ -13,19 +16,43 @@ export type AuthContext = {
   profile: Profile;
 };
 
+async function ensureProfile(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+): Promise<Profile | null> {
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("id, display_name, primary_role, avatar_path")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (existing) return existing;
+
+  // Fallback when the auth trigger did not create a row (partial signup, race, etc.).
+  // Always create as renter; owner/agent roles are only set by the signup trigger
+  // from trusted metadata or by security-definer paths.
+  const { data: created, error } = await supabase
+    .from("profiles")
+    .insert({
+      id: userId,
+      primary_role: "renter",
+    })
+    .select("id, display_name, primary_role, avatar_path")
+    .maybeSingle();
+
+  if (error || !created) return null;
+  return created;
+}
+
 export async function getAuthContext(): Promise<AuthContext | null> {
   const supabase = await createClient();
-  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const { data: claimsData, error: claimsError } =
+    await supabase.auth.getClaims();
   const claims = claimsData?.claims;
 
   if (claimsError || !claims?.sub) return null;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, display_name, primary_role, avatar_path")
-    .eq("id", claims.sub)
-    .maybeSingle();
-
+  const profile = await ensureProfile(supabase, claims.sub);
   if (!profile) return null;
 
   return {
@@ -44,7 +71,10 @@ export async function requireUser() {
 
 export async function requireOwnerOrAgent() {
   const auth = await requireUser();
-  if (auth.profile.primary_role !== "owner" && auth.profile.primary_role !== "agent") {
+  if (
+    auth.profile.primary_role !== "owner" &&
+    auth.profile.primary_role !== "agent"
+  ) {
     redirect("/dashboard?error=owner-role-required");
   }
   return auth;
