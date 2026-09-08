@@ -27,6 +27,8 @@ jobs:
         run: npm run typecheck
       - name: Localization QA
         run: npm run i18nqa
+      - name: Bangladesh phone QA
+        run: npm run phoneqa
       - name: Lint
         run: npm run lint
       - name: Dead code
