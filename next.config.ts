@@ -1,8 +1,13 @@
 import type { NextConfig } from "next";
 
-const supabaseUrl =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  "https://naoarepmcfdnxehbdios.supabase.co";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+if (!supabaseUrl) {
+  throw new Error(
+    "Missing required environment variable: NEXT_PUBLIC_SUPABASE_URL. " +
+      "Copy .env.example to .env.local and set the values for your Supabase project.",
+  );
+}
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,

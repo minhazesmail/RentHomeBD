@@ -1,12 +1,19 @@
-// These values are intentionally public. Supabase publishable keys are designed
-// for browser clients; authorization is enforced by RLS and database grants.
-// Environment variables still override them for isolated deployments.
-const DEFAULT_SUPABASE_URL = "https://naoarepmcfdnxehbdios.supabase.co";
-const DEFAULT_SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_Af21QWd3B7XLt_4TmoWEQw_deZseDwD";
+// Supabase publishable keys are designed for browser clients; authorization is
+// enforced by RLS and database grants. Values must come from environment
+// variables so each deployment can use an isolated project.
 
-export const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
-export const SUPABASE_PUBLISHABLE_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  DEFAULT_SUPABASE_PUBLISHABLE_KEY;
+function requiredEnv(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(
+      `Missing required environment variable: ${name}. ` +
+        `Copy .env.example to .env.local and set the values for your Supabase project.`,
+    );
+  }
+  return value;
+}
+
+export const SUPABASE_URL = requiredEnv("NEXT_PUBLIC_SUPABASE_URL");
+export const SUPABASE_PUBLISHABLE_KEY = requiredEnv(
+  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+);
