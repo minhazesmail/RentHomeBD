@@ -44,7 +44,9 @@ for (const file of [
   "src/app/theme-tokens.css",
   "src/app/theme.css",
   "src/app/theme-dark-compat.css",
+  "src/app/landing-how-theme.css",
   "scripts/check-theme-browser.mjs",
+  "scripts/check-how-theme-browser.mjs",
   ...routeThemes.map(([themeFile]) => themeFile),
 ]) {
   read(file);
@@ -81,11 +83,13 @@ requireText("src/components/product-navigation.tsx", "<ThemeSwitcher compact />"
 requireText("src/app/login/page.tsx", "<ThemeSwitcher compact />", "login appearance control");
 requireText("src/app/account/phone/page.tsx", "<ThemeSwitcher compact />", "phone verification appearance control");
 
-/* Cascade ownership: appearance tokens must be in the final theme layer. */
-requireText("src/app/styles.css", 'route-atmosphere, theme;', "theme as final cascade layer");
-requireText("src/app/styles.css", '@import "./theme-tokens.css" layer(theme);', "appearance tokens in final theme layer");
-requireText("src/app/styles.css", '@import "./theme.css" layer(theme);', "global appearance behavior in final theme layer");
+/* Cascade ownership: route-wide appearance resolves in theme; complete local
+   component contracts may resolve one final step later. */
+requireText("src/app/styles.css", 'route-atmosphere, theme, component-appearance;', "component appearance as final cascade layer");
+requireText("src/app/styles.css", '@import "./theme-tokens.css" layer(theme);', "appearance tokens in route-wide theme layer");
+requireText("src/app/styles.css", '@import "./theme.css" layer(theme);', "global appearance behavior in route-wide theme layer");
 requireText("src/app/styles.css", '@import "./landing-theme.css" layer(theme);', "root landing appearance bridge");
+requireText("src/app/styles.css", '@import "./landing-how-theme.css" layer(component-appearance);', "journey component appearance ownership");
 forbidText("src/app/styles.css", '@import "./theme-tokens.css" layer(tokens);', "theme tokens must not load before globals");
 forbidText("src/app/styles.css", "theme-compat.css", "unscoped legacy theme compatibility must not load globally");
 forbidText("src/app/styles.css", "theme-module-overrides.css", "unscoped CSS-module repaint overrides must not load globally");
@@ -151,11 +155,28 @@ for (const routeSelector of [
   forbidText("src/app/theme.css", routeSelector, `global theme sheet must not own route selector ${routeSelector}`);
 }
 
-/* Every major route family owns its appearance bridge in the final layer. */
+/* Every major route family owns its appearance bridge in the route-wide theme layer. */
 for (const [themeFile, manifest, importName] of routeThemes) {
   requireText(themeFile, 'html[data-resolved-theme="dark"]', `${themeFile} dark scope`);
   requireText(manifest, `@import "./${importName}" layer(theme);`, `${manifest} route-owned appearance import`);
 }
+
+/* The How-it-works component owns a complete semantic surface contract in the
+   final component layer so Light controls cannot leak into Dark content. */
+for (const token of [
+  "--journey-shell-color:",
+  "--journey-control-color:",
+  "--journey-panel-color:",
+  "--journey-text:",
+  "--journey-muted:",
+  "--journey-active-foreground:",
+]) {
+  requireText("src/app/landing-how-theme.css", token, `journey semantic token ${token}`);
+}
+requireText("src/app/landing-how-theme.css", 'html[data-resolved-theme="dark"] main.landing-shell .landing-how-tabs-shell', "resolved-dark journey contract");
+requireText("src/app/landing-how-theme.css", '.landing-how-tabs-shell.owner', "owner journey variant");
+requireText("src/app/landing-how-theme.css", ".landing-how-panel-heading h3", "journey heading foreground ownership");
+requireText("src/app/landing-how-theme.css", ".landing-step-cards > li", "connected journey step ownership");
 
 /* CSS Modules must consume semantic tokens themselves rather than depending on
    global specificity battles. */
@@ -182,6 +203,7 @@ requireText("src/components/owner-portfolio-controls.module.css", "var(--control
 requireText("package.json", '"themebrowser": "node scripts/check-theme-browser.mjs"', "theme browser script");
 requireText("package.json", '"playwright": "1.63.0"', "pinned Playwright browser dependency");
 requireText(".github/workflows/ci.yml", "Rendered theme QA", "rendered theme CI step");
+requireText(".github/workflows/ci.yml", "How-it-works dark theme QA", "journey interaction CI step");
 requireText(".github/workflows/ci.yml", "playwright install --with-deps chromium", "Chromium install for rendered theme QA");
 requireText("scripts/check-theme-browser.mjs", 'preference: "system", colorScheme: "dark", expected: "dark"', "System dark browser scenario");
 requireText("scripts/check-theme-browser.mjs", 'preference: "system", colorScheme: "light", expected: "light"', "System light browser scenario");
@@ -189,6 +211,10 @@ requireText("scripts/check-theme-browser.mjs", "contrastRatio", "computed contra
 requireText("scripts/check-theme-browser.mjs", "complexBackground", "gradient-aware contrast handling");
 requireText("scripts/check-theme-browser.mjs", "closed appearance menu is still visibly rendered", "closed disclosure browser assertion");
 requireText("scripts/check-theme-browser.mjs", "computed-theme-snapshots.json", "computed appearance artifact");
+requireText("scripts/check-how-theme-browser.mjs", 'const locales = ["en", "bn"]', "journey locale matrix");
+requireText("scripts/check-how-theme-browser.mjs", 'preference: "system", colorScheme: "dark"', "journey System-dark scenario");
+requireText("scripts/check-how-theme-browser.mjs", '#landing-persona-tab-owner', "owner journey interaction coverage");
+requireText("scripts/check-how-theme-browser.mjs", "computed-how-theme-snapshots.json", "journey computed appearance artifact");
 
 if (failures.length) {
   console.error("Theme regression check failed:\n");

@@ -4,10 +4,10 @@
    page is the app root, so its dark appearance bridge is imported here but is
    fully scoped to `.landing-*` selectors. */
 
-/* Appearance is the final layer. Core palette primitives load in tokens, while
-   semantic appearance values load last so legacy globals cannot overwrite dark
-   or system-resolved values. */
-@layer tokens, globals, primitives, foundation, shells, brand, motion, responsive, accessibility, performance, cleanup, route-base, route-polish, route-redesign, route-detail, route-fixes, route-contrast, route-atmosphere, theme;
+/* Appearance layers load last. Core palette primitives load in tokens, route-wide
+   semantic appearance loads in theme, and component-appearance is reserved for
+   narrowly scoped components that must own their complete surface contract. */
+@layer tokens, globals, primitives, foundation, shells, brand, motion, responsive, accessibility, performance, cleanup, route-base, route-polish, route-redesign, route-detail, route-fixes, route-contrast, route-atmosphere, theme, component-appearance;
 
 /* Design system foundation */
 @import "./tokens.css" layer(tokens);
@@ -26,9 +26,10 @@
 @import "./visual-regression-cleanup.css" layer(cleanup);
 @import "./spacing-normalization.css" layer(cleanup);
 
-/* Appearance contract must be first inside the final layer so theme.css and
-   route-specific theme files can consume it without redefining tokens. */
+/* Route-wide appearance resolves first; component-local appearance can then own
+   complete surfaces without duplicating ownership inside the same layer. */
 @import "./theme-tokens.css" layer(theme);
 @import "./theme.css" layer(theme);
 @import "./theme-dark-compat.css" layer(theme);
 @import "./landing-theme.css" layer(theme);
+@import "./landing-how-theme.css" layer(component-appearance);
