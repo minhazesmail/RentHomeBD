@@ -4,9 +4,9 @@
   padding: clamp(72px, 8vw, 112px) clamp(22px, 4.2vw, 58px);
   border: 1px solid rgba(16, 37, 29, .075);
   border-radius: 28px;
-  background:
+  background: var(--landing-faq-background,
     radial-gradient(circle at 8% 12%, rgba(185, 242, 39, .09), transparent 24rem),
-    linear-gradient(135deg, rgba(255, 253, 248, .94), rgba(239, 246, 237, .9)) !important;
+    linear-gradient(135deg, rgba(255, 253, 248, .94), rgba(239, 246, 237, .9))) !important;
 }
 
 .landing-faq-editorial-intro {
