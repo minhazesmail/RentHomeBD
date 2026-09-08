@@ -9,12 +9,14 @@ const routes = [
   {
     name: "landing",
     path: "/",
-    critical: [".landing-frame", ".landing-search-console", ".landing-how-panel"],
+    highRisk: true,
+    critical: [".landing-frame", ".landing-search-console", ".landing-how-panel", ".landing-faq-editorial"],
   },
   {
     name: "homes",
     path: "/homes",
-    critical: [".homes-page", ".renter-map-panel"],
+    highRisk: true,
+    critical: [".homes-page", ".renter-map-panel", "[data-product-navigation]"],
     desktopCritical: [".renter-search-sidebar", ".renter-filter-panel"],
     mobileCritical: ["[data-mobile-view]"],
   },
@@ -53,8 +55,11 @@ const scenarios = [
 ];
 
 const viewports = [
-  { name: "desktop", width: 1440, height: 1000 },
-  { name: "mobile", width: 390, height: 844 },
+  { name: "desktop", width: 1440, height: 1000, allRoutes: true },
+  { name: "laptop", width: 1280, height: 900 },
+  { name: "tablet-landscape", width: 1024, height: 768 },
+  { name: "tablet", width: 768, height: 900 },
+  { name: "mobile", width: 390, height: 844, allRoutes: true },
 ];
 
 function relativeLuminance([r, g, b]) {
@@ -81,6 +86,11 @@ function parseRgb(value) {
   return [Number(match[1]), Number(match[2]), Number(match[3])];
 }
 
+function luminanceFromCss(value) {
+  const rgb = parseRgb(value);
+  return rgb ? relativeLuminance(rgb) : null;
+}
+
 async function inspectPage(page, critical, scenario) {
   return page.evaluate(({ critical, expected, preference }) => {
     const root = document.documentElement;
@@ -103,6 +113,7 @@ async function inspectPage(page, critical, scenario) {
         height: rect.height,
         color: style.color,
         backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
         borderColor: style.borderColor,
       };
     });
@@ -136,7 +147,7 @@ async function inspectPage(page, critical, scenario) {
           : element.textContent;
         return Boolean(text?.trim()) && rect.width > 2 && rect.height > 2 && style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) > 0.2;
       })
-      .slice(0, 220)
+      .slice(0, 320)
       .map((element) => {
         const style = getComputedStyle(element);
         let backgroundNode = element;
@@ -161,6 +172,31 @@ async function inspectPage(page, critical, scenario) {
         };
       });
 
+    function surface(selector) {
+      const element = document.querySelector(selector);
+      if (!element) return null;
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return {
+        selector,
+        color: style.color,
+        backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        width: rect.width,
+        height: rect.height,
+        left: rect.left,
+        right: rect.right,
+        top: rect.top,
+        bottom: rect.bottom,
+      };
+    }
+
+    const landingShell = document.querySelector("main.landing-shell");
+    const landingStyle = landingShell ? getComputedStyle(landingShell) : null;
+    const mapTile = document.querySelector(".renter-map-canvas .leaflet-tile");
+    const productNav = document.querySelector("[data-product-navigation]");
+    const productNavRect = productNav?.getBoundingClientRect();
+
     return {
       preference: root.dataset.theme,
       resolved: root.dataset.resolvedTheme,
@@ -175,6 +211,11 @@ async function inspectPage(page, critical, scenario) {
         accentContrast: rootStyle.getPropertyValue("--accent-contrast").trim(),
         accentSoftStrong: rootStyle.getPropertyValue("--accent-soft-strong").trim(),
       },
+      landingTokens: landingStyle ? {
+        canvas: landingStyle.getPropertyValue("--landing-canvas").trim(),
+        contentBackground: landingStyle.getPropertyValue("--landing-content-background").trim(),
+        text: landingStyle.getPropertyValue("--landing-text").trim(),
+      } : null,
       body: {
         color: bodyStyle.color,
         backgroundColor: bodyStyle.backgroundColor,
@@ -182,16 +223,87 @@ async function inspectPage(page, critical, scenario) {
       appearanceDisclosure,
       criticalState,
       textSamples,
+      surfaces: {
+        landingHero: surface(".landing-hero-reference"),
+        landingSearch: surface(".landing-search-console"),
+        landingContent: surface(".landing-how"),
+        landingFaq: surface(".landing-faq-editorial"),
+        landingFaqRailTitle: surface(".landing-faq-rail strong"),
+        landingMapRail: surface(".landing-map-rail"),
+        landingMapEmpty: surface(".landing-map-preview [class*='emptyState']"),
+        homesSidebar: surface(".renter-search-sidebar"),
+        homesMap: surface(".renter-map-canvas"),
+      },
+      mapTileSrc: mapTile instanceof HTMLImageElement ? mapTile.currentSrc || mapTile.src : null,
+      overflow: {
+        document: root.scrollWidth - root.clientWidth,
+        body: body.scrollWidth - body.clientWidth,
+        productNavRight: productNavRect ? productNavRect.right - window.innerWidth : 0,
+        productNavLeft: productNavRect ? -productNavRect.left : 0,
+      },
     };
   }, { critical, expected: scenario.expected, preference: scenario.preference });
 }
 
-async function captureFailure(page, label) {
-  try {
-    await page.screenshot({ path: path.join(artifactRoot, `${label}.png`), fullPage: true });
-  } catch {
-    // A failed navigation can also make screenshots unavailable.
+function rectanglesOverlap(a, b) {
+  if (!a || !b || a.width <= 2 || a.height <= 2 || b.width <= 2 || b.height <= 2) return false;
+  return Math.min(a.right, b.right) > Math.max(a.left, b.left)
+    && Math.min(a.bottom, b.bottom) > Math.max(a.top, b.top);
+}
+
+function validateLandingSurfaceRoles(snapshot, label, failures) {
+  const { surfaces, landingTokens, resolved } = snapshot;
+  if (!surfaces.landingSearch || !surfaces.landingContent || !surfaces.landingFaq || !surfaces.landingMapRail) return;
+
+  const searchLum = luminanceFromCss(surfaces.landingSearch.backgroundColor);
+  const contentLum = luminanceFromCss(surfaces.landingContent.backgroundColor);
+  const mapRailLum = luminanceFromCss(surfaces.landingMapRail.backgroundColor);
+  const faqRailTextLum = luminanceFromCss(surfaces.landingFaqRailTitle?.color);
+
+  if (resolved === "dark") {
+    if (!landingTokens?.canvas || !landingTokens?.contentBackground || !landingTokens?.text) {
+      failures.push(`${label}: landing dark semantic palette is incomplete`);
+    }
+    for (const [name, value] of [["search console", searchLum], ["editorial content", contentLum], ["map rail", mapRailLum]]) {
+      if (value != null && value > 0.22) failures.push(`${label}: ${name} is still a light surface in Dark mode (luminance ${value.toFixed(3)})`);
+    }
+    if (faqRailTextLum != null && faqRailTextLum < 0.55) {
+      failures.push(`${label}: FAQ rail heading is not using a light dark-surface foreground`);
+    }
+  } else {
+    for (const [name, value] of [["search console", searchLum], ["editorial content", contentLum]]) {
+      if (value != null && value < 0.60) failures.push(`${label}: ${name} drifted away from the established Light surface`);
+    }
   }
+
+  if (rectanglesOverlap(surfaces.landingMapEmpty, surfaces.landingMapRail)) {
+    failures.push(`${label}: landing map empty-state copy overlaps the discovery rail`);
+  }
+}
+
+function validateHomesSurfaceRoles(snapshot, label, failures, viewport) {
+  if (snapshot.resolved === "dark") {
+    if (snapshot.mapTileSrc && !snapshot.mapTileSrc.includes("cartocdn.com/dark_all")) {
+      failures.push(`${label}: Dark homes map is not using the dark CARTO basemap`);
+    }
+    const sidebarLum = luminanceFromCss(snapshot.surfaces.homesSidebar?.backgroundColor);
+    if (sidebarLum != null && sidebarLum > 0.22) failures.push(`${label}: renter sidebar is still a light surface in Dark mode`);
+  } else if (snapshot.mapTileSrc && !snapshot.mapTileSrc.includes("tile.openstreetmap.org")) {
+    failures.push(`${label}: Light homes map is not using the standard OpenStreetMap basemap`);
+  }
+
+  if (viewport.width <= 1040) {
+    if (snapshot.overflow.document > 2 || snapshot.overflow.body > 2) {
+      failures.push(`${label}: page has horizontal overflow at ${viewport.width}px`);
+    }
+    if (snapshot.overflow.productNavRight > 2 || snapshot.overflow.productNavLeft > 2) {
+      failures.push(`${label}: product navigation clips outside the viewport at ${viewport.width}px`);
+    }
+  }
+}
+
+async function captureScreenshot(page, label) {
+  await page.screenshot({ path: path.join(artifactRoot, `${label}.png`), fullPage: true });
 }
 
 async function main() {
@@ -218,33 +330,35 @@ async function main() {
         const page = await context.newPage();
 
         for (const route of routes) {
+          if (!viewport.allRoutes && !route.highRisk) continue;
+
           const label = `${route.name}-${scenario.name}-${viewport.name}`;
           const failureStart = failures.length;
           const critical = [
             ...route.critical,
-            ...(viewport.name === "desktop" ? (route.desktopCritical ?? []) : (route.mobileCritical ?? [])),
+            ...(viewport.width >= 900 ? (route.desktopCritical ?? []) : (route.mobileCritical ?? [])),
           ];
 
           try {
             const response = await page.goto(`${baseURL}${route.path}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-            if (!response || response.status() >= 400) {
-              throw new Error(`HTTP ${response?.status() ?? "no response"}`);
-            }
+            if (!response || response.status() >= 400) throw new Error(`HTTP ${response?.status() ?? "no response"}`);
             await page.waitForFunction(() => document.documentElement.dataset.themeReady === "true", null, { timeout: 8_000 });
-            await page.waitForTimeout(160);
+
+            if (route.name === "homes") {
+              await page.waitForSelector(".renter-map-canvas", { timeout: 8_000 });
+              await page.waitForSelector(".renter-map-canvas .leaflet-tile", { timeout: 8_000 }).catch(() => {});
+            }
+            if (route.name === "landing") {
+              await page.locator(".landing-faq-editorial").scrollIntoViewIfNeeded().catch(() => {});
+            }
+            await page.waitForTimeout(180);
 
             const snapshot = await inspectPage(page, critical, scenario);
-            snapshots.push({ label, ...snapshot });
+            snapshots.push({ label, viewport, ...snapshot });
 
-            if (snapshot.preference !== scenario.preference) {
-              failures.push(`${label}: data-theme=${snapshot.preference}, expected ${scenario.preference}`);
-            }
-            if (snapshot.resolved !== scenario.expected) {
-              failures.push(`${label}: data-resolved-theme=${snapshot.resolved}, expected ${scenario.expected}`);
-            }
-            if (snapshot.ready !== "true") {
-              failures.push(`${label}: prepaint theme bootstrap did not mark themeReady`);
-            }
+            if (snapshot.preference !== scenario.preference) failures.push(`${label}: data-theme=${snapshot.preference}, expected ${scenario.preference}`);
+            if (snapshot.resolved !== scenario.expected) failures.push(`${label}: data-resolved-theme=${snapshot.resolved}, expected ${scenario.expected}`);
+            if (snapshot.ready !== "true") failures.push(`${label}: prepaint theme bootstrap did not mark themeReady`);
 
             for (const [token, value] of Object.entries(snapshot.tokens)) {
               if (!value) failures.push(`${label}: semantic token ${token} is unresolved`);
@@ -277,10 +391,19 @@ async function main() {
               }
             }
 
-            if (failures.length > failureStart) await captureFailure(page, label);
+            if (route.name === "landing") validateLandingSurfaceRoles(snapshot, label, failures);
+            if (route.name === "homes") validateHomesSurfaceRoles(snapshot, label, failures, viewport);
+
+            /* Keep successful visual artifacts for the highest-risk routes in
+               explicit Light and Dark so a green CI run remains inspectable. */
+            if (route.highRisk && (scenario.name === "light" || scenario.name === "dark")) {
+              await captureScreenshot(page, label);
+            } else if (failures.length > failureStart) {
+              await captureScreenshot(page, label);
+            }
           } catch (error) {
             failures.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
-            await captureFailure(page, label);
+            try { await captureScreenshot(page, label); } catch { /* navigation may have failed before paint */ }
           }
         }
 
