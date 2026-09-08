@@ -1,0 +1,178 @@
+/* How-it-works appearance ownership.
+   The journey is one connected surface. Light keeps the established redesign
+   palette; Dark/System-dark swap only semantic roles, never geometry. */
+
+main.landing-shell .landing-how-tabs-shell {
+  --journey-shell-color: rgba(255, 253, 248, .86);
+  --journey-shell-image:
+    radial-gradient(circle at 92% 8%, rgba(185, 242, 39, .12), transparent 21rem),
+    radial-gradient(circle at 6% 108%, rgba(8, 118, 83, .08), transparent 24rem);
+  --journey-control-color: rgba(255, 255, 255, .34);
+  --journey-panel-color: transparent;
+  --journey-text: #0b231b;
+  --journey-muted: #5d6f66;
+  --journey-tab-text: #66766e;
+  --journey-tab-track: rgba(8, 47, 37, .06);
+  --journey-meta-color: rgba(255, 253, 248, .92);
+  --journey-active-foreground: #fff;
+  --journey-action-foreground: #fff;
+  --journey-icon-color: var(--journey-soft);
+  --journey-surface-shadow: 0 22px 54px rgba(11, 35, 27, .08);
+
+  background-color: var(--journey-shell-color);
+  background-image: var(--journey-shell-image);
+  color: var(--journey-text);
+  box-shadow: var(--journey-surface-shadow);
+}
+
+main.landing-shell .landing-how-tabs-shell.owner {
+  --journey-shell-color: rgba(255, 253, 248, .88);
+  --journey-shell-image:
+    radial-gradient(circle at 92% 8%, rgba(217, 166, 63, .15), transparent 21rem),
+    radial-gradient(circle at 8% 108%, rgba(155, 86, 60, .07), transparent 24rem);
+}
+
+main.landing-shell .landing-how-controls {
+  border-bottom-color: var(--journey-line);
+  background: var(--journey-control-color);
+}
+
+main.landing-shell .landing-persona-tabs {
+  background: var(--journey-tab-track);
+  box-shadow: inset 0 0 0 1px var(--journey-line);
+}
+
+main.landing-shell .landing-persona-tabs button {
+  color: var(--journey-tab-text);
+}
+
+main.landing-shell .landing-persona-tabs button:hover {
+  color: var(--journey-text);
+}
+
+main.landing-shell .landing-persona-tabs button.active,
+main.landing-shell .landing-persona-tabs button[aria-selected="true"] {
+  background: var(--journey-accent-strong);
+  color: var(--journey-active-foreground);
+}
+
+main.landing-shell .landing-how-primary-link {
+  background: var(--journey-accent-strong);
+  color: var(--journey-action-foreground);
+}
+
+main.landing-shell .landing-how-panel {
+  background: var(--journey-panel-color);
+  color: var(--journey-text);
+  box-shadow: none;
+}
+
+main.landing-shell .landing-how-panel-heading h3,
+main.landing-shell .landing-step-copy strong {
+  color: var(--journey-text);
+}
+
+main.landing-shell .landing-persona-kicker {
+  color: var(--journey-accent);
+}
+
+main.landing-shell .landing-step-cards > li {
+  background: transparent;
+  box-shadow: none;
+}
+
+main.landing-shell .landing-step-cards li + li,
+main.landing-shell .landing-how-outcome {
+  border-color: var(--journey-line);
+}
+
+main.landing-shell .landing-step-icon {
+  border-color: var(--journey-line);
+  background: var(--journey-icon-color);
+  color: var(--journey-accent);
+  box-shadow: none;
+}
+
+main.landing-shell .landing-step-meta {
+  background: var(--journey-meta-color);
+  color: var(--journey-muted);
+  box-shadow: 0 0 0 1px var(--journey-line);
+}
+
+main.landing-shell .landing-step-meta > span {
+  color: var(--journey-accent);
+}
+
+main.landing-shell .landing-step-meta > small,
+main.landing-shell .landing-step-copy p,
+main.landing-shell .landing-how-outcome {
+  color: var(--journey-muted);
+}
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-how-tabs-shell {
+  --journey-accent: #65d8a8;
+  --journey-accent-strong: #42c58f;
+  --journey-soft: #173b2e;
+  --journey-line: rgba(225, 239, 232, .15);
+  --journey-copy: #a9bcb2;
+  --journey-shell-color: #0d241b;
+  --journey-shell-image:
+    radial-gradient(circle at 92% 8%, rgba(101, 216, 168, .08), transparent 20rem),
+    radial-gradient(circle at 7% 110%, rgba(228, 199, 149, .06), transparent 24rem);
+  --journey-control-color: #102b21;
+  --journey-panel-color: #0d241b;
+  --journey-text: #f4f8f6;
+  --journey-muted: #a9bcb2;
+  --journey-tab-text: #afc0b7;
+  --journey-tab-track: rgba(225, 239, 232, .07);
+  --journey-meta-color: #173b2e;
+  --journey-active-foreground: #06120e;
+  --journey-action-foreground: #06120e;
+  --journey-icon-color: #173b2e;
+  --journey-surface-shadow: 0 26px 68px rgba(0, 0, 0, .28);
+}
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-how-tabs-shell.owner {
+  --journey-accent: #e3ad90;
+  --journey-accent-strong: #cf8467;
+  --journey-soft: #38251f;
+  --journey-line: rgba(239, 204, 185, .16);
+  --journey-muted: #c6b5ac;
+  --journey-tab-text: #c1b1a9;
+  --journey-meta-color: #38251f;
+  --journey-active-foreground: #1a0d08;
+  --journey-action-foreground: #1a0d08;
+  --journey-icon-color: #38251f;
+  --journey-shell-image:
+    radial-gradient(circle at 92% 8%, rgba(207, 132, 103, .10), transparent 20rem),
+    radial-gradient(circle at 7% 110%, rgba(228, 199, 149, .05), transparent 24rem);
+}
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-how-controls {
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .025);
+}
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-persona-tabs button:hover {
+  background: rgba(225, 239, 232, .06);
+}
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-persona-tabs button.active:hover,
+html[data-resolved-theme="dark"] main.landing-shell .landing-persona-tabs button[aria-selected="true"]:hover {
+  background: var(--journey-accent-strong);
+  color: var(--journey-active-foreground);
+}
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-how-primary-link:hover {
+  background: var(--journey-accent);
+  color: var(--journey-action-foreground);
+}
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-step-cards::before {
+  background: linear-gradient(90deg, transparent, var(--journey-line) 8%, var(--journey-line) 92%, transparent);
+}
+
+@media (max-width: 760px) {
+  html[data-resolved-theme="dark"] main.landing-shell .landing-step-cards::before {
+    background: linear-gradient(180deg, transparent, var(--journey-line) 7%, var(--journey-line) 93%, transparent);
+  }
+}
