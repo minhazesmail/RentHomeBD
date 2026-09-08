@@ -1,34 +1,46 @@
-# RentHomeBD Supabase foundation
+# RentHomeBD Supabase
 
-`schema.sql` contains the Task 2 database foundation for the rental marketplace.
+## Source of truth
 
-## Included
+**`supabase/migrations/` is the only schema source of truth.**
 
-- user profiles linked 1:1 to `auth.users`
-- property listings with structured rental fields
-- exact latitude/longitude plus a PostGIS `geography(Point, 4326)` column and GiST index
-- mandatory-capable normalized tenant-type associations
-- normalized amenities and property amenities
-- property photo/video metadata
-- listing lifecycle states for draft, moderation, availability, reconfirmation, rented, expiry, and rejection
-- explicit Data API grants and Row Level Security policies
-- ownership indexes and map/search indexes
-- automatic `updated_at` triggers
+`schema.sql` is a **historical Task 2 snapshot** kept for reference. Do not apply it on a fresh project by itself. Always apply the full ordered migration set (CLI `supabase db push` or equivalent).
 
-## Security model
+## What the migrations cover
 
-Public/anonymous users can only read currently available, published, non-expired properties and their associated tenant types, amenities, and media metadata. Authenticated owners can read and manage their own listings, including non-public states. Profiles are private to their authenticated user in this phase.
+- Profiles linked 1:1 to `auth.users` (provisioning trigger)
+- Property listings with PostGIS geography + GiST index
+- Tenant types, amenities, media metadata
+- Listing lifecycle (draft → moderation → available → reconfirm / rented / expired / rejected)
+- Moderators and moderation action audit trail
+- Saved homes and saved searches
+- Private messaging with abuse controls
+- Account trust (phone verification sync, role verification by moderators)
+- Listing reports, freshness controls, storage path hardening
+- RLS policies and column-level grants (including locked `primary_role` updates)
 
-Verification/moderation authority is intentionally not stored as user-editable profile flags. Admin/moderator authorization and ID verification will be introduced separately so those fields cannot be self-elevated by clients.
+## Security model (summary)
 
-## Applying the schema
+- Anonymous users may only read currently **available**, published, non-expired listings and related public metadata.
+- Authenticated owners manage their own listings (including non-public states).
+- Profiles are private to the owning user; moderators get controlled read access via membership.
+- `primary_role` is set at signup by a security-definer trigger (from metadata) and cannot be changed by clients afterward.
+- Role verification badges and phone verification timestamps are not client-writable trust flags.
+- SMS provider credentials must never appear in `NEXT_PUBLIC_*` or the app repo (see `docs/phone-otp-production.md`).
 
-A dedicated Supabase project has not been created from this repository yet. When the project is created:
+## Applying to a project
 
-1. Enable/use PostGIS in the `extensions` schema.
-2. Use the Supabase CLI to create the migration file (`supabase migration new ...`) rather than manually inventing a migration filename.
-3. Apply the contents of `schema.sql` through that migration.
-4. Run database tests and Supabase security/performance advisors.
-5. Generate TypeScript database types and commit them to the app.
+1. Enable PostGIS in the `extensions` schema.
+2. Link the CLI to the project and run `supabase db push` (or apply migrations in timestamp order).
+3. Run Supabase security/performance advisors.
+4. Regenerate types:
 
-The photo-count publishing rule (minimum 3 photos) and tenant-type required rule are cross-row workflow rules. They should be enforced at the publish transition rather than as simple row constraints; that publish workflow is intentionally outside Task 2.
+```bash
+supabase gen types typescript --linked > src/lib/supabase/database.types.ts
+```
+
+5. Keep `database.types.ts` committed and in sync after every schema change.
+
+## Publishing rules
+
+Minimum photo count and required tenant types are enforced at the publish / moderation transition (not only as row checks). See the listing workflow and completeness migrations.

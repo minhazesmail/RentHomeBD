@@ -1,16 +1,16 @@
-# RentHomeBD
+# RentHomeBD (NearBasha)
 
-RentHomeBD is a map-first apartment and home rental SaaS for Bangladesh. Renters discover available properties by location and owners publish structured listings with exact map pins and tenant preferences.
+Map-first apartment and home rental SaaS for Bangladesh. Renters discover moderated properties by exact location; owners publish structured listings with map pins and tenant preferences.
 
 ## Product direction
 
-The MVP is being built incrementally, one task at a time. Its core pillars are:
+MVP pillars:
 
-- exact GPS/map-based property discovery
-- mandatory tenant-type matching
-- fresh, moderated listings
-- phone-verified accounts and in-app communication
-- a foundation that can later support agents, verification, commute search, roommate matching, and multi-city expansion
+- Exact GPS/map-based property discovery
+- Mandatory tenant-type matching
+- Fresh, moderated listings
+- Phone-verified accounts and in-app messaging
+- Foundation for agents, role verification, commute search, roommate matching, and multi-city expansion
 
 ## Stack
 
@@ -18,23 +18,45 @@ The MVP is being built incrementally, one task at a time. Its core pillars are:
 - React 19
 - TypeScript
 - Tailwind CSS 4
-- Supabase (database/auth/storage in upcoming tasks)
+- Supabase (Auth, Postgres + PostGIS, Storage, RLS)
+- Leaflet / react-leaflet for maps
 
 ## Local development
 
 ```bash
 npm install
 cp .env.example .env.local
-# Optionally override the default Supabase project values in .env.local.
+# Required: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Open `http://localhost:3000`.
+
+**Environment variables are required.** There are no hardcoded production defaults. See `.env.example`.
+
+### Database
+
+Schema is managed exclusively through files in `supabase/migrations/`. Do **not** apply `supabase/schema.sql` alone — it is a historical Task 2 snapshot.
+
+```bash
+# Against a linked Supabase project
+supabase db push
+
+# Regenerate TypeScript types after migrations
+supabase gen types typescript --linked > src/lib/supabase/database.types.ts
+```
+
+See `supabase/README.md` and `docs/phone-otp-production.md` for security and production notes.
 
 ## Quality checks
 
 ```bash
 npm run typecheck
 npm run lint
+npm run deadcode
+npm run uiqa
+npm run i18nqa
 npm run build
 ```
+
+CI also runs browser theme QA (Playwright) when secrets are configured.
