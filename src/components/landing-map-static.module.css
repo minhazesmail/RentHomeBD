@@ -83,11 +83,14 @@
   outline: none;
 }
 
+/* The discovery rail occupies the right side of the landing preview. Keep the
+   no-inventory guidance centered in the unobstructed map area instead of under
+   the rail. */
 .emptyState {
   position: absolute;
-  inset: 50% auto auto 50%;
+  inset: 50% auto auto 34%;
   z-index: 2;
-  width: min(82%, 21rem);
+  width: min(52%, 21rem);
   transform: translate(-50%, -50%);
   text-align: center;
 }
@@ -104,4 +107,11 @@
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .emptyState {
+    inset: 36% auto auto 50%;
+    width: min(82%, 21rem);
+  }
 }
