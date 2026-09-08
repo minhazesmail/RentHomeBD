@@ -86,7 +86,9 @@ requireRegex("src/app/auth-login-polish.css", /\.auth-owner-note\s+p\s*\{[\s\S]*
 requireText("src/app/auth-login-polish.css", "@media (max-width: 480px)", "mobile auth mode-switch alignment");
 
 // Product and marketing navigation must remain horizontally safe at narrow widths.
-requireText("src/components/product-navigation.module.css", "@media (max-width: 860px)", "tablet product-nav breakpoint");
+// The product nav now wraps earlier than the previous 860px contract because the
+// account/theme/language cluster can collide with center links on narrow laptops.
+requireText("src/components/product-navigation.module.css", "@media (max-width: 1040px)", "medium-width product-nav breakpoint");
 requireText("src/components/product-navigation.module.css", "@media (max-width: 480px)", "phone product-nav breakpoint");
 requireText("src/components/product-navigation.module.css", "overflow-x: auto", "horizontal product-nav overflow handling");
 requireText("src/components/marketing-navigation.module.css", "@media (max-width: 920px)", "tablet marketing-nav breakpoint");

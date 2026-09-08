@@ -7,6 +7,7 @@ import type { LatLngBoundsExpression } from "leaflet";
 
 import styles from "./leaflet-map.module.css";
 import { tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
+import { useTheme } from "@/theme/use-theme";
 
 export type MapListing = {
   id: string;
@@ -45,6 +46,37 @@ type WorkingCluster = {
   y: number;
   cellX: number;
   cellY: number;
+};
+
+type MapAppearance = {
+  areaStroke: string;
+  areaFill: string;
+  userLocation: string;
+  userRing: string;
+};
+
+const LIGHT_MAP: MapAppearance = {
+  areaStroke: "#126b4d",
+  areaFill: "#126b4d",
+  userLocation: "#167d78",
+  userRing: "#ffffff",
+};
+
+const DARK_MAP: MapAppearance = {
+  areaStroke: "#65d8a8",
+  areaFill: "#42b987",
+  userLocation: "#66d4cc",
+  userRing: "#07130f",
+};
+
+const LIGHT_BASEMAP = {
+  url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+};
+
+const DARK_BASEMAP = {
+  url: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
 };
 
 function FitToResults({ listings, center, liveTracking }: { listings: MapListing[]; center: [number, number]; liveTracking: boolean }) {
@@ -109,9 +141,9 @@ function customAreaVertexIcon(index: number) {
   });
 }
 
-function CustomAreaVertices({ points, editable, onChange }: { points: [number, number][]; editable: boolean; onChange: (points: [number, number][]) => void }) {
+function CustomAreaVertices({ points, editable, appearance, onChange }: { points: [number, number][]; editable: boolean; appearance: MapAppearance; onChange: (points: [number, number][]) => void }) {
   if (!editable) {
-    return points.map((point, index) => <CircleMarker key={`custom-area-${index}`} center={point} radius={5} pathOptions={{ color: "#0b3d2e", fillColor: "#126b4d", fillOpacity: 1, weight: 2 }} />);
+    return points.map((point, index) => <CircleMarker key={`custom-area-${index}`} center={point} radius={5} pathOptions={{ color: appearance.areaStroke, fillColor: appearance.areaFill, fillOpacity: 1, weight: 2 }} />);
   }
 
   return points.map((point, index) => (
@@ -340,19 +372,22 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, onS
   drawingCustomArea?: boolean;
   onCustomAreaChange?: (points: [number, number][]) => void;
 }) {
+  const { resolvedTheme } = useTheme();
   const userCenter: [number, number] | null = userLocation ? [userLocation.latitude, userLocation.longitude] : null;
   const editingCustomArea = !drawingCustomArea && customArea.length >= 3;
+  const basemap = resolvedTheme === "dark" ? DARK_BASEMAP : LIGHT_BASEMAP;
+  const appearance = resolvedTheme === "dark" ? DARK_MAP : LIGHT_MAP;
 
   return (
-    <MapContainer center={center} zoom={12} scrollWheelZoom className={`renter-map-canvas${drawingCustomArea ? " drawing-custom-area" : ""}`}>
-      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+    <MapContainer center={center} zoom={12} scrollWheelZoom className={`renter-map-canvas basemap-${resolvedTheme}${drawingCustomArea ? " drawing-custom-area" : ""}`}>
+      <TileLayer key={resolvedTheme} attribution={basemap.attribution} url={basemap.url} />
       <FitToResults listings={listings} center={center} liveTracking={liveTracking} />
       <ManualMapCenter disabled={drawingCustomArea || editingCustomArea} onChange={onCenterChange} />
       <CustomAreaDrawing active={drawingCustomArea} points={customArea} onChange={onCustomAreaChange ?? (() => {})} />
-      {radiusKm !== null && customArea.length < 3 && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: "#126b4d", fillColor: "#126b4d", fillOpacity: 0.04, weight: 1 }} />}
-      {customArea.length >= 2 && <Polygon positions={customArea} pathOptions={{ color: "#126b4d", fillColor: "#126b4d", fillOpacity: customArea.length >= 3 ? 0.12 : 0.04, weight: 3 }} />}
-      <CustomAreaVertices points={customArea} editable={editingCustomArea} onChange={onCustomAreaChange ?? (() => {})} />
-      {userCenter && <><Circle center={userCenter} radius={Math.max(userLocation?.accuracy ?? 0, 5)} pathOptions={{ color: "#167d78", fillColor: "#167d78", fillOpacity: 0.08, weight: 1 }} /><CircleMarker center={userCenter} radius={9} pathOptions={{ color: "#ffffff", fillColor: "#167d78", fillOpacity: 1, weight: 4 }}><Popup><div className="map-popup"><strong>Your live location</strong><small>Accuracy ±{Math.round(userLocation?.accuracy ?? 0)} m</small></div></Popup></CircleMarker></>}
+      {radiusKm !== null && customArea.length < 3 && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: appearance.areaStroke, fillColor: appearance.areaFill, fillOpacity: resolvedTheme === "dark" ? 0.08 : 0.04, weight: 1 }} />}
+      {customArea.length >= 2 && <Polygon positions={customArea} pathOptions={{ color: appearance.areaStroke, fillColor: appearance.areaFill, fillOpacity: customArea.length >= 3 ? (resolvedTheme === "dark" ? 0.18 : 0.12) : (resolvedTheme === "dark" ? 0.08 : 0.04), weight: 3 }} />}
+      <CustomAreaVertices points={customArea} editable={editingCustomArea} appearance={appearance} onChange={onCustomAreaChange ?? (() => {})} />
+      {userCenter && <><Circle center={userCenter} radius={Math.max(userLocation?.accuracy ?? 0, 5)} pathOptions={{ color: appearance.userLocation, fillColor: appearance.userLocation, fillOpacity: resolvedTheme === "dark" ? 0.14 : 0.08, weight: 1 }} /><CircleMarker center={userCenter} radius={9} pathOptions={{ color: appearance.userRing, fillColor: appearance.userLocation, fillOpacity: 1, weight: 4 }}><Popup><div className="map-popup"><strong>Your live location</strong><small>Accuracy ±{Math.round(userLocation?.accuracy ?? 0)} m</small></div></Popup></CircleMarker></>}
       <ClusteredListings listings={listings} selectedId={selectedId} onSelect={onSelect} />
     </MapContainer>
   );
