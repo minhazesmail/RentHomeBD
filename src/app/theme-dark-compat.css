@@ -1,12 +1,12 @@
 /* Dark-only compatibility for legacy route headings that still use fixed deep
-   emerald text colors. The resolved-theme guard prevents these important rules
-   from ever repainting the original light UI. */
+   emerald text colors. The landing route owns its complete dark surface system
+   locally, so exclude `/` from this emergency compatibility bridge. */
 
-html[data-resolved-theme="dark"] [data-route] :where(h1, h2, h3, h4, h5, h6) {
+html[data-resolved-theme="dark"] [data-route]:not([data-route="/"]) :where(h1, h2, h3, h4, h5, h6) {
   color: var(--ink) !important;
 }
 
-html[data-resolved-theme="dark"] [data-route] :where(
+html[data-resolved-theme="dark"] [data-route]:not([data-route="/"]) :where(
   [class*="next-action"],
   [class*="surface-dark"],
   [class*="landing-nav"],
