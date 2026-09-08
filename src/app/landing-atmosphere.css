@@ -22,6 +22,9 @@ main.landing-shell {
   --atm-cool-y: 2%;
   --atm-cool-scale: 1.05;
   --atm-direction-shift: 14px;
+  --landing-content-background: rgba(255, 253, 248, .70);
+  --landing-content-background-mobile: rgba(255, 253, 248, .82);
+  --landing-trust-background: #073f31;
   position: relative;
   isolation: isolate;
   background: transparent !important;
@@ -35,15 +38,16 @@ main.landing-shell[data-scroll-direction="down"] {
   --atm-direction-shift: 14px;
 }
 
-/* One fixed canvas, three quiet light layers. There is no looping animation,
-   requestAnimationFrame work, backdrop blur, canvas, or WebGL. */
+/* One fixed canvas, three quiet light layers. Use a background shorthand here
+   so older landing background images cannot leak through behind the current
+   atmosphere implementation. */
 .site-atmosphere {
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background-color: var(--atm-base);
+  background: var(--atm-base);
   transition: background-color 880ms cubic-bezier(.22, 1, .36, 1);
   contain: strict;
 }
@@ -213,19 +217,20 @@ main.landing-shell[data-atmosphere="footer"] {
 }
 
 /* Let the atmosphere read through the page without reintroducing expensive
-   live blur. Content surfaces stay opaque enough for text contrast. */
+   live blur. Content surfaces stay opaque enough for text contrast. The actual
+   surface colors are variables so Dark mode can own the same components. */
 main.landing-shell .landing-frame {
   background: transparent !important;
 }
 
 .landing-shell .landing-content-section {
-  background: rgba(255, 253, 248, .70) !important;
+  background: var(--landing-content-background) !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
 
 .landing-shell .landing-trust-section {
-  background: #073f31 !important;
+  background: var(--landing-trust-background) !important;
   color: #fff;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
@@ -261,7 +266,7 @@ main.landing-shell .landing-frame {
   }
 
   .landing-shell .landing-content-section {
-    background: rgba(255, 253, 248, .82) !important;
+    background: var(--landing-content-background-mobile, var(--landing-content-background)) !important;
   }
 }
 
