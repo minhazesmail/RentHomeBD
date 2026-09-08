@@ -111,13 +111,16 @@
   outline-offset: 2px;
 }
 
-@media (max-width: 860px) {
+/* Move to the two-row navigation before the center links and account actions
+   compete for horizontal space. This prevents the clipped medium-width state
+   that appeared around tablet / narrow-desktop viewports. */
+@media (max-width: 1040px) {
   .productNavShell {
     box-shadow: var(--shadow-sm);
   }
 
   .productNav {
-    width: min(100% - 24px, 720px);
+    width: min(100% - 24px, 960px);
     grid-template-columns: 1fr auto;
     gap: 7px 10px;
     padding: 8px 0 9px;
