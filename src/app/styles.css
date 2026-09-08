@@ -32,4 +32,3 @@
 @import "./theme.css" layer(theme);
 @import "./theme-dark-compat.css" layer(theme);
 @import "./landing-theme.css" layer(theme);
-@import "./landing-theme-polish.css" layer(theme);
