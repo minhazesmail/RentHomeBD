@@ -1,121 +1,582 @@
-/* Landing dark-mode bridge.
-   Keep the established landing components as designed paper/dark islands and
-   change only the page atmosphere plus text that sits directly on that dark
-   atmosphere. Do not remap the legacy --landing-* palette globally: older
-   landing generations still consume those variables and broad remaps create
-   cross-surface contrast regressions. */
+/* Landing appearance ownership.
+   Light mode remains owned by the established landing styles. Dark mode defines
+   one route-level semantic palette, then maps every landing surface onto that
+   palette. This avoids the previous hybrid state where dark text tokens were
+   inherited inside large light editorial sections. */
 
 html[data-resolved-theme="dark"] main.landing-shell {
+  --landing-canvas: #07130f;
+  --landing-canvas-warm: #091a14;
+  --landing-surface: #0d241b;
+  --landing-surface-soft: #102b21;
+  --landing-surface-elevated: #123127;
+  --landing-surface-strong: #173b2e;
+  --landing-text: #f4f8f6;
+  --landing-text-soft: #c0d1c8;
+  --landing-text-muted: #99aea3;
+  --landing-border: rgba(225, 239, 232, .14);
+  --landing-border-strong: rgba(225, 239, 232, .24);
+  --landing-accent: #65d8a8;
+  --landing-accent-strong: #42c58f;
+  --landing-accent-bright: #b2e665;
+  --landing-warm: #e4c795;
+  --landing-shadow: 0 24px 70px rgba(0, 0, 0, .34);
+  --landing-content-background: rgba(9, 29, 22, .94);
+  --landing-content-background-mobile: rgba(9, 29, 22, .98);
+  --landing-trust-background: #09251c;
+  --landing-faq-background:
+    radial-gradient(circle at 8% 12%, rgba(101, 216, 168, .09), transparent 24rem),
+    linear-gradient(135deg, rgba(13, 36, 27, .98), rgba(8, 25, 19, .98));
+
+  /* Route-local compatibility aliases. Older landing redesign generations still
+     consume these names, but in Dark they now resolve coherently because every
+     landing surface is dark rather than mixing paper and dark islands. */
+  --landing-ink: var(--landing-text);
+  --landing-ink-soft: var(--landing-text-soft);
+  --landing-emerald: var(--landing-accent-strong);
+  --landing-emerald-deep: var(--landing-accent);
+  --landing-lime: var(--landing-accent-bright);
+  --ref-ink: var(--landing-text);
+  --ref-green: var(--landing-accent-strong);
+  --ref-ivory: var(--landing-canvas);
+  --ref-paper: var(--landing-surface);
+  --ref-line: var(--landing-border);
+  --ref-gold: var(--landing-warm);
+
   background: transparent;
+  color: var(--landing-text);
 }
 
-/* The atmosphere element also receives older light `background` shorthands.
-   A single scoped important declaration is intentional here: it clears those
-   background images and guarantees that Dark/System-dark never exposes the
-   ivory canvas beneath pale hero copy. */
-html[data-resolved-theme="dark"] .site-atmosphere.landing-scroll-atmosphere {
-  background: #07130f !important;
+/* The scroll atmosphere stays dark in every landing mood. Section changes use
+   subtle hue/depth shifts, not light/dark flips. */
+html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="hero"] {
+  --atm-base: #07130f;
+  --atm-warm-opacity: .10;
+  --atm-cool-opacity: .16;
+  --atm-depth-opacity: .20;
 }
 
-/* Keep the ambient fields subtle on the dark canvas rather than replacing the
-   whole landing palette. */
+html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="trust"] {
+  --atm-base: #09241b;
+  --atm-warm-opacity: .08;
+  --atm-cool-opacity: .18;
+  --atm-depth-opacity: .22;
+}
+
+html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="journey"] {
+  --atm-base: #081b15;
+  --atm-warm-opacity: .09;
+  --atm-cool-opacity: .15;
+  --atm-depth-opacity: .20;
+}
+
+html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="homes"] {
+  --atm-base: #0a1e17;
+  --atm-warm-opacity: .11;
+  --atm-cool-opacity: .14;
+  --atm-depth-opacity: .21;
+}
+
+html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="local"] {
+  --atm-base: #081c15;
+  --atm-warm-opacity: .08;
+  --atm-cool-opacity: .17;
+  --atm-depth-opacity: .21;
+}
+
+html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="clarity"] {
+  --atm-base: #091c16;
+  --atm-warm-opacity: .07;
+  --atm-cool-opacity: .15;
+  --atm-depth-opacity: .22;
+}
+
+html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="action"],
+html[data-resolved-theme="dark"] main.landing-shell[data-atmosphere="footer"] {
+  --atm-base: #06120e;
+  --atm-warm-opacity: .10;
+  --atm-cool-opacity: .15;
+  --atm-depth-opacity: .28;
+}
+
 html[data-resolved-theme="dark"] .site-atmosphere__warm {
-  color: #8b6840;
-  opacity: .10;
+  color: #9a7547;
 }
 
 html[data-resolved-theme="dark"] .site-atmosphere__cool {
-  color: #2a765b;
-  opacity: .14;
+  color: #2f8463;
 }
 
 html[data-resolved-theme="dark"] .site-atmosphere__depth {
-  color: #020806;
-  opacity: .18;
+  color: #010604;
 }
 
-/* Only copy rendered directly on the dark atmosphere switches to light text.
-   The search console remains an intentionally light paper surface. */
-html[data-resolved-theme="dark"] .landing-copy > h1 {
-  color: #f4f8f6 !important;
+/* Hero */
+html[data-resolved-theme="dark"] main.landing-shell .landing-hero-reference {
+  border-bottom-color: var(--landing-border);
+  background:
+    radial-gradient(circle at 9% 5%, rgba(228, 199, 149, .09), transparent 24rem),
+    radial-gradient(circle at 86% 18%, rgba(66, 197, 143, .07), transparent 30rem),
+    linear-gradient(145deg, rgba(7, 19, 15, .98), rgba(9, 28, 21, .96));
+}
+
+html[data-resolved-theme="dark"] .landing-copy > h1,
+html[data-resolved-theme="dark"] .landing-copy > .intro {
+  color: var(--landing-text);
 }
 
 html[data-resolved-theme="dark"] .landing-copy > .intro {
-  color: #bed0c7;
+  color: var(--landing-text-soft);
 }
 
-html[data-resolved-theme="dark"] .landing-popular-searches {
-  color: #aebfb6;
+html[data-resolved-theme="dark"] .landing-live-kicker {
+  color: var(--landing-accent);
 }
 
-html[data-resolved-theme="dark"] .landing-confidence-row {
-  border-color: rgba(255, 255, 255, .15);
+html[data-resolved-theme="dark"] .landing-search-console {
+  border-color: var(--landing-border);
+  background: rgba(13, 36, 27, .96);
+  color: var(--landing-text);
+  box-shadow: var(--landing-shadow);
 }
 
-html[data-resolved-theme="dark"] .landing-confidence-row > div + div {
-  border-color: rgba(255, 255, 255, .15);
-}
-
-html[data-resolved-theme="dark"] .landing-confidence-row strong {
-  color: #f4f8f6;
-}
-
+html[data-resolved-theme="dark"] .landing-search-console-heading span,
+html[data-resolved-theme="dark"] .landing-search-console > .form-hint,
+html[data-resolved-theme="dark"] .landing-popular-searches,
 html[data-resolved-theme="dark"] .landing-confidence-row span {
-  color: #aebfb6;
+  color: var(--landing-text-muted);
 }
 
-/* These are deliberate light "paper" islands in both appearances. Local light
-   semantic roles prevent the global dark compatibility layer from turning
-   headings/controls pale inside a light card while preserving the original
-   landing component colors and geometry. */
-html[data-resolved-theme="dark"] :where(
-  .landing-search-console,
-  .landing-map-caption,
-  .landing-map-rail,
-  .landing-content-section
-) {
-  --background: #f7f3e9;
-  --background-warm: #f7f3e9;
-  --foreground: #10251d;
-  --ink: #10251d;
-  --ink-soft: #53635b;
-  --muted: #718078;
-  --surface-solid: #fffdf8;
-  --surface-elevated: #fffdf8;
-  --surface-muted: #f6f0e4;
-  --surface-soft: #f7f4ec;
-  --surface-strong: #e8eadf;
-  --surface-input: #faf9f4;
-  --surface-overlay: rgba(255, 253, 248, .97);
-  --control-background: #fffdf8;
-  --control-background-hover: #f6f0e4;
-  --control-border: rgba(16, 37, 29, .10);
-  --control-border-hover: rgba(8, 118, 83, .42);
-  --border: rgba(16, 37, 29, .10);
-  --border-soft: rgba(16, 37, 29, .08);
-  --border-strong: rgba(16, 37, 29, .16);
-  --accent: #087653;
-  --accent-hover: #075943;
-  --accent-bright: #b9f227;
-  --accent-contrast: #073f31;
-  --text-primary: #10251d;
-  --text-secondary: #53635b;
-  color-scheme: light;
+html[data-resolved-theme="dark"] .landing-search-console-heading strong,
+html[data-resolved-theme="dark"] .landing-confidence-row strong {
+  color: var(--landing-text);
 }
 
+html[data-resolved-theme="dark"] .landing-search-console-heading > svg,
+html[data-resolved-theme="dark"] .landing-search-console-field > svg {
+  color: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-search-console-fields {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-search-console-field {
+  border-color: var(--landing-border);
+  color: var(--landing-text-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-search-console-field > span {
+  color: var(--landing-text-muted);
+}
+
+html[data-resolved-theme="dark"] .landing-search-console-field input,
+html[data-resolved-theme="dark"] .landing-search-console-field select {
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-search-console-field:focus-within {
+  background: var(--landing-surface-strong);
+  box-shadow: inset 0 0 0 2px rgba(101, 216, 168, .26);
+}
+
+html[data-resolved-theme="dark"] .landing-search-submit {
+  background: var(--landing-accent-strong);
+  color: #06120e;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .28);
+}
+
+html[data-resolved-theme="dark"] .landing-search-submit:hover {
+  background: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-popular-searches a {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+  color: var(--landing-text-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-popular-searches a:hover {
+  border-color: rgba(101, 216, 168, .44);
+  background: var(--landing-surface-strong);
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-confidence-row,
+html[data-resolved-theme="dark"] .landing-confidence-row > div + div {
+  border-color: var(--landing-border);
+}
+
+/* Hero map frame and its application-owned chrome. */
+html[data-resolved-theme="dark"] .landing-hero-reference .landing-visual {
+  border-color: var(--landing-border);
+  background:
+    radial-gradient(circle at 86% 5%, rgba(228, 199, 149, .10), transparent 20rem),
+    linear-gradient(145deg, #0d2a20, #07130f);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.035), 0 22px 64px rgba(0,0,0,.28);
+}
+
+html[data-resolved-theme="dark"] .landing-hero-reference .landing-visual::before {
+  border-color: rgba(101, 216, 168, .15);
+}
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-map-preview {
+  border-color: var(--landing-border-strong);
+  background: var(--landing-surface-soft);
+  box-shadow: 0 34px 90px rgba(0, 0, 0, .36);
+}
+
+html[data-resolved-theme="dark"] .landing-map-caption,
+html[data-resolved-theme="dark"] .landing-map-rail {
+  border-color: var(--landing-border);
+  background: rgba(18, 49, 39, .96);
+  color: var(--landing-text);
+  box-shadow: 0 20px 54px rgba(0,0,0,.30);
+}
+
+html[data-resolved-theme="dark"] .landing-map-caption strong,
+html[data-resolved-theme="dark"] .landing-map-rail-heading strong,
+html[data-resolved-theme="dark"] .landing-map-area-card strong,
+html[data-resolved-theme="dark"] .landing-map-property-copy > strong {
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-map-caption small,
+html[data-resolved-theme="dark"] .landing-map-rail-heading span,
+html[data-resolved-theme="dark"] .landing-map-area-card small,
+html[data-resolved-theme="dark"] .landing-map-property-copy > span,
+html[data-resolved-theme="dark"] .landing-map-property-copy small {
+  color: var(--landing-text-muted);
+}
+
+html[data-resolved-theme="dark"] .landing-map-caption a {
+  background: #07130f;
+  color: var(--landing-accent-bright);
+}
+
+html[data-resolved-theme="dark"] .landing-map-rail-heading svg,
+html[data-resolved-theme="dark"] .landing-map-area-card > svg,
+html[data-resolved-theme="dark"] .landing-map-rail-action,
+html[data-resolved-theme="dark"] .landing-map-property-copy b {
+  color: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-map-area-card,
+html[data-resolved-theme="dark"] .landing-map-property-card {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-map-area-card:hover,
+html[data-resolved-theme="dark"] .landing-map-property-card:hover {
+  border-color: rgba(101, 216, 168, .36);
+  background: var(--landing-surface-strong);
+}
+
+html[data-resolved-theme="dark"] .landing-map-area-number,
+html[data-resolved-theme="dark"] .landing-map-property-image small {
+  background: var(--landing-surface-elevated);
+  color: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-map-rail-action {
+  border-top-color: var(--landing-border);
+}
+
+html[data-resolved-theme="dark"] .landing-map-floating-note {
+  border: 1px solid var(--landing-border);
+  background: rgba(4, 13, 10, .92);
+  color: var(--landing-text-soft);
+}
+
+/* Trust and editorial sections */
+html[data-resolved-theme="dark"] .landing-trust-section,
 html[data-resolved-theme="dark"] .landing-content-section {
-  color: var(--landing-ink);
+  border-color: var(--landing-border);
+  color: var(--landing-text);
+  box-shadow: 0 28px 78px rgba(0,0,0,.22);
 }
 
-/* WCAG fixes on the retained light paper surfaces. */
-html[data-resolved-theme="dark"] .landing-search-console > .form-hint {
-  color: #5d6f66;
+html[data-resolved-theme="dark"] .landing-trust-heading h2,
+html[data-resolved-theme="dark"] .landing-section-intro h2,
+html[data-resolved-theme="dark"] .landing-faq-editorial-intro h2,
+html[data-resolved-theme="dark"] .landing-faq-rail strong,
+html[data-resolved-theme="dark"] .landing-faq-help-strip strong {
+  color: var(--landing-text);
 }
 
-html[data-resolved-theme="dark"] .landing-launch-actions .primary-button {
-  color: #fff;
+html[data-resolved-theme="dark"] .landing-trust-heading > p,
+html[data-resolved-theme="dark"] .landing-section-intro > p:last-child,
+html[data-resolved-theme="dark"] .landing-faq-editorial-intro > p:last-child,
+html[data-resolved-theme="dark"] .landing-faq-rail p {
+  color: var(--landing-text-muted);
 }
 
-/* Trust, CTA, map frame, navigation and footer already own intentional dark
-   surfaces in the landing design, so they are deliberately left to their
-   route styles instead of being repainted here. */
+html[data-resolved-theme="dark"] .landing-trust-card,
+html[data-resolved-theme="dark"] .landing-how-panel,
+html[data-resolved-theme="dark"] .landing-step-cards > *,
+html[data-resolved-theme="dark"] .landing-listing-card,
+html[data-resolved-theme="dark"] .landing-featured-empty,
+html[data-resolved-theme="dark"] .landing-launch-primary,
+html[data-resolved-theme="dark"] .landing-launch-paths article {
+  border-color: var(--landing-border);
+  background: var(--landing-surface);
+  color: var(--landing-text);
+  box-shadow: 0 14px 38px rgba(0,0,0,.18);
+}
+
+html[data-resolved-theme="dark"] .landing-trust-card:hover,
+html[data-resolved-theme="dark"] .landing-listing-card:hover {
+  border-color: rgba(101, 216, 168, .36);
+  background: var(--landing-surface-elevated);
+  box-shadow: 0 24px 58px rgba(0,0,0,.28);
+}
+
+html[data-resolved-theme="dark"] .landing-trust-icon,
+html[data-resolved-theme="dark"] .landing-step-icon {
+  background: var(--landing-surface-strong);
+  color: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-trust-card strong,
+html[data-resolved-theme="dark"] .landing-step-copy strong,
+html[data-resolved-theme="dark"] .landing-listing-title-row h3,
+html[data-resolved-theme="dark"] .landing-featured-empty strong,
+html[data-resolved-theme="dark"] .landing-launch-copy > strong,
+html[data-resolved-theme="dark"] .landing-launch-paths strong {
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-trust-card p,
+html[data-resolved-theme="dark"] .landing-step-copy p,
+html[data-resolved-theme="dark"] .landing-listing-title-row p,
+html[data-resolved-theme="dark"] .landing-featured-empty p,
+html[data-resolved-theme="dark"] .landing-launch-copy > p:not(.eyebrow),
+html[data-resolved-theme="dark"] .landing-launch-paths p {
+  color: var(--landing-text-muted);
+}
+
+html[data-resolved-theme="dark"] .landing-trust-note {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+  color: var(--landing-text-muted);
+}
+
+html[data-resolved-theme="dark"] .landing-trust-note strong {
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-persona-tabs {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-persona-tabs button {
+  color: var(--landing-text-muted);
+}
+
+html[data-resolved-theme="dark"] .landing-persona-tabs button:hover {
+  color: var(--landing-text);
+  background: var(--landing-surface-elevated);
+}
+
+html[data-resolved-theme="dark"] .landing-persona-tabs button[aria-selected="true"] {
+  background: var(--landing-accent-strong);
+  color: #06120e;
+}
+
+html[data-resolved-theme="dark"] .landing-how-panel {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(101, 216, 168, .08), transparent 18rem),
+    var(--landing-surface);
+}
+
+html[data-resolved-theme="dark"] .landing-step-copy > span {
+  color: var(--landing-text-muted);
+}
+
+/* Live inventory */
+html[data-resolved-theme="dark"] .landing-listing-visual,
+html[data-resolved-theme="dark"] .landing-listing-image-empty {
+  background: linear-gradient(145deg, #15372b, #0d241b);
+  color: var(--landing-text-muted);
+}
+
+html[data-resolved-theme="dark"] .landing-listing-kicker span,
+html[data-resolved-theme="dark"] .landing-listing-copy .demo-meta span {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+  color: var(--landing-text-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-listing-kicker span + span,
+html[data-resolved-theme="dark"] .landing-listing-title-row > strong {
+  color: var(--landing-warm);
+}
+
+html[data-resolved-theme="dark"] .landing-listing-title-row > strong small {
+  color: var(--landing-text-muted);
+}
+
+html[data-resolved-theme="dark"] .landing-listing-link {
+  border-top-color: var(--landing-border);
+  color: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-launch-primary {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(101, 216, 168, .08), transparent 19rem),
+    var(--landing-surface);
+}
+
+html[data-resolved-theme="dark"] .landing-launch-areas a {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+  color: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-launch-areas a:hover {
+  border-color: rgba(101, 216, 168, .36);
+  background: var(--landing-surface-strong);
+}
+
+html[data-resolved-theme="dark"] .landing-launch-paths article:last-child {
+  background: linear-gradient(135deg, rgba(228, 199, 149, .07), var(--landing-surface));
+}
+
+html[data-resolved-theme="dark"] .landing-launch-paths article > span:first-child,
+html[data-resolved-theme="dark"] .landing-launch-paths a {
+  color: var(--landing-accent);
+}
+
+/* FAQ: one dark editorial surface with explicit local foreground ownership. */
+html[data-resolved-theme="dark"] .landing-faq-topic-row button {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+  color: var(--landing-text-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-topic-row button:hover {
+  border-color: rgba(101, 216, 168, .36);
+  background: var(--landing-surface-strong);
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-topic-row button.is-active {
+  border-color: var(--landing-accent-strong);
+  background: var(--landing-accent-strong);
+  color: #06120e;
+}
+
+html[data-resolved-theme="dark"] .landing-faq-rail > div:first-child > span,
+html[data-resolved-theme="dark"] .landing-faq-rail-links a,
+html[data-resolved-theme="dark"] .landing-faq-editorial-item .landing-faq-number {
+  color: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-editorial .landing-faq-editorial-list,
+html[data-resolved-theme="dark"] .landing-faq-editorial .landing-faq-editorial-item,
+html[data-resolved-theme="dark"] .landing-faq-help-strip {
+  border-color: var(--landing-border);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-editorial .landing-faq-editorial-item[open] {
+  background: linear-gradient(90deg, rgba(66, 197, 143, .10), rgba(18, 49, 39, .34));
+  box-shadow: inset 3px 0 0 var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-editorial-item summary,
+html[data-resolved-theme="dark"] .landing-faq-editorial-item .landing-faq-question {
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-editorial-item summary > .landing-faq-disclosure {
+  border-color: var(--landing-border-strong);
+  background: var(--landing-surface-soft);
+  color: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-editorial-item[open] summary > .landing-faq-disclosure {
+  background: var(--landing-accent-strong);
+  color: #06120e;
+}
+
+html[data-resolved-theme="dark"] .landing-faq-answer p {
+  color: var(--landing-text-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-answer-badges > span {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+  color: var(--landing-text-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-help-strip > div:first-child span {
+  color: var(--landing-text-muted);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-help-strip a {
+  border-color: var(--landing-border);
+  background: var(--landing-surface-soft);
+  color: var(--landing-accent);
+}
+
+html[data-resolved-theme="dark"] .landing-faq-help-strip a:last-child {
+  border-color: var(--landing-accent-strong);
+  background: var(--landing-accent-strong);
+  color: #06120e;
+}
+
+/* CTA/footer retain their intentional inverse composition, but use the same
+   dark route palette for borders and secondary actions. */
+html[data-resolved-theme="dark"] .landing-cta-band {
+  border-color: rgba(228, 199, 149, .24);
+  background:
+    radial-gradient(circle at 83% 18%, rgba(228, 199, 149, .13), transparent 26rem),
+    radial-gradient(circle at 12% 110%, rgba(66, 197, 143, .13), transparent 24rem),
+    #071a13;
+}
+
+html[data-resolved-theme="dark"] .landing-cta-band h2,
+html[data-resolved-theme="dark"] .landing-cta-band p {
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-cta-band p {
+  color: var(--landing-text-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-cta-band .secondary-button {
+  border-color: var(--landing-border-strong);
+  background: var(--landing-surface-elevated);
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-footer {
+  color: var(--landing-text-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-footer-brand p,
+html[data-resolved-theme="dark"] .landing-footer-links strong {
+  color: var(--landing-text);
+}
+
+html[data-resolved-theme="dark"] .landing-footer-brand > span,
+html[data-resolved-theme="dark"] .landing-footer-links a,
+html[data-resolved-theme="dark"] .landing-footer-bottom {
+  color: var(--landing-text-muted);
+}
+
+html[data-resolved-theme="dark"] .landing-footer-links a:hover {
+  color: var(--landing-text);
+}
+
+@media (max-width: 760px) {
+  html[data-resolved-theme="dark"] .landing-search-console-field,
+  html[data-resolved-theme="dark"] .landing-search-console-field:nth-of-type(3) {
+    border-color: var(--landing-border);
+    background: var(--landing-surface-soft);
+  }
+}
