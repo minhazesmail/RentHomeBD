@@ -1,0 +1,12 @@
+/* Final dark landing surface reconciliation.
+   Keep this file deliberately tiny: it closes cases where older route styles
+   paint a light field background even though the final dark route palette owns
+   the foreground. */
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-search-console-field {
+  background: var(--landing-surface-soft);
+}
+
+html[data-resolved-theme="dark"] main.landing-shell .landing-search-console-field:focus-within {
+  background: var(--landing-surface-strong);
+}
