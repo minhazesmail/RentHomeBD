@@ -5,6 +5,7 @@ import { safeRelativePath } from "@/lib/safe-redirect";
 import type { Database } from "@/lib/supabase/database.types";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
+/** Keep in sync with matcher entries in src/proxy.ts */
 const PROTECTED_ROUTE_PREFIXES = [
   "/saved",
   "/messages",
@@ -12,7 +13,7 @@ const PROTECTED_ROUTE_PREFIXES = [
   "/owner",
   "/account",
   "/moderation",
-];
+] as const;
 
 function isProtectedRoute(pathname: string) {
   return PROTECTED_ROUTE_PREFIXES.some(
@@ -51,6 +52,8 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
+  // Refresh session cookies when present; redirect only if there is no subject.
+  // Fine-grained authorization remains in require* helpers on each page.
   const { data: claimsData } = await supabase.auth.getClaims();
   if (!claimsData?.claims?.sub) {
     const loginUrl = request.nextUrl.clone();
