@@ -30,6 +30,18 @@
   margin-bottom: var(--text-gap-tight);
 }
 
+/* The route's older field treatment assigns an opaque light background to each
+   search field. Dark appearance owns the field foreground in the final theme
+   layer, so give the route layer a matching dark background here to avoid a
+   pale field surviving beneath dark-mode copy. */
+html[data-resolved-theme="dark"] .landing-shell .landing-search-console-field {
+  background: var(--landing-surface-soft);
+}
+
+html[data-resolved-theme="dark"] .landing-shell .landing-search-console-field:focus-within {
+  background: var(--landing-surface-strong);
+}
+
 /* Batch 7 — section headings and their supporting copy sit side-by-side on
    desktop, but collapse into one column on narrower layouts. Keep neutral
    margins here, then add a deliberate vertical break only when that collapse
