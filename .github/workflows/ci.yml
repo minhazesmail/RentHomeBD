@@ -25,10 +25,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_APP_URL: http://localhost:3000
-      # Provide these as repository secrets (Settings → Secrets and variables → Actions).
-      # Do not commit real values.
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      # Prefer repository secrets when configured. The fallbacks are non-production,
+      # compile-only values so pull requests can verify Next.js bundling without
+      # connecting to a real Supabase project.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://ci-placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_placeholder' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
