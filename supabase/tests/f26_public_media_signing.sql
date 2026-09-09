@@ -84,11 +84,40 @@ values
   ('property-media', '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3/expired.jpg');
 set local session_replication_role = origin;
 
+-- Sanity-check fixture state before RLS role switching. These fail early if a
+-- listing lifecycle trigger or test seed changes unexpectedly.
+select case when count(*) = 1 then 1 else 1 / 0 end as fixture_public_property_exists
+from public.properties
+where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
+  and owner_id = '11111111-1111-4111-8111-111111111111'
+  and status = 'available'::public.listing_status
+  and published_at is not null
+  and expires_at > now();
+
+select case when count(*) = 1 then 1 else 1 / 0 end as fixture_public_object_exists
+from storage.objects
+where bucket_id = 'property-media'
+  and name = '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1/public.jpg';
+
 -- Anonymous signing: only currently public listing media is visible.
 set local role anon;
 select set_config('request.jwt.claim.role', 'anon', true);
 select set_config('request.jwt.claim.sub', '', true);
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select set_config('request.jwt', '', true);
 select set_config('storage.operation', 'storage.object.sign', true);
+
+-- Match the Storage API transaction scope and prove each public-policy input
+-- independently before asserting storage.objects visibility.
+select case when storage.allow_any_operation(array['storage.object.sign']) then 1 else 1 / 0 end
+  as anon_sign_operation_matches;
+
+select case when count(*) = 1 then 1 else 1 / 0 end as anon_can_read_public_property
+from public.properties
+where id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
+  and status = 'available'::public.listing_status
+  and published_at is not null
+  and expires_at > now();
 
 select case when count(*) = 1 then 1 else 1 / 0 end as anon_can_sign_public
 from storage.objects
@@ -125,6 +154,8 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '22222222-2222-4222-8222-222222222222', true);
+select set_config('request.jwt.claims', '{"role":"authenticated","sub":"22222222-2222-4222-8222-222222222222"}', true);
+select set_config('request.jwt', '', true);
 select set_config('storage.operation', 'storage.object.sign', true);
 
 select case when count(*) = 1 then 1 else 1 / 0 end as renter_can_sign_public
@@ -141,6 +172,8 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '11111111-1111-4111-8111-111111111111', true);
+select set_config('request.jwt.claims', '{"role":"authenticated","sub":"11111111-1111-4111-8111-111111111111"}', true);
+select set_config('request.jwt', '', true);
 select set_config('storage.operation', 'storage.object.sign', true);
 
 select case when count(*) = 1 then 1 else 1 / 0 end as owner_can_sign_own_draft
@@ -153,6 +186,8 @@ reset role;
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '33333333-3333-4333-8333-333333333333', true);
+select set_config('request.jwt.claims', '{"role":"authenticated","sub":"33333333-3333-4333-8333-333333333333"}', true);
+select set_config('request.jwt', '', true);
 select set_config('storage.operation', 'storage.object.sign', true);
 
 select case when count(*) = 1 then 1 else 1 / 0 end as moderator_can_sign_draft
