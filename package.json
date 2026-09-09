@@ -10,6 +10,7 @@
     "deadcode": "node scripts/check-dead-code.mjs",
     "phoneqa": "node scripts/check-bangladesh-phone.mjs",
     "envqa": "node scripts/check-supabase-browser-env.mjs",
+    "authredirectqa": "node scripts/check-auth-redirects.mjs",
     "workflowqa": "node scripts/check-listing-workflow-fixes.mjs",
     "uiqa": "node scripts/check-ui-regressions.mjs && node scripts/check-theme.mjs",
     "themeqa": "node scripts/check-theme.mjs",
