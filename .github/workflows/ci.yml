@@ -41,6 +41,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Supabase browser env QA
         run: npm run envqa
+      - name: Listing workflow QA
+        run: npm run workflowqa
       - name: Typecheck
         run: npm run typecheck
       - name: Localization QA
