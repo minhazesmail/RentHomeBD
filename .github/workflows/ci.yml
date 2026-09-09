@@ -20,6 +20,17 @@ jobs:
         run: supabase db start
       - name: Verify migrations survive a clean reset
         run: supabase db reset
+      - name: Verify public media signing RLS
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f26_public_media_signing.sql
 
   verify:
     runs-on: ubuntu-latest
