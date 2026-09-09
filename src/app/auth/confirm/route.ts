@@ -1,8 +1,16 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { safeRelativePath } from "@/lib/safe-redirect";
+import { safeRedirectUrl, safeRelativePath } from "@/lib/safe-redirect";
 import { createClient } from "@/lib/supabase/server";
+
+function trustedAppUrl() {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!appUrl) {
+    throw new Error("Missing required environment variable: NEXT_PUBLIC_APP_URL");
+  }
+  return appUrl;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -21,8 +29,9 @@ export async function GET(request: NextRequest) {
     error = new Error("Missing authentication confirmation parameters");
   }
 
-  const redirectTo = request.nextUrl.clone();
-  redirectTo.pathname = error ? "/auth/error" : next;
-  redirectTo.search = error ? "?message=confirmation-failed" : "";
+  const destination = error
+    ? "/auth/error?message=confirmation-failed"
+    : next;
+  const redirectTo = safeRedirectUrl(trustedAppUrl(), destination);
   return NextResponse.redirect(redirectTo);
 }
