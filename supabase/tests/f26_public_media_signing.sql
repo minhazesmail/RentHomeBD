@@ -71,11 +71,18 @@ values
     now() - interval '1 day'
   );
 
+-- These rows model media that already existed before a listing became public
+-- or expired. The production integrity trigger intentionally blocks creating
+-- or changing storage objects after a listing leaves an editable state, so the
+-- fixture bypasses triggers only while seeding this pre-existing state. RLS is
+-- fully enabled again for every assertion below.
+set local session_replication_role = replica;
 insert into storage.objects (bucket_id, name)
 values
   ('property-media', '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1/public.jpg'),
   ('property-media', '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2/draft.jpg'),
   ('property-media', '11111111-1111-4111-8111-111111111111/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3/expired.jpg');
+set local session_replication_role = origin;
 
 -- Anonymous signing: only currently public listing media is visible.
 set local role anon;
