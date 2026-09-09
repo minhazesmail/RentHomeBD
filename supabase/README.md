@@ -28,6 +28,7 @@ The foundational migration is `20260828153047_core_rental_schema.sql`. This file
 - Profiles are private to the owning user; moderators get controlled read access via membership.
 - `primary_role` is set at signup by a security-definer trigger (from metadata) and cannot be changed by clients afterward.
 - Role verification badges and phone verification timestamps are not client-writable trust flags.
+- Public owner identity/trust fields on listings are database-maintained snapshots. They are refreshed when a listing becomes available, when an owner reconfirms an active listing, and while an available listing's profile trust state changes.
 - SMS provider credentials must never appear in `NEXT_PUBLIC_*` or the app repo (see `docs/phone-otp-production.md`).
 
 ## Fresh local verification
