@@ -283,15 +283,6 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
     }
   }
 
-  async function stageExistingMediaOrder() {
-    for (let index = 0; index < orderedMedia.length; index += 1) {
-      const item = orderedMedia[index];
-      if (item.kind !== "existing") continue;
-      const staged = await supabase.from("property_media").update({ sort_order: 100 + index } as never).eq("id", item.media.id);
-      if (staged.error) throw staged.error;
-    }
-  }
-
   async function uploadNewMedia(propertyId: string) {
     for (let index = 0; index < orderedMedia.length; index += 1) {
       const item = orderedMedia[index];
@@ -336,7 +327,6 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       }
       await syncRelations(propertyId);
       await removeDeletedMedia();
-      await stageExistingMediaOrder();
       await uploadNewMedia(propertyId);
       await finalizeExistingMediaOrder();
       if (submitForReview) {
