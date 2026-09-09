@@ -6,6 +6,21 @@ on:
   pull_request:
 
 jobs:
+  database:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: 2.117.0
+      - name: Initialize local Supabase configuration
+        run: supabase init --force
+      - name: Apply migrations to a fresh database
+        run: supabase db start
+      - name: Verify migrations survive a clean reset
+        run: supabase db reset
+
   verify:
     runs-on: ubuntu-latest
     env:
@@ -23,6 +38,8 @@ jobs:
         run: npm install
       - name: Install Chromium for theme QA
         run: npx playwright install --with-deps chromium
+      - name: Supabase browser env QA
+        run: npm run envqa
       - name: Typecheck
         run: npm run typecheck
       - name: Localization QA
