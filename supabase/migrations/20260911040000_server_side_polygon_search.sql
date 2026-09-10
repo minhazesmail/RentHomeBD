@@ -212,9 +212,10 @@ begin
         )
         or (
           search_polygon is not null
+          and p.location operator(extensions.&&) polygon_geometry
           and extensions.st_intersects(
-            p.location,
-            polygon_geometry::extensions.geography
+            p.location::extensions.geometry,
+            polygon_geometry
           )
         )
       )
