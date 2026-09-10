@@ -18,7 +18,7 @@ function ContextualSaveHomeButton({
 
   const saved = savedHomes.savedPropertyIds.has(propertyId);
   const busy = savedHomes.pendingPropertyIds.has(propertyId);
-  const message = savedHomes.errorByPropertyId.get(propertyId) ?? null;
+  const message = savedHomes.errorByPropertyId.get(propertyId) ?? savedHomes.loadError;
 
   function toggle() {
     if (!savedHomes.ready) return;
