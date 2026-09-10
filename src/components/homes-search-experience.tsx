@@ -75,12 +75,20 @@ export function HomesSearchExperience({ children, initialSearch }: { children: R
     };
   }, [supabase]);
 
+  const savedStoreKey = personalization.authReady
+    ? personalization.userId ?? "anonymous"
+    : "auth-loading";
+
   return (
     <>
       <ProductNavigation authenticated={Boolean(personalization.userId)} canList={personalization.canList} current="explore" />
       {children}
       <MobileMapModel>
-        <SavedHomesProvider userId={personalization.userId} authReady={personalization.authReady}>
+        <SavedHomesProvider
+          key={savedStoreKey}
+          userId={personalization.userId}
+          authReady={personalization.authReady}
+        >
           <RenterMapSearch
             userId={personalization.userId}
             initialSearch={initialSearch}
