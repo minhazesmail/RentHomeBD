@@ -95,6 +95,8 @@ jobs:
         run: npm run mapsearchqa
       - name: Map return and saved-search validation QA
         run: npm run navigationqa
+      - name: Message realtime and read-receipt QA
+        run: npm run messageqa
       - name: Typecheck
         run: npm run typecheck
       - name: Localization QA
