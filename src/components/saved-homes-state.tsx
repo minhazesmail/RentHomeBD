@@ -44,6 +44,10 @@ export function SavedHomesProvider({
 }: SavedHomesProviderProps) {
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const initialKey = savedIdsKey(initialSavedPropertyIds);
+  const stableInitialSavedPropertyIds = useMemo<string[] | undefined>(() => {
+    if (initialKey === "__load__") return undefined;
+    return initialKey ? initialKey.split("|") : [];
+  }, [initialKey]);
   const [savedPropertyIds, setSavedPropertyIds] = useState<Set<string>>(
     () => new Set(initialSavedPropertyIds ?? []),
   );
@@ -72,8 +76,8 @@ export function SavedHomesProvider({
       };
     }
 
-    if (initialSavedPropertyIds) {
-      setSavedPropertyIds(new Set(initialSavedPropertyIds));
+    if (stableInitialSavedPropertyIds) {
+      setSavedPropertyIds(new Set(stableInitialSavedPropertyIds));
       setLoaded(true);
       return () => {
         cancelled = true;
@@ -101,7 +105,7 @@ export function SavedHomesProvider({
     return () => {
       cancelled = true;
     };
-  }, [authReady, initialKey, initialSavedPropertyIds, supabase, userId]);
+  }, [authReady, stableInitialSavedPropertyIds, supabase, userId]);
 
   const toggleSaved = useCallback(async (propertyId: string) => {
     if (!userId || !loaded || pendingPropertyIds.has(propertyId)) return;
