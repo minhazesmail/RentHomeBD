@@ -23,12 +23,9 @@ type SavedHomesProviderProps = {
   initialSavedPropertyIds?: string[];
 };
 
-const SavedHomesContext = createContext<SavedHomesState | null>(null);
+type RemoteLoadState = "idle" | "loaded" | "error";
 
-function savedIdsKey(ids: string[] | undefined) {
-  if (!ids) return "__load__";
-  return [...ids].sort().join("|");
-}
+const SavedHomesContext = createContext<SavedHomesState | null>(null);
 
 function setMembership(current: Set<string>, propertyId: string, saved: boolean) {
   const next = new Set(current);
@@ -44,50 +41,21 @@ export function SavedHomesProvider({
   initialSavedPropertyIds,
 }: SavedHomesProviderProps) {
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
-  const initialKey = savedIdsKey(initialSavedPropertyIds);
-  const stableInitialSavedPropertyIds = useMemo<string[] | undefined>(() => {
-    if (initialKey === "__load__") return undefined;
-    return initialKey ? initialKey.split("|") : [];
-  }, [initialKey]);
+  const hasServerSeed = initialSavedPropertyIds !== undefined;
   const [savedPropertyIds, setSavedPropertyIds] = useState<Set<string>>(
     () => new Set(initialSavedPropertyIds ?? []),
   );
   const [pendingPropertyIds, setPendingPropertyIds] = useState<Set<string>>(new Set());
   const [errorByPropertyId, setErrorByPropertyId] = useState<Map<string, string>>(new Map());
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(Boolean(authReady && (userId === null || initialSavedPropertyIds)));
+  const [remoteLoadState, setRemoteLoadState] = useState<RemoteLoadState>(
+    hasServerSeed ? "loaded" : "idle",
+  );
 
   useEffect(() => {
+    if (!authReady || !userId || hasServerSeed) return;
+
     let cancelled = false;
-
-    setPendingPropertyIds(new Set());
-    setErrorByPropertyId(new Map());
-    setLoadError(null);
-
-    if (!authReady) {
-      setLoaded(false);
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    if (!userId) {
-      setSavedPropertyIds(new Set());
-      setLoaded(true);
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    if (stableInitialSavedPropertyIds) {
-      setSavedPropertyIds(new Set(stableInitialSavedPropertyIds));
-      setLoaded(true);
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    setLoaded(false);
     void (async () => {
       const { data, error } = await supabase
         .from("saved_properties")
@@ -96,23 +64,25 @@ export function SavedHomesProvider({
 
       if (cancelled) return;
       if (error) {
-        setSavedPropertyIds(new Set());
         setLoadError("Could not load your saved homes. Refresh the page and try again.");
-        setLoaded(false);
+        setRemoteLoadState("error");
         return;
       }
 
       setSavedPropertyIds(new Set((data ?? []).map((row) => row.property_id as string)));
-      setLoaded(true);
+      setLoadError(null);
+      setRemoteLoadState("loaded");
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [authReady, stableInitialSavedPropertyIds, supabase, userId]);
+  }, [authReady, hasServerSeed, supabase, userId]);
+
+  const ready = authReady && (!userId || hasServerSeed || remoteLoadState === "loaded");
 
   const toggleSaved = useCallback(async (propertyId: string) => {
-    if (!userId || !loaded || pendingPropertyIds.has(propertyId)) return;
+    if (!userId || !ready || pendingPropertyIds.has(propertyId)) return;
 
     const wasSaved = savedPropertyIds.has(propertyId);
     const nextSaved = !wasSaved;
@@ -142,17 +112,17 @@ export function SavedHomesProvider({
       next.delete(propertyId);
       return next;
     });
-  }, [loaded, pendingPropertyIds, savedPropertyIds, supabase, userId]);
+  }, [pendingPropertyIds, ready, savedPropertyIds, supabase, userId]);
 
   const value = useMemo<SavedHomesState>(() => ({
     userId,
-    ready: authReady && loaded,
+    ready,
     loadError,
     savedPropertyIds,
     pendingPropertyIds,
     errorByPropertyId,
     toggleSaved,
-  }), [authReady, errorByPropertyId, loadError, loaded, pendingPropertyIds, savedPropertyIds, toggleSaved, userId]);
+  }), [errorByPropertyId, loadError, pendingPropertyIds, ready, savedPropertyIds, toggleSaved, userId]);
 
   return <SavedHomesContext.Provider value={value}>{children}</SavedHomesContext.Provider>;
 }
