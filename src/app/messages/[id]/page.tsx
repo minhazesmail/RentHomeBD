@@ -26,6 +26,7 @@ type Conversation = {
 };
 
 type Message = { id: string; sender_id: string; body: string; created_at: string };
+type ParticipantTrust = { phone_verified: boolean };
 type PropertySummary = { rent_bdt: number | null; available_from: string | null };
 type ThreadSearchParams = { q?: string | string[]; filter?: string | string[] };
 
@@ -70,16 +71,15 @@ export default async function MessageThreadPage({
   const otherReadField = viewerIsRenter ? "owner_last_read_at" : "renter_last_read_at";
   const viewerReadAt = viewerIsRenter ? conversation.renter_last_read_at : conversation.owner_last_read_at;
   const otherReadAt = viewerIsRenter ? conversation.owner_last_read_at : conversation.renter_last_read_at;
-  const otherUserId = viewerIsRenter ? conversation.owner_id : conversation.renter_id;
 
-  const [{ data: messageRows }, { data: otherProfile }, { data: propertyMedia }, { data: propertySummaryRows }] = await Promise.all([
+  const [{ data: messageRows }, { data: participantTrustRows }, { data: propertyMedia }, { data: propertySummaryRows }] = await Promise.all([
     supabase
       .from("messages")
       .select("id, sender_id, body, created_at")
       .eq("conversation_id", conversation.id)
       .order("created_at", { ascending: false })
       .limit(THREAD_PAGE_SIZE + 1),
-    supabase.from("profiles").select("phone_verified_at").eq("id", otherUserId).maybeSingle(),
+    supabase.rpc("get_conversation_participant_trust", { conversation_uuid: conversation.id }),
     supabase
       .from("property_media")
       .select("storage_path")
@@ -94,9 +94,10 @@ export default async function MessageThreadPage({
   const newestFirst = (messageRows ?? []) as Message[];
   const hasOlderMessages = newestFirst.length > THREAD_PAGE_SIZE;
   const messages = newestFirst.slice(0, THREAD_PAGE_SIZE).reverse();
+  const participantTrust = (participantTrustRows?.[0] ?? null) as ParticipantTrust | null;
   const otherName = viewerIsRenter ? conversation.owner_display_name : conversation.renter_display_name;
   const otherRole = viewerIsRenter ? "Owner / agent" : "Renter";
-  const phoneVerified = Boolean(otherProfile?.phone_verified_at);
+  const phoneVerified = Boolean(participantTrust?.phone_verified);
   const initial = (otherName || "R").slice(0, 1).toUpperCase();
   const propertyTitle = conversation.property_title || "Rental property";
   const propertySummary = (propertySummaryRows?.[0] ?? null) as PropertySummary | null;
