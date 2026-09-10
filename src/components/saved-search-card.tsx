@@ -6,6 +6,13 @@ import { useRouter } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import styles from "./saved-search-match-state.module.css";
+import {
+  DEFAULT_RENTER_SEARCH_RADIUS,
+  MAX_RENTER_SEARCH_BEDROOMS,
+  MAX_RENTER_SEARCH_RADIUS_KM,
+  MAX_RENTER_SEARCH_RENT_BDT,
+  MIN_RENTER_SEARCH_RADIUS_KM,
+} from "@/lib/search-defaults";
 import { createClient } from "@/lib/supabase/client";
 import { TENANT_PROFILE_LABELS, type TenantType } from "@/lib/tenant-match";
 
@@ -36,8 +43,6 @@ type Props = {
   matchState: MatchState | null;
 };
 
-const MAX_RENT = 10_000_000;
-
 function duplicateName(name: string) {
   const base = name.trim() || "Saved search";
   const suffix = " copy";
@@ -51,7 +56,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
   const [busyAction, setBusyAction] = useState<"save" | "duplicate" | "delete" | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [name, setName] = useState(search.name);
-  const [radiusKm, setRadiusKm] = useState(search.radius_km == null ? "" : String(search.radius_km));
+  const [radiusKm, setRadiusKm] = useState(search.radius_km == null ? DEFAULT_RENTER_SEARCH_RADIUS : String(search.radius_km));
   const [minRent, setMinRent] = useState(search.min_rent == null ? "" : String(search.min_rent));
   const [maxRent, setMaxRent] = useState(search.max_rent == null ? "" : String(search.max_rent));
   const [tenantType, setTenantType] = useState<TenantType | "">(search.tenant_type ?? "");
@@ -60,7 +65,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
 
   function resetForm() {
     setName(search.name);
-    setRadiusKm(search.radius_km == null ? "" : String(search.radius_km));
+    setRadiusKm(search.radius_km == null ? DEFAULT_RENTER_SEARCH_RADIUS : String(search.radius_km));
     setMinRent(search.min_rent == null ? "" : String(search.min_rent));
     setMaxRent(search.max_rent == null ? "" : String(search.max_rent));
     setTenantType(search.tenant_type ?? "");
@@ -77,11 +82,11 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
     const maximum = maxRent === "" ? null : Number(maxRent);
     const bedroomCount = bedrooms === "" ? null : Number(bedrooms);
 
-    if (radius !== null && (!Number.isFinite(radius) || radius < 0.5 || radius > 100)) return "Radius must be between 0.5 and 100 km.";
-    if (minimum !== null && (!Number.isFinite(minimum) || minimum < 0 || minimum > MAX_RENT)) return "Minimum rent must be between ৳0 and ৳10,000,000.";
-    if (maximum !== null && (!Number.isFinite(maximum) || maximum < 0 || maximum > MAX_RENT)) return "Maximum rent must be between ৳0 and ৳10,000,000.";
+    if (radius === null || !Number.isFinite(radius) || radius < MIN_RENTER_SEARCH_RADIUS_KM || radius > MAX_RENTER_SEARCH_RADIUS_KM) return `Radius must be between ${MIN_RENTER_SEARCH_RADIUS_KM} and ${MAX_RENTER_SEARCH_RADIUS_KM} km.`;
+    if (minimum !== null && (!Number.isFinite(minimum) || minimum < 0 || minimum > MAX_RENTER_SEARCH_RENT_BDT)) return "Minimum rent must be between ৳0 and ৳10,000,000.";
+    if (maximum !== null && (!Number.isFinite(maximum) || maximum < 0 || maximum > MAX_RENTER_SEARCH_RENT_BDT)) return "Maximum rent must be between ৳0 and ৳10,000,000.";
     if (minimum !== null && maximum !== null && minimum > maximum) return "Minimum rent cannot be higher than maximum rent.";
-    if (bedroomCount !== null && (!Number.isInteger(bedroomCount) || bedroomCount < 0 || bedroomCount > 99)) return "Bedrooms must be a whole number between 0 and 99.";
+    if (bedroomCount !== null && (!Number.isInteger(bedroomCount) || bedroomCount < 0 || bedroomCount > MAX_RENTER_SEARCH_BEDROOMS)) return `Bedrooms must be a whole number between 0 and ${MAX_RENTER_SEARCH_BEDROOMS}.`;
     return null;
   }
 
@@ -95,7 +100,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
       .from("saved_searches")
       .update({
         name: name.trim(),
-        radius_km: radiusKm === "" ? null : Number(radiusKm),
+        radius_km: Number(radiusKm),
         min_rent: minRent === "" ? null : Number(minRent),
         max_rent: maxRent === "" ? null : Number(maxRent),
         tenant_type: tenantType || null,
@@ -178,15 +183,15 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
             </label>
             <label className="saved-search-edit-field">
               <span>Radius (km)</span>
-              <input type="number" min="0.5" max="100" step="0.5" value={radiusKm} onChange={(event) => setRadiusKm(event.target.value)} placeholder="Any" />
+              <input type="number" min={MIN_RENTER_SEARCH_RADIUS_KM} max={MAX_RENTER_SEARCH_RADIUS_KM} step="0.5" value={radiusKm} onChange={(event) => setRadiusKm(event.target.value)} placeholder={DEFAULT_RENTER_SEARCH_RADIUS} required />
             </label>
             <label className="saved-search-edit-field">
               <span>Minimum rent</span>
-              <input type="number" min="0" max={MAX_RENT} step="500" value={minRent} onChange={(event) => setMinRent(event.target.value)} placeholder="Any" />
+              <input type="number" min="0" max={MAX_RENTER_SEARCH_RENT_BDT} step="500" value={minRent} onChange={(event) => setMinRent(event.target.value)} placeholder="Any" />
             </label>
             <label className="saved-search-edit-field">
               <span>Maximum rent</span>
-              <input type="number" min="0" max={MAX_RENT} step="500" value={maxRent} onChange={(event) => setMaxRent(event.target.value)} placeholder="Any" />
+              <input type="number" min="0" max={MAX_RENTER_SEARCH_RENT_BDT} step="500" value={maxRent} onChange={(event) => setMaxRent(event.target.value)} placeholder="Any" />
             </label>
             <label className="saved-search-edit-field">
               <span>Renter type</span>
@@ -197,7 +202,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
             </label>
             <label className="saved-search-edit-field">
               <span>Minimum bedrooms</span>
-              <input type="number" min="0" max="99" step="1" value={bedrooms} onChange={(event) => setBedrooms(event.target.value)} placeholder="Any" />
+              <input type="number" min="0" max={MAX_RENTER_SEARCH_BEDROOMS} step="1" value={bedrooms} onChange={(event) => setBedrooms(event.target.value)} placeholder="Any" />
             </label>
           </div>
           <p className="form-hint">This keeps the saved map center in place. Run the search if you want to move the map to a different area.</p>
