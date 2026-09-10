@@ -361,6 +361,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
 
   function startLiveLocation() {
     if (!navigator.geolocation) { setMessage("Location access is not supported by this browser."); return; }
+    cancelActiveSearch();
     if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
     if (customAreaMode) {
       setCustomArea([]);
