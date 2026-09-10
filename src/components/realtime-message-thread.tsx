@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { MessageComposer, friendlyMessageError, type ChatMessage } from "@/components/message-composer";
 import {
+  isThreadBottomVisible,
   latestIncomingMessageAt,
   mergeThreadMessages,
   shouldAdvanceReadAt,
@@ -62,6 +63,7 @@ export function RealtimeMessageThread({
   const listRef = useRef<HTMLDivElement | null>(null);
   const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
   const bottomVisibleRef = useRef(false);
+  const followIncomingRef = useRef(false);
   const restoreScrollHeightRef = useRef<number | null>(null);
   const hasPositionedInitiallyRef = useRef(false);
   const messagesRef = useRef(initialMessages);
@@ -163,7 +165,10 @@ export function RealtimeMessageThread({
             }
 
             const batch = (data ?? []) as ChatMessage[];
-            if (batch.length) storeMessages((current) => mergeMessages(current, batch));
+            if (batch.length) {
+              if (bottomVisibleRef.current) followIncomingRef.current = true;
+              storeMessages((current) => mergeMessages(current, batch));
+            }
             if (batch.length < CATCH_UP_PAGE_SIZE) break;
             offset += batch.length;
           }
@@ -187,6 +192,7 @@ export function RealtimeMessageThread({
         },
         (payload) => {
           const next = payload.new as ChatMessage;
+          if (next.sender_id !== userId && bottomVisibleRef.current) followIncomingRef.current = true;
           storeMessages((current) => mergeMessage(current, next));
         },
       )
@@ -225,7 +231,7 @@ export function RealtimeMessageThread({
       void supabase.removeChannel(messageChannel);
       void supabase.removeChannel(readChannel);
     };
-  }, [conversationId, otherReadField, readField, supabase]);
+  }, [conversationId, otherReadField, readField, supabase, userId]);
 
   useEffect(() => {
     function syncDocumentActivity() {
@@ -252,7 +258,7 @@ export function RealtimeMessageThread({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const visible = Boolean(entry?.isIntersecting);
+        const visible = Boolean(entry?.isIntersecting) && isThreadBottomVisible(root);
         bottomVisibleRef.current = visible;
         setBottomVisible(visible);
       },
@@ -272,10 +278,17 @@ export function RealtimeMessageThread({
 
   useLayoutEffect(() => {
     const node = listRef.current;
+    if (!node) return;
+
     const previousHeight = restoreScrollHeightRef.current;
-    if (!node || previousHeight === null) return;
-    node.scrollTop += node.scrollHeight - previousHeight;
-    restoreScrollHeightRef.current = null;
+    if (previousHeight !== null) {
+      node.scrollTop += node.scrollHeight - previousHeight;
+      restoreScrollHeightRef.current = null;
+    }
+
+    const visible = isThreadBottomVisible(node);
+    bottomVisibleRef.current = visible;
+    setBottomVisible(visible);
   }, [messages]);
 
   useEffect(() => {
@@ -286,7 +299,8 @@ export function RealtimeMessageThread({
       hasPositionedInitiallyRef.current = true;
       return;
     }
-    if (!lastMessageMine && !bottomVisibleRef.current) return;
+    if (!lastMessageMine && !followIncomingRef.current) return;
+    followIncomingRef.current = false;
     node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
   }, [lastMessageId, lastMessageMine]);
 
