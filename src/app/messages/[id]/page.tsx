@@ -68,10 +68,9 @@ export default async function MessageThreadPage({
   const viewerIsRenter = auth.userId === conversation.renter_id;
   const readField = viewerIsRenter ? "renter_last_read_at" : "owner_last_read_at";
   const otherReadField = viewerIsRenter ? "owner_last_read_at" : "renter_last_read_at";
+  const viewerReadAt = viewerIsRenter ? conversation.renter_last_read_at : conversation.owner_last_read_at;
   const otherReadAt = viewerIsRenter ? conversation.owner_last_read_at : conversation.renter_last_read_at;
   const otherUserId = viewerIsRenter ? conversation.owner_id : conversation.renter_id;
-
-  await supabase.from("conversations").update({ [readField]: new Date().toISOString() }).eq("id", conversation.id);
 
   const [{ data: messageRows }, { data: otherProfile }, { data: propertyMedia }, { data: propertySummaryRows }] = await Promise.all([
     supabase
@@ -150,6 +149,7 @@ export default async function MessageThreadPage({
               userId={auth.userId}
               readField={readField}
               otherReadField={otherReadField}
+              initialReadAt={viewerReadAt}
               initialOtherReadAt={otherReadAt}
               initialMessages={messages}
               initialHasOlderMessages={hasOlderMessages}
