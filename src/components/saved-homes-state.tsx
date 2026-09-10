@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 type SavedHomesState = {
   userId: string | null;
   ready: boolean;
+  loadError: string | null;
   savedPropertyIds: ReadonlySet<string>;
   pendingPropertyIds: ReadonlySet<string>;
   errorByPropertyId: ReadonlyMap<string, string>;
@@ -53,6 +54,7 @@ export function SavedHomesProvider({
   );
   const [pendingPropertyIds, setPendingPropertyIds] = useState<Set<string>>(new Set());
   const [errorByPropertyId, setErrorByPropertyId] = useState<Map<string, string>>(new Map());
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(Boolean(authReady && (userId === null || initialSavedPropertyIds)));
 
   useEffect(() => {
@@ -60,6 +62,7 @@ export function SavedHomesProvider({
 
     setPendingPropertyIds(new Set());
     setErrorByPropertyId(new Map());
+    setLoadError(null);
 
     if (!authReady) {
       setLoaded(false);
@@ -94,7 +97,8 @@ export function SavedHomesProvider({
       if (cancelled) return;
       if (error) {
         setSavedPropertyIds(new Set());
-        setLoaded(true);
+        setLoadError("Could not load your saved homes. Refresh the page and try again.");
+        setLoaded(false);
         return;
       }
 
@@ -143,11 +147,12 @@ export function SavedHomesProvider({
   const value = useMemo<SavedHomesState>(() => ({
     userId,
     ready: authReady && loaded,
+    loadError,
     savedPropertyIds,
     pendingPropertyIds,
     errorByPropertyId,
     toggleSaved,
-  }), [authReady, errorByPropertyId, loaded, pendingPropertyIds, savedPropertyIds, toggleSaved, userId]);
+  }), [authReady, errorByPropertyId, loadError, loaded, pendingPropertyIds, savedPropertyIds, toggleSaved, userId]);
 
   return <SavedHomesContext.Provider value={value}>{children}</SavedHomesContext.Provider>;
 }
