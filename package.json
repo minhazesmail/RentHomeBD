@@ -13,6 +13,7 @@
     "authredirectqa": "node scripts/check-auth-redirects.mjs",
     "workflowqa": "node scripts/check-listing-workflow-fixes.mjs",
     "searchstateqa": "node scripts/check-saved-search-consistency.mjs",
+    "mapsearchqa": "node scripts/check-map-search-safety.mjs",
     "uiqa": "node scripts/check-ui-regressions.mjs && node scripts/check-theme.mjs",
     "themeqa": "node scripts/check-theme.mjs",
     "themebrowser": "node scripts/check-theme-browser.mjs",
