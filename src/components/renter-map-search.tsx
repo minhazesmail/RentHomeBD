@@ -19,6 +19,7 @@ const LeafletMap = dynamic(() => import("@/components/leaflet-map"), { ssr: fals
 const DHAKA_CENTER: [number, number] = [23.8103, 90.4125];
 const RADIUS_OPTIONS = ["2", "5", "10", "15", "25", "50", "100"];
 const MAX_RENT_FILTER = 10_000_000;
+const MAX_CUSTOM_AREA_VERTICES = 100;
 const PUBLIC_MEDIA_TTL_SECONDS = 300;
 const LIVE_SEARCH_MIN_DISTANCE_METERS = 120;
 const LIVE_CENTER_MIN_DISTANCE_METERS = 30;
@@ -50,6 +51,11 @@ type SearchMapListing = MapListing & {
   results_truncated?: boolean;
 };
 
+type SearchPolygonGeoJson = {
+  type: "Polygon";
+  coordinates: [number, number][][];
+};
+
 function initialRadius(value?: string) {
   return value && RADIUS_OPTIONS.includes(value) ? value : "15";
 }
@@ -74,6 +80,7 @@ function friendlySearchError(error: unknown) {
   if (message.includes("search center") || message.includes("latitude") || message.includes("longitude")) return "Choose a valid map location and try again.";
   if (message.includes("bedroom filter")) return "Choose a valid bedroom filter.";
   if (message.includes("sort mode")) return "Choose a supported search ordering and try again.";
+  if (message.includes("custom search polygon")) return "Draw a valid custom area with 3 to 100 corners and try again.";
   if (message.includes("violates check constraint")) return "One or more saved-search filters are outside the allowed range.";
   return "We couldn't run this search. Check the filters and try again.";
 }
@@ -89,16 +96,10 @@ function distanceMeters(a: [number, number], b: [number, number]) {
   return earthRadius * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
 }
 
-function pointInPolygon(point: [number, number], polygon: [number, number][]) {
-  const [lat, lng] = point;
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-    const [latI, lngI] = polygon[i];
-    const [latJ, lngJ] = polygon[j];
-    const intersects = (lngI > lng) !== (lngJ > lng) && lat < ((latJ - latI) * (lng - lngI)) / ((lngJ - lngI) || Number.EPSILON) + latI;
-    if (intersects) inside = !inside;
-  }
-  return inside;
+function customAreaGeoJson(points: [number, number][]): SearchPolygonGeoJson | null {
+  if (points.length < 3 || points.length > MAX_CUSTOM_AREA_VERTICES) return null;
+  const ring = points.map(([lat, lng]) => [lng, lat] as [number, number]);
+  return { type: "Polygon", coordinates: [[...ring, ring[0]]] };
 }
 
 function compatibilityRank(listing: MapListing, preference?: TenantType) {
@@ -172,14 +173,17 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
   const lastLiveDisplayLocationRef = useRef<UserMapLocation | null>(null);
   const lastLiveStatusAccuracyRef = useRef<number | null>(null);
   const liveFixReceivedRef = useRef(false);
-  const runSearchRef = useRef<(searchCenter?: [number, number], requestedSort?: SortOption) => Promise<void>>(async () => {});
+  const searchRequestIdRef = useRef(0);
+  const searchAbortRef = useRef<AbortController | null>(null);
+  const runSearchRef = useRef<(searchCenter?: [number, number], requestedSort?: SortOption, requestedArea?: [number, number][] | null) => Promise<void>>(async () => {});
   const initialCenterRef = useRef(initialCenter);
   const lastPreferredTenantTypeRef = useRef<TenantType | undefined>(preferredTenantType);
 
   const softPreference = tenantType ? undefined : preferredTenantType;
   const customAreaMode = drawingCustomArea || customArea.length > 0;
+  const customAreaActive = !drawingCustomArea && customArea.length >= 3;
   const orderedListings = useMemo(() => sortedResults(listings, sortOption, preferredTenantType, tenantType), [listings, preferredTenantType, sortOption, tenantType]);
-  const visibleListings = useMemo(() => customArea.length >= 3 ? orderedListings.filter((listing) => pointInPolygon([listing.latitude, listing.longitude], customArea)) : orderedListings, [customArea, orderedListings]);
+  const visibleListings = orderedListings;
   const effectiveSelectedId = selectedId && visibleListings.some((listing) => listing.id === selectedId) ? selectedId : null;
   const selectedListing = useMemo(
     () => visibleListings.find((listing) => listing.id === effectiveSelectedId) ?? null,
@@ -189,11 +193,9 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
   const resultsTruncated = Boolean(listings[0]?.results_truncated);
   const resultCountText = busy
     ? "Searching…"
-    : customArea.length >= 3
-      ? `${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"}`
-      : resultsTruncated
-        ? `Showing ${visibleListings.length} of ${totalMatches.toLocaleString("en-BD")} homes`
-        : `${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"}`;
+    : resultsTruncated
+      ? `Showing ${visibleListings.length} of ${totalMatches.toLocaleString("en-BD")} homes`
+      : `${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"}`;
 
   const searchReturnPath = useCallback((selectionId: string) => {
     const params = new URLSearchParams({
@@ -218,6 +220,14 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
     setSelectedId(propertyId);
   }, []);
 
+  const cancelActiveSearch = useCallback(() => {
+    searchRequestIdRef.current += 1;
+    searchAbortRef.current?.abort();
+    searchAbortRef.current = null;
+    setBusy(false);
+    setMessage(null);
+  }, []);
+
   const validateFilters = useCallback(() => {
     const radius = Number(radiusKm);
     const minimum = minRent ? Number(minRent) : null;
@@ -229,25 +239,64 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
     return null;
   }, [maxRent, minRent, radiusKm]);
 
-  const runSearch = useCallback(async (searchCenter = center, requestedSort = sortOption) => {
-    const validationMessage = validateFilters();
-    if (validationMessage) { setMessage(validationMessage); setBusy(false); return; }
+  const runSearch = useCallback(async (searchCenter = center, requestedSort = sortOption, requestedArea?: [number, number][] | null) => {
+    const requestId = ++searchRequestIdRef.current;
+    searchAbortRef.current?.abort();
+    const searchController = new AbortController();
+    searchAbortRef.current = searchController;
+    const isCurrentSearch = () => searchRequestIdRef.current === requestId && !searchController.signal.aborted;
+    const areaPoints = requestedArea === undefined ? (customAreaActive ? customArea : null) : requestedArea;
+    const searchPolygon = areaPoints ? customAreaGeoJson(areaPoints) : null;
+    const validationMessage = validateFilters() ?? (areaPoints && !searchPolygon ? `Custom areas must contain between 3 and ${MAX_CUSTOM_AREA_VERTICES} corners.` : null);
+
+    if (validationMessage) {
+      if (isCurrentSearch()) {
+        searchAbortRef.current = null;
+        setMessage(validationMessage);
+        setBusy(false);
+      }
+      return;
+    }
+
     setBusy(true);
     setMessage(null);
+
     const { data, error } = await supabase.rpc("search_available_properties", {
-      center_lat: searchCenter[0], center_long: searchCenter[1], radius_km: Number(radiusKm), min_rent: minRent ? Number(minRent) : null, max_rent: maxRent ? Number(maxRent) : null, renter_tenant_type: tenantType || null, min_bedrooms: bedrooms ? Number(bedrooms) : null,
+      center_lat: searchCenter[0],
+      center_long: searchCenter[1],
+      radius_km: Number(radiusKm),
+      min_rent: minRent ? Number(minRent) : null,
+      max_rent: maxRent ? Number(maxRent) : null,
+      renter_tenant_type: tenantType || null,
+      min_bedrooms: bedrooms ? Number(bedrooms) : null,
       sort_mode: requestedSort,
       preferred_tenant_type: tenantType ? null : preferredTenantType ?? null,
-    });
-    if (error) { setMessage(friendlySearchError(error)); setBusy(false); return; }
+      search_polygon: searchPolygon,
+    }).abortSignal(searchController.signal);
+
+    if (!isCurrentSearch()) return;
+    if (error) {
+      searchAbortRef.current = null;
+      setMessage(friendlySearchError(error));
+      setBusy(false);
+      return;
+    }
 
     const rows = (data ?? []) as SearchMapListing[];
     const propertyIds = rows.map((listing) => listing.id);
-    const tenantRows = propertyIds.length > 0
-      ? (await supabase.from("property_tenant_types").select("property_id, tenant_type").in("property_id", propertyIds)).data as TenantTypeRow[] | null
-      : [];
+    let tenantRows: TenantTypeRow[] = [];
+    if (propertyIds.length > 0) {
+      const tenantResult = await supabase
+        .from("property_tenant_types")
+        .select("property_id, tenant_type")
+        .in("property_id", propertyIds)
+        .abortSignal(searchController.signal);
+      if (!isCurrentSearch()) return;
+      tenantRows = (tenantResult.data ?? []) as TenantTypeRow[];
+    }
+
     const tenantTypesByProperty = new Map<string, TenantType[]>();
-    for (const row of tenantRows ?? []) {
+    for (const row of tenantRows) {
       const current = tenantTypesByProperty.get(row.property_id) ?? [];
       current.push(row.tenant_type);
       tenantTypesByProperty.set(row.property_id, current);
@@ -257,6 +306,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
     const signedUrlByPath = new Map<string, string>();
     if (coverPaths.length > 0) {
       const { data: signedRows } = await supabase.storage.from("property-media").createSignedUrls(coverPaths, PUBLIC_MEDIA_TTL_SECONDS);
+      if (!isCurrentSearch()) return;
       for (const signed of signedRows ?? []) {
         if (signed.path && signed.signedUrl) signedUrlByPath.set(signed.path, signed.signedUrl);
       }
@@ -267,10 +317,25 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
       tenant_types: tenantTypesByProperty.get(listing.id) ?? [],
       cover_url: listing.cover_media_path ? signedUrlByPath.get(listing.cover_media_path) ?? null : null,
     }));
+
+    if (!isCurrentSearch()) return;
     setListings(hydrated);
     setSelectedId((current) => current && hydrated.some((listing) => listing.id === current) ? current : null);
+    searchAbortRef.current = null;
     setBusy(false);
-  }, [bedrooms, center, maxRent, minRent, preferredTenantType, radiusKm, sortOption, supabase, tenantType, validateFilters]);
+  }, [bedrooms, center, customArea, customAreaActive, maxRent, minRent, preferredTenantType, radiusKm, sortOption, supabase, tenantType, validateFilters]);
+
+  const handleCustomAreaChange = useCallback((points: [number, number][]) => {
+    if (points.length > MAX_CUSTOM_AREA_VERTICES) {
+      setMessage(`Custom areas can contain at most ${MAX_CUSTOM_AREA_VERTICES} corners.`);
+      return;
+    }
+    setCustomArea(points);
+    setSelectedId(null);
+    if (!drawingCustomArea && points.length >= 3) {
+      void runSearch(center, sortOption, points);
+    }
+  }, [center, drawingCustomArea, runSearch, sortOption]);
 
   useEffect(() => { runSearchRef.current = runSearch; }, [runSearch]);
   useEffect(() => {
@@ -282,6 +347,10 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
     lastPreferredTenantTypeRef.current = preferredTenantType;
     void runSearchRef.current();
   }, [preferredTenantType]);
+  useEffect(() => () => {
+    searchRequestIdRef.current += 1;
+    searchAbortRef.current?.abort();
+  }, []);
   useEffect(() => () => { if (watchIdRef.current !== null && navigator.geolocation) navigator.geolocation.clearWatch(watchIdRef.current); }, []);
 
   function stopLiveLocation() {
@@ -293,6 +362,11 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
   function startLiveLocation() {
     if (!navigator.geolocation) { setMessage("Location access is not supported by this browser."); return; }
     if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
+    if (customAreaMode) {
+      setCustomArea([]);
+      setDrawingCustomArea(false);
+      setSelectedId(null);
+    }
     setLocating(true);
     setMessage(null);
     setLocationStatus("Requesting precise location…");
@@ -342,7 +416,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
       }
       if (shouldRefreshResults) {
         lastLiveSearchLocationRef.current = next;
-        void runSearchRef.current(next);
+        void runSearchRef.current(next, undefined, null);
       }
     }, (error) => {
       liveFixReceivedRef.current = false;
@@ -364,10 +438,11 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
     setSelectedId(null);
     const nextCenter: [number, number] = [preset.latitude, preset.longitude];
     setCenter(nextCenter);
-    void runSearch(nextCenter);
+    void runSearch(nextCenter, sortOption, null);
   }
 
   function handleMapCenterChange(nextCenter: [number, number]) {
+    cancelActiveSearch();
     if (liveTracking) {
       stopLiveLocation();
       setLocationStatus("Live location paused because you moved the map manually.");
@@ -379,6 +454,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
   }
 
   function clearFilters() {
+    cancelActiveSearch();
     setMinRent("");
     setMaxRent("");
     setTenantType("");
@@ -388,7 +464,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
     setDrawingCustomArea(false);
     setSelectedId(null);
     setMessage("Filters cleared. Refreshing homes around this map location.");
-    window.setTimeout(() => { void runSearchRef.current(center); }, 0);
+    window.setTimeout(() => { void runSearchRef.current(center, sortOption, null); }, 0);
   }
 
   async function saveSearch() {
@@ -404,6 +480,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
   }
 
   function startCustomArea() {
+    cancelActiveSearch();
     stopLiveLocation();
     setLocationPreset("");
     setCustomArea([]);
@@ -414,13 +491,17 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
 
   function finishCustomArea() {
     if (customArea.length < 3) { setMessage("Add at least 3 points to create a custom search area."); return; }
+    if (customArea.length > MAX_CUSTOM_AREA_VERTICES) { setMessage(`Custom areas can contain at most ${MAX_CUSTOM_AREA_VERTICES} corners.`); return; }
     setDrawingCustomArea(false);
     setSelectedId(null);
-    setMessage(`${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"} inside your custom area. Choose a result or map marker to preview a specific home. This drawn area is temporary and will not be saved.`);
+    void runSearch(center, sortOption, customArea);
   }
 
   function clearCustomArea() {
-    setCustomArea([]); setDrawingCustomArea(false); setSelectedId(null); setMessage(null);
+    setCustomArea([]);
+    setDrawingCustomArea(false);
+    setSelectedId(null);
+    void runSearch(center, sortOption, null);
   }
 
   return (
@@ -430,11 +511,11 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
         <div className="renter-filter-panel">
           <div className="renter-filter-grid">
             <label className="field full">Area or landmark<select value={locationPreset} onChange={(event) => searchPresetLocation(event.target.value)} disabled={busy}><option value="">Choose a supported Dhaka location</option>{LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label}>{location.label}</option>)}</select></label>
-            <label className="field">Minimum rent (৳)<input inputMode="numeric" value={minRent} onChange={(e) => setMinRent(e.target.value.replace(/\D/g, ""))} placeholder="10000" /></label>
-            <label className="field">Maximum rent (৳)<input inputMode="numeric" value={maxRent} onChange={(e) => setMaxRent(e.target.value.replace(/\D/g, ""))} placeholder="40000" /></label>
-            <label className="field">Renter type<select value={tenantType} onChange={(e) => setTenantType(e.target.value)}><option value="">Any renter type</option><option value="family">{TENANT_PROFILE_LABELS.family}</option><option value="bachelor">{TENANT_PROFILE_LABELS.bachelor}</option><option value="student">{TENANT_PROFILE_LABELS.student}</option><option value="job_holder">{TENANT_PROFILE_LABELS.job_holder}</option></select></label>
-            <label className="field">Bedrooms<select value={bedrooms} onChange={(e) => setBedrooms(e.target.value)}><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></label>
-            <label className="field">Radius<select value={radiusKm} onChange={(e) => setRadiusKm(e.target.value)}><option value="2">2 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="15">15 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select></label>
+            <label className="field">Minimum rent (৳)<input inputMode="numeric" value={minRent} onChange={(event) => { cancelActiveSearch(); setMinRent(event.target.value.replace(/\D/g, "")); }} placeholder="10000" /></label>
+            <label className="field">Maximum rent (৳)<input inputMode="numeric" value={maxRent} onChange={(event) => { cancelActiveSearch(); setMaxRent(event.target.value.replace(/\D/g, "")); }} placeholder="40000" /></label>
+            <label className="field">Renter type<select value={tenantType} onChange={(event) => { cancelActiveSearch(); setTenantType(event.target.value); }}><option value="">Any renter type</option><option value="family">{TENANT_PROFILE_LABELS.family}</option><option value="bachelor">{TENANT_PROFILE_LABELS.bachelor}</option><option value="student">{TENANT_PROFILE_LABELS.student}</option><option value="job_holder">{TENANT_PROFILE_LABELS.job_holder}</option></select></label>
+            <label className="field">Bedrooms<select value={bedrooms} onChange={(event) => { cancelActiveSearch(); setBedrooms(event.target.value); }}><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></label>
+            <label className="field">Radius<select value={radiusKm} onChange={(event) => { cancelActiveSearch(); setRadiusKm(event.target.value); }}><option value="2">2 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="15">15 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select></label>
             <label className="field">Sort results<select value={sortOption} onChange={(event) => { const nextSort = event.target.value as SortOption; setSortOption(nextSort); void runSearch(center, nextSort); }}><option value="recommended">Recommended</option><option value="distance">Distance: nearest</option><option value="rent-asc">Rent: low to high</option><option value="rent-desc">Rent: high to low</option></select></label>
           </div>
           <p className="form-hint">Choose a supported area to move the map and search there immediately. You can still pan the map manually for anywhere else.</p>
@@ -445,24 +526,24 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
             <span className="tenant-legend-chip tenant-student"><GraduationCap size={12} aria-hidden="true" />{TENANT_PROFILE_LABELS.student}</span>
             <span className="tenant-legend-chip tenant-everyone"><CircleCheck size={12} aria-hidden="true" />{TENANT_PROFILE_LABELS.everyone}</span>
           </div>
-          <div className="renter-filter-actions">{liveTracking ? <button className="secondary-button renter-live-location-button" type="button" onClick={stopLiveLocation}>Stop live location</button> : <button className="secondary-button renter-live-location-button" type="button" onClick={startLiveLocation} disabled={locating}>{locating ? "Finding you…" : "◎ My live location"}</button>}<button className="primary-button" type="button" onClick={() => void runSearch()} disabled={busy}>{busy ? "Searching…" : "Search map"}</button></div>
+          <div className="renter-filter-actions">{liveTracking ? <button className="secondary-button renter-live-location-button" type="button" onClick={stopLiveLocation}>Stop live location</button> : <button className="secondary-button renter-live-location-button" type="button" onClick={startLiveLocation} disabled={locating}>{locating ? "Finding you…" : "◎ My live location"}</button>}<button className="primary-button" type="button" onClick={() => void runSearch()} disabled={busy}>{busy ? "Searching…" : customAreaActive ? "Search area" : "Search map"}</button></div>
           <div className="custom-area-controls">
             <button className="text-button" type="button" onClick={clearFilters} disabled={busy}>Clear filters</button>
             {!drawingCustomArea && customArea.length < 3 && <button className="secondary-button" type="button" onClick={startCustomArea}>◇ Draw custom area</button>}
             {drawingCustomArea && <><button className="primary-button" type="button" onClick={finishCustomArea}>Finish area ({customArea.length})</button><button className="text-button" type="button" onClick={clearCustomArea}>Cancel</button></>}
-            {!drawingCustomArea && customArea.length >= 3 && <><span><strong>Custom area active · temporary</strong>{visibleListings.length} homes inside</span><button className="text-button" type="button" onClick={clearCustomArea}>Clear area</button></>}
+            {customAreaActive && <><span><strong>Custom area active · temporary</strong>{resultsTruncated ? `Showing ${visibleListings.length} of ${totalMatches.toLocaleString("en-BD")} homes inside` : `${visibleListings.length} home${visibleListings.length === 1 ? "" : "s"} inside`}</span><button className="text-button" type="button" onClick={clearCustomArea}>Clear area</button></>}
           </div>
           {locationStatus && <div className="success-message compact-message" role="status" aria-live="polite">{locationStatus}</div>}
           <div className="save-search-row"><input value={searchName} onChange={(e) => setSearchName(e.target.value)} maxLength={80} placeholder={customAreaMode ? "Clear custom area to save a radius search" : "Name this search, e.g. Dhanmondi family"} disabled={customAreaMode} aria-describedby="save-search-help" /><button className="secondary-button" type="button" onClick={() => void saveSearch()} disabled={savingSearch || customAreaMode}>{savingSearch ? "Saving…" : "Save radius search"}</button></div>
           <p className="form-hint" id="save-search-help">{customAreaMode ? "Custom drawn areas are session-only and are not stored in Saved. Clear the custom area to save the current center, radius, and filters." : `Saved searches store this center, radius, and your filters. Search radius is capped at 100 km.`}</p>
-          {message && <div className={message.startsWith("Search saved") || message.includes("inside your custom area") ? "success-message compact-message" : "auth-message"} role="status" aria-live="polite">{message}</div>}
+          {message && <div className={message.startsWith("Search saved") ? "success-message compact-message" : "auth-message"} role="status" aria-live="polite">{message}</div>}
         </div>
 
-        <div className="renter-results-header"><strong>{resultCountText}</strong><span>{customArea.length >= 3 ? `Inside custom area · ${sortDescription(sortOption, preferredTenantType, tenantType)}` : sortDescription(sortOption, preferredTenantType, tenantType)}</span></div>
+        <div className="renter-results-header"><strong>{resultCountText}</strong><span>{customAreaActive ? `Inside custom area · ${sortDescription(sortOption, preferredTenantType, tenantType)}` : sortDescription(sortOption, preferredTenantType, tenantType)}</span></div>
         <RenterResultsList
           listings={visibleListings}
           busy={busy}
-          customAreaActive={customArea.length >= 3}
+          customAreaActive={customAreaActive}
           selectedId={effectiveSelectedId}
           preference={softPreference}
           userId={userId}
@@ -472,7 +553,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
       </aside>
 
       <section className="renter-map-panel">
-        <LeafletMap listings={visibleListings} center={center} radiusKm={Number(radiusKm)} selectedId={effectiveSelectedId} onSelect={handleSelectListing} onCenterChange={handleMapCenterChange} userLocation={userLocation} liveTracking={liveTracking} customArea={customArea} drawingCustomArea={drawingCustomArea} onCustomAreaChange={setCustomArea} />
+        <LeafletMap listings={visibleListings} center={center} radiusKm={Number(radiusKm)} selectedId={effectiveSelectedId} onSelect={handleSelectListing} onCenterChange={handleMapCenterChange} userLocation={userLocation} liveTracking={liveTracking} customArea={customArea} drawingCustomArea={drawingCustomArea} onCustomAreaChange={handleCustomAreaChange} />
         {drawingCustomArea && <div className="custom-area-map-hint" role="status"><strong>Draw your search area</strong><span>Tap corners on the map · {customArea.length}/3 minimum · temporary session only</span></div>}
         {selectedListing && <article className={`mobile-map-sheet tenant-compatibility-${tenantCompatibility(selectedListing.tenant_types ?? [], softPreference)}`} aria-live="polite"><button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label="Close property preview">×</button><div className="mobile-map-sheet-handle" aria-hidden="true" /><div className="mobile-map-sheet-content"><div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div><div className="mobile-map-sheet-copy"><TenantBadge types={selectedListing.tenant_types ?? []} preference={softPreference} /><h2>{selectedListing.title || "Rental property"}</h2><p>{selectedListing.address_text || "Location available on map"}</p>{tenantCompatibility(selectedListing.tenant_types ?? [], softPreference) === "mismatch" && <small className="tenant-preference-note is-mismatch">Different renter type preference</small>}<div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? `৳${selectedListing.rent_bdt.toLocaleString("en-BD")}` : "Rent on request"}</strong><span>{selectedListing.bedrooms ?? "—"} bed · {selectedListing.bathrooms ?? "—"} bath</span></div></div></div><div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} compact /><Link className="primary-button link-button" href={propertyHref(selectedListing.id)}>View full listing</Link></div></article>}
       </section>
