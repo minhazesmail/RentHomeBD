@@ -22,6 +22,7 @@ const transpiled = ts.transpileModule(helperSource, {
 
 const helperModule = await import(`data:text/javascript;base64,${Buffer.from(transpiled).toString("base64")}`);
 const {
+  isThreadBottomVisible,
   latestIncomingMessageAt,
   mergeThreadMessages,
   shouldAdvanceReadAt,
@@ -44,6 +45,8 @@ assert.equal(latestIncomingMessageAt(merged, viewerId), "2026-09-11T00:00:03.000
 assert.equal(shouldAdvanceReadAt(null, "2026-09-11T00:00:03.000Z"), true);
 assert.equal(shouldAdvanceReadAt("2026-09-11T00:00:03.000Z", "2026-09-11T00:00:03.000Z"), false);
 assert.equal(shouldAdvanceReadAt("2026-09-11T00:00:04.000Z", "2026-09-11T00:00:03.000Z"), false, "read state must never move backward");
+assert.equal(isThreadBottomVisible({ scrollHeight: 1000, scrollTop: 400, clientHeight: 500 }), false, "offscreen bottom must be detected synchronously");
+assert.equal(isThreadBottomVisible({ scrollHeight: 1000, scrollTop: 499, clientHeight: 500 }), true, "small browser rounding at the bottom should be tolerated");
 assert.equal(threadCanAdvanceRead("hidden", true, true), false, "hidden tabs cannot mark a thread read");
 assert.equal(threadCanAdvanceRead("visible", false, true), false, "unfocused windows cannot mark a thread read");
 assert.equal(threadCanAdvanceRead("visible", true, false), false, "messages below the viewport cannot be marked read");
@@ -65,9 +68,11 @@ requireSource(threadSource, /mergeMessages\(current,\s*batch\)/, "catch-up resul
 requireSource(threadSource, /document\.visibilityState/, "read receipts must consider document visibility");
 requireSource(threadSource, /document\.hasFocus\(\)/, "read receipts must consider window focus");
 requireSource(threadSource, /new IntersectionObserver/, "read receipts must require actual thread-bottom visibility");
+requireSource(threadSource, /useLayoutEffect\(\(\)\s*=>\s*\{[\s\S]{0,600}isThreadBottomVisible\(node\)/, "message renders must synchronously re-measure whether the bottom is still visible");
 requireSource(threadSource, /latestIncomingMessageAt\(messages,\s*userId\)/, "read state must advance only through incoming messages actually present in the thread");
 requireSource(threadSource, /threadCanAdvanceRead\(documentVisibility,\s*windowFocused,\s*bottomVisible\)/, "visibility, focus and viewport state must gate read writes");
-requireSource(threadSource, /if\s*\(!lastMessageMine\s*&&\s*!bottomVisibleRef\.current\)\s*return;/, "offscreen incoming messages must not force the thread to the bottom");
+requireSource(threadSource, /if\s*\(next\.sender_id\s*!==\s*userId\s*&&\s*bottomVisibleRef\.current\)\s*followIncomingRef\.current\s*=\s*true;/, "incoming auto-follow must only be armed when the viewer was already at the bottom");
+requireSource(threadSource, /if\s*\(!lastMessageMine\s*&&\s*!followIncomingRef\.current\)\s*return;/, "offscreen incoming messages must not force the thread to the bottom");
 forbidSource(threadSource, /if\s*\(next\.sender_id\s*!==\s*userId\)[\s\S]{0,260}\.update\(\{\s*\[readField\]:\s*next\.created_at\s*\}\)/, "Realtime INSERT handlers must not mark messages read automatically");
 
 forbidSource(routeSource, /\.update\(\{\s*\[readField\]:\s*new Date\(\)\.toISOString\(\)\s*\}\)/, "server rendering must not mutate read state");
