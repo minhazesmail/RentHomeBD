@@ -16,6 +16,7 @@
     "mapsearchqa": "node scripts/check-map-search-safety.mjs",
     "navigationqa": "node scripts/check-navigation-search-validation.mjs",
     "messageqa": "node scripts/check-message-thread-resilience.mjs",
+    "trustabuseqa": "node scripts/check-conversation-trust-abuse-controls.mjs",
     "uiqa": "node scripts/check-ui-regressions.mjs && node scripts/check-theme.mjs",
     "themeqa": "node scripts/check-theme.mjs",
     "themebrowser": "node scripts/check-theme-browser.mjs",
