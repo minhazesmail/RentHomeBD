@@ -4,6 +4,12 @@ export type ThreadMessageLike = {
   created_at: string;
 };
 
+type ScrollViewport = {
+  scrollHeight: number;
+  scrollTop: number;
+  clientHeight: number;
+};
+
 function timestamp(value: string) {
   const parsed = new Date(value).getTime();
   return Number.isFinite(parsed) ? parsed : Number.NEGATIVE_INFINITY;
@@ -35,6 +41,10 @@ export function shouldAdvanceReadAt(current: string | null, target: string | nul
   if (!Number.isFinite(targetTime)) return false;
   if (!current) return true;
   return targetTime > timestamp(current);
+}
+
+export function isThreadBottomVisible(viewport: ScrollViewport, tolerancePx = 2) {
+  return viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= tolerancePx;
 }
 
 export function threadCanAdvanceRead(
