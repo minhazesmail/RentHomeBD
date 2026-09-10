@@ -61,13 +61,16 @@ export function RealtimeMessageThread({
   const [bottomVisible, setBottomVisible] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
   const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
+  const bottomVisibleRef = useRef(false);
   const restoreScrollHeightRef = useRef<number | null>(null);
   const hasPositionedInitiallyRef = useRef(false);
   const messagesRef = useRef(initialMessages);
   const committedReadAtRef = useRef(initialReadAt);
   const desiredReadAtRef = useRef(initialReadAt);
   const readSyncInFlightRef = useRef(false);
-  const lastMessageId = optimisticMessages.at(-1)?.id ?? null;
+  const lastMessage = optimisticMessages.at(-1) ?? null;
+  const lastMessageId = lastMessage?.id ?? null;
+  const lastMessageMine = lastMessage?.sender_id === userId;
   const renderedAt = new Date();
 
   const flushReadState = useCallback(async () => {
@@ -248,7 +251,11 @@ export function RealtimeMessageThread({
     if (!root || !target) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => setBottomVisible(Boolean(entry?.isIntersecting)),
+      ([entry]) => {
+        const visible = Boolean(entry?.isIntersecting);
+        bottomVisibleRef.current = visible;
+        setBottomVisible(visible);
+      },
       { root, threshold: 0.9 },
     );
     observer.observe(target);
@@ -279,8 +286,9 @@ export function RealtimeMessageThread({
       hasPositionedInitiallyRef.current = true;
       return;
     }
+    if (!lastMessageMine && !bottomVisibleRef.current) return;
     node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
-  }, [lastMessageId]);
+  }, [lastMessageId, lastMessageMine]);
 
   async function loadOlderMessages() {
     const oldestMessage = messages[0];
