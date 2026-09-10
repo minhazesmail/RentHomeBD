@@ -91,4 +91,11 @@ if (finalGuard < 0 || resultCommit < finalGuard) {
   throw new Error(`${mapSearchFile} must verify request freshness immediately before committing listings.`);
 }
 
+const liveStart = mapSearch.indexOf("function startLiveLocation()");
+const liveCancel = mapSearch.indexOf("cancelActiveSearch();", liveStart);
+const liveWatch = mapSearch.indexOf("navigator.geolocation.watchPosition", liveStart);
+if (liveStart < 0 || liveCancel < liveStart || liveWatch < 0 || liveCancel > liveWatch) {
+  throw new Error(`${mapSearchFile} must invalidate older search work before waiting for the first live GPS fix.`);
+}
+
 console.log("F10/F11 QA passed: custom areas are server-queried and stale searches cannot overwrite newer results.");
