@@ -2,6 +2,20 @@
 
 begin;
 
+-- PostgreSQL may constant-fold `1 / 0` even inside an unselected CASE branch.
+-- Keep assertions procedural so a failure means the condition actually failed.
+create or replace function pg_temp.assert_true(condition boolean, message text)
+returns void
+language plpgsql
+volatile
+as $$
+begin
+  if condition is not true then
+    raise exception 'Assertion failed: %', message;
+  end if;
+end;
+$$;
+
 insert into auth.users (id, raw_user_meta_data)
 values
   ('61111111-1111-4111-8111-111111111111', '{"role":"owner","display_name":"Save QA Owner"}'::jsonb),
@@ -21,10 +35,10 @@ select set_config(
 -- create a second draft because both calls resolve to the same row.
 select public.ensure_property_draft('6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1');
 select public.ensure_property_draft('6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1');
-
-select case when count(*) = 1 then 1 else 1 / 0 end as one_retry_safe_draft
-from public.properties
-where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
+select pg_temp.assert_true(
+  (select count(*) = 1 from public.properties where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),
+  'repeated ensure_property_draft must keep one property row'
+);
 
 reset role;
 
@@ -112,13 +126,14 @@ select public.save_property_draft(
   ))
 );
 
-select case when count(*) = 1 then 1 else 1 / 0 end as retry_keeps_one_media_row
-from public.property_media
-where property_id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
-
-select case when count(*) = 1 then 1 else 1 / 0 end as retry_keeps_one_tenant_row
-from public.property_tenant_types
-where property_id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
+select pg_temp.assert_true(
+  (select count(*) = 1 from public.property_media where property_id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),
+  'retry must keep one property_media row'
+);
+select pg_temp.assert_true(
+  (select count(*) = 1 from public.property_tenant_types where property_id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),
+  'retry must keep one tenant relation'
+);
 
 -- A failure late in the atomic reconciliation must roll back fields and
 -- relationships together. The invalid amenity causes a FK violation after the
@@ -168,23 +183,23 @@ begin
 end;
 $$;
 
-select case when title = 'Retry-safe Dhanmondi apartment' then 1 else 1 / 0 end as failed_save_rolls_back_property
-from public.properties
-where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
-
-select case when count(*) = 1 then 1 else 1 / 0 end as failed_save_rolls_back_tenants
-from public.property_tenant_types
-where property_id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'
-  and tenant_type = 'family'::public.tenant_type;
+select pg_temp.assert_true(
+  (select title = 'Retry-safe Dhanmondi apartment' from public.properties where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),
+  'failed atomic save must roll back scalar property changes'
+);
+select pg_temp.assert_true(
+  (select count(*) = 1 from public.property_tenant_types where property_id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1' and tenant_type = 'family'::public.tenant_type),
+  'failed atomic save must roll back tenant replacement'
+);
 
 -- Submission is also idempotent. A retry after a lost response leaves the same
 -- row in pending_review and does not duplicate any listing data.
 select public.submit_property_for_review('6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1');
 select public.submit_property_for_review('6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1');
-
-select case when status = 'pending_review'::public.listing_status then 1 else 1 / 0 end as retry_safe_submission
-from public.properties
-where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
+select pg_temp.assert_true(
+  (select status = 'pending_review'::public.listing_status from public.properties where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),
+  'repeated submission must remain pending_review'
+);
 
 reset role;
 
@@ -212,22 +227,25 @@ select set_config(
 );
 
 -- F07: beginning an edit takes the old publication private and clears stale
--- freshness/trust snapshots. The existing moderation-history tables are not
--- touched by this transition.
+-- freshness/trust snapshots. Existing moderation history is untouched.
 select public.begin_property_edit('6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1');
+select pg_temp.assert_true(
+  (select
+    status = 'draft'::public.listing_status
+    and published_at is null
+    and last_confirmed_at is null
+    and expires_at is null
+    and public_owner_display_name is null
+    and public_owner_role is null
+    and public_owner_phone_verified_at is null
+    and public_owner_role_verified_at is null
+    and public_owner_role_verified_role is null
+   from public.properties
+   where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),
+  'available listing must become a private clean draft before editing'
+);
 
-select case when
-  status = 'draft'::public.listing_status
-  and published_at is null
-  and last_confirmed_at is null
-  and expires_at is null
-  and public_owner_display_name is null
-  and public_owner_role is null
-then 1 else 1 / 0 end as available_can_return_to_private_draft
-from public.properties
-where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
-
--- Repeated begin-edit requests are harmless once the listing is already a draft.
+-- Repeated begin-edit requests are harmless once already a draft.
 select public.begin_property_edit('6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1');
 
 reset role;
@@ -246,8 +264,10 @@ set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '61111111-1111-4111-8111-111111111111', true);
 select public.begin_property_edit('6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1');
-select case when status = 'draft'::public.listing_status and published_at is null then 1 else 1 / 0 end as rented_can_relist
-from public.properties where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
+select pg_temp.assert_true(
+  (select status = 'draft'::public.listing_status and published_at is null and expires_at is null from public.properties where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),
+  'rented listing must support relisting as a private draft'
+);
 reset role;
 
 set local session_replication_role = replica;
@@ -263,10 +283,12 @@ set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '61111111-1111-4111-8111-111111111111', true);
 select public.begin_property_edit('6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1');
-select case when status = 'draft'::public.listing_status and expires_at is null then 1 else 1 / 0 end as expired_can_relist
-from public.properties where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1';
+select pg_temp.assert_true(
+  (select status = 'draft'::public.listing_status and published_at is null and expires_at is null from public.properties where id = '6aaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),
+  'expired listing must support relisting as a private draft'
+);
 
--- A different owner cannot hijack the draft, save it, or start its lifecycle.
+-- A different owner cannot hijack the draft or start its lifecycle.
 select set_config('request.jwt.claim.sub', '62222222-2222-4222-8222-222222222222', true);
 do $$
 declare
