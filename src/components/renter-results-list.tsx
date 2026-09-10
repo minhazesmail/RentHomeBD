@@ -26,7 +26,6 @@ const RenterResultCard = memo(function RenterResultCard({
   selected,
   preference,
   userId,
-  initiallySaved,
   href,
   onSelect,
 }: {
@@ -34,7 +33,6 @@ const RenterResultCard = memo(function RenterResultCard({
   selected: boolean;
   preference?: TenantType;
   userId: string | null;
-  initiallySaved: boolean;
   href: string;
   onSelect: (id: string) => void;
 }) {
@@ -62,7 +60,7 @@ const RenterResultCard = memo(function RenterResultCard({
       <button className="text-button renter-result-map-button" type="button" onClick={() => onSelect(listing.id)} aria-pressed={selected}>
         {selected ? "Shown on map" : "Show on map"}
       </button>
-      <SaveHomeButton propertyId={listing.id} userId={userId} initialSaved={initiallySaved} compact />
+      <SaveHomeButton propertyId={listing.id} userId={userId} compact />
     </div>
   );
 });
@@ -74,7 +72,6 @@ export const RenterResultsList = memo(function RenterResultsList({
   selectedId,
   preference,
   userId,
-  savedPropertyIds,
   propertyHref,
   onSelect,
 }: {
@@ -84,7 +81,6 @@ export const RenterResultsList = memo(function RenterResultsList({
   selectedId: string | null;
   preference?: TenantType;
   userId: string | null;
-  savedPropertyIds: Set<string>;
   propertyHref: (propertyId: string) => string;
   onSelect: (id: string) => void;
 }) {
@@ -102,7 +98,6 @@ export const RenterResultsList = memo(function RenterResultsList({
           selected={selectedId === listing.id}
           preference={preference}
           userId={userId}
-          initiallySaved={savedPropertyIds.has(listing.id)}
           href={propertyHref(listing.id)}
           onSelect={onSelect}
         />
