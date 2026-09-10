@@ -30,3 +30,15 @@ export function safeRedirectUrl(
   const trustedOrigin = new URL(baseUrl).origin;
   return new URL(safeRelativePath(value, fallback), trustedOrigin);
 }
+
+/**
+ * Property-detail return links are only allowed to restore the renter map route.
+ * Preserve the original query string and hash so center, filters, sort and selection
+ * survive the round trip, but reject other internal paths as well as external URLs.
+ */
+export function safeHomesReturnPath(value: string | null | undefined): string {
+  const fallback = "/homes";
+  const candidate = safeRelativePath(value, fallback);
+  const parsed = new URL(candidate, "https://nearbasha.invalid");
+  return parsed.pathname === "/homes" || parsed.pathname === "/homes/" ? candidate : fallback;
+}
