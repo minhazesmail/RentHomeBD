@@ -23,8 +23,6 @@ export type MapListing = {
   longitude: number;
   distance_meters: number | null;
   cover_media_path: string | null;
-  total_matches?: number;
-  results_truncated?: boolean;
   cover_url?: string | null;
   tenant_types?: TenantType[];
 };
@@ -124,135 +122,249 @@ function ManualMapCenter({ disabled, onChange }: { disabled: boolean; onChange?:
   return null;
 }
 
-function DrawCustomArea({ active, points, onChange }: { active: boolean; points: [number, number][]; onChange?: (points: [number, number][]) => void }) {
+function CustomAreaDrawing({ active, points, onChange }: { active: boolean; points: [number, number][]; onChange: (points: [number, number][]) => void }) {
   useMapEvents({
     click: (event) => {
-      if (!active || !onChange) return;
+      if (!active) return;
       onChange([...points, [event.latlng.lat, event.latlng.lng]]);
     },
   });
   return null;
 }
 
-function clusterListings(listings: MapListing[], zoom: number) {
-  if (listings.length <= 1 || zoom >= 16) {
-    return listings.map<ListingCluster>((listing) => ({ id: listing.id, latitude: listing.latitude, longitude: listing.longitude, listings: [listing] }));
-  }
-
-  const scale = 256 * 2 ** zoom;
-  const cellSize = zoom <= 11 ? 62 : zoom <= 13 ? 54 : 46;
-  const buckets = new Map<string, WorkingCluster>();
-
-  for (const listing of listings) {
-    const normalizedX = (listing.longitude + 180) / 360;
-    const latitudeRadians = listing.latitude * Math.PI / 180;
-    const normalizedY = (1 - Math.log(Math.tan(latitudeRadians) + 1 / Math.cos(latitudeRadians)) / Math.PI) / 2;
-    const x = normalizedX * scale;
-    const y = normalizedY * scale;
-    const cellX = Math.floor(x / cellSize);
-    const cellY = Math.floor(y / cellSize);
-    const key = `${cellX}:${cellY}`;
-    const existing = buckets.get(key);
-    if (existing) {
-      existing.listings.push(listing);
-      existing.x += x;
-      existing.y += y;
-    } else {
-      buckets.set(key, { listings: [listing], x, y, cellX, cellY });
-    }
-  }
-
-  return [...buckets.values()].map<ListingCluster>((cluster) => {
-    const count = cluster.listings.length;
-    return {
-      id: count === 1 ? cluster.listings[0].id : `cluster:${cluster.cellX}:${cluster.cellY}`,
-      latitude: cluster.listings.reduce((sum, listing) => sum + listing.latitude, 0) / count,
-      longitude: cluster.listings.reduce((sum, listing) => sum + listing.longitude, 0) / count,
-      listings: cluster.listings,
-    };
+function customAreaVertexIcon(index: number) {
+  return divIcon({
+    className: styles.customAreaVertexIcon,
+    html: `<span>${index + 1}</span>`,
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
   });
 }
 
-function MapListings({ listings, selectedId, onSelect }: { listings: MapListing[]; selectedId: string | null; onSelect?: (id: string) => void }) {
+function CustomAreaVertices({ points, editable, appearance, onChange }: { points: [number, number][]; editable: boolean; appearance: MapAppearance; onChange: (points: [number, number][]) => void }) {
+  if (!editable) {
+    return points.map((point, index) => <CircleMarker key={`custom-area-${index}`} center={point} radius={5} pathOptions={{ color: appearance.areaStroke, fillColor: appearance.areaFill, fillOpacity: 1, weight: 2 }} />);
+  }
+
+  return points.map((point, index) => (
+    <Marker
+      key={`custom-area-edit-${index}`}
+      position={point}
+      icon={customAreaVertexIcon(index)}
+      draggable
+      keyboard
+      autoPan
+      eventHandlers={{
+        dragend: (event) => {
+          const next = event.target.getLatLng();
+          const updated = [...points];
+          updated[index] = [next.lat, next.lng];
+          onChange(updated);
+        },
+      }}
+    >
+      {index === 0 && <Tooltip permanent direction="top" offset={[0, -18]}>Drag corners to adjust area</Tooltip>}
+    </Marker>
+  ));
+}
+
+function clusterRadiusPixels(zoom: number) {
+  if (zoom <= 10) return 72;
+  if (zoom === 11) return 64;
+  if (zoom === 12) return 56;
+  if (zoom === 13) return 48;
+  return 0;
+}
+
+function clusterTone(listings: MapListing[]) {
+  const tones = new Set(listings.map((listing) => tenantTone(listing.tenant_types ?? [])));
+  return tones.size === 1 ? [...tones][0] : "neutral";
+}
+
+function compactRent(rent: number | null) {
+  if (!rent) return "Home";
+  if (rent >= 100_000) return `৳${(rent / 100_000).toFixed(rent % 100_000 === 0 ? 0 : 1)}L`;
+  if (rent >= 1_000) return `৳${Math.round(rent / 1_000)}k`;
+  return `৳${rent}`;
+}
+
+function markerIcon(label: string, tone: ReturnType<typeof tenantTone>, selected = false, cluster = false) {
+  return divIcon({
+    className: "renthome-marker-shell",
+    html: `<span class="renthome-marker tenant-tone-${tone}${selected ? " is-selected" : ""}${cluster ? " cluster" : ""}">${label}</span>`,
+    iconSize: cluster ? [40, 40] : [58, 40],
+    iconAnchor: cluster ? [20, 20] : [14, 38],
+    popupAnchor: cluster ? [0, -18] : [10, -34],
+  });
+}
+
+function clusterBucketKey(cellX: number, cellY: number) {
+  return `${cellX}:${cellY}`;
+}
+
+function ListingMarker({ listing, selected, onSelect }: { listing: MapListing; selected: boolean; onSelect: (id: string) => void }) {
+  const tone = clusterTone([listing]);
+  return (
+    <Marker
+      position={[listing.latitude, listing.longitude]}
+      icon={markerIcon(compactRent(listing.rent_bdt), tone, selected)}
+      riseOnHover
+      zIndexOffset={selected ? 1000 : 0}
+      title={listing.title || "Rental property"}
+      eventHandlers={{ click: () => onSelect(listing.id) }}
+    >
+      <Popup>
+        <div className="map-popup">
+          <strong>{listing.title || "Rental property"}</strong>
+          <span>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}/month` : "Rent on request"}</span>
+          <small>{tenantSummary(listing.tenant_types ?? [])}</small>
+          <small>{listing.address_text || "Exact location shown on map"}</small>
+        </div>
+      </Popup>
+    </Marker>
+  );
+}
+
+function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapListing[]; selectedId: string | null; onSelect: (id: string) => void }) {
   const map = useMap();
-  const [zoom, setZoom] = useState(map.getZoom());
+  const [zoom, setZoom] = useState(() => map.getZoom());
+
   useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
-  const clusters = useMemo(() => clusterListings(listings, zoom), [listings, zoom]);
+
+  const clusters = useMemo<ListingCluster[]>(() => {
+    const clusterRadius = clusterRadiusPixels(zoom);
+    if (clusterRadius === 0) {
+      return listings.map((listing) => ({ id: listing.id, latitude: listing.latitude, longitude: listing.longitude, listings: [listing] }));
+    }
+
+    const working: WorkingCluster[] = [];
+    const buckets = new Map<string, WorkingCluster[]>();
+
+    function addToBucket(cluster: WorkingCluster) {
+      const key = clusterBucketKey(cluster.cellX, cluster.cellY);
+      const bucket = buckets.get(key);
+      if (bucket) bucket.push(cluster);
+      else buckets.set(key, [cluster]);
+    }
+
+    function moveBucket(cluster: WorkingCluster, nextCellX: number, nextCellY: number) {
+      if (cluster.cellX === nextCellX && cluster.cellY === nextCellY) return;
+      const previousKey = clusterBucketKey(cluster.cellX, cluster.cellY);
+      const previousBucket = buckets.get(previousKey);
+      if (previousBucket) {
+        const index = previousBucket.indexOf(cluster);
+        if (index >= 0) previousBucket.splice(index, 1);
+        if (previousBucket.length === 0) buckets.delete(previousKey);
+      }
+      cluster.cellX = nextCellX;
+      cluster.cellY = nextCellY;
+      addToBucket(cluster);
+    }
+
+    for (const listing of listings) {
+      const point = map.project([listing.latitude, listing.longitude], zoom);
+      const cellX = Math.floor(point.x / clusterRadius);
+      const cellY = Math.floor(point.y / clusterRadius);
+      let nearest: WorkingCluster | null = null;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+        for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+          const bucket = buckets.get(clusterBucketKey(cellX + offsetX, cellY + offsetY));
+          if (!bucket) continue;
+          for (const candidate of bucket) {
+            const distance = Math.hypot(point.x - candidate.x, point.y - candidate.y);
+            if (distance <= clusterRadius && distance < nearestDistance) {
+              nearest = candidate;
+              nearestDistance = distance;
+            }
+          }
+        }
+      }
+
+      if (!nearest) {
+        const cluster: WorkingCluster = { listings: [listing], x: point.x, y: point.y, cellX, cellY };
+        working.push(cluster);
+        addToBucket(cluster);
+        continue;
+      }
+
+      const previousCount = nearest.listings.length;
+      nearest.listings.push(listing);
+      nearest.x = (nearest.x * previousCount + point.x) / (previousCount + 1);
+      nearest.y = (nearest.y * previousCount + point.y) / (previousCount + 1);
+      moveBucket(nearest, Math.floor(nearest.x / clusterRadius), Math.floor(nearest.y / clusterRadius));
+    }
+
+    return working.map((cluster) => ({
+      id: `cluster:${cluster.listings.map((listing) => listing.id).sort().join(":")}`,
+      latitude: cluster.listings.reduce((sum, listing) => sum + listing.latitude, 0) / cluster.listings.length,
+      longitude: cluster.listings.reduce((sum, listing) => sum + listing.longitude, 0) / cluster.listings.length,
+      listings: cluster.listings,
+    }));
+  }, [listings, map, zoom]);
+
+  const selectedListing = selectedId ? listings.find((listing) => listing.id === selectedId) ?? null : null;
+  const displayClusters = useMemo(() => {
+    if (!selectedId) return clusters;
+    return clusters.flatMap((cluster) => {
+      const remaining = cluster.listings.filter((listing) => listing.id !== selectedId);
+      if (remaining.length === 0) return [];
+      if (remaining.length === cluster.listings.length) return [cluster];
+      return [{
+        id: `${cluster.id}:without:${selectedId}`,
+        latitude: remaining.reduce((sum, listing) => sum + listing.latitude, 0) / remaining.length,
+        longitude: remaining.reduce((sum, listing) => sum + listing.longitude, 0) / remaining.length,
+        listings: remaining,
+      }];
+    });
+  }, [clusters, selectedId]);
 
   return (
     <>
-      {clusters.map((cluster) => {
-        if (cluster.listings.length > 1) {
-          return (
-            <Marker
-              key={cluster.id}
-              position={[cluster.latitude, cluster.longitude]}
-              icon={divIcon({
-                className: styles.clusterMarker,
-                html: `<span>${cluster.listings.length}</span>`,
-                iconSize: [42, 42],
-                iconAnchor: [21, 21],
-              })}
-              eventHandlers={{
-                click: () => {
-                  const bounds = cluster.listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
-                  map.fitBounds(bounds, { padding: [48, 48], maxZoom: Math.min(17, zoom + 2) });
-                },
-              }}
-            >
-              <Tooltip direction="top" offset={[0, -20]}>{cluster.listings.length} homes</Tooltip>
-            </Marker>
-          );
+      {displayClusters.map((cluster) => {
+        const tone = clusterTone(cluster.listings);
+
+        if (cluster.listings.length === 1) {
+          const listing = cluster.listings[0];
+          return <ListingMarker key={listing.id} listing={listing} selected={false} onSelect={onSelect} />;
         }
 
-        const listing = cluster.listings[0];
-        const selected = selectedId === listing.id;
-        const tone = tenantTone(listing.tenant_types ?? []);
-        const icon = divIcon({
-          className: `${styles.priceMarker} ${styles[`tenant_${tone}`] ?? styles.tenant_neutral}${selected ? ` ${styles.selected}` : ""}`,
-          html: `<span>${listing.rent_bdt ? `৳${Math.round(listing.rent_bdt / 1000)}k` : "Home"}</span>`,
-          iconSize: [64, 34],
-          iconAnchor: [32, 17],
-        });
         return (
           <Marker
-            key={listing.id}
-            position={[listing.latitude, listing.longitude]}
-            icon={icon}
-            zIndexOffset={selected ? 500 : 0}
-            eventHandlers={{ click: () => onSelect?.(listing.id) }}
+            key={cluster.id}
+            position={[cluster.latitude, cluster.longitude]}
+            icon={markerIcon(String(cluster.listings.length), tone, false, true)}
+            riseOnHover
+            title={`${cluster.listings.length} homes in this area. Activate to zoom in.`}
+            eventHandlers={{
+              click: () => {
+                const bounds = cluster.listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
+                map.fitBounds(bounds, { padding: [70, 70], maxZoom: Math.min(15, zoom + 2), animate: true });
+              },
+            }}
           >
-            <Tooltip direction="top" offset={[0, -18]}>{listing.title || "Rental property"}</Tooltip>
             <Popup>
-              <strong>{listing.title || "Rental property"}</strong><br />
-              {tenantSummary(listing.tenant_types ?? [])}<br />
-              {listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}/month` : "Rent on request"}
+              <div className="map-popup map-cluster-popup">
+                <strong>{cluster.listings.length} homes in this area</strong>
+                <span>{tone === "neutral" ? "Mixed renter fit" : tenantSummary(cluster.listings[0].tenant_types ?? [])}</span>
+                <small>Activate the cluster to zoom in and compare individual homes.</small>
+              </div>
             </Popup>
           </Marker>
         );
       })}
+      {selectedListing && <ListingMarker key={`selected:${selectedListing.id}`} listing={selectedListing} selected onSelect={onSelect} />}
     </>
   );
 }
 
-export default function LeafletMap({
-  listings,
-  center,
-  radiusKm,
-  selectedId = null,
-  onSelect,
-  onCenterChange,
-  userLocation,
-  liveTracking = false,
-  customArea = [],
-  drawingCustomArea = false,
-  onCustomAreaChange,
-}: {
+export default function LeafletMap({ listings, center, radiusKm, selectedId, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange }: {
   listings: MapListing[];
   center: [number, number];
-  radiusKm: number;
-  selectedId?: string | null;
-  onSelect?: (id: string) => void;
+  radiusKm: number | null;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
   onCenterChange?: (center: [number, number]) => void;
   userLocation?: UserMapLocation | null;
   liveTracking?: boolean;
@@ -261,24 +373,22 @@ export default function LeafletMap({
   onCustomAreaChange?: (points: [number, number][]) => void;
 }) {
   const { resolvedTheme } = useTheme();
-  const mapAppearance = resolvedTheme === "dark" ? DARK_MAP : LIGHT_MAP;
+  const userCenter: [number, number] | null = userLocation ? [userLocation.latitude, userLocation.longitude] : null;
+  const editingCustomArea = !drawingCustomArea && customArea.length >= 3;
   const basemap = resolvedTheme === "dark" ? DARK_BASEMAP : LIGHT_BASEMAP;
+  const appearance = resolvedTheme === "dark" ? DARK_MAP : LIGHT_MAP;
 
   return (
-    <MapContainer center={center} zoom={12} className={styles.map} scrollWheelZoom>
+    <MapContainer center={center} zoom={12} scrollWheelZoom className={`renter-map-canvas basemap-${resolvedTheme}${drawingCustomArea ? " drawing-custom-area" : ""}`}>
       <TileLayer key={resolvedTheme} attribution={basemap.attribution} url={basemap.url} />
       <FitToResults listings={listings} center={center} liveTracking={liveTracking} />
-      <ManualMapCenter disabled={drawingCustomArea || liveTracking} onChange={onCenterChange} />
-      <DrawCustomArea active={drawingCustomArea} points={customArea} onChange={onCustomAreaChange} />
-      <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: mapAppearance.areaStroke, fillColor: mapAppearance.areaFill, fillOpacity: 0.08, weight: 1.5 }} />
-      {customArea.length >= 3 && <Polygon positions={customArea} pathOptions={{ color: mapAppearance.areaStroke, fillColor: mapAppearance.areaFill, fillOpacity: 0.14, weight: 2 }} />}
-      {userLocation && (
-        <>
-          <Circle center={[userLocation.latitude, userLocation.longitude]} radius={userLocation.accuracy} pathOptions={{ color: mapAppearance.userLocation, fillColor: mapAppearance.userLocation, fillOpacity: 0.08, weight: 1 }} />
-          <CircleMarker center={[userLocation.latitude, userLocation.longitude]} radius={7} pathOptions={{ color: mapAppearance.userRing, fillColor: mapAppearance.userLocation, fillOpacity: 1, weight: 3 }} />
-        </>
-      )}
-      <MapListings listings={listings} selectedId={selectedId} onSelect={onSelect} />
+      <ManualMapCenter disabled={drawingCustomArea || editingCustomArea} onChange={onCenterChange} />
+      <CustomAreaDrawing active={drawingCustomArea} points={customArea} onChange={onCustomAreaChange ?? (() => {})} />
+      {radiusKm !== null && customArea.length < 3 && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: appearance.areaStroke, fillColor: appearance.areaFill, fillOpacity: resolvedTheme === "dark" ? 0.08 : 0.04, weight: 1 }} />}
+      {customArea.length >= 2 && <Polygon positions={customArea} pathOptions={{ color: appearance.areaStroke, fillColor: appearance.areaFill, fillOpacity: customArea.length >= 3 ? (resolvedTheme === "dark" ? 0.18 : 0.12) : (resolvedTheme === "dark" ? 0.08 : 0.04), weight: 3 }} />}
+      <CustomAreaVertices points={customArea} editable={editingCustomArea} appearance={appearance} onChange={onCustomAreaChange ?? (() => {})} />
+      {userCenter && <><Circle center={userCenter} radius={Math.max(userLocation?.accuracy ?? 0, 5)} pathOptions={{ color: appearance.userLocation, fillColor: appearance.userLocation, fillOpacity: resolvedTheme === "dark" ? 0.14 : 0.08, weight: 1 }} /><CircleMarker center={userCenter} radius={9} pathOptions={{ color: appearance.userRing, fillColor: appearance.userLocation, fillOpacity: 1, weight: 4 }}><Popup><div className="map-popup"><strong>Your live location</strong><small>Accuracy ±{Math.round(userLocation?.accuracy ?? 0)} m</small></div></Popup></CircleMarker></>}
+      <ClusteredListings listings={listings} selectedId={selectedId} onSelect={onSelect} />
     </MapContainer>
   );
 }
