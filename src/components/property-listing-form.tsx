@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ListingReadiness } from "@/components/listing-readiness";
@@ -39,10 +39,17 @@ type ExistingProperty = {
   media: ExistingMedia[];
 };
 
-type Props = { userId: string; amenities: Amenity[]; property?: ExistingProperty };
+type Props = { userId: string; amenities: Amenity[]; property?: ExistingProperty; draftId?: string };
 type OrderedMedia =
   | { key: string; kind: "existing"; media: ExistingMedia }
   | { key: string; kind: "new"; file: File };
+type PersistedMediaItem = {
+  id: string;
+  storage_path: string;
+  media_type: "photo" | "video";
+  sort_order: number;
+};
+type UploadedMediaReceipt = Omit<PersistedMediaItem, "sort_order">;
 
 const tenantOptions = [["family", TENANT_PROFILE_LABELS.family], ["bachelor", TENANT_PROFILE_LABELS.bachelor], ["student", TENANT_PROFILE_LABELS.student], ["job_holder", TENANT_PROFILE_LABELS.job_holder], ["everyone", TENANT_PROFILE_LABELS.everyone]] as const;
 const utilityOptions = [["water", "Water"], ["gas", "Gas"], ["electricity", "Electricity"], ["internet", "Internet"], ["service_charge", "Service charge"]] as const;
@@ -67,6 +74,18 @@ function fileExtension(file: File) {
 function storageFilename(path: string) { return path.split("/").pop() ?? path; }
 function existingMediaKey(id: string) { return `existing:${id}`; }
 function selectedFileKey(file: File) { return `new:${file.name}:${file.size}:${file.lastModified}`; }
+
+async function stableMediaId(propertyId: string, file: File) {
+  const fingerprint = `${propertyId}\0${file.name}\0${file.size}\0${file.lastModified}\0${file.type}`;
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(fingerprint)));
+  const bytes = digest.slice(0, 16);
+  // RFC 9562 UUIDv8 bits: deterministic application-defined payload + standard variant.
+  bytes[6] = (bytes[6] & 0x0f) | 0x80;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 function rawErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   if (typeof error === "object" && error !== null && "message" in error) {
@@ -79,6 +98,7 @@ function rawErrorMessage(error: unknown) {
 function friendlyListingError(error: unknown) {
   const raw = rawErrorMessage(error);
   const message = raw.toLowerCase();
+  if (message.includes("draft was saved, but")) return raw;
   if (message.includes("title of at least 5 characters") || message.includes("properties_title_length")) return "Add a listing title with at least 5 characters.";
   if (message.includes("property type is required")) return "Choose a property type before submitting for review.";
   if (message.includes("monthly rent is required") || message.includes("properties_rent_positive")) return "Enter a valid monthly rent greater than ৳0.";
@@ -89,6 +109,7 @@ function friendlyListingError(error: unknown) {
   if (message.includes("properties_deposit_nonnegative")) return "Security deposit cannot be negative.";
   if (message.includes("properties_floor_within_building")) return "Floor number cannot be higher than the building's total floors.";
   if (message.includes("properties_size_positive")) return "Property size must be greater than 0 sq ft.";
+  if (message.includes("start editing or relisting") || message.includes("listing must be editable")) return "Start editing or relisting this property before changing its content.";
   if (message.includes("row-level security") || message.includes("permission denied")) return "You do not have permission to change this listing. Refresh the page and sign in again if needed.";
   if (message.includes("violates check constraint")) return "One or more listing values are outside the allowed range. Check the numbers and try again.";
   if (raw) return "We couldn't save this listing. Check the details and try again.";
@@ -103,7 +124,7 @@ function SelectedMediaPreview({ file }: { file: File }) {
     : <img className="listing-media-preview" src={previewUrl} alt={`Preview of ${file.name}`} />;
 }
 
-export function PropertyListingForm({ userId, amenities, property }: Props) {
+export function PropertyListingForm({ userId, amenities, property, draftId }: Props) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const locked = property ? !["draft", "pending_review", "rejected"].includes(property.status) : false;
@@ -134,6 +155,8 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
   const [busy, setBusy] = useState(false);
   const [locating, setLocating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const uploadedMediaByFileKey = useRef(new Map<string, UploadedMediaReceipt>());
+  const pendingNewUploadCleanup = useRef(new Set<string>());
 
   const latNumber = optionalNumber(latitude);
   const lngNumber = optionalNumber(longitude);
@@ -175,6 +198,10 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
       setMessage(`A listing can have up to 10 media files. You can add ${Math.max(0, 10 - existingMedia.length - files.length)} more.`);
       return;
     }
+    for (const file of unique) {
+      const uploaded = uploadedMediaByFileKey.current.get(selectedFileKey(file));
+      if (uploaded) pendingNewUploadCleanup.current.delete(uploaded.storage_path);
+    }
     setFiles((items) => [...items, ...unique]);
     setMediaOrder((items) => [...items, ...unique.map(selectedFileKey)]);
     setMessage(unique.length < nextFiles.length ? "Duplicate selections were skipped. Your existing selected files were kept." : null);
@@ -189,6 +216,8 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
 
   function removeSelectedFile(file: File) {
     const key = selectedFileKey(file);
+    const uploaded = uploadedMediaByFileKey.current.get(key);
+    if (uploaded) pendingNewUploadCleanup.current.add(uploaded.storage_path);
     setFiles((items) => items.filter((item) => selectedFileKey(item) !== key));
     setMediaOrder((items) => items.filter((item) => item !== key));
   }
@@ -259,91 +288,157 @@ export function PropertyListingForm({ userId, amenities, property }: Props) {
     }, { enableHighAccuracy: true, timeout: 12000 });
   }
 
-  async function syncRelations(propertyId: string) {
-    const tenantDelete = await supabase.from("property_tenant_types").delete().eq("property_id", propertyId);
-    if (tenantDelete.error) throw tenantDelete.error;
-    if (tenantTypes.length) {
-      const tenantInsert = await supabase.from("property_tenant_types").insert(tenantTypes.map((tenant_type) => ({ property_id: propertyId, tenant_type })) as never);
-      if (tenantInsert.error) throw tenantInsert.error;
-    }
-    const amenityDelete = await supabase.from("property_amenities").delete().eq("property_id", propertyId);
-    if (amenityDelete.error) throw amenityDelete.error;
-    if (selectedAmenities.length) {
-      const amenityInsert = await supabase.from("property_amenities").insert(selectedAmenities.map((amenity_slug) => ({ property_id: propertyId, amenity_slug })) as never);
-      if (amenityInsert.error) throw amenityInsert.error;
-    }
-  }
+  async function prepareMediaForAtomicSave(propertyId: string) {
+    const mediaItems: PersistedMediaItem[] = [];
 
-  async function removeDeletedMedia() {
-    for (const media of removedMedia) {
-      const storageResult = await supabase.storage.from("property-media").remove([media.storage_path]);
-      if (storageResult.error) throw storageResult.error;
-      const metadataResult = await supabase.from("property_media").delete().eq("id", media.id);
-      if (metadataResult.error) throw metadataResult.error;
-    }
-  }
-
-  async function uploadNewMedia(propertyId: string) {
     for (let index = 0; index < orderedMedia.length; index += 1) {
       const item = orderedMedia[index];
-      if (item.kind !== "new") continue;
+      if (item.kind === "existing") {
+        mediaItems.push({
+          id: item.media.id,
+          storage_path: item.media.storage_path,
+          media_type: item.media.media_type,
+          sort_order: index,
+        });
+        continue;
+      }
+
       const file = item.file;
       if (file.size > 20 * 1024 * 1024) throw new Error(`${file.name} is larger than 20 MB.`);
-      const id = crypto.randomUUID();
-      const path = `${userId}/${propertyId}/${id}.${fileExtension(file)}`;
-      const upload = await supabase.storage.from("property-media").upload(path, file, { cacheControl: "3600", upsert: false });
-      if (upload.error) throw upload.error;
-      const mediaType = file.type.startsWith("video/") ? "video" : "photo";
-      const metadata = await supabase.from("property_media").insert({ property_id: propertyId, storage_path: path, media_type: mediaType, sort_order: index } as never);
-      if (metadata.error) { await supabase.storage.from("property-media").remove([path]); throw metadata.error; }
+      const key = selectedFileKey(file);
+      let receipt = uploadedMediaByFileKey.current.get(key);
+
+      if (!receipt) {
+        const id = await stableMediaId(propertyId, file);
+        const storagePath = `${userId}/${propertyId}/${id}.${fileExtension(file)}`;
+        const mediaType: "photo" | "video" = file.type.startsWith("video/") ? "video" : "photo";
+        const upload = await supabase.storage.from("property-media").upload(storagePath, file, { cacheControl: "3600", upsert: false });
+
+        if (upload.error) {
+          // A lost upload response is ambiguous. Verify the deterministic path
+          // before retrying bytes; if it exists, reconcile it into this save.
+          const verification = await supabase.storage.from("property-media").createSignedUrl(storagePath, 60);
+          if (verification.error) throw upload.error;
+        }
+
+        receipt = { id, storage_path: storagePath, media_type: mediaType };
+        uploadedMediaByFileKey.current.set(key, receipt);
+      }
+
+      pendingNewUploadCleanup.current.delete(receipt.storage_path);
+      mediaItems.push({ ...receipt, sort_order: index });
     }
+
+    return mediaItems;
   }
 
-  async function finalizeExistingMediaOrder() {
-    for (let index = 0; index < orderedMedia.length; index += 1) {
-      const item = orderedMedia[index];
-      if (item.kind !== "existing") continue;
-      const result = await supabase.from("property_media").update({ sort_order: index } as never).eq("id", item.media.id);
-      if (result.error) throw result.error;
+  async function cleanupRemovedStorage() {
+    const cleanupPaths = new Set<string>([
+      ...removedMedia.map((media) => media.storage_path),
+      ...pendingNewUploadCleanup.current,
+    ]);
+    if (!cleanupPaths.size) return;
+
+    const result = await supabase.storage.from("property-media").remove(Array.from(cleanupPaths));
+    if (result.error) {
+      throw new Error("Your draft was saved, but removed media could not be cleaned up. Save again before submitting for review.");
     }
+
+    for (const [key, receipt] of uploadedMediaByFileKey.current) {
+      if (cleanupPaths.has(receipt.storage_path)) uploadedMediaByFileKey.current.delete(key);
+    }
+    pendingNewUploadCleanup.current.clear();
+    setRemovedMedia([]);
+  }
+
+  async function beginEditing() {
+    if (!property || !locked) return;
+    setBusy(true);
+    setMessage(null);
+    const { error } = await supabase.rpc("begin_property_edit" as never, { property_uuid: property.id } as never);
+    if (error) {
+      setMessage(property.status === "rented" || property.status === "expired"
+        ? "Could not relist this property. Please try again."
+        : "Could not start editing this listing. Please try again.");
+      setBusy(false);
+      return;
+    }
+    router.refresh();
+    setBusy(false);
   }
 
   async function save(submitForReview: boolean) {
     if (locked) return;
     const validationMessage = submitForReview ? validateForReview() : validateNumericFields();
     if (validationMessage) { setMessage(validationMessage); return; }
-    setBusy(true); setMessage(null);
+
+    const propertyId = property?.id ?? draftId;
+    if (!propertyId) {
+      setMessage("Could not establish a stable draft id. Refresh the page and try again.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage(null);
     try {
-      const payload = { title: title.trim() || null, description: description.trim() || null, address_text: addressText.trim() || null, property_type: propertyType || null, rent_bdt: optionalNumber(rent), deposit_bdt: optionalNumber(deposit) ?? 0, utilities_included: utilities, size_sqft: optionalNumber(size), bedrooms: optionalNumber(bedrooms), bathrooms: optionalNumber(bathrooms), floor_number: optionalNumber(floorNumber), total_floors: optionalNumber(totalFloors), furnishing, gender_preference: genderPreference, available_from: availableFrom || null, latitude: latNumber, longitude: lngNumber };
-      let propertyId = property?.id;
-      if (propertyId && property) {
-        const currentStatus = property.status === "pending_review" ? "draft" : property.status;
-        const result = await supabase.from("properties").update({ ...payload, status: currentStatus } as never).eq("id", propertyId).eq("owner_id", userId);
-        if (result.error) throw result.error;
-      } else {
-        const result = await supabase.from("properties").insert({ owner_id: userId, status: "draft", ...payload } as never).select("id").single();
-        if (result.error) throw result.error;
-        propertyId = result.data.id;
-      }
-      await syncRelations(propertyId);
-      await removeDeletedMedia();
-      await uploadNewMedia(propertyId);
-      await finalizeExistingMediaOrder();
+      const ensured = await supabase.rpc("ensure_property_draft" as never, { property_uuid: propertyId } as never);
+      if (ensured.error) throw ensured.error;
+
+      const mediaItems = await prepareMediaForAtomicSave(propertyId);
+      const payload = {
+        title: title.trim() || null,
+        description: description.trim() || null,
+        address_text: addressText.trim() || null,
+        property_type: propertyType || null,
+        rent_bdt: optionalNumber(rent),
+        deposit_bdt: optionalNumber(deposit) ?? 0,
+        utilities_included: utilities,
+        size_sqft: optionalNumber(size),
+        bedrooms: optionalNumber(bedrooms),
+        bathrooms: optionalNumber(bathrooms),
+        floor_number: optionalNumber(floorNumber),
+        total_floors: optionalNumber(totalFloors),
+        furnishing,
+        gender_preference: genderPreference,
+        available_from: availableFrom || null,
+        latitude: latNumber,
+        longitude: lngNumber,
+      };
+
+      const saved = await supabase.rpc("save_property_draft" as never, {
+        property_uuid: propertyId,
+        property_payload: payload,
+        tenant_types: tenantTypes,
+        amenity_slugs: selectedAmenities,
+        media_items: mediaItems,
+      } as never);
+      if (saved.error) throw saved.error;
+
+      // Destructive Storage cleanup happens only after the database contains a
+      // complete valid draft. Cleanup failure therefore never loses metadata or
+      // creates a half-submitted listing; the user can safely retry the draft.
+      await cleanupRemovedStorage();
+
       if (submitForReview) {
-        const submission = await supabase.from("properties").update({ status: "pending_review" } as never).eq("id", propertyId).eq("owner_id", userId);
+        const submission = await supabase.rpc("submit_property_for_review" as never, { property_uuid: propertyId } as never);
         if (submission.error) throw submission.error;
       }
+
       router.push(`/owner?notice=${submitForReview ? "submitted" : "saved"}`);
       router.refresh();
-    } catch (error) { setMessage(friendlyListingError(error)); setBusy(false); }
+    } catch (error) {
+      setMessage(friendlyListingError(error));
+      setBusy(false);
+    }
   }
 
   const mediaCount = orderedMedia.length;
+  const relistLabel = property?.status === "rented" || property?.status === "expired" ? "Relist as draft" : "Start editing";
 
   return (
     <form className="listing-form" onSubmit={(event) => { event.preventDefault(); void save(false); }}>
       {property?.moderation_notes && <div className="review-note"><strong>Moderator note:</strong> {property.moderation_notes}</div>}
-      {locked && <div className="review-note">This listing is currently {property?.status.replaceAll("_", " ")}. Editing is locked at this stage.</div>}
+      {locked && <div className="review-note"><strong>This listing is currently {property?.status.replaceAll("_", " ")}.</strong><p>To change renter-facing details, move it back to a private draft. It will need moderation again before it becomes public.</p><button className="secondary-button" type="button" disabled={busy} onClick={() => void beginEditing()}>{busy ? "Preparing…" : relistLabel}</button></div>}
 
       {!locked && <ListingReadiness title={title} description={description} addressText={addressText} propertyType={propertyType} rent={rent} availableFrom={availableFrom} floorNumber={floorNumber} bedrooms={bedrooms} bathrooms={bathrooms} tenantTypes={tenantTypes} amenities={selectedAmenities} utilities={utilities} hasExactPin={latNumber !== null && lngNumber !== null} hasPhoto={hasPhoto} />}
 
