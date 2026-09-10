@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { pathToFileURL } from "node:url";
 import ts from "typescript";
 
 const helperPath = new URL("../src/lib/message-thread-state.ts", import.meta.url);
@@ -68,6 +67,7 @@ requireSource(threadSource, /document\.hasFocus\(\)/, "read receipts must consid
 requireSource(threadSource, /new IntersectionObserver/, "read receipts must require actual thread-bottom visibility");
 requireSource(threadSource, /latestIncomingMessageAt\(messages,\s*userId\)/, "read state must advance only through incoming messages actually present in the thread");
 requireSource(threadSource, /threadCanAdvanceRead\(documentVisibility,\s*windowFocused,\s*bottomVisible\)/, "visibility, focus and viewport state must gate read writes");
+requireSource(threadSource, /if\s*\(!lastMessageMine\s*&&\s*!bottomVisibleRef\.current\)\s*return;/, "offscreen incoming messages must not force the thread to the bottom");
 forbidSource(threadSource, /if\s*\(next\.sender_id\s*!==\s*userId\)[\s\S]{0,260}\.update\(\{\s*\[readField\]:\s*next\.created_at\s*\}\)/, "Realtime INSERT handlers must not mark messages read automatically");
 
 forbidSource(routeSource, /\.update\(\{\s*\[readField\]:\s*new Date\(\)\.toISOString\(\)\s*\}\)/, "server rendering must not mutate read state");
