@@ -1,10 +1,52 @@
 "use client";
 
-import { startTransition, useMemo, useOptimistic, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { createClient } from "@/lib/supabase/client";
+import { SavedHomesProvider, useSavedHomesState } from "@/components/saved-homes-state";
+
+function ContextualSaveHomeButton({
+  propertyId,
+  compact,
+}: {
+  propertyId: string;
+  compact: boolean;
+}) {
+  const router = useRouter();
+  const savedHomes = useSavedHomesState();
+
+  if (!savedHomes) return null;
+
+  const saved = savedHomes.savedPropertyIds.has(propertyId);
+  const busy = savedHomes.pendingPropertyIds.has(propertyId);
+  const message = savedHomes.errorByPropertyId.get(propertyId) ?? null;
+
+  function toggle() {
+    if (!savedHomes.ready) return;
+    if (!savedHomes.userId) {
+      router.push(`/login?next=${encodeURIComponent(`/homes/${propertyId}`)}`);
+      return;
+    }
+    void savedHomes.toggleSaved(propertyId);
+  }
+
+  return (
+    <div className={compact ? "save-home-wrap compact" : "save-home-wrap"}>
+      <button
+        className={saved ? "save-home-button saved" : "save-home-button"}
+        type="button"
+        onClick={toggle}
+        disabled={busy || !savedHomes.ready}
+        aria-pressed={saved}
+        aria-busy={busy || !savedHomes.ready}
+        aria-label={!savedHomes.ready ? "Loading saved home state" : saved ? "Remove from saved homes" : "Save this home"}
+      >
+        <span aria-hidden="true">{saved ? "♥" : "♡"}</span>
+        {!compact && (!savedHomes.ready ? "Loading…" : busy ? (saved ? "Saving…" : "Removing…") : saved ? "Saved home" : "Save home")}
+      </button>
+      {message && <small className={compact ? "sr-only" : "save-home-error"} role="status">{message}</small>}
+    </div>
+  );
+}
 
 export function SaveHomeButton({
   propertyId,
@@ -17,59 +59,18 @@ export function SaveHomeButton({
   initialSaved?: boolean;
   compact?: boolean;
 }) {
-  const router = useRouter();
-  const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
-  const [saved, setSaved] = useState(initialSaved);
-  const [optimisticSaved, setOptimisticSaved] = useOptimistic(saved, (_current, next: boolean) => next);
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const sharedSavedHomes = useSavedHomesState();
 
-  function toggle() {
-    if (!userId) {
-      router.push(`/login?next=${encodeURIComponent(`/homes/${propertyId}`)}`);
-      return;
-    }
-
-    const nextSaved = !saved;
-    setBusy(true);
-    setMessage(null);
-
-    startTransition(async () => {
-      setOptimisticSaved(nextSaved);
-
-      const result = nextSaved
-        ? await supabase.from("saved_properties").upsert(
-            { user_id: userId, property_id: propertyId },
-            { onConflict: "user_id,property_id", ignoreDuplicates: true },
-          )
-        : await supabase.from("saved_properties").delete().eq("user_id", userId).eq("property_id", propertyId);
-
-      if (result.error) {
-        setMessage("Could not update your saved homes. Please try again.");
-        setBusy(false);
-        return;
-      }
-
-      setSaved(nextSaved);
-      setBusy(false);
-    });
+  if (sharedSavedHomes) {
+    return <ContextualSaveHomeButton propertyId={propertyId} compact={compact} />;
   }
 
   return (
-    <div className={compact ? "save-home-wrap compact" : "save-home-wrap"}>
-      <button
-        className={optimisticSaved ? "save-home-button saved" : "save-home-button"}
-        type="button"
-        onClick={toggle}
-        disabled={busy}
-        aria-pressed={optimisticSaved}
-        aria-busy={busy}
-        aria-label={optimisticSaved ? "Remove from saved homes" : "Save this home"}
-      >
-        <span aria-hidden="true">{optimisticSaved ? "♥" : "♡"}</span>
-        {!compact && (busy ? (optimisticSaved ? "Saving…" : "Removing…") : optimisticSaved ? "Saved home" : "Save home")}
-      </button>
-      {message && <small className={compact ? "sr-only" : "save-home-error"} role="status">{message}</small>}
-    </div>
+    <SavedHomesProvider
+      userId={userId}
+      initialSavedPropertyIds={initialSaved ? [propertyId] : []}
+    >
+      <ContextualSaveHomeButton propertyId={propertyId} compact={compact} />
+    </SavedHomesProvider>
   );
 }
