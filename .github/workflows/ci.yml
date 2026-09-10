@@ -64,6 +64,26 @@ jobs:
           docker exec -i "$DB_CONTAINER" \
             psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
             < supabase/tests/f13_saved_search_validation.sql
+      - name: Verify conversation participant trust
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f16_conversation_participant_trust.sql
+      - name: Verify atomic abuse limits under concurrency
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          DB_CONTAINER="$DB_CONTAINER" bash supabase/tests/f17_atomic_abuse_limits.sh
 
   verify:
     runs-on: ubuntu-latest
@@ -97,6 +117,8 @@ jobs:
         run: npm run navigationqa
       - name: Message realtime and read-receipt QA
         run: npm run messageqa
+      - name: Conversation trust and abuse-control QA
+        run: npm run trustabuseqa
       - name: Typecheck
         run: npm run typecheck
       - name: Localization QA
