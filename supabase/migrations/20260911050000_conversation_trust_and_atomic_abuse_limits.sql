@@ -111,7 +111,7 @@ begin
     raise exception 'Conversation not found';
   end if;
 
-  if new.sender_id <> actor then
+  if actor is null or new.sender_id <> actor then
     raise exception 'Sender mismatch';
   end if;
 
