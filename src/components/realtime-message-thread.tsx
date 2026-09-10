@@ -1,9 +1,15 @@
 "use client";
 
-import { startTransition, useEffect, useLayoutEffect, useMemo, useOptimistic, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useOptimistic, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { MessageComposer, friendlyMessageError, type ChatMessage } from "@/components/message-composer";
+import {
+  latestIncomingMessageAt,
+  mergeThreadMessages,
+  shouldAdvanceReadAt,
+  threadCanAdvanceRead,
+} from "@/lib/message-thread-state";
 import { formatExactMessageTime, formatThreadMessageTime } from "@/lib/message-time";
 import { createClient } from "@/lib/supabase/client";
 
@@ -12,26 +18,36 @@ type Props = {
   userId: string;
   readField: "renter_last_read_at" | "owner_last_read_at";
   otherReadField: "renter_last_read_at" | "owner_last_read_at";
+  initialReadAt: string | null;
   initialOtherReadAt: string | null;
   initialMessages: ChatMessage[];
   initialHasOlderMessages: boolean;
   pageSize: number;
 };
 
-type ConnectionState = "connecting" | "live" | "offline";
+type ConnectionState = "connecting" | "syncing" | "live" | "offline";
+
+const CATCH_UP_PAGE_SIZE = 200;
 
 function mergeMessage(messages: ChatMessage[], next: ChatMessage) {
-  if (messages.some((message) => message.id === next.id)) return messages;
-  return [...messages, next].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  return mergeThreadMessages(messages, [next]);
 }
 
 function mergeMessages(messages: ChatMessage[], incoming: ChatMessage[]) {
-  const byId = new Map(messages.map((message) => [message.id, message]));
-  for (const message of incoming) byId.set(message.id, message);
-  return Array.from(byId.values()).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  return mergeThreadMessages(messages, incoming);
 }
 
-export function RealtimeMessageThread({ conversationId, userId, readField, otherReadField, initialOtherReadAt, initialMessages, initialHasOlderMessages, pageSize }: Props) {
+export function RealtimeMessageThread({
+  conversationId,
+  userId,
+  readField,
+  otherReadField,
+  initialReadAt,
+  initialOtherReadAt,
+  initialMessages,
+  initialHasOlderMessages,
+  pageSize,
+}: Props) {
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [messages, setMessages] = useState(initialMessages);
   const [optimisticMessages, addOptimisticMessage] = useOptimistic(messages, (current, next: ChatMessage) => mergeMessage(current, next));
@@ -40,13 +56,122 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
   const [hasOlderMessages, setHasOlderMessages] = useState(initialHasOlderMessages);
   const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [olderMessagesError, setOlderMessagesError] = useState<string | null>(null);
+  const [documentVisibility, setDocumentVisibility] = useState<DocumentVisibilityState>("hidden");
+  const [windowFocused, setWindowFocused] = useState(false);
+  const [bottomVisible, setBottomVisible] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const bottomSentinelRef = useRef<HTMLDivElement | null>(null);
   const restoreScrollHeightRef = useRef<number | null>(null);
   const hasPositionedInitiallyRef = useRef(false);
+  const messagesRef = useRef(initialMessages);
+  const committedReadAtRef = useRef(initialReadAt);
+  const desiredReadAtRef = useRef(initialReadAt);
+  const readSyncInFlightRef = useRef(false);
   const lastMessageId = optimisticMessages.at(-1)?.id ?? null;
   const renderedAt = new Date();
 
+  const flushReadState = useCallback(async () => {
+    if (readSyncInFlightRef.current) return;
+    readSyncInFlightRef.current = true;
+
+    try {
+      while (shouldAdvanceReadAt(committedReadAtRef.current, desiredReadAtRef.current)) {
+        const target = desiredReadAtRef.current;
+        if (!target) break;
+
+        const { error } = await supabase
+          .from("conversations")
+          .update({ [readField]: target })
+          .eq("id", conversationId);
+
+        if (error) return;
+        committedReadAtRef.current = target;
+      }
+    } finally {
+      readSyncInFlightRef.current = false;
+    }
+  }, [conversationId, readField, supabase]);
+
   useEffect(() => {
+    let disposed = false;
+    let catchUpInFlight = false;
+    let catchUpQueued = false;
+
+    function storeMessages(updater: (current: ChatMessage[]) => ChatMessage[]) {
+      setMessages((current) => {
+        const next = updater(current);
+        messagesRef.current = next;
+        return next;
+      });
+    }
+
+    function recordOwnReadAt(value: unknown) {
+      if (typeof value !== "string") return;
+      if (shouldAdvanceReadAt(committedReadAtRef.current, value)) committedReadAtRef.current = value;
+      if (shouldAdvanceReadAt(desiredReadAtRef.current, value)) desiredReadAtRef.current = value;
+    }
+
+    async function syncConversationReadState() {
+      const { data } = await supabase
+        .from("conversations")
+        .select(`${readField}, ${otherReadField}`)
+        .eq("id", conversationId)
+        .maybeSingle();
+      if (disposed || !data) return;
+
+      const row = data as Record<string, unknown>;
+      const otherValue = row[otherReadField];
+      if (typeof otherValue === "string" || otherValue === null) setOtherReadAt(otherValue as string | null);
+      recordOwnReadAt(row[readField]);
+    }
+
+    async function catchUpMessages() {
+      if (catchUpInFlight) {
+        catchUpQueued = true;
+        return;
+      }
+
+      catchUpInFlight = true;
+      let successful = true;
+
+      try {
+        do {
+          catchUpQueued = false;
+          const latestMessage = messagesRef.current.at(-1) ?? null;
+          let offset = 0;
+
+          while (!disposed) {
+            let query = supabase
+              .from("messages")
+              .select("id, sender_id, body, created_at")
+              .eq("conversation_id", conversationId)
+              .order("created_at", { ascending: true })
+              .order("id", { ascending: true })
+              .range(offset, offset + CATCH_UP_PAGE_SIZE - 1);
+
+            if (latestMessage) query = query.gte("created_at", latestMessage.created_at);
+
+            const { data, error } = await query;
+            if (disposed) return;
+            if (error) {
+              successful = false;
+              setConnectionState("offline");
+              break;
+            }
+
+            const batch = (data ?? []) as ChatMessage[];
+            if (batch.length) storeMessages((current) => mergeMessages(current, batch));
+            if (batch.length < CATCH_UP_PAGE_SIZE) break;
+            offset += batch.length;
+          }
+        } while (!disposed && successful && catchUpQueued);
+      } finally {
+        catchUpInFlight = false;
+      }
+
+      if (!disposed && successful) setConnectionState("live");
+    }
+
     const messageChannel = supabase
       .channel(`messages-${conversationId}`)
       .on(
@@ -59,18 +184,15 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
         },
         (payload) => {
           const next = payload.new as ChatMessage;
-          setMessages((current) => mergeMessage(current, next));
-
-          if (next.sender_id !== userId) {
-            void supabase
-              .from("conversations")
-              .update({ [readField]: next.created_at })
-              .eq("id", conversationId);
-          }
-        }
+          storeMessages((current) => mergeMessage(current, next));
+        },
       )
       .subscribe((status) => {
-        if (status === "SUBSCRIBED") setConnectionState("live");
+        if (status === "SUBSCRIBED") {
+          setConnectionState("syncing");
+          void catchUpMessages();
+          void syncConversationReadState();
+        }
         if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") setConnectionState("offline");
       });
 
@@ -86,17 +208,60 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
         },
         (payload) => {
           const next = payload.new as Record<string, unknown>;
-          const value = next[otherReadField];
-          if (typeof value === "string") setOtherReadAt(value);
-        }
+          const otherValue = next[otherReadField];
+          if (typeof otherValue === "string" || otherValue === null) setOtherReadAt(otherValue as string | null);
+          recordOwnReadAt(next[readField]);
+        },
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") void syncConversationReadState();
+      });
 
     return () => {
+      disposed = true;
       void supabase.removeChannel(messageChannel);
       void supabase.removeChannel(readChannel);
     };
-  }, [conversationId, otherReadField, readField, supabase, userId]);
+  }, [conversationId, otherReadField, readField, supabase]);
+
+  useEffect(() => {
+    function syncDocumentActivity() {
+      setDocumentVisibility(document.visibilityState);
+      setWindowFocused(document.hasFocus());
+    }
+
+    syncDocumentActivity();
+    document.addEventListener("visibilitychange", syncDocumentActivity);
+    window.addEventListener("focus", syncDocumentActivity);
+    window.addEventListener("blur", syncDocumentActivity);
+
+    return () => {
+      document.removeEventListener("visibilitychange", syncDocumentActivity);
+      window.removeEventListener("focus", syncDocumentActivity);
+      window.removeEventListener("blur", syncDocumentActivity);
+    };
+  }, []);
+
+  useEffect(() => {
+    const root = listRef.current;
+    const target = bottomSentinelRef.current;
+    if (!root || !target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setBottomVisible(Boolean(entry?.isIntersecting)),
+      { root, threshold: 0.9 },
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (!threadCanAdvanceRead(documentVisibility, windowFocused, bottomVisible)) return;
+
+    const latestIncomingAt = latestIncomingMessageAt(messages, userId);
+    if (shouldAdvanceReadAt(desiredReadAtRef.current, latestIncomingAt)) desiredReadAtRef.current = latestIncomingAt;
+    if (shouldAdvanceReadAt(committedReadAtRef.current, desiredReadAtRef.current)) void flushReadState();
+  }, [bottomVisible, documentVisibility, flushReadState, messages, userId, windowFocused]);
 
   useLayoutEffect(() => {
     const node = listRef.current;
@@ -144,7 +309,11 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
     const newestFirst = (data ?? []) as ChatMessage[];
     const olderMessages = newestFirst.slice(0, pageSize).reverse();
     setHasOlderMessages(newestFirst.length > pageSize);
-    setMessages((current) => mergeMessages(current, olderMessages));
+    setMessages((current) => {
+      const next = mergeMessages(current, olderMessages);
+      messagesRef.current = next;
+      return next;
+    });
     setLoadingOlderMessages(false);
   }
 
@@ -178,7 +347,14 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
           return;
         }
 
-        setMessages((current) => mergeMessage(current, data as ChatMessage));
+        const sentMessage = data as ChatMessage;
+        setMessages((current) => {
+          const next = mergeMessage(current, sentMessage);
+          messagesRef.current = next;
+          return next;
+        });
+        if (shouldAdvanceReadAt(committedReadAtRef.current, sentMessage.created_at)) committedReadAtRef.current = sentMessage.created_at;
+        if (shouldAdvanceReadAt(desiredReadAtRef.current, sentMessage.created_at)) desiredReadAtRef.current = sentMessage.created_at;
         resolve();
       });
     });
@@ -190,7 +366,15 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
     <section className="thread-panel realtime-thread-panel">
       <div className="thread-live-bar" aria-live="polite">
         <span className={`thread-live-dot ${connectionState}`} aria-hidden="true" />
-        <span>{connectionState === "live" ? "Live conversation" : connectionState === "connecting" ? "Connecting live updates…" : "Live updates interrupted"}</span>
+        <span>
+          {connectionState === "live"
+            ? "Live conversation"
+            : connectionState === "syncing"
+              ? "Catching up on messages…"
+              : connectionState === "connecting"
+                ? "Connecting live updates…"
+                : "Live updates interrupted"}
+        </span>
       </div>
 
       <div className="message-list" ref={listRef}>
@@ -219,6 +403,7 @@ export function RealtimeMessageThread({ conversationId, userId, readField, other
             </div>
           );
         })}
+        <div ref={bottomSentinelRef} aria-hidden="true" style={{ height: 1 }} />
       </div>
 
       <MessageComposer onSend={sendMessage} />
