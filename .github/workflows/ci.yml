@@ -31,6 +31,17 @@ jobs:
           docker exec -i "$DB_CONTAINER" \
             psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
             < supabase/tests/f06_f07_listing_save_lifecycle.sql
+      - name: Verify server-side renter search ordering
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f08_f09_saved_state_search_ordering.sql
 
   verify:
     runs-on: ubuntu-latest
@@ -56,6 +67,8 @@ jobs:
         run: npm run authredirectqa
       - name: Listing workflow QA
         run: npm run workflowqa
+      - name: Saved state and search ordering QA
+        run: npm run searchstateqa
       - name: Typecheck
         run: npm run typecheck
       - name: Localization QA
