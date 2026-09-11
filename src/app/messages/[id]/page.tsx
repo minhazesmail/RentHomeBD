@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { ConversationSafetyControls } from "@/components/conversation-safety-controls";
 import { MessagesInboxPane } from "@/components/messages-inbox-pane";
 import { ProductNavigation } from "@/components/product-navigation";
 import { RealtimeMessageThread } from "@/components/realtime-message-thread";
@@ -78,6 +79,7 @@ export default async function MessageThreadPage({
   if (!conversation) notFound();
 
   const viewerIsRenter = auth.userId === conversation.renter_id;
+  const otherUserId = viewerIsRenter ? conversation.owner_id : conversation.renter_id;
   const readField = viewerIsRenter ? "renter_last_read_at" : "owner_last_read_at";
   const otherReadField = viewerIsRenter ? "owner_last_read_at" : "renter_last_read_at";
   const viewerReadAt = viewerIsRenter ? conversation.renter_last_read_at : conversation.owner_last_read_at;
@@ -145,6 +147,7 @@ export default async function MessageThreadPage({
                     {phoneVerified && <span className="message-verified-badge" title={copy.phoneVerified}>{copy.verified}</span>}
                   </div>
                   <p>{otherRole}</p>
+                  <ConversationSafetyControls conversationId={conversation.id} otherUserId={otherUserId} />
                 </div>
               </div>
               <Link className="thread-property-context" href={`/homes/${conversation.property_id}`} aria-label={formatWorkflowText(copy.viewProperty, { title: propertyTitle })}>
