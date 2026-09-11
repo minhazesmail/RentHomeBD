@@ -56,7 +56,7 @@ type OwnerEditorCopy = {
   editPage: { [K in keyof typeof en.editPage]: string };
   workflow: {
     [K in Exclude<keyof typeof en.workflow, "steps">]: string;
-  } & { steps: Array<{ label: string; short: string }> };
+  } & { steps: ReadonlyArray<{ label: string; short: string }> };
   readiness: {
     [K in Exclude<keyof typeof en.readiness, "checks">]: string;
   } & {
