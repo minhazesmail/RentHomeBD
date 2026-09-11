@@ -93,6 +93,28 @@ jobs:
             exit 1
           fi
           DB_CONTAINER="$DB_CONTAINER" bash supabase/tests/f18_account_creation_quotas.sh
+      - name: Verify support intake and participant blocking
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f20_support_and_blocking.sql
+      - name: Verify public property media signing policy
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f26_public_media_signing.sql
 
   verify:
     runs-on: ubuntu-latest
@@ -107,9 +129,12 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
-      - name: Install dependencies
-        run: npm install
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install frozen dependencies
+        run: npm ci
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
       - name: Install Chromium for theme QA
         run: npx playwright install --with-deps chromium
       - name: Supabase browser env QA
@@ -134,6 +159,10 @@ jobs:
         run: npm run i18nqa
       - name: Bangladesh phone QA
         run: npm run phoneqa
+      - name: Orphan CSS QA
+        run: npm run cssqa
+      - name: Signed public media renewal QA
+        run: npm run mediaqa
       - name: Lint
         run: npm run lint
       - name: Dead code
