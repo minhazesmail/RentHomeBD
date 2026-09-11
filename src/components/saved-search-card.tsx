@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import styles from "./saved-search-match-state.module.css";
+import { useLocale } from "@/i18n/use-locale";
+import { formatWorkflowText, getWorkflowCopy } from "@/i18n/workflow-copy";
 import {
   DEFAULT_RENTER_SEARCH_RADIUS,
   MAX_RENTER_SEARCH_BEDROOMS,
@@ -14,7 +16,7 @@ import {
   MIN_RENTER_SEARCH_RADIUS_KM,
 } from "@/lib/search-defaults";
 import { createClient } from "@/lib/supabase/client";
-import { TENANT_PROFILE_LABELS, type TenantType } from "@/lib/tenant-match";
+import type { TenantType } from "@/lib/tenant-match";
 
 type SavedSearchRecord = {
   id: string;
@@ -43,14 +45,22 @@ type Props = {
   matchState: MatchState | null;
 };
 
-function duplicateName(name: string) {
-  const base = name.trim() || "Saved search";
-  const suffix = " copy";
+function duplicateName(name: string, fallback: string, suffix: string) {
+  const base = name.trim() || fallback;
   return `${base.slice(0, 80 - suffix.length)}${suffix}`;
 }
 
 export function SavedSearchCard({ search, userId, runHref, displayTitle, displayArea, displayFilters, matchState }: Props) {
   const router = useRouter();
+  const { locale, dictionary, formatNumber } = useLocale();
+  const copy = getWorkflowCopy(locale).saved.searchCard;
+  const tenantLabels: Record<TenantType, string> = {
+    family: dictionary.common.tenant.family,
+    bachelor: dictionary.common.tenant.bachelor,
+    student: dictionary.common.tenant.student,
+    job_holder: dictionary.common.tenant.jobHolder,
+    everyone: dictionary.common.tenant.everyone,
+  };
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [editing, setEditing] = useState(false);
   const [busyAction, setBusyAction] = useState<"save" | "duplicate" | "delete" | null>(null);
@@ -75,18 +85,22 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
 
   function validate() {
     const trimmedName = name.trim();
-    if (!trimmedName || trimmedName.length > 80) return "Use a search name between 1 and 80 characters.";
+    if (!trimmedName || trimmedName.length > 80) return copy.nameValidation;
 
     const radius = radiusKm === "" ? null : Number(radiusKm);
     const minimum = minRent === "" ? null : Number(minRent);
     const maximum = maxRent === "" ? null : Number(maxRent);
     const bedroomCount = bedrooms === "" ? null : Number(bedrooms);
 
-    if (radius === null || !Number.isFinite(radius) || radius < MIN_RENTER_SEARCH_RADIUS_KM || radius > MAX_RENTER_SEARCH_RADIUS_KM) return `Radius must be between ${MIN_RENTER_SEARCH_RADIUS_KM} and ${MAX_RENTER_SEARCH_RADIUS_KM} km.`;
-    if (minimum !== null && (!Number.isFinite(minimum) || minimum < 0 || minimum > MAX_RENTER_SEARCH_RENT_BDT)) return "Minimum rent must be between ৳0 and ৳10,000,000.";
-    if (maximum !== null && (!Number.isFinite(maximum) || maximum < 0 || maximum > MAX_RENTER_SEARCH_RENT_BDT)) return "Maximum rent must be between ৳0 and ৳10,000,000.";
-    if (minimum !== null && maximum !== null && minimum > maximum) return "Minimum rent cannot be higher than maximum rent.";
-    if (bedroomCount !== null && (!Number.isInteger(bedroomCount) || bedroomCount < 0 || bedroomCount > MAX_RENTER_SEARCH_BEDROOMS)) return `Bedrooms must be a whole number between 0 and ${MAX_RENTER_SEARCH_BEDROOMS}.`;
+    if (radius === null || !Number.isFinite(radius) || radius < MIN_RENTER_SEARCH_RADIUS_KM || radius > MAX_RENTER_SEARCH_RADIUS_KM) {
+      return formatWorkflowText(copy.radiusValidation, { min: MIN_RENTER_SEARCH_RADIUS_KM, max: MAX_RENTER_SEARCH_RADIUS_KM });
+    }
+    if (minimum !== null && (!Number.isFinite(minimum) || minimum < 0 || minimum > MAX_RENTER_SEARCH_RENT_BDT)) return copy.minimumRentValidation;
+    if (maximum !== null && (!Number.isFinite(maximum) || maximum < 0 || maximum > MAX_RENTER_SEARCH_RENT_BDT)) return copy.maximumRentValidation;
+    if (minimum !== null && maximum !== null && minimum > maximum) return copy.rentOrderValidation;
+    if (bedroomCount !== null && (!Number.isInteger(bedroomCount) || bedroomCount < 0 || bedroomCount > MAX_RENTER_SEARCH_BEDROOMS)) {
+      return formatWorkflowText(copy.bedroomsValidation, { max: MAX_RENTER_SEARCH_BEDROOMS });
+    }
     return null;
   }
 
@@ -110,12 +124,12 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
       .eq("user_id", userId);
 
     if (error) {
-      setStatus("We couldn't update this saved search. Check the values and try again.");
+      setStatus(copy.updateError);
       setBusyAction(null);
       return;
     }
 
-    setStatus("Saved search updated.");
+    setStatus(copy.updated);
     setEditing(false);
     setBusyAction(null);
     router.refresh();
@@ -126,7 +140,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
     setStatus(null);
     const { error } = await supabase.from("saved_searches").insert({
       user_id: userId,
-      name: duplicateName(search.name),
+      name: duplicateName(search.name, copy.savedSearch, copy.copySuffix),
       center_lat: search.center_lat,
       center_long: search.center_long,
       radius_km: search.radius_km,
@@ -137,28 +151,35 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
     });
 
     if (error) {
-      setStatus("We couldn't duplicate this saved search. Try again.");
+      setStatus(error.message.toLowerCase().includes("saved search limit reached") ? copy.limitError : copy.duplicateError);
       setBusyAction(null);
       return;
     }
 
-    setStatus("Saved search duplicated.");
+    setStatus(copy.duplicated);
     setBusyAction(null);
     router.refresh();
   }
 
   async function remove() {
-    if (!window.confirm(`Delete “${displayTitle}”?`)) return;
+    if (!window.confirm(formatWorkflowText(copy.deleteConfirm, { title: displayTitle }))) return;
     setBusyAction("delete");
     setStatus(null);
     const { error } = await supabase.from("saved_searches").delete().eq("id", search.id).eq("user_id", userId);
     if (error) {
-      setStatus("We couldn't delete this saved search. Try again.");
+      setStatus(copy.deleteError);
       setBusyAction(null);
       return;
     }
     router.refresh();
   }
+
+  const currentMatchText = matchState
+    ? formatWorkflowText(matchState.currentCount === 1 ? copy.currentMatchOne : copy.currentMatchMany, { count: formatNumber(matchState.currentCount) })
+    : "";
+  const newMatchText = matchState
+    ? formatWorkflowText(copy.newSinceChange, { count: formatNumber(matchState.newCount) })
+    : "";
 
   return (
     <div className={`saved-search-card${editing ? " is-editing" : ""}${hasNewMatches ? " has-new-matches" : ""}`}>
@@ -167,58 +188,58 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
         <span>{displayArea}</span>
         <small>{displayFilters}</small>
         {matchState ? (
-          <div className={styles.state} aria-label="Current saved search matches">
-            <span className={styles.pill}>{matchState.currentCount} current {matchState.currentCount === 1 ? "match" : "matches"}</span>
-            {matchState.newCount > 0 ? <span className={`${styles.pill} ${styles.newPill}`}>{matchState.newCount} new since last change</span> : <span className={styles.muted}>No new matches since last change</span>}
+          <div className={styles.state} aria-label={copy.currentMatchesAria}>
+            <span className={styles.pill}>{currentMatchText}</span>
+            {matchState.newCount > 0 ? <span className={`${styles.pill} ${styles.newPill}`}>{newMatchText}</span> : <span className={styles.muted}>{copy.noNew}</span>}
           </div>
-        ) : <span className={styles.muted}>Match counts unavailable right now</span>}
+        ) : <span className={styles.muted}>{copy.unavailable}</span>}
       </div>
 
       {editing ? (
         <form className="saved-search-edit-form" onSubmit={(event) => { event.preventDefault(); void saveChanges(); }}>
           <div className="saved-search-edit-grid">
             <label className="saved-search-edit-field saved-search-edit-name">
-              <span>Search name</span>
+              <span>{copy.searchName}</span>
               <input value={name} onChange={(event) => setName(event.target.value)} maxLength={80} required />
             </label>
             <label className="saved-search-edit-field">
-              <span>Radius (km)</span>
+              <span>{copy.radius}</span>
               <input type="number" min={MIN_RENTER_SEARCH_RADIUS_KM} max={MAX_RENTER_SEARCH_RADIUS_KM} step="0.5" value={radiusKm} onChange={(event) => setRadiusKm(event.target.value)} placeholder={DEFAULT_RENTER_SEARCH_RADIUS} required />
             </label>
             <label className="saved-search-edit-field">
-              <span>Minimum rent</span>
-              <input type="number" min="0" max={MAX_RENTER_SEARCH_RENT_BDT} step="500" value={minRent} onChange={(event) => setMinRent(event.target.value)} placeholder="Any" />
+              <span>{copy.minimumRent}</span>
+              <input type="number" min="0" max={MAX_RENTER_SEARCH_RENT_BDT} step="500" value={minRent} onChange={(event) => setMinRent(event.target.value)} placeholder={copy.any} />
             </label>
             <label className="saved-search-edit-field">
-              <span>Maximum rent</span>
-              <input type="number" min="0" max={MAX_RENTER_SEARCH_RENT_BDT} step="500" value={maxRent} onChange={(event) => setMaxRent(event.target.value)} placeholder="Any" />
+              <span>{copy.maximumRent}</span>
+              <input type="number" min="0" max={MAX_RENTER_SEARCH_RENT_BDT} step="500" value={maxRent} onChange={(event) => setMaxRent(event.target.value)} placeholder={copy.any} />
             </label>
             <label className="saved-search-edit-field">
-              <span>Renter type</span>
+              <span>{copy.renterType}</span>
               <select value={tenantType} onChange={(event) => setTenantType(event.target.value as TenantType | "")}>
-                <option value="">Any renter type</option>
-                {(Object.entries(TENANT_PROFILE_LABELS) as [TenantType, string][]).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                <option value="">{copy.anyRenterType}</option>
+                {(Object.entries(tenantLabels) as [TenantType, string][]).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
               </select>
             </label>
             <label className="saved-search-edit-field">
-              <span>Minimum bedrooms</span>
-              <input type="number" min="0" max={MAX_RENTER_SEARCH_BEDROOMS} step="1" value={bedrooms} onChange={(event) => setBedrooms(event.target.value)} placeholder="Any" />
+              <span>{copy.minimumBedrooms}</span>
+              <input type="number" min="0" max={MAX_RENTER_SEARCH_BEDROOMS} step="1" value={bedrooms} onChange={(event) => setBedrooms(event.target.value)} placeholder={copy.any} />
             </label>
           </div>
-          <p className="form-hint">This keeps the saved map center in place. Run the search if you want to move the map to a different area.</p>
+          <p className="form-hint">{copy.editHint}</p>
           <div className="saved-search-edit-actions">
-            <button className="primary-button" type="submit" disabled={busyAction !== null}>{busyAction === "save" ? "Saving…" : "Save changes"}</button>
-            <button className="text-button" type="button" onClick={() => { resetForm(); setEditing(false); }} disabled={busyAction !== null}>Cancel</button>
+            <button className="primary-button" type="submit" disabled={busyAction !== null}>{busyAction === "save" ? copy.saving : copy.saveChanges}</button>
+            <button className="text-button" type="button" onClick={() => { resetForm(); setEditing(false); }} disabled={busyAction !== null}>{copy.cancel}</button>
           </div>
           {status && <div className="saved-search-status" role="status" aria-live="polite">{status}</div>}
         </form>
       ) : (
         <div className="saved-search-controls">
           <div className="saved-search-actions">
-            <Link className="primary-button link-button" href={runHref}>{hasNewMatches ? `View ${matchState!.newCount} new ${matchState!.newCount === 1 ? "match" : "matches"}` : "Run search"}</Link>
-            <button className="secondary-button" type="button" onClick={() => { setStatus(null); setEditing(true); }} disabled={busyAction !== null}>Edit</button>
-            <button className="text-button" type="button" onClick={() => void duplicate()} disabled={busyAction !== null}>{busyAction === "duplicate" ? "Duplicating…" : "Duplicate"}</button>
-            <button className="text-button" type="button" onClick={() => void remove()} disabled={busyAction !== null}>{busyAction === "delete" ? "Deleting…" : "Delete"}</button>
+            <Link className="primary-button link-button" href={runHref}>{hasNewMatches ? formatWorkflowText(matchState!.newCount === 1 ? copy.viewNewMatchOne : copy.viewNewMatchMany, { count: formatNumber(matchState!.newCount) }) : copy.runSearch}</Link>
+            <button className="secondary-button" type="button" onClick={() => { setStatus(null); setEditing(true); }} disabled={busyAction !== null}>{copy.edit}</button>
+            <button className="text-button" type="button" onClick={() => void duplicate()} disabled={busyAction !== null}>{busyAction === "duplicate" ? copy.duplicating : copy.duplicate}</button>
+            <button className="text-button" type="button" onClick={() => void remove()} disabled={busyAction !== null}>{busyAction === "delete" ? copy.deleting : copy.delete}</button>
           </div>
           {status && <div className="saved-search-status" role="status" aria-live="polite">{status}</div>}
         </div>
