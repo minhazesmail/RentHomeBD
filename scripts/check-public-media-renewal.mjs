@@ -9,9 +9,9 @@ const compiled = ts.transpileModule(source, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   fileName: sourcePath,
 });
-const module = { exports: {} };
-new Function("exports", "module", "URL", compiled.outputText)(module.exports, module, URL);
-const { PUBLIC_MEDIA_TTL_SECONDS, PUBLIC_MEDIA_REFRESH_MS, publicMediaRefreshIsBeforeExpiry, storagePathFromSignedUrl } = module.exports;
+const compiledModule = { exports: {} };
+new Function("exports", "module", "URL", compiled.outputText)(compiledModule.exports, compiledModule, URL);
+const { PUBLIC_MEDIA_TTL_SECONDS, PUBLIC_MEDIA_REFRESH_MS, publicMediaRefreshIsBeforeExpiry, storagePathFromSignedUrl } = compiledModule.exports;
 
 if (PUBLIC_MEDIA_TTL_SECONDS !== 300) throw new Error(`Unexpected public media TTL: ${PUBLIC_MEDIA_TTL_SECONDS}`);
 if (!publicMediaRefreshIsBeforeExpiry() || PUBLIC_MEDIA_REFRESH_MS >= PUBLIC_MEDIA_TTL_SECONDS * 1000) {
