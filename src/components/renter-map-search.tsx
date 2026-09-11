@@ -241,7 +241,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
 
   const handleSelectListing = useCallback((propertyId: string) => {
     setSelectedId(propertyId);
-  }, []);
+  }, [setSelectedId]);
 
   const cancelActiveSearch = useCallback(() => {
     searchRequestIdRef.current += 1;
@@ -249,7 +249,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
     searchAbortRef.current = null;
     setBusy(false);
     setMessage(null);
-  }, []);
+  }, [setBusy, setMessage]);
 
   const validateFilters = useCallback(() => {
     const radius = Number(radiusKm);
@@ -346,7 +346,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
     setSelectedId((current) => current && hydrated.some((listing) => listing.id === current) ? current : null);
     searchAbortRef.current = null;
     setBusy(false);
-  }, [bedrooms, center, copy, customArea, customAreaActive, maxRent, minRent, preferredTenantType, radiusKm, sortOption, supabase, tenantType, validateFilters]);
+  }, [bedrooms, center, copy, customArea, customAreaActive, maxRent, minRent, preferredTenantType, radiusKm, setBusy, setListings, setMessage, setSelectedId, sortOption, supabase, tenantType, validateFilters]);
 
   const handleCustomAreaChange = useCallback((points: [number, number][]) => {
     if (points.length > MAX_CUSTOM_AREA_VERTICES) {
@@ -358,7 +358,7 @@ export function RenterMapSearch({ userId, initialSearch = {}, preferredTenantTyp
     if (!drawingCustomArea && points.length >= 3) {
       void runSearch(center, sortOption, points);
     }
-  }, [center, copy, drawingCustomArea, runSearch, sortOption]);
+  }, [center, copy, drawingCustomArea, runSearch, setCustomArea, setMessage, setSelectedId, sortOption]);
 
   useEffect(() => { runSearchRef.current = runSearch; }, [runSearch]);
   useEffect(() => {
