@@ -1,19 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
   "git": {
     "deploymentEnabled": {
       "perf/**": false
     }
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_SUPABASE_URL": "https://naoarepmcfdnxehbdios.supabase.co",
-      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_Af21QWd3B7XLt_4TmoWEQw_deZseDwD"
-    }
-  },
-  "env": {
-    "NEXT_PUBLIC_SUPABASE_URL": "https://naoarepmcfdnxehbdios.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_Af21QWd3B7XLt_4TmoWEQw_deZseDwD"
   }
 }

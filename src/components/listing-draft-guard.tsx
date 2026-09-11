@@ -2,9 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { useLocale } from "@/i18n/use-locale";
-import { formatWorkflowText, getWorkflowCopy } from "@/i18n/workflow-copy";
-
 const DRAFT_VERSION = 1;
 const DRAFT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const FIELD_SELECTOR = 'input:not([type="file"]), textarea, select';
@@ -86,9 +83,6 @@ function parseDraft(raw: string | null): StoredListingDraft | null {
 }
 
 export function ListingDraftGuard({ userId, propertyId }: Props) {
-  const { locale } = useLocale();
-  const copy = getWorkflowCopy(locale).owner.draftGuard;
-  const intlLocale = locale === "bn" ? "bn-BD" : "en-BD";
   const key = storageKey(userId, propertyId);
   const dirtyRef = useRef(false);
   const mediaTouchedRef = useRef(false);
@@ -106,6 +100,9 @@ export function ListingDraftGuard({ userId, propertyId }: Props) {
     const stored = parseDraft(window.localStorage.getItem(key));
     if (stored) {
       recoverableRef.current = stored;
+      // Defer the UI notification until after the synchronization effect has
+      // installed its listeners. This avoids a cascading render inside the
+      // effect while keeping the localStorage recovery source authoritative.
       recoveryTimer = window.setTimeout(() => {
         if (recoverableRef.current === stored) setRecoverable(stored);
       }, 0);
@@ -171,7 +168,7 @@ export function ListingDraftGuard({ userId, propertyId }: Props) {
       const destination = new URL(anchor.href, window.location.href);
       if (destination.href === window.location.href) return;
       persist();
-      const leave = window.confirm(copy.leaveConfirm);
+      const leave = window.confirm("You have unsaved listing changes. Leave this page without saving the draft?");
       if (!leave) {
         event.preventDefault();
         event.stopPropagation();
@@ -200,7 +197,7 @@ export function ListingDraftGuard({ userId, propertyId }: Props) {
       window.removeEventListener("beforeunload", onBeforeUnload);
       document.removeEventListener("click", onDocumentClick, true);
     };
-  }, [copy.leaveConfirm, key]);
+  }, [key]);
 
   function restoreDraft() {
     const form = document.querySelector<HTMLFormElement>("form.listing-form");
@@ -227,33 +224,24 @@ export function ListingDraftGuard({ userId, propertyId }: Props) {
   }
 
   if (recoverable) {
-    const savedDate = new Intl.DateTimeFormat(intlLocale, {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: "Asia/Dhaka",
-    }).format(new Date(recoverable.savedAt));
     return (
       <div className="review-note" role="status">
-        <strong>{copy.found}</strong>
-        <p>{formatWorkflowText(copy.savedInBrowser, { date: savedDate })}</p>
-        {recoverable.mediaTouched && <p>{copy.mediaWarning}</p>}
+        <strong>Unsaved listing draft found</strong>
+        <p>NearBasha saved your form fields in this browser {new Date(recoverable.savedAt).toLocaleString("en-BD")}.</p>
+        {recoverable.mediaTouched && <p>Media files, removals, cover choice, or map interactions may need to be repeated after restoring.</p>}
         <div className="owner-header-actions">
-          <button className="secondary-button" type="button" onClick={restoreDraft}>{copy.restore}</button>
-          <button className="text-button" type="button" onClick={discardDraft}>{copy.discard}</button>
+          <button className="secondary-button" type="button" onClick={restoreDraft}>Restore draft</button>
+          <button className="text-button" type="button" onClick={discardDraft}>Discard local draft</button>
         </div>
       </div>
     );
   }
 
-  const savedTime = savedAt
-    ? new Intl.DateTimeFormat(intlLocale, { hour: "numeric", minute: "2-digit", timeZone: "Asia/Dhaka" }).format(new Date(savedAt))
-    : null;
-
   return (
     <div className="form-hint" role="status" aria-live="polite">
-      {dirty && savedTime
-        ? formatWorkflowText(copy.activeSaved, { time: savedTime })
-        : copy.active}
+      {dirty
+        ? `Draft protection active${savedAt ? ` · fields backed up locally at ${new Date(savedAt).toLocaleTimeString("en-BD", { hour: "numeric", minute: "2-digit" })}` : ""}. Save draft before leaving; newly selected media files cannot be restored after a reload.`
+        : "Draft protection active. NearBasha will warn before you leave with unsaved changes and locally back up form fields as you edit."}
     </div>
   );
 }

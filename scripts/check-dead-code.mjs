@@ -5,13 +5,12 @@ const root = process.cwd();
 const srcRoot = path.join(root, "src");
 const publicRoot = path.join(root, "public");
 const moduleExtensions = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".css"];
+const textExtensions = new Set([...moduleExtensions, ".json", ".md", ".yml", ".yaml", ".html"]);
 const publicAssetExtensions = new Set([".svg", ".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif"]);
-const ignoredDirectories = new Set([".git", ".next", ".vercel", "node_modules", "artifacts", "coverage", "dist", "build"]);
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    if (entry.isDirectory() && ignoredDirectories.has(entry.name)) return [];
     const absolute = path.join(dir, entry.name);
     return entry.isDirectory() ? walk(absolute) : [absolute];
   });
@@ -76,10 +75,9 @@ const unreachable = sourceFiles
   .map(relative)
   .sort();
 
-// Public assets count as used only when a reachable application module refers
-// to their public URL. Generated output, dependencies and stale repository text
-// cannot keep an obsolete asset artificially alive.
-const reachableText = [...reachable]
+const repositoryText = walk(root)
+  .filter((file) => !relative(file).startsWith(".git/"))
+  .filter((file) => textExtensions.has(path.extname(file)))
   .map((file) => {
     try { return fs.readFileSync(file, "utf8"); } catch { return ""; }
   })
@@ -90,13 +88,13 @@ const publicAssets = walk(publicRoot)
 const unusedAssets = publicAssets
   .filter((file) => {
     const publicPath = `/${path.relative(publicRoot, file).split(path.sep).join("/")}`;
-    return !reachableText.includes(publicPath);
+    return !repositoryText.includes(publicPath);
   })
   .map(relative)
   .sort();
 
 if (!unreachable.length && !unusedAssets.length) {
-  console.log(`Dead-code check passed (${reachable.size} reachable source modules, ${publicAssets.length} public assets checked; generated/dependency directories pruned).`);
+  console.log(`Dead-code check passed (${reachable.size} reachable source modules, ${publicAssets.length} public assets checked).`);
   process.exit(0);
 }
 

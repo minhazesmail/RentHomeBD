@@ -4,9 +4,7 @@
 
 **`supabase/migrations/` is the only schema source of truth.**
 
-`schema.sql` is a **historical Task 2 snapshot** kept for reference. Do not apply it on a fresh project by itself. Always apply the full ordered migration set.
-
-The foundational migration is `20260828153047_core_rental_schema.sql`. This file was restored from the migration already recorded in the RentHomeBD Supabase project, so its historical timestamp must not be changed or duplicated. Later migrations depend on the schemas, enums, tables, grants, RLS policies, indexes, and helper trigger it creates.
+`schema.sql` is a **historical Task 2 snapshot** kept for reference. Do not apply it on a fresh project by itself. Always apply the full ordered migration set (CLI `supabase db push` or equivalent).
 
 ## What the migrations cover
 
@@ -28,36 +26,20 @@ The foundational migration is `20260828153047_core_rental_schema.sql`. This file
 - Profiles are private to the owning user; moderators get controlled read access via membership.
 - `primary_role` is set at signup by a security-definer trigger (from metadata) and cannot be changed by clients afterward.
 - Role verification badges and phone verification timestamps are not client-writable trust flags.
-- Public owner identity/trust fields on listings are database-maintained snapshots. They are refreshed when a listing becomes available, when an owner reconfirms an active listing, and while an available listing's profile trust state changes.
 - SMS provider credentials must never appear in `NEXT_PUBLIC_*` or the app repo (see `docs/phone-otp-production.md`).
-
-## Fresh local verification
-
-A clean database must be reproducible from the repository alone. With Docker available and the Supabase CLI installed:
-
-```bash
-supabase init --force
-supabase db start
-supabase db reset
-```
-
-`supabase db start` applies the ordered migrations to a fresh local database, and `supabase db reset` destroys and recreates that database from the same migration history. CI runs both commands on pull requests so a missing or out-of-order foundation cannot silently ship again.
-
-Do not run `supabase db reset --linked` against production.
 
 ## Applying to a project
 
-1. Link the CLI to the intended Supabase project.
-2. Compare local and remote migration history before pushing.
-3. Run `supabase db push` (or equivalent) so only migrations not already recorded remotely are applied.
-4. Run Supabase security/performance advisors.
-5. Regenerate types:
+1. Enable PostGIS in the `extensions` schema.
+2. Link the CLI to the project and run `supabase db push` (or apply migrations in timestamp order).
+3. Run Supabase security/performance advisors.
+4. Regenerate types:
 
 ```bash
 supabase gen types typescript --linked > src/lib/supabase/database.types.ts
 ```
 
-6. Keep `database.types.ts` committed and in sync after every schema change.
+5. Keep `database.types.ts` committed and in sync after every schema change.
 
 ## Publishing rules
 

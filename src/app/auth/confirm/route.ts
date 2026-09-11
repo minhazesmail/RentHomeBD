@@ -1,23 +1,8 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { safeRedirectUrl, safeRelativePath } from "@/lib/safe-redirect";
+import { safeRelativePath } from "@/lib/safe-redirect";
 import { createClient } from "@/lib/supabase/server";
-
-function trustedAppUrl() {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (appUrl) return appUrl;
-
-  // VERCEL_URL is a platform-controlled deployment hostname, not a request
-  // header. Using it as the preview fallback keeps confirmation redirects
-  // same-deployment without reintroducing Host-header trust.
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-  if (process.env.VERCEL === "1" && vercelUrl) {
-    return `https://${vercelUrl}`;
-  }
-
-  throw new Error("Missing required environment variable: NEXT_PUBLIC_APP_URL");
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -36,9 +21,8 @@ export async function GET(request: NextRequest) {
     error = new Error("Missing authentication confirmation parameters");
   }
 
-  const destination = error
-    ? "/auth/error?message=confirmation-failed"
-    : next;
-  const redirectTo = safeRedirectUrl(trustedAppUrl(), destination);
+  const redirectTo = request.nextUrl.clone();
+  redirectTo.pathname = error ? "/auth/error" : next;
+  redirectTo.search = error ? "?message=confirmation-failed" : "";
   return NextResponse.redirect(redirectTo);
 }

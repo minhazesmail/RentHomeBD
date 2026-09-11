@@ -4,14 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { ProductNavigation } from "@/components/product-navigation";
 import { SavedHomesWorkspace, type SavedHome } from "@/components/saved-homes-workspace";
 import { SavedSearchCard } from "@/components/saved-search-card";
-import { getDictionary } from "@/i18n/get-dictionary";
-import { formatCurrency, formatNumber } from "@/i18n/format";
-import { getLocale } from "@/i18n/get-locale";
-import { formatWorkflowText, getWorkflowCopy, type WorkflowCopy } from "@/i18n/workflow-copy";
 import { requireUser } from "@/lib/auth";
 import { describeMapCenter } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/server";
-import { normalizeTenantType, type TenantType } from "@/lib/tenant-match";
+import { normalizeTenantType, TENANT_PROFILE_LABELS, type TenantType } from "@/lib/tenant-match";
 export const dynamic = "force-dynamic";
 
 const SAVED_HOME_MEDIA_TTL_SECONDS = 300;
@@ -20,8 +16,6 @@ type SavedSearchMatchRow = {
   current_count: number | string;
   new_count: number | string;
 };
-
-type SavedCopy = WorkflowCopy["saved"];
 
 function searchHref(search: {
   center_lat: number;
@@ -41,98 +35,64 @@ function searchHref(search: {
   return `/homes?${params.toString()}`;
 }
 
-function renterTypeLabel(value: unknown, dictionary: ReturnType<typeof getDictionary>) {
+function renterTypeLabel(value: unknown) {
   const type = normalizeTenantType(value);
-  if (!type) return null;
-  const labels: Record<TenantType, string> = {
-    family: dictionary.common.tenant.family,
-    bachelor: dictionary.common.tenant.bachelor,
-    student: dictionary.common.tenant.student,
-    job_holder: dictionary.common.tenant.jobHolder,
-    everyone: dictionary.common.tenant.everyone,
-  };
-  return labels[type];
+  return type ? TENANT_PROFILE_LABELS[type] : null;
 }
 
-function propertyLabel(value: unknown, copy: WorkflowCopy["owner"]["form"]) {
-  const labels: Record<string, string> = {
-    apartment: copy.apartment,
-    house: copy.house,
-    room_share: copy.roomShare,
-    sublet: copy.sublet,
-    hostel_seat: copy.hostelSeat,
-  };
-  return typeof value === "string" && labels[value] ? labels[value] : null;
-}
-
-function furnishingLabel(value: unknown, dictionary: ReturnType<typeof getDictionary>) {
-  if (value === "furnished") return dictionary.common.furnishing.furnished;
-  if (value === "semi_furnished") return dictionary.common.furnishing.semiFurnished;
-  if (value === "unfurnished") return dictionary.common.furnishing.unfurnished;
-  return dictionary.common.furnishing.unspecified;
+function propertyLabel(value: unknown) {
+  return typeof value === "string" && value
+    ? value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase())
+    : "Not listed";
 }
 
 function savedSearchLocation(search: { center_lat: unknown; center_long: unknown }) {
   return describeMapCenter(Number(search.center_lat), Number(search.center_long));
 }
 
-function savedSearchTitle(search: { name: unknown; center_lat: unknown; center_long: unknown }, copy: SavedCopy) {
+function savedSearchTitle(search: { name: unknown; center_lat: unknown; center_long: unknown }) {
   const name = typeof search.name === "string" ? search.name.trim() : "";
   const location = savedSearchLocation(search);
   const genericName = !name || /^(my\s+)?(saved\s+)?search(?:\s+\d+)?$/i.test(name);
-  return genericName ? formatWorkflowText(copy.page.genericSearchTitle, { location }) : name;
+  return genericName ? `${location} search` : name;
 }
 
-function savedSearchArea(
-  search: { center_lat: unknown; center_long: unknown; radius_km: unknown },
-  copy: SavedCopy,
-  locale: Awaited<ReturnType<typeof getLocale>>,
-) {
+function savedSearchArea(search: { center_lat: unknown; center_long: unknown; radius_km: unknown }) {
   const location = savedSearchLocation(search);
   const radius = search.radius_km == null ? null : Number(search.radius_km);
   return radius !== null && Number.isFinite(radius)
-    ? formatWorkflowText(copy.page.aroundWithRadius, { location, radius: formatNumber(radius, locale) })
-    : formatWorkflowText(copy.page.around, { location });
+    ? `Around ${location} · within ${radius} km`
+    : `Around ${location}`;
 }
 
-function savedSearchFilters(
-  search: {
-    min_rent: unknown;
-    max_rent: unknown;
-    tenant_type: unknown;
-    min_bedrooms: unknown;
-  },
-  copy: SavedCopy,
-  locale: Awaited<ReturnType<typeof getLocale>>,
-  dictionary: ReturnType<typeof getDictionary>,
-) {
+function savedSearchFilters(search: {
+  min_rent: unknown;
+  max_rent: unknown;
+  tenant_type: unknown;
+  min_bedrooms: unknown;
+}) {
   const parts: string[] = [];
   const minRent = search.min_rent == null ? null : Number(search.min_rent);
   const maxRent = search.max_rent == null ? null : Number(search.max_rent);
 
   if (minRent !== null || maxRent !== null) {
-    const minimum = minRent !== null && Number.isFinite(minRent) ? formatCurrency(minRent, locale) : copy.common.any;
-    const maximum = maxRent !== null && Number.isFinite(maxRent) ? formatCurrency(maxRent, locale) : copy.common.any;
-    parts.push(formatWorkflowText(copy.page.rentFilter, { minimum, maximum }));
+    const minimum = minRent !== null && Number.isFinite(minRent) ? `৳${minRent.toLocaleString("en-BD")}` : "any";
+    const maximum = maxRent !== null && Number.isFinite(maxRent) ? `৳${maxRent.toLocaleString("en-BD")}` : "any";
+    parts.push(`Rent ${minimum}–${maximum}`);
   }
 
-  const renterType = renterTypeLabel(search.tenant_type, dictionary);
-  if (renterType) parts.push(formatWorkflowText(copy.page.renterTypeFilter, { type: renterType }));
+  const renterType = renterTypeLabel(search.tenant_type);
+  if (renterType) parts.push(`Renter type: ${renterType}`);
 
   const bedrooms = search.min_bedrooms == null ? null : Number(search.min_bedrooms);
-  if (bedrooms !== null && Number.isFinite(bedrooms)) {
-    parts.push(formatWorkflowText(copy.page.bedroomsFilter, { count: formatNumber(bedrooms, locale) }));
-  }
+  if (bedrooms !== null && Number.isFinite(bedrooms)) parts.push(`${bedrooms}+ bedrooms`);
 
-  return parts.length ? parts.join(" · ") : copy.common.noExtraFilters;
+  return parts.length ? parts.join(" · ") : "No extra filters";
 }
 
 export default async function SavedPage() {
-  const [auth, locale] = await Promise.all([requireUser(), getLocale()]);
+  const auth = await requireUser();
   const canList = auth.profile.primary_role === "owner" || auth.profile.primary_role === "agent";
-  const dictionary = getDictionary(locale);
-  const workflow = getWorkflowCopy(locale);
-  const copy = workflow.saved;
   const supabase = (await createClient()) as unknown as SupabaseClient;
 
   const [{ data: savedRows }, { data: searches }] = await Promise.all([
@@ -187,7 +147,7 @@ export default async function SavedPage() {
   const renterFitByProperty = new Map<string, string[]>();
   for (const row of tenantRows ?? []) {
     const propertyId = row.property_id as string;
-    const tenantLabel = renterTypeLabel(row.tenant_type, dictionary);
+    const tenantLabel = renterTypeLabel(row.tenant_type);
     if (!tenantLabel) continue;
     const current = renterFitByProperty.get(propertyId) ?? [];
     if (!current.includes(tenantLabel)) current.push(tenantLabel);
@@ -199,14 +159,14 @@ export default async function SavedPage() {
     const property = propertyMap.get(propertyId)!;
     return {
       id: propertyId,
-      title: (property.title as string | null) || copy.common.rentalProperty,
-      address: (property.address_text as string | null) || copy.common.locationOnMap,
+      title: (property.title as string | null) || "Rental property",
+      address: (property.address_text as string | null) || "Location shown on map",
       rentBdt: property.rent_bdt == null ? null : Number(property.rent_bdt),
       bedrooms: property.bedrooms == null ? null : Number(property.bedrooms),
       bathrooms: property.bathrooms == null ? null : Number(property.bathrooms),
       sizeSqft: property.size_sqft == null ? null : Number(property.size_sqft),
-      propertyType: propertyLabel(property.property_type, workflow.owner.form) ?? copy.common.notListed,
-      furnishing: furnishingLabel(property.furnishing, dictionary),
+      propertyType: propertyLabel(property.property_type),
+      furnishing: propertyLabel(property.furnishing),
       renterFit: renterFitByProperty.get(propertyId) ?? [],
       coverUrl: coverUrlByProperty.get(propertyId) ?? null,
     };
@@ -218,25 +178,25 @@ export default async function SavedPage() {
 
       <div className="saved-shell">
         <div className="saved-hero">
-          <p className="eyebrow">{copy.page.eyebrow}</p>
-          <h1>{copy.page.title}</h1>
-          <p className="intro">{copy.page.description}</p>
-          <div className="saved-hero-metrics" aria-label={copy.page.summaryAria}>
-            <div><strong>{formatNumber(availableHomes.length, locale)}</strong><span>{copy.page.homesLive}</span></div>
-            <div><strong>{formatNumber(searches?.length ?? 0, locale)}</strong><span>{copy.page.savedSearches}</span></div>
-            <div className={newMatchCount > 0 ? "has-new" : undefined}><strong>{formatNumber(newMatchCount, locale)}</strong><span>{copy.page.newMatches}</span></div>
+          <p className="eyebrow">Shortlist workspace</p>
+          <h1>Saved homes & searches</h1>
+          <p className="intro">Compare the homes you already like, keep unavailable ones out of the way, and return first to searches with new matches.</p>
+          <div className="saved-hero-metrics" aria-label="Saved workspace summary">
+            <div><strong>{availableHomes.length}</strong><span>homes live</span></div>
+            <div><strong>{searches?.length ?? 0}</strong><span>saved searches</span></div>
+            <div className={newMatchCount > 0 ? "has-new" : undefined}><strong>{newMatchCount}</strong><span>new matches</span></div>
           </div>
         </div>
 
-        <nav className="saved-workspace-nav" aria-label={copy.page.sectionsAria}>
-          <a href="#saved-homes"><span>{copy.page.homes}</span><strong>{formatNumber(availableHomes.length, locale)}</strong></a>
-          <a href="#saved-searches"><span>{copy.page.searches}</span><strong>{formatNumber(searches?.length ?? 0, locale)}</strong>{newMatchCount > 0 && <small>{formatNumber(newMatchCount, locale)} {copy.common.new}</small>}</a>
+        <nav className="saved-workspace-nav" aria-label="Saved workspace sections">
+          <a href="#saved-homes"><span>Homes</span><strong>{availableHomes.length}</strong></a>
+          <a href="#saved-searches"><span>Searches</span><strong>{searches?.length ?? 0}</strong>{newMatchCount > 0 && <small>{newMatchCount} new</small>}</a>
         </nav>
 
         <section className="saved-section" id="saved-homes">
           <div className="saved-section-heading">
-            <div><h2>{copy.page.shortlistTitle}</h2><p>{copy.page.shortlistDescription}</p></div>
-            <span>{formatNumber(availableHomes.length, locale)}</span>
+            <div><h2>Your shortlist</h2><p>Select two to four live homes to compare rent, size, furnishing, location, and renter fit side by side.</p></div>
+            <span>{availableHomes.length}</span>
           </div>
           <SavedHomesWorkspace
             userId={auth.userId}
@@ -247,11 +207,11 @@ export default async function SavedPage() {
 
         <section className="saved-section" id="saved-searches">
           <div className="saved-section-heading">
-            <div><h2>{copy.page.searchesTitle}</h2><p>{copy.page.searchesDescription}</p></div>
-            <div className="saved-section-counts"><span>{formatNumber(searches?.length ?? 0, locale)}</span>{newMatchCount > 0 && <small>{formatNumber(newMatchCount, locale)} {copy.common.new}</small>}</div>
+            <div><h2>Saved searches</h2><p>Searches with new matches rise to the top so you can reopen the most useful areas first.</p></div>
+            <div className="saved-section-counts"><span>{searches?.length ?? 0}</span>{newMatchCount > 0 && <small>{newMatchCount} new</small>}</div>
           </div>
           {!searches?.length ? (
-            <div className="saved-empty"><strong>{copy.page.noSearches}</strong><span>{copy.page.noSearchesHint}</span><Link className="primary-button link-button" href="/homes">{copy.page.exploreMap}</Link></div>
+            <div className="saved-empty"><strong>No saved searches yet.</strong><span>Save a radius, budget, bedrooms, and renter-fit combination from the live map.</span><Link className="primary-button link-button" href="/homes">Explore the map</Link></div>
           ) : (
             <div className="saved-search-list">
               {orderedSearches.map((search) => (
@@ -259,9 +219,9 @@ export default async function SavedPage() {
                   key={search.id as string}
                   userId={auth.userId}
                   runHref={searchHref(search as never)}
-                  displayTitle={savedSearchTitle(search, copy)}
-                  displayArea={savedSearchArea(search, copy, locale)}
-                  displayFilters={savedSearchFilters(search, copy, locale, dictionary)}
+                  displayTitle={savedSearchTitle(search)}
+                  displayArea={savedSearchArea(search)}
+                  displayFilters={savedSearchFilters(search)}
                   matchState={matchStateBySearch.get(search.id as string) ?? null}
                   search={{
                     id: search.id as string,

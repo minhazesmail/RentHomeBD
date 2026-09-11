@@ -41,6 +41,13 @@ h1 {
   color: var(--muted);
   font-size: 0.9rem;
 }
+.status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+}
 .hero-actions {
   display: flex;
   align-items: center;
@@ -247,6 +254,7 @@ h1 { font-weight: 760; letter-spacing: -.065em; }
   backdrop-filter: blur(14px);
   box-shadow: var(--shadow-sm);
 }
+.status-dot { box-shadow: 0 0 0 5px rgba(23,107,74,.1); }
 .success-message { border-radius: 14px; }
 .review-note { border-radius: 14px; }
 
@@ -1237,9 +1245,10 @@ strong {
 @keyframes nb-ref-pulse{0%,
 100%{opacity:.7;transform:scale(.88)}50%{opacity:1;transform:scale(1.08)}}
 @media(max-width:760px){.mobile-homes-intro{padding:13px 16px}}.field.full { grid-column: 1 / -1; }
+.map-road.one { width: 85%; height: 26px; top: 24%; left: 4%; transform: rotate(-14deg); }
 .map-road.two { width: 72%; height: 24px; top: 57%; left: 22%; transform: rotate(18deg); }
 .map-road.three { width: 65%; height: 22px; top: 43%; left: -6%; transform: rotate(63deg); }
-.map-pin-demo.p2 { top: 46%; right: 23%; }.map-pin-demo.p3 { bottom: 22%; left: 42%; }
+.map-pin-demo.p1 { top: 22%; left: 28%; }.map-pin-demo.p2 { top: 46%; right: 23%; }.map-pin-demo.p3 { bottom: 22%; left: 42%; }
 .landing-listing-visual.visual-2 { background: linear-gradient(145deg,#e4e9df,#cbd7c9); }
 .landing-listing-visual.visual-3 { background: linear-gradient(145deg,#dbe5dc,#c1d2c5); }
 
@@ -1407,6 +1416,14 @@ strong {
 }
 .message-row.mine{justify-content:flex-end}
 .message-row.pending{opacity:.7}
+
+.message-bubble.own,
+.message-bubble.is-own {
+  border-radius: 18px 18px 5px 18px;
+  background: var(--nb-emerald);
+  color: white;
+}
+
 .saved-home-card.unavailable {
   display: flex;
   justify-content: space-between;

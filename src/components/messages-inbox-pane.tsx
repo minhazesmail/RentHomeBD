@@ -1,9 +1,6 @@
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { formatNumber } from "@/i18n/format";
-import { getLocale } from "@/i18n/get-locale";
-import { formatWorkflowText, getWorkflowCopy } from "@/i18n/workflow-copy";
 import { formatExactMessageTime, formatInboxMessageTime } from "@/lib/message-time";
 import { createClient } from "@/lib/supabase/server";
 
@@ -50,11 +47,7 @@ function conversationHref(id: string, query: string, unreadOnly: boolean) {
 }
 
 export async function MessagesInboxPane({ userId, page = 1, query = "", unreadOnly = false, currentConversationId = null }: Props) {
-  const [supabase, locale] = await Promise.all([
-    createClient() as unknown as Promise<SupabaseClient>,
-    getLocale(),
-  ]);
-  const copy = getWorkflowCopy(locale).messages.inbox;
+  const supabase = (await createClient()) as unknown as SupabaseClient;
   const offset = (page - 1) * INBOX_PAGE_SIZE;
   const renderedAt = new Date();
 
@@ -94,44 +87,44 @@ export async function MessagesInboxPane({ userId, page = 1, query = "", unreadOn
   const coverUrlByProperty = new Map(coverEntries);
 
   return (
-    <aside className="messages-workspace-inbox" aria-label={copy.conversationsAria}>
+    <aside className="messages-workspace-inbox" aria-label="Conversations">
       <div className="messages-workspace-inbox-head">
         <div>
-          <p className="eyebrow">{copy.eyebrow}</p>
-          <h1>{copy.title}</h1>
+          <p className="eyebrow">Inbox</p>
+          <h1>Messages</h1>
         </div>
-        <span className="messages-inbox-page-label">{page > 1 ? formatWorkflowText(copy.page, { page: formatNumber(page, locale) }) : copy.recent}</span>
+        <span className="messages-inbox-page-label">{page > 1 ? `Page ${page}` : "Recent"}</span>
       </div>
 
-      <section className="messages-organization" aria-label={copy.organizeAria}>
+      <section className="messages-organization" aria-label="Organize conversations">
         <form className="messages-search-form" action="/messages" method="get">
-          <label className="sr-only" htmlFor="message-search">{copy.searchLabel}</label>
-          <input id="message-search" name="q" type="search" defaultValue={query} maxLength={120} placeholder={copy.searchPlaceholder} />
+          <label className="sr-only" htmlFor="message-search">Search conversations</label>
+          <input id="message-search" name="q" type="search" defaultValue={query} maxLength={120} placeholder="Search people or homes" />
           {unreadOnly && <input type="hidden" name="filter" value="unread" />}
-          <button className="secondary-button" type="submit">{copy.search}</button>
-          {query && <Link className="text-link" href={inboxHref({ unreadOnly })}>{copy.clear}</Link>}
+          <button className="secondary-button" type="submit">Search</button>
+          {query && <Link className="text-link" href={inboxHref({ unreadOnly })}>Clear</Link>}
         </form>
-        <nav className="messages-filter-tabs" aria-label={copy.filtersAria}>
-          <Link className={!unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query })} aria-current={!unreadOnly ? "page" : undefined}>{copy.all}</Link>
-          <Link className={unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query, unreadOnly: true })} aria-current={unreadOnly ? "page" : undefined}>{copy.unread}</Link>
+        <nav className="messages-filter-tabs" aria-label="Conversation filters">
+          <Link className={!unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query })} aria-current={!unreadOnly ? "page" : undefined}>All</Link>
+          <Link className={unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query, unreadOnly: true })} aria-current={unreadOnly ? "page" : undefined}>Unread</Link>
         </nav>
       </section>
 
       <div className="messages-workspace-list">
         {!conversations.length ? (
           page > 1 ? (
-            <div className="empty-conversations">{copy.emptyPage} <Link className="text-link" href={firstPageHref}>{copy.returnFirst}</Link>.</div>
+            <div className="empty-conversations">No conversations on this page. <Link className="text-link" href={firstPageHref}>Return to the first page</Link>.</div>
           ) : hasOrganizationFilters ? (
-            <div className="empty-conversations">{copy.emptyFilter} <Link className="text-link" href="/messages">{copy.showAll}</Link>.</div>
+            <div className="empty-conversations">No conversations match these filters. <Link className="text-link" href="/messages">Show all</Link>.</div>
           ) : (
-            <div className="empty-conversations">{copy.empty}</div>
+            <div className="empty-conversations">No conversations yet. Open a property and choose <strong>Message owner</strong> to start one.</div>
           )
         ) : (
           conversations.map((conversation) => {
             const unread = Number(conversation.unread_count);
             const otherName = userId === conversation.renter_id ? conversation.owner_display_name : conversation.renter_display_name;
             const timestamp = conversation.last_message_at || conversation.created_at;
-            const propertyTitle = conversation.property_title || copy.rentalProperty;
+            const propertyTitle = conversation.property_title || "Rental property";
             const coverUrl = coverUrlByProperty.get(conversation.property_id);
             const active = conversation.id === currentConversationId;
             return (
@@ -142,16 +135,16 @@ export async function MessagesInboxPane({ userId, page = 1, query = "", unreadOn
                 aria-current={active ? "page" : undefined}
               >
                 <span className="conversation-property-media" aria-hidden="true">
-                  {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <span>{copy.home}</span>}
+                  {coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <span>Home</span>}
                 </span>
                 <div className="conversation-main">
-                  <strong>{otherName || copy.user}</strong>
+                  <strong>{otherName || "NearBasha user"}</strong>
                   <span>{propertyTitle}</span>
-                  <small>{conversation.last_message_body || copy.started}</small>
+                  <small>{conversation.last_message_body || "Conversation started — send the first message."}</small>
                 </div>
                 <div className="conversation-meta">
-                  {unread > 0 && <span className="unread-badge">{formatNumber(unread, locale)}</span>}
-                  <time dateTime={timestamp} title={formatExactMessageTime(timestamp, locale)}>{formatInboxMessageTime(timestamp, renderedAt, locale)}</time>
+                  {unread > 0 && <span className="unread-badge">{unread}</span>}
+                  <time dateTime={timestamp} title={formatExactMessageTime(timestamp)}>{formatInboxMessageTime(timestamp, renderedAt)}</time>
                 </div>
               </Link>
             );
@@ -160,10 +153,10 @@ export async function MessagesInboxPane({ userId, page = 1, query = "", unreadOn
       </div>
 
       {(page > 1 || hasNextPage) && (
-        <nav className="messages-pagination messages-workspace-pagination" aria-label={copy.pagesAria}>
-          {page > 1 ? <Link className="secondary-button link-button" href={inboxHref({ page: page - 1, query, unreadOnly })}>{copy.newer}</Link> : <span />}
-          <span className="messages-page-number">{formatWorkflowText(copy.page, { page: formatNumber(page, locale) })}</span>
-          {hasNextPage ? <Link className="secondary-button link-button" href={inboxHref({ page: page + 1, query, unreadOnly })}>{copy.older}</Link> : <span />}
+        <nav className="messages-pagination messages-workspace-pagination" aria-label="Messages pages">
+          {page > 1 ? <Link className="secondary-button link-button" href={inboxHref({ page: page - 1, query, unreadOnly })}>Newer</Link> : <span />}
+          <span className="messages-page-number">Page {page}</span>
+          {hasNextPage ? <Link className="secondary-button link-button" href={inboxHref({ page: page + 1, query, unreadOnly })}>Older</Link> : <span />}
         </nav>
       )}
     </aside>

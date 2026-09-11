@@ -12,7 +12,6 @@ import { ReportListingButton } from "@/components/report-listing-button";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { StartConversationButton } from "@/components/start-conversation-button";
 import { getAuthContext } from "@/lib/auth";
-import { safeHomesReturnPath } from "@/lib/safe-redirect";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeTenantType, normalizeTenantTypes, TENANT_PROFILE_LABELS, tenantCompatibility } from "@/lib/tenant-match";
 type Amenity = { slug: string; name: string };
@@ -61,15 +60,8 @@ function availabilityLabel(availableFrom: string | null) {
   return dateKey <= dhakaDateKey() ? "Available now" : `Available from ${formatPropertyDate(availableFrom)}`;
 }
 
-export default async function PublicPropertyPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const [{ id }, query] = await Promise.all([params, searchParams]);
-  const returnTo = safeHomesReturnPath(typeof query.returnTo === "string" ? query.returnTo : null);
+export default async function PublicPropertyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = (await createClient()) as unknown as SupabaseClient;
   const auth = await getAuthContext();
   const { data, error } = await supabase.rpc("get_public_property_detail", { property_uuid: id });
@@ -114,7 +106,7 @@ export default async function PublicPropertyPage({
     <main className="property-detail-page">
       <header className="property-detail-topbar">
         <BrandLogo className="property-brand-logo" />
-        <div className="property-detail-nav"><Link className="text-link" href={returnTo}>Back to map</Link>{auth && <Link className="text-link" href="/saved">Saved</Link>}<Link className="text-link" href={auth ? "/messages" : "/login"}>{auth ? "Messages" : "Sign in"}</Link></div>
+        <div className="property-detail-nav"><Link className="text-link" href="/homes">Back to map</Link>{auth && <Link className="text-link" href="/saved">Saved</Link>}<Link className="text-link" href={auth ? "/messages" : "/login"}>{auth ? "Messages" : "Sign in"}</Link></div>
       </header>
       <div className="property-detail-shell">
         <section className="property-detail-hero">

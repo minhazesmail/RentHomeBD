@@ -14,7 +14,7 @@ export function ListingFreshnessActions({
   status: "available" | "pending_confirmation" | "rented" | "expired" | string;
 }) {
   const router = useRouter();
-  const [busy, setBusy] = useState<"confirm" | "rented" | "edit" | null>(null);
+  const [busy, setBusy] = useState<"confirm" | "rented" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function reconfirm() {
@@ -55,50 +55,16 @@ export function ListingFreshnessActions({
     setBusy(null);
   }
 
-  async function beginEdit() {
-    setBusy("edit");
-    setError(null);
-    const supabase = createClient();
-    const { error: editError } = await supabase.rpc(
-      "begin_property_edit" as never,
-      { property_uuid: propertyId } as never,
-    );
-
-    if (editError) {
-      setError(status === "rented" || status === "expired"
-        ? "Could not relist this property. Please try again."
-        : "Could not start editing this listing. Please try again.");
-      setBusy(null);
-      return;
-    }
-
-    router.push(`/owner/properties/${propertyId}`);
-    router.refresh();
-  }
-
-  const canConfirmAvailability = ["available", "pending_confirmation"].includes(status);
-  const canBeginEdit = ["available", "pending_confirmation", "rented", "expired"].includes(status);
-  if (!canConfirmAvailability && !canBeginEdit) return null;
-
-  const editLabel = status === "rented" || status === "expired" ? "Relist as draft" : "Edit & re-review";
+  if (!["available", "pending_confirmation"].includes(status)) return null;
 
   return (
     <div className="freshness-actions" onClick={(event) => event.preventDefault()} aria-live="polite">
-      {canConfirmAvailability && (
-        <>
-          <ActionButton variant="secondary" className="freshness-button" type="button" disabled={busy !== null} aria-busy={busy === "confirm"} onClick={() => void reconfirm()}>
-            {busy === "confirm" ? "Confirming…" : "Still available"}
-          </ActionButton>
-          <ActionButton variant="text" className="freshness-rented" type="button" disabled={busy !== null} aria-busy={busy === "rented"} onClick={() => void markRented()}>
-            {busy === "rented" ? "Updating…" : "Mark rented"}
-          </ActionButton>
-        </>
-      )}
-      {canBeginEdit && (
-        <ActionButton variant={canConfirmAvailability ? "text" : "secondary"} className="freshness-button" type="button" disabled={busy !== null} aria-busy={busy === "edit"} onClick={() => void beginEdit()}>
-          {busy === "edit" ? "Preparing…" : editLabel}
-        </ActionButton>
-      )}
+      <ActionButton variant="secondary" className="freshness-button" type="button" disabled={busy !== null} aria-busy={busy === "confirm"} onClick={() => void reconfirm()}>
+        {busy === "confirm" ? "Confirming…" : "Still available"}
+      </ActionButton>
+      <ActionButton variant="text" className="freshness-rented" type="button" disabled={busy !== null} aria-busy={busy === "rented"} onClick={() => void markRented()}>
+        {busy === "rented" ? "Updating…" : "Mark rented"}
+      </ActionButton>
       {error && <span className="freshness-error" role="alert">{error}</span>}
     </div>
   );
