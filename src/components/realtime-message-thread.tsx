@@ -4,6 +4,8 @@ import { startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useO
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { MessageComposer, friendlyMessageError, type ChatMessage } from "@/components/message-composer";
+import { useLocale } from "@/i18n/use-locale";
+import { getWorkflowCopy } from "@/i18n/workflow-copy";
 import {
   isThreadBottomVisible,
   latestIncomingMessageAt,
@@ -49,6 +51,8 @@ export function RealtimeMessageThread({
   initialHasOlderMessages,
   pageSize,
 }: Props) {
+  const { locale } = useLocale();
+  const copy = getWorkflowCopy(locale).messages.live;
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [messages, setMessages] = useState(initialMessages);
   const [optimisticMessages, addOptimisticMessage] = useOptimistic(messages, (current, next: ChatMessage) => mergeMessage(current, next));
@@ -323,7 +327,7 @@ export function RealtimeMessageThread({
 
     if (error) {
       restoreScrollHeightRef.current = null;
-      setOlderMessagesError("Could not load earlier messages. Please try again.");
+      setOlderMessagesError(copy.loadOlderError);
       setLoadingOlderMessages(false);
       return;
     }
@@ -364,7 +368,7 @@ export function RealtimeMessageThread({
           .single();
 
         if (error) {
-          resultError = friendlyMessageError(error.message);
+          resultError = friendlyMessageError(error.message, locale);
           resolve();
           return;
         }
@@ -390,12 +394,12 @@ export function RealtimeMessageThread({
         <span className={`thread-live-dot ${connectionState}`} aria-hidden="true" />
         <span>
           {connectionState === "live"
-            ? "Live conversation"
+            ? copy.liveConversation
             : connectionState === "syncing"
-              ? "Catching up on messages…"
+              ? copy.catchingUp
               : connectionState === "connecting"
-                ? "Connecting live updates…"
-                : "Live updates interrupted"}
+                ? copy.connecting
+                : copy.interrupted}
         </span>
       </div>
 
@@ -403,13 +407,13 @@ export function RealtimeMessageThread({
         {hasOlderMessages && (
           <div className="older-message-loader">
             <button className="secondary-button" type="button" onClick={loadOlderMessages} disabled={loadingOlderMessages}>
-              {loadingOlderMessages ? "Loading earlier messages…" : "Load earlier messages"}
+              {loadingOlderMessages ? copy.loadingEarlier : copy.loadEarlier}
             </button>
             {olderMessagesError && <span className="form-error" role="alert">{olderMessagesError}</span>}
           </div>
         )}
-        {!hasOlderMessages && optimisticMessages.length > pageSize && <div className="message-history-start">You’ve reached the start of this conversation.</div>}
-        {!optimisticMessages.length && <div className="renter-empty">No messages yet. Use a quick inquiry below or write your own message.</div>}
+        {!hasOlderMessages && optimisticMessages.length > pageSize && <div className="message-history-start">{copy.historyStart}</div>}
+        {!optimisticMessages.length && <div className="renter-empty">{copy.empty}</div>}
         {optimisticMessages.map((message) => {
           const mine = message.sender_id === userId;
           const read = mine && !message.pending && Boolean(otherReadAt && new Date(message.created_at) <= new Date(otherReadAt));
@@ -418,8 +422,8 @@ export function RealtimeMessageThread({
               <div className="message-bubble">
                 <div>{message.body}</div>
                 <small className="message-status">
-                  <span>{message.pending ? "Sending…" : <time suppressHydrationWarning dateTime={message.created_at} title={formatExactMessageTime(message.created_at)}>{formatThreadMessageTime(message.created_at, renderedAt)}</time>}</span>
-                  {mine && !message.pending && <span className={read ? "read-receipt read" : "read-receipt"}>{read ? "✓✓ Read" : "✓ Sent"}</span>}
+                  <span>{message.pending ? copy.sending : <time suppressHydrationWarning dateTime={message.created_at} title={formatExactMessageTime(message.created_at, locale)}>{formatThreadMessageTime(message.created_at, renderedAt, locale)}</time>}</span>
+                  {mine && !message.pending && <span className={read ? "read-receipt read" : "read-receipt"}>{read ? copy.read : copy.sent}</span>}
                 </small>
               </div>
             </div>
