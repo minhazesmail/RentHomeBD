@@ -6,29 +6,163 @@ on:
   pull_request:
 
 jobs:
+  database:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: 2.117.0
+      - name: Initialize local Supabase configuration
+        run: supabase init --force
+      - name: Apply migrations to a fresh database
+        run: supabase db start
+      - name: Verify migrations survive a clean reset
+        run: supabase db reset
+      - name: Verify atomic listing save and relist lifecycle
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f06_f07_listing_save_lifecycle.sql
+      - name: Verify server-side renter search ordering
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f08_f09_saved_state_search_ordering.sql
+      - name: Verify server-side polygon search
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f10_polygon_search.sql
+      - name: Verify saved-search input bounds
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f13_saved_search_validation.sql
+      - name: Verify conversation participant trust
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f16_conversation_participant_trust.sql
+      - name: Verify atomic abuse limits under concurrency
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          DB_CONTAINER="$DB_CONTAINER" bash supabase/tests/f17_atomic_abuse_limits.sh
+      - name: Verify account creation quotas under concurrency
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          DB_CONTAINER="$DB_CONTAINER" bash supabase/tests/f18_account_creation_quotas.sh
+      - name: Verify support intake and participant blocking
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f20_support_and_blocking.sql
+      - name: Verify public property media signing policy
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f26_public_media_signing.sql
+
   verify:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_APP_URL: http://localhost:3000
-      # Provide these as repository secrets (Settings → Secrets and variables → Actions).
-      # Do not commit real values.
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      # Prefer repository secrets when configured. The fallbacks are non-production,
+      # compile-only values so pull requests can verify Next.js bundling without
+      # connecting to a real Supabase project.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://ci-placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_placeholder' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
-          node-version: 22
-      - name: Install dependencies
-        run: npm install
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install frozen dependencies
+        run: npm ci
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
       - name: Install Chromium for theme QA
         run: npx playwright install --with-deps chromium
+      - name: Supabase browser env QA
+        run: npm run envqa
+      - name: Auth redirect QA
+        run: npm run authredirectqa
+      - name: Listing workflow QA
+        run: npm run workflowqa
+      - name: Saved state and search ordering QA
+        run: npm run searchstateqa
+      - name: Map search polygon and race QA
+        run: npm run mapsearchqa
+      - name: Map return and saved-search validation QA
+        run: npm run navigationqa
+      - name: Message realtime and read-receipt QA
+        run: npm run messageqa
+      - name: Conversation trust and abuse-control QA
+        run: npm run trustabuseqa
       - name: Typecheck
         run: npm run typecheck
       - name: Localization QA
         run: npm run i18nqa
       - name: Bangladesh phone QA
         run: npm run phoneqa
+      - name: Orphan CSS QA
+        run: npm run cssqa
+      - name: Signed public media renewal QA
+        run: npm run mediaqa
       - name: Lint
         run: npm run lint
       - name: Dead code

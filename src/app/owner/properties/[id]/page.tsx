@@ -6,6 +6,9 @@ import editorStyles from "@/components/listing-editor.module.css";
 import { ListingWorkflowNav } from "@/components/listing-workflow-nav";
 import { ProductNavigation } from "@/components/product-navigation";
 import { PropertyListingForm } from "@/components/property-listing-form";
+import { getLocale } from "@/i18n/get-locale";
+import { getOwnerEditorCopy } from "@/i18n/owner-editor-copy";
+import { getWorkflowCopy } from "@/i18n/workflow-copy";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import "../listing-media-styles.css";
@@ -14,9 +17,11 @@ export const dynamic = "force-dynamic";
 const OWNER_MEDIA_PREVIEW_TTL_SECONDS = 300;
 
 export default async function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireOwnerOrAgent();
+  const [auth, locale] = await Promise.all([requireOwnerOrAgent(), getLocale()]);
   const { id } = await params;
   const supabase = await createClient();
+  const pageCopy = getOwnerEditorCopy(locale).editPage;
+  const commonOwnerCopy = getWorkflowCopy(locale).owner.page;
 
   const [{ data: property }, { data: amenities }, { data: tenantRows }, { data: amenityRows }, { data: mediaRows }] = await Promise.all([
     supabase.from("properties").select("id, title, description, address_text, property_type, rent_bdt, deposit_bdt, utilities_included, size_sqft, bedrooms, bathrooms, floor_number, total_floors, furnishing, gender_preference, available_from, latitude, longitude, status, moderation_notes").eq("id", id).eq("owner_id", auth.userId).maybeSingle(),
@@ -46,11 +51,11 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
       <ProductNavigation authenticated canList current="properties" />
       <header className="listing-page-header listing-editor-header">
         <div>
-          <p className="eyebrow">Owner workspace · Edit listing</p>
-          <h1 className="listing-page-title">Edit listing</h1>
-          <p className="intro">Review one renter-facing step at a time. Changes stay private until the listing passes moderation again.</p>
+          <p className="eyebrow">{pageCopy.eyebrow}</p>
+          <h1 className="listing-page-title">{pageCopy.title}</h1>
+          <p className="intro">{pageCopy.description}</p>
         </div>
-        <Link className="text-link" href="/owner">Back to properties</Link>
+        <Link className="text-link" href="/owner">{commonOwnerCopy.backToProperties}</Link>
       </header>
 
       <div className={editorStyles.editorShell}>

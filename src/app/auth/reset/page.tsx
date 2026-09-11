@@ -4,12 +4,8 @@ import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { getLocale } from "@/i18n/get-locale";
+import { safeRelativePath } from "@/lib/safe-redirect";
 import { ResetPasswordForm } from "./reset-password-form";
-
-function safeNext(value: string | string[] | undefined) {
-  const candidate = Array.isArray(value) ? value[0] : value;
-  return candidate?.startsWith("/") && !candidate.startsWith("//") ? candidate : "/dashboard";
-}
 
 export default async function ResetPasswordPage({
   searchParams,
@@ -17,7 +13,8 @@ export default async function ResetPasswordPage({
   searchParams: Promise<{ next?: string | string[] }>;
 }) {
   const params = await searchParams;
-  const nextPath = safeNext(params.next);
+  const candidate = Array.isArray(params.next) ? params.next[0] : params.next;
+  const nextPath = safeRelativePath(candidate);
   const locale = await getLocale();
   const copy = getDictionary(locale).auth.resetPage;
 
