@@ -57,8 +57,8 @@ requireText("src/app/page.tsx", "dictionary.landing", "landing dictionary usage"
 requireText("src/app/login/auth-form.tsx", "dictionary.auth.form", "auth dictionary usage");
 requireText("src/components/phone-verification-form.tsx", "dictionary.auth.phoneVerification", "phone verification dictionary usage");
 requireText("src/components/renter-map-search.tsx", "getWorkflowCopy(locale).homes.search", "renter map workflow copy");
-requireText("src/components/renter-results-list.tsx", "getWorkflowCopy(locale)", "renter result-card workflow copy");
-requireText("src/app/saved/page.tsx", "getWorkflowCopy(locale).saved", "saved page workflow copy");
+requireText("src/components/renter-results-list.tsx", "getRenterResultsCopy(locale)", "renter result-card workflow copy");
+requireText("src/app/saved/page.tsx", "const copy = workflow.saved", "saved page workflow copy");
 requireText("src/components/saved-search-card.tsx", "getWorkflowCopy(locale).saved.searchCard", "saved-search editor workflow copy");
 requireText("src/components/saved-homes-workspace.tsx", "getWorkflowCopy(locale).saved.homes", "saved-home comparison workflow copy");
 requireText("src/components/message-composer.tsx", "getWorkflowCopy(locale).messages.composer", "message composer workflow copy");
@@ -69,8 +69,10 @@ requireText("src/components/property-listing-form.tsx", "getWorkflowCopy(locale)
 requireText("src/components/property-listing-form.tsx", "property draft limit reached", "localized unfinished-listing quota mapping");
 requireText("src/components/listing-workflow-nav.tsx", "getOwnerEditorCopy(locale).workflow", "listing workflow navigation localization");
 requireText("src/components/listing-readiness.tsx", "getOwnerEditorCopy(locale).readiness", "listing readiness localization");
-requireText("src/components/listing-draft-guard.tsx", "getOwnerEditorCopy(locale).draftGuard", "listing draft-guard localization");
-requireText("src/lib/message-time.ts", "toIntlLocale(locale)", "locale-aware message timestamp formatting");
+requireText("src/components/listing-draft-guard.tsx", "getWorkflowCopy(locale).owner.draftGuard", "listing draft-guard localization");
+requireText("src/lib/message-time.ts", "localeTag(locale)", "locale-aware message timestamp formatting");
+requireText("src/lib/message-time.ts", '"bn-BD"', "Bangla message timestamp locale");
+requireText("src/lib/message-time.ts", '"Asia/Dhaka"', "Bangladesh message timezone");
 
 forbidText("src/components/marketing-navigation.tsx", ">Find on map<", "marketing nav must source labels from dictionaries");
 forbidText("src/components/product-navigation.tsx", 'label: "Explore"', "product nav must source labels from dictionaries");
