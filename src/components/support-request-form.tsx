@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { useLocale } from "@/i18n/use-locale";
 import { getSupportCopy, type SupportCategory } from "@/i18n/support-copy";
@@ -30,7 +31,7 @@ export function SupportRequestForm({
     setBusy(true);
     setMessage(null);
     setReference(null);
-    const supabase = createClient();
+    const supabase = createClient() as unknown as SupabaseClient;
     const { data, error } = await supabase.rpc("submit_support_request", {
       request_email: email.trim(),
       request_category: category,
