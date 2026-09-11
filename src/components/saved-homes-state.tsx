@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { useLocale } from "@/i18n/use-locale";
+import { getWorkflowCopy } from "@/i18n/workflow-copy";
 import { createClient } from "@/lib/supabase/client";
 
 type SavedHomesState = {
@@ -40,6 +42,8 @@ export function SavedHomesProvider({
   authReady = true,
   initialSavedPropertyIds,
 }: SavedHomesProviderProps) {
+  const { locale } = useLocale();
+  const copy = getWorkflowCopy(locale).saved.homes;
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const hasServerSeed = initialSavedPropertyIds !== undefined;
   const [savedPropertyIds, setSavedPropertyIds] = useState<Set<string>>(
@@ -64,7 +68,7 @@ export function SavedHomesProvider({
 
       if (cancelled) return;
       if (error) {
-        setLoadError("Could not load your saved homes. Refresh the page and try again.");
+        setLoadError(copy.loadError);
         setRemoteLoadState("error");
         return;
       }
@@ -77,7 +81,7 @@ export function SavedHomesProvider({
     return () => {
       cancelled = true;
     };
-  }, [authReady, hasServerSeed, supabase, userId]);
+  }, [authReady, copy.loadError, hasServerSeed, supabase, userId]);
 
   const ready = authReady && (!userId || hasServerSeed || remoteLoadState === "loaded");
 
@@ -104,7 +108,7 @@ export function SavedHomesProvider({
 
     if (result.error) {
       setSavedPropertyIds((current) => setMembership(current, propertyId, wasSaved));
-      setErrorByPropertyId((current) => new Map(current).set(propertyId, "Could not update your saved homes. Please try again."));
+      setErrorByPropertyId((current) => new Map(current).set(propertyId, copy.updateError));
     }
 
     setPendingPropertyIds((current) => {
@@ -112,7 +116,7 @@ export function SavedHomesProvider({
       next.delete(propertyId);
       return next;
     });
-  }, [pendingPropertyIds, ready, savedPropertyIds, supabase, userId]);
+  }, [copy.updateError, pendingPropertyIds, ready, savedPropertyIds, supabase, userId]);
 
   const value = useMemo<SavedHomesState>(() => ({
     userId,
