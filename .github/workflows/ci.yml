@@ -84,6 +84,15 @@ jobs:
             exit 1
           fi
           DB_CONTAINER="$DB_CONTAINER" bash supabase/tests/f17_atomic_abuse_limits.sh
+      - name: Verify account creation quotas under concurrency
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          DB_CONTAINER="$DB_CONTAINER" bash supabase/tests/f18_account_creation_quotas.sh
 
   verify:
     runs-on: ubuntu-latest
