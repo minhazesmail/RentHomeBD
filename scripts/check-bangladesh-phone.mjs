@@ -13,14 +13,14 @@ const compiled = ts.transpileModule(source, {
   fileName: sourcePath,
 });
 
-const module = { exports: {} };
-new Function("exports", "module", compiled.outputText)(module.exports, module);
+const compiledModule = { exports: {} };
+new Function("exports", "module", compiled.outputText)(compiledModule.exports, compiledModule);
 const {
   BD_MOBILE_PREFIX_PATTERN,
   BD_MOBILE_PREFIXES,
   bangladeshPhoneSubscriberDigits,
   normalizeBangladeshPhone,
-} = module.exports;
+} = compiledModule.exports;
 
 if (!(BD_MOBILE_PREFIX_PATTERN instanceof RegExp) || BD_MOBILE_PREFIX_PATTERN.source !== "^1[3-9]\\d{8}$") {
   console.error("bangladesh-phone.ts: unexpected Bangladesh mobile prefix pattern.");
