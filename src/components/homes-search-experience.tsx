@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { MobileMapModel } from "@/components/mobile-map-model";
 import { ProductNavigation } from "@/components/product-navigation";
 import { RenterMapSearch } from "@/components/renter-map-search";
+import { SavedHomesProvider } from "@/components/saved-homes-state";
 import { normalizeTenantType, type TenantType } from "@/lib/tenant-match";
 import { createClient } from "@/lib/supabase/client";
 
@@ -24,16 +25,16 @@ type InitialSearch = {
 
 type PersonalizationState = {
   userId: string | null;
-  savedPropertyIds: string[];
   preferredTenantType?: TenantType;
   canList: boolean;
+  authReady: boolean;
 };
 
 const EMPTY_PERSONALIZATION: PersonalizationState = {
   userId: null,
-  savedPropertyIds: [],
   preferredTenantType: undefined,
   canList: false,
+  authReady: false,
 };
 
 export function HomesSearchExperience({ children, initialSearch }: { children: ReactNode; initialSearch: InitialSearch }) {
@@ -46,21 +47,25 @@ export function HomesSearchExperience({ children, initialSearch }: { children: R
     async function loadPersonalization() {
       const { data: claimsData } = await supabase.auth.getClaims();
       const userId = claimsData?.claims?.sub;
-      if (!userId || cancelled) return;
+      if (cancelled) return;
 
-      setPersonalization((current) => ({ ...current, userId }));
+      if (!userId) {
+        setPersonalization({ ...EMPTY_PERSONALIZATION, authReady: true });
+        return;
+      }
 
-      const [{ data: savedRows }, { data: profile }] = await Promise.all([
-        supabase.from("saved_properties").select("property_id").eq("user_id", userId),
-        supabase.from("profiles").select("primary_role, preferred_tenant_type").eq("id", userId).maybeSingle(),
-      ]);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("primary_role, preferred_tenant_type")
+        .eq("id", userId)
+        .maybeSingle();
 
       if (cancelled) return;
       setPersonalization({
         userId,
-        savedPropertyIds: (savedRows ?? []).map((row) => row.property_id as string),
         preferredTenantType: normalizeTenantType(profile?.preferred_tenant_type),
         canList: profile?.primary_role === "owner" || profile?.primary_role === "agent",
+        authReady: true,
       });
     }
 
@@ -70,17 +75,26 @@ export function HomesSearchExperience({ children, initialSearch }: { children: R
     };
   }, [supabase]);
 
+  const savedStoreKey = personalization.authReady
+    ? personalization.userId ?? "anonymous"
+    : "auth-loading";
+
   return (
     <>
       <ProductNavigation authenticated={Boolean(personalization.userId)} canList={personalization.canList} current="explore" />
       {children}
       <MobileMapModel>
-        <RenterMapSearch
+        <SavedHomesProvider
+          key={savedStoreKey}
           userId={personalization.userId}
-          initialSavedPropertyIds={personalization.savedPropertyIds}
-          initialSearch={initialSearch}
-          preferredTenantType={personalization.preferredTenantType}
-        />
+          authReady={personalization.authReady}
+        >
+          <RenterMapSearch
+            userId={personalization.userId}
+            initialSearch={initialSearch}
+            preferredTenantType={personalization.preferredTenantType}
+          />
+        </SavedHomesProvider>
       </MobileMapModel>
     </>
   );
