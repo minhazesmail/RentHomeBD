@@ -2,6 +2,17 @@
 
 begin;
 
+create or replace function pg_temp.assert_true(condition boolean, message text)
+returns void
+language plpgsql
+as $$
+begin
+  if condition is not true then
+    raise exception 'Assertion failed: %', message;
+  end if;
+end;
+$$;
+
 insert into auth.users (id, email, raw_user_meta_data)
 values
   ('44444444-4444-4444-8444-444444444444', 'renter-support@example.com', '{"role":"renter","display_name":"Renter Support QA"}'::jsonb),
@@ -20,10 +31,12 @@ select public.submit_support_request(
 ) as anonymous_support_request;
 reset role;
 
-select case when count(*) = 1 then 1 else 1 / 0 end as anonymous_request_persisted
-from public.support_requests where email = 'locked-out@example.com' and category = 'account_recovery';
+select pg_temp.assert_true(
+  (select count(*) = 1 from public.support_requests where email = 'locked-out@example.com' and category = 'account_recovery'),
+  'anonymous support request should persist'
+);
 
--- Authenticated requests are attached to the caller and visible only as their own request.
+-- Authenticated requests are attached to the caller and visible as their own request.
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '44444444-4444-4444-8444-444444444444', true);
@@ -35,8 +48,10 @@ select public.submit_support_request(
   'Please start the verified process for a copy of the data associated with my account.',
   '{}'::jsonb
 );
-select case when count(*) = 1 then 1 else 1 / 0 end as user_can_read_own_request
-from public.support_requests where user_id = '44444444-4444-4444-8444-444444444444';
+select pg_temp.assert_true(
+  (select count(*) = 1 from public.support_requests where user_id = '44444444-4444-4444-8444-444444444444'),
+  'authenticated user should see their own support request'
+);
 reset role;
 
 -- Seed an existing conversation; blocking is allowed only between real participants.
@@ -47,14 +62,16 @@ insert into public.conversations (id, property_id, renter_id, owner_id, renter_d
 values ('cccccccc-cccc-4ccc-8ccc-cccccccccccc', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', '44444444-4444-4444-8444-444444444444', '55555555-5555-4555-8555-555555555555', 'Renter Support QA', 'Owner Support QA', 'Support QA home', now());
 set local session_replication_role = origin;
 
+-- Renter blocks owner: block state is visible and direct Data API-style message insert fails.
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '44444444-4444-4444-8444-444444444444', true);
 select set_config('request.jwt.claims', '{"role":"authenticated","sub":"44444444-4444-4444-8444-444444444444"}', true);
-select case when public.set_user_block('55555555-5555-4555-8555-555555555555', true) then 1 else 1 / 0 end as block_succeeds;
-select case when blocked and blocked_by_me then 1 else 1 / 0 end as block_state_visible
-from public.get_conversation_block_state('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
-
+select pg_temp.assert_true(public.set_user_block('55555555-5555-4555-8555-555555555555', true), 'renter block should succeed');
+select pg_temp.assert_true(
+  (select blocked and blocked_by_me from public.get_conversation_block_state('cccccccc-cccc-4ccc-8ccc-cccccccccccc')),
+  'renter should see own block state'
+);
 do $$
 begin
   begin
@@ -68,10 +85,39 @@ begin
   end;
 end;
 $$;
+select pg_temp.assert_true(not public.set_user_block('55555555-5555-4555-8555-555555555555', false), 'renter unblock should succeed');
+reset role;
 
-select case when not public.set_user_block('55555555-5555-4555-8555-555555555555', false) then 1 else 1 / 0 end as unblock_succeeds;
-select case when not blocked and not blocked_by_me then 1 else 1 / 0 end as unblock_state_visible
-from public.get_conversation_block_state('cccccccc-cccc-4ccc-8ccc-cccccccccccc');
+-- Owner blocks renter: renter cannot see the owner's private block row directly,
+-- but SECURITY DEFINER trigger validation must still enforce it.
+set local role authenticated;
+select set_config('request.jwt.claim.role', 'authenticated', true);
+select set_config('request.jwt.claim.sub', '55555555-5555-4555-8555-555555555555', true);
+select set_config('request.jwt.claims', '{"role":"authenticated","sub":"55555555-5555-4555-8555-555555555555"}', true);
+select pg_temp.assert_true(public.set_user_block('44444444-4444-4444-8444-444444444444', true), 'owner block should succeed');
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claim.role', 'authenticated', true);
+select set_config('request.jwt.claim.sub', '44444444-4444-4444-8444-444444444444', true);
+select set_config('request.jwt.claims', '{"role":"authenticated","sub":"44444444-4444-4444-8444-444444444444"}', true);
+select pg_temp.assert_true(
+  (select blocked and not blocked_by_me from public.get_conversation_block_state('cccccccc-cccc-4ccc-8ccc-cccccccccccc')),
+  'renter should learn that messaging is blocked without seeing owner block row'
+);
+do $$
+begin
+  begin
+    insert into public.messages (conversation_id, sender_id, body)
+    values ('cccccccc-cccc-4ccc-8ccc-cccccccccccc', '44444444-4444-4444-8444-444444444444', 'Other-party block must also stop this');
+    raise exception 'expected other-party block to reject message';
+  exception when others then
+    if position('Messaging is blocked between these accounts' in sqlerrm) = 0 then
+      raise;
+    end if;
+  end;
+end;
+$$;
 reset role;
 
 rollback;
