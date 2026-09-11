@@ -2,6 +2,11 @@
   "name": "renthomebd",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.19.0",
+  "engines": {
+    "node": "24.20.0",
+    "npm": "11.19.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -17,6 +22,8 @@
     "navigationqa": "node scripts/check-navigation-search-validation.mjs",
     "messageqa": "node scripts/check-message-thread-resilience.mjs",
     "trustabuseqa": "node scripts/check-conversation-trust-abuse-controls.mjs",
+    "cssqa": "node scripts/check-orphan-css.mjs",
+    "mediaqa": "node scripts/check-public-media-renewal.mjs",
     "uiqa": "node scripts/check-ui-regressions.mjs && node scripts/check-theme.mjs",
     "themeqa": "node scripts/check-theme.mjs",
     "themebrowser": "node scripts/check-theme-browser.mjs",
