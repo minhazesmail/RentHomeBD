@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getSupportCopy } from "@/i18n/support-copy";
 import { useLocale } from "@/i18n/use-locale";
@@ -24,7 +25,7 @@ export function ConversationSafetyControls({
 
   useEffect(() => {
     let active = true;
-    const supabase = createClient();
+    const supabase = createClient() as unknown as SupabaseClient;
     void supabase.rpc("get_conversation_block_state", { conversation_uuid: conversationId }).then(({ data }) => {
       if (!active) return;
       const row = Array.isArray(data) ? data[0] : data;
@@ -37,7 +38,7 @@ export function ConversationSafetyControls({
     const shouldBlock = !state?.blocked_by_me;
     setBusy(true);
     setError(null);
-    const supabase = createClient();
+    const supabase = createClient() as unknown as SupabaseClient;
     const { error: blockError } = await supabase.rpc("set_user_block", { blocked_user: otherUserId, should_block: shouldBlock });
     if (blockError) {
       setError(copy.blockError);
