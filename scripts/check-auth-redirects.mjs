@@ -52,7 +52,14 @@ assert.equal(
 const confirmRoutePath = path.join(root, "src", "app", "auth", "confirm", "route.ts");
 const confirmRoute = fs.readFileSync(confirmRoutePath, "utf8");
 assert.match(confirmRoute, /NEXT_PUBLIC_APP_URL/);
+assert.match(confirmRoute, /process\.env\.VERCEL_URL/);
+assert.match(confirmRoute, /process\.env\.VERCEL === "1"/);
 assert.match(confirmRoute, /safeRedirectUrl\(trustedAppUrl\(\), destination\)/);
+assert.doesNotMatch(
+  confirmRoute,
+  /headers\s*\(/,
+  "auth confirmation must not derive its trusted origin from request headers",
+);
 assert.doesNotMatch(
   confirmRoute,
   /\.pathname\s*=/,
@@ -74,4 +81,4 @@ const authForm = fs.readFileSync(authFormPath, "utf8");
 assert.match(authForm, /const resetDestination = `\/auth\/reset\?next=\$\{encodeURIComponent\(safeNext\)\}`/);
 assert.match(authForm, /next=\$\{encodeURIComponent\(resetDestination\)\}/);
 
-console.log("Auth redirect QA passed: nested path/query/hash destinations stay same-origin and intact.");
+console.log("Auth redirect QA passed: nested path/query/hash destinations stay same-origin and Vercel previews use only platform-controlled origin fallback.");
