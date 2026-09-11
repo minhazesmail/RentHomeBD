@@ -7,6 +7,8 @@ import editorStyles from "@/components/listing-editor.module.css";
 import { ListingWorkflowNav } from "@/components/listing-workflow-nav";
 import { ProductNavigation } from "@/components/product-navigation";
 import { PropertyListingForm } from "@/components/property-listing-form";
+import { getLocale } from "@/i18n/get-locale";
+import { getWorkflowCopy } from "@/i18n/workflow-copy";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import "../listing-media-styles.css";
@@ -28,7 +30,8 @@ export default async function NewPropertyPage({
 }: {
   searchParams: Promise<NewPropertySearchParams>;
 }) {
-  const auth = await requireOwnerOrAgent();
+  const [auth, locale] = await Promise.all([requireOwnerOrAgent(), getLocale()]);
+  const copy = getWorkflowCopy(locale).owner.page;
   const params = await searchParams;
   const requestedDraftId = firstValue(params.draft)?.trim();
 
@@ -51,8 +54,6 @@ export default async function NewPropertyPage({
       .maybeSingle(),
   ]);
 
-  // If an earlier save committed before the browser lost the response, resume
-  // through the normal edit route instead of presenting another blank form.
   if (existingDraft) {
     redirect(`/owner/properties/${draftId}`);
   }
@@ -62,11 +63,11 @@ export default async function NewPropertyPage({
       <ProductNavigation authenticated canList current="properties" />
       <header className="listing-page-header listing-editor-header">
         <div>
-          <p className="eyebrow">Owner workspace · New listing</p>
-          <h1 className="listing-page-title">Create a rental listing</h1>
-          <p className="intro">Work through one renter-facing step at a time. Your readiness panel stays visible as the listing becomes ready for review.</p>
+          <p className="eyebrow">{copy.newEyebrow}</p>
+          <h1 className="listing-page-title">{copy.newTitle}</h1>
+          <p className="intro">{copy.newDescription}</p>
         </div>
-        <Link className="text-link" href="/owner">Back to properties</Link>
+        <Link className="text-link" href="/owner">{copy.backToProperties}</Link>
       </header>
 
       <div className={editorStyles.editorShell}>
