@@ -20,7 +20,7 @@ function translationLeafPaths(relativePath) {
   const source = read(relativePath);
   const stack = [];
   const keys = new Set();
-  for (const line of source.split("\n")) {
+  for (const line of source.split(/\r?\n/)) {
     const match = line.match(/^(\s*)([A-Za-z][A-Za-z0-9]*):\s*(.*)$/);
     if (!match) continue;
     const [, whitespace, key, value] = match;
@@ -37,6 +37,8 @@ function translationLeafPaths(relativePath) {
 
 const enKeys = translationLeafPaths("src/i18n/dictionaries/en.ts");
 const bnKeys = translationLeafPaths("src/i18n/dictionaries/bn.ts");
+if (enKeys.length === 0 || bnKeys.length === 0) failures.push("translation dictionaries parsed zero leaf keys");
+if (enKeys.length < 50 || bnKeys.length < 50) failures.push(`translation dictionary coverage unexpectedly small (en=${enKeys.length}, bn=${bnKeys.length})`);
 if (JSON.stringify(enKeys) !== JSON.stringify(bnKeys)) failures.push("translation dictionaries do not have matching leaf keys");
 
 requireText("src/i18n/config.ts", '["en", "bn"]', "supported locale list");
