@@ -1,6 +1,27 @@
 import type { Locale } from "@/i18n/config";
 
-const en = {
+export type SupportCategory = "account_recovery" | "otp_delivery" | "data_export" | "account_deletion" | "safety_abuse" | "other";
+
+type SupportCopy = {
+  email: string;
+  category: string;
+  categories: Record<SupportCategory, string>;
+  subject: string;
+  details: string;
+  detailsHelp: string;
+  submit: string;
+  sending: string;
+  sent: string;
+  error: string;
+  manual: string;
+  block: string;
+  unblock: string;
+  blocked: string;
+  report: string;
+  blockError: string;
+};
+
+const en: SupportCopy = {
   email: "Email for replies",
   category: "What do you need help with?",
   categories: {
@@ -24,9 +45,9 @@ const en = {
   blocked: "Messaging is blocked in this conversation.",
   report: "Report safety issue",
   blockError: "Could not update the block right now.",
-} as const;
+};
 
-const bn: typeof en = {
+const bn: SupportCopy = {
   email: "উত্তরের জন্য ইমেইল",
   category: "কী বিষয়ে সহায়তা প্রয়োজন?",
   categories: {
@@ -52,5 +73,4 @@ const bn: typeof en = {
   blockError: "এখন ব্লক সেটিং পরিবর্তন করা যায়নি।",
 };
 
-export type SupportCategory = keyof typeof en.categories;
 export function getSupportCopy(locale: Locale) { return locale === "bn" ? bn : en; }
