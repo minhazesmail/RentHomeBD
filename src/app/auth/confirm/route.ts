@@ -6,10 +6,17 @@ import { createClient } from "@/lib/supabase/server";
 
 function trustedAppUrl() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (!appUrl) {
-    throw new Error("Missing required environment variable: NEXT_PUBLIC_APP_URL");
+  if (appUrl) return appUrl;
+
+  // VERCEL_URL is a platform-controlled deployment hostname, not a request
+  // header. Using it as the preview fallback keeps confirmation redirects
+  // same-deployment without reintroducing Host-header trust.
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (process.env.VERCEL === "1" && vercelUrl) {
+    return `https://${vercelUrl}`;
   }
-  return appUrl;
+
+  throw new Error("Missing required environment variable: NEXT_PUBLIC_APP_URL");
 }
 
 export async function GET(request: NextRequest) {
