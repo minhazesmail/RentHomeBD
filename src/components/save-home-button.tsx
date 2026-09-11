@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 
 import { SavedHomesProvider, useSavedHomesState } from "@/components/saved-homes-state";
+import { useLocale } from "@/i18n/use-locale";
+import { getWorkflowCopy } from "@/i18n/workflow-copy";
 
 function ContextualSaveHomeButton({
   propertyId,
@@ -12,6 +14,8 @@ function ContextualSaveHomeButton({
   compact: boolean;
 }) {
   const router = useRouter();
+  const { locale } = useLocale();
+  const copy = getWorkflowCopy(locale).saved.homes;
   const savedHomes = useSavedHomesState();
 
   if (!savedHomes) return null;
@@ -39,10 +43,10 @@ function ContextualSaveHomeButton({
         disabled={busy || !store.ready}
         aria-pressed={saved}
         aria-busy={busy || !store.ready}
-        aria-label={!store.ready ? "Loading saved home state" : saved ? "Remove from saved homes" : "Save this home"}
+        aria-label={!store.ready ? copy.loadingState : saved ? copy.removeSaved : copy.saveThisHome}
       >
         <span aria-hidden="true">{saved ? "♥" : "♡"}</span>
-        {!compact && (!store.ready ? "Loading…" : busy ? (saved ? "Saving…" : "Removing…") : saved ? "Saved home" : "Save home")}
+        {!compact && (!store.ready ? copy.loading : busy ? (saved ? copy.saving : copy.removing) : saved ? copy.savedHome : copy.saveHome)}
       </button>
       {message && <small className={compact ? "sr-only" : "save-home-error"} role="status">{message}</small>}
     </div>
