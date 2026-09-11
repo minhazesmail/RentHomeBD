@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Briefcase, CircleCheck, GraduationCap, User, Users } from "lucide-react";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 import type { MapListing } from "@/components/leaflet-map";
 import { SaveHomeButton } from "@/components/save-home-button";
+import { useRenewingPublicMedia } from "@/hooks/use-renewing-public-media";
 import { formatCurrency, formatNumber } from "@/i18n/format";
 import { getRenterResultsCopy } from "@/i18n/renter-results-copy";
 import { useLocale } from "@/i18n/use-locale";
@@ -34,29 +35,18 @@ function TenantBadge({ types, preference }: { types: TenantType[]; preference?: 
     : tone === "student" ? <GraduationCap {...iconProps} />
     : tone === "bachelor" ? (types.includes("job_holder") ? <Briefcase {...iconProps} /> : <User {...iconProps} />)
     : <CircleCheck {...iconProps} />;
-  const summary = !types.length
-    ? labels.unspecified
-    : types.includes("everyone")
-      ? labels.everyone
-      : types.map((type) => labels[type]).join(" · ");
-
+  const summary = !types.length ? labels.unspecified : types.includes("everyone") ? labels.everyone : types.map((type) => labels[type]).join(" · ");
   return <span className={`tenant-match-badge tenant-${tone}${compatibility === "match" ? " is-profile-match" : ""}`}>{icon}<span>{summary}</span></span>;
 }
 
-const RenterResultCard = memo(function RenterResultCard({
-  listing,
-  selected,
-  preference,
-  userId,
-  href,
-  onSelect,
-}: {
+const RenterResultCard = memo(function RenterResultCard({ listing, selected, preference, userId, href, onSelect, onMediaError }: {
   listing: MapListing;
   selected: boolean;
   preference?: TenantType;
   userId: string | null;
   href: string;
   onSelect: (id: string) => void;
+  onMediaError: (path: string) => void;
 }) {
   const { locale } = useLocale();
   const copy = getRenterResultsCopy(locale);
@@ -64,17 +54,15 @@ const RenterResultCard = memo(function RenterResultCard({
   const rent = listing.rent_bdt ? formatCurrency(listing.rent_bdt, locale) : copy.rentOnRequest;
   const bedrooms = listing.bedrooms == null ? "—" : formatNumber(listing.bedrooms, locale);
   const bathrooms = listing.bathrooms == null ? "—" : formatNumber(listing.bathrooms, locale);
-  const distance = listing.distance_meters === null
-    ? null
-    : listing.distance_meters < 1000
-      ? formatWorkflowText(copy.metersAway, { distance: formatNumber(Math.round(listing.distance_meters), locale) })
-      : formatWorkflowText(copy.kilometersAway, { distance: formatNumber(listing.distance_meters / 1000, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) });
+  const distance = listing.distance_meters === null ? null : listing.distance_meters < 1000
+    ? formatWorkflowText(copy.metersAway, { distance: formatNumber(Math.round(listing.distance_meters), locale) })
+    : formatWorkflowText(copy.kilometersAway, { distance: formatNumber(listing.distance_meters / 1000, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) });
 
   return (
     <div className={`renter-result-card-wrap tenant-compatibility-${compatibility}${selected ? " active" : ""}`}>
       <Link className="renter-result-card" href={href}>
         <div className="renter-result-image">
-          {listing.cover_url ? <Image src={listing.cover_url} alt="" width={320} height={220} sizes="(max-width: 900px) 40vw, 220px" /> : <span>⌂</span>}
+          {listing.cover_url ? <Image src={listing.cover_url} alt="" width={320} height={220} sizes="(max-width: 900px) 40vw, 220px" onError={() => { if (listing.cover_media_path) onMediaError(listing.cover_media_path); }} /> : <span>⌂</span>}
         </div>
         <div className="renter-result-copy">
           <TenantBadge types={listing.tenant_types ?? []} preference={preference} />
@@ -82,31 +70,17 @@ const RenterResultCard = memo(function RenterResultCard({
           <span>{listing.address_text || copy.locationOnMap}</span>
           {compatibility === "match" && <small className="tenant-preference-note is-match">{copy.matchesType}</small>}
           {compatibility === "mismatch" && <small className="tenant-preference-note is-mismatch">{copy.differentType}</small>}
-          <div className="renter-result-meta">
-            <b>{rent}</b>
-            <small>{bedrooms} {copy.bed} · {bathrooms} {copy.bath}</small>
-          </div>
+          <div className="renter-result-meta"><b>{rent}</b><small>{bedrooms} {copy.bed} · {bathrooms} {copy.bath}</small></div>
           {distance && <small>{distance}</small>}
         </div>
       </Link>
-      <button className="text-button renter-result-map-button" type="button" onClick={() => onSelect(listing.id)} aria-pressed={selected}>
-        {selected ? copy.shownOnMap : copy.showOnMap}
-      </button>
+      <button className="text-button renter-result-map-button" type="button" onClick={() => onSelect(listing.id)} aria-pressed={selected}>{selected ? copy.shownOnMap : copy.showOnMap}</button>
       <SaveHomeButton propertyId={listing.id} userId={userId} compact />
     </div>
   );
 });
 
-export const RenterResultsList = memo(function RenterResultsList({
-  listings,
-  busy,
-  customAreaActive,
-  selectedId,
-  preference,
-  userId,
-  propertyHref,
-  onSelect,
-}: {
+export const RenterResultsList = memo(function RenterResultsList({ listings, busy, customAreaActive, selectedId, preference, userId, propertyHref, onSelect }: {
   listings: MapListing[];
   busy: boolean;
   customAreaActive: boolean;
@@ -118,23 +92,15 @@ export const RenterResultsList = memo(function RenterResultsList({
 }) {
   const { locale } = useLocale();
   const copy = getRenterResultsCopy(locale);
+  const renewableItems = useMemo(() => listings.flatMap((listing) => listing.cover_media_path ? [{ path: listing.cover_media_path, initialUrl: listing.cover_url }] : []), [listings]);
+  const { urls, refresh } = useRenewingPublicMedia(renewableItems);
+  const liveListings = useMemo(() => listings.map((listing) => listing.cover_media_path && urls[listing.cover_media_path] ? { ...listing, cover_url: urls[listing.cover_media_path] } : listing), [listings, urls]);
+
   return (
     <div className="renter-results-list">
-      {!busy && listings.length === 0 && (
-        <div className="renter-empty">
-          {customAreaActive ? copy.noCustomAreaResults : copy.noResults}
-        </div>
-      )}
-      {listings.map((listing) => (
-        <RenterResultCard
-          key={listing.id}
-          listing={listing}
-          selected={selectedId === listing.id}
-          preference={preference}
-          userId={userId}
-          href={propertyHref(listing.id)}
-          onSelect={onSelect}
-        />
+      {!busy && liveListings.length === 0 && <div className="renter-empty">{customAreaActive ? copy.noCustomAreaResults : copy.noResults}</div>}
+      {liveListings.map((listing) => (
+        <RenterResultCard key={listing.id} listing={listing} selected={selectedId === listing.id} preference={preference} userId={userId} href={propertyHref(listing.id)} onSelect={onSelect} onMediaError={(path) => void refresh(path)} />
       ))}
     </div>
   );
