@@ -1,0 +1,29 @@
+name: Generate package lock
+
+on:
+  push:
+    branches: [fix/audit-complete-f20-f26]
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Record toolchain
+        run: |
+          node --version | tee node-version.txt
+          npm --version | tee npm-version.txt
+      - name: Generate lockfile
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Upload lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-lock-${{ github.sha }}
+          path: |
+            package-lock.json
+            node-version.txt
+            npm-version.txt
+          retention-days: 1
