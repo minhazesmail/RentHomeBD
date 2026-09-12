@@ -6,7 +6,7 @@ export function BrandLogo({ className = "" }: { className?: string }) {
 
   return (
     <Link className={classes} href="/" aria-label="NearBasha home">
-      <Image src="/nearbasha-logo.svg" alt="NearBasha" width={240} height={70} priority />
+      <Image src="/nearbasha-logo.svg" alt="NearBasha" width={1560} height={310} priority />
     </Link>
   );
 }

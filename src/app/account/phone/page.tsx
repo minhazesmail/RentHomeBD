@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import Link from "next/link";
 import { LockKeyhole, ShieldCheck } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -24,7 +25,7 @@ export default async function PhoneVerificationPage() {
     <main className="verification-shell phone-verification-shell">
       <header className="listing-page-header verification-page-header phone-verification-page-header">
         <div>
-          <Link className="brand-link compact-brand" href="/">NearBasha</Link>
+          <BrandLogo className="workspace-brand-logo" />
           <p className="eyebrow">{copy.pageEyebrow}</p>
           <h1 className="listing-page-title">{isVerified ? copy.pageVerifiedTitle : copy.pageUnverifiedTitle}</h1>
           <p className="intro">{copy.pageDescription}</p>

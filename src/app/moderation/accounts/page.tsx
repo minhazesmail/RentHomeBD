@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { ModerationWorkbenchNav } from "@/components/moderation-workbench-nav";
@@ -34,7 +34,7 @@ export default async function AccountVerificationPage({ searchParams }: { search
 
   return (
     <main className="owner-shell moderation-shell moderation-accounts-shell">
-      <header className="owner-header moderation-header"><div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">{copy.common.trustModeration}</p><h1 className="owner-title">{copy.accounts.title}</h1><p className="intro">{copy.accounts.intro}</p></div></header>
+      <header className="owner-header moderation-header"><div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.common.trustModeration}</p><h1 className="owner-title">{copy.accounts.title}</h1><p className="intro">{copy.accounts.intro}</p></div></header>
       <ModerationWorkbenchNav current="accounts" counts={counts} />
       {params.notice === "verified" && <div className="success-message">{copy.accounts.verifiedNotice}</div>}
       {params.notice === "revoked" && <div className="success-message">{copy.accounts.revokedNotice}</div>}

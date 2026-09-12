@@ -59,7 +59,7 @@
   vertical-align: 1px;
 }
 .brand-logo img {
-  filter: drop-shadow(0 6px 14px rgba(13,95,67,.08));
+  filter: none;
 }.brand-logo {
   display: inline-flex;
   align-items: center;
@@ -75,7 +75,7 @@
   object-fit: contain;
 }
 .property-brand-logo img {
-  filter: drop-shadow(0 6px 14px rgba(13,95,67,.08));
+  filter: none;
 }.property-brand-logo {
   display: inline-flex;
   align-items: center;
@@ -127,7 +127,7 @@
   letter-spacing: -0.04em;
 }
 .auth-brand-logo img {
-  filter: drop-shadow(0 6px 14px rgba(13,95,67,.08));
+  filter: none;
 }.auth-brand-logo {
   display: inline-flex;
   align-items: center;
@@ -203,7 +203,7 @@
   }
 }
 .homes-brand-logo img {
-  filter: drop-shadow(0 6px 14px rgba(13,95,67,.08));
+  filter: none;
 }.homes-brand-logo {
   display: inline-flex;
   align-items: center;
@@ -256,4 +256,18 @@
 
 .renter-dashboard-header .brand-logo {
   margin-bottom: 22px;
+}
+
+/* Architectural identity: preserve the full lockup at compact navigation sizes. */
+.brand-logo img {
+  width: clamp(148px, 18vw, 210px);
+  height: auto;
+  aspect-ratio: 1560 / 310;
+  max-width: 100%;
+}
+.landing-nav .brand-logo img { width: clamp(148px, 18vw, 210px); height: auto; }
+.workspace-brand-logo { margin-bottom: 20px; }
+.workspace-brand-logo img { width: 180px; height: auto; }
+@media (max-width: 760px) {
+  .landing-nav .brand-logo img { width: 148px; height: auto; }
 }

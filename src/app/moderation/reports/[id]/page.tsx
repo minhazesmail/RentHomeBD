@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -42,7 +43,7 @@ export default async function ReportReviewPage({ params, searchParams }: { param
   return (
     <main className="listing-shell moderation-shell moderation-report-detail-shell">
       <header className="listing-page-header moderation-header">
-        <div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">{copy.reportDetail.eyebrow}</p><h1 className="listing-page-title">{property.title || copy.common.reportedListing}</h1><p className="intro">{formatModerationText(copy.reportDetail.reportFrom, { name: reporter?.display_name || copy.common.nearbashaUser, date: reportDate })}</p></div>
+        <div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.reportDetail.eyebrow}</p><h1 className="listing-page-title">{property.title || copy.common.reportedListing}</h1><p className="intro">{formatModerationText(copy.reportDetail.reportFrom, { name: reporter?.display_name || copy.common.nearbashaUser, date: reportDate })}</p></div>
         <Link className="text-link" href="/moderation/reports">{copy.reportDetail.back}</Link>
       </header>
       <ModerationWorkbenchNav current="reports" counts={counts} />

@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -26,7 +27,7 @@ export default async function ModerationQueuePage({ searchParams }: { searchPara
 
   return (
     <main className="owner-shell moderation-shell moderation-queue-shell">
-      <header className="owner-header moderation-header"><div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">{copy.common.moderation}</p><h1 className="owner-title">{copy.listings.title}</h1><p className="intro">{copy.listings.intro}</p></div></header>
+      <header className="owner-header moderation-header"><div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.common.moderation}</p><h1 className="owner-title">{copy.listings.title}</h1><p className="intro">{copy.listings.intro}</p></div></header>
       <ModerationWorkbenchNav current="listings" counts={counts} />
       {params.notice === "approved" && <div className="success-message">{copy.listings.approved}</div>}
       {params.notice === "rejected" && <div className="success-message">{copy.listings.rejected}</div>}
