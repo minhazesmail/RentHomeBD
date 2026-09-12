@@ -32,7 +32,7 @@ const boundsMigration = read(boundsMigrationFile).toLowerCase();
 // F12: the map serializes its current center/filter/sort/selection into returnTo.
 // The redesigned workspace also adds result-list scroll position. The detail route
 // must consume the value, restrict it to /homes, and feed the complete relative
-// URL (including query/hash) back to Next Link.
+// URL (including query/hash) back to Next Link. Link text may be localized.
 for (const contract of [
   "searchReturnPath(propertyId)",
   "returnTo=${encodeURIComponent(searchReturnPath(propertyId))}",
@@ -40,7 +40,7 @@ for (const contract of [
   "searchParams: Promise<Record<string, string | string[] | undefined>>;",
   'typeof query.returnTo === "string" ? query.returnTo : null',
   "safeHomesReturnPath",
-  'href={returnTo}>Back to map</Link>',
+  'href={returnTo}>{copy.nav.backToMap}</Link>',
 ]) {
   requireContract(contract.includes("searchReturnPath") || contract.includes("returnTo=${") ? mapSearch : detail, contract, contract.includes("searchReturnPath") || contract.includes("returnTo=${") ? mapSearchFile : detailFile);
 }
@@ -98,12 +98,15 @@ for (const retiredPattern of [
 }
 
 for (const contract of [
-  "check (radius_km is not null and radius_km between 0.5 and 100)",
-  "check (min_bedrooms is null or min_bedrooms between 0 and 20)",
-  "check (min_rent is null or min_rent between 0 and 10000000)",
-  "check (max_rent is null or max_rent between 0 and 10000000)",
+  "radius_km is not null",
+  "radius_km >= 0.5 and radius_km <= 100",
+  "min_rent is null or (min_rent >= 0 and min_rent <= 10000000)",
+  "max_rent is null or (max_rent >= 0 and max_rent <= 10000000)",
+  "min_bedrooms is null or (min_bedrooms >= 0 and min_bedrooms <= 20)",
 ]) {
-  requireContract(boundsMigration, contract, boundsMigrationFile);
+  if (!boundsMigration.includes(contract)) {
+    throw new Error(`${boundsMigrationFile} is missing required F13 database bound: ${contract}`);
+  }
 }
 
 console.log("F12/F13 QA passed: property details restore validated map context and saved-search edits honor database search bounds.");
