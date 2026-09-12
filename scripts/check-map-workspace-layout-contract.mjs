@@ -49,6 +49,16 @@ requireText(
 );
 requireText(fixesCss, "grid-column: 1 / -1;", "toolbar/workspace full-span guard");
 requireText(fixesCss, "grid-auto-flow: row;", "desktop row flow guard");
+requirePattern(
+  fixesCss,
+  /\.nb-global-shell--renter \.renter-search-toolbar\s*\{[^}]*grid-row:\s*1;/s,
+  "toolbar explicit desktop grid row",
+);
+requirePattern(
+  fixesCss,
+  /\.nb-global-shell--renter \.renter-workspace\s*\{[^}]*grid-row:\s*2;/s,
+  "workspace explicit desktop grid row",
+);
 
 // The toolbar currently carries the historic renter-filter-panel class for
 // shared form styling. These geometry resets must remain explicit so the old
@@ -91,7 +101,9 @@ requireText(ci, "run: npm run mapworkspacebrowser", "rendered map workspace CI c
 requireText(browserQa, 'name: "reported-desktop", width: 1272, height: 638', "reported desktop viewport coverage");
 requireText(browserQa, 'const scenarios = ["light", "dark"]', "light/dark geometry coverage");
 requireText(browserQa, "toolbar does not span the full renter search shell", "toolbar full-span rendered assertion");
-requireText(browserQa, "workspace starts beside/under the toolbar instead of below it", "toolbar/workspace stacking rendered assertion");
+requireText(browserQa, 'toolbar.gridRowStart !== "1"', "toolbar rendered grid-row assertion");
+requireText(browserQa, 'workspace.gridRowStart !== "2"', "workspace rendered grid-row assertion");
+requireText(browserQa, "The toolbar is sticky", "sticky geometry regression rationale");
 
 if (failures.length) {
   console.error("Map workspace layout contract QA failed:\n" + failures.map((failure) => `- ${failure}`).join("\n"));
