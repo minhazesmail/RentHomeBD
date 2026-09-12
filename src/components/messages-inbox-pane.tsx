@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatNumber } from "@/i18n/format";
 import { getLocale } from "@/i18n/get-locale";
 import { formatWorkflowText, getWorkflowCopy } from "@/i18n/workflow-copy";
+import { messageConversationHref, messageInboxHref } from "@/lib/message-navigation";
 import { formatExactMessageTime, formatInboxMessageTime } from "@/lib/message-time";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,37 +27,28 @@ type ConversationSummary = {
 
 type Props = {
   userId: string;
+  renderedAtMs: number;
   page?: number;
   query?: string;
   unreadOnly?: boolean;
   currentConversationId?: string | null;
 };
 
-function inboxHref({ page = 1, query = "", unreadOnly = false }: { page?: number; query?: string; unreadOnly?: boolean }) {
-  const params = new URLSearchParams();
-  if (query) params.set("q", query);
-  if (unreadOnly) params.set("filter", "unread");
-  if (page > 1) params.set("page", String(page));
-  const search = params.toString();
-  return search ? `/messages?${search}` : "/messages";
-}
-
-function conversationHref(id: string, query: string, unreadOnly: boolean) {
-  const params = new URLSearchParams();
-  if (query) params.set("q", query);
-  if (unreadOnly) params.set("filter", "unread");
-  const search = params.toString();
-  return search ? `/messages/${id}?${search}` : `/messages/${id}`;
-}
-
-export async function MessagesInboxPane({ userId, page = 1, query = "", unreadOnly = false, currentConversationId = null }: Props) {
+export async function MessagesInboxPane({
+  userId,
+  renderedAtMs,
+  page = 1,
+  query = "",
+  unreadOnly = false,
+  currentConversationId = null,
+}: Props) {
   const [supabase, locale] = await Promise.all([
     createClient() as unknown as Promise<SupabaseClient>,
     getLocale(),
   ]);
   const copy = getWorkflowCopy(locale).messages.inbox;
   const offset = (page - 1) * INBOX_PAGE_SIZE;
-  const renderedAt = new Date();
+  const renderedAt = new Date(renderedAtMs);
 
   const { data, error } = await supabase
     .rpc("get_message_inbox", { search_text: query || null, unread_only: unreadOnly })
@@ -67,7 +59,7 @@ export async function MessagesInboxPane({ userId, page = 1, query = "", unreadOn
   const hasNextPage = pageRows.length > INBOX_PAGE_SIZE;
   const conversations = pageRows.slice(0, INBOX_PAGE_SIZE);
   const hasOrganizationFilters = Boolean(query || unreadOnly);
-  const firstPageHref = inboxHref({ query, unreadOnly });
+  const firstPageHref = messageInboxHref({ query, unreadOnly });
 
   const propertyIds = Array.from(new Set(conversations.map((conversation) => conversation.property_id)));
   const { data: mediaRows } = propertyIds.length
@@ -109,11 +101,11 @@ export async function MessagesInboxPane({ userId, page = 1, query = "", unreadOn
           <input id="message-search" name="q" type="search" defaultValue={query} maxLength={120} placeholder={copy.searchPlaceholder} />
           {unreadOnly && <input type="hidden" name="filter" value="unread" />}
           <button className="secondary-button" type="submit">{copy.search}</button>
-          {query && <Link className="text-link" href={inboxHref({ unreadOnly })}>{copy.clear}</Link>}
+          {query && <Link className="text-link" href={messageInboxHref({ unreadOnly })}>{copy.clear}</Link>}
         </form>
         <nav className="messages-filter-tabs" aria-label={copy.filtersAria}>
-          <Link className={!unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query })} aria-current={!unreadOnly ? "page" : undefined}>{copy.all}</Link>
-          <Link className={unreadOnly ? "messages-filter-active" : ""} href={inboxHref({ query, unreadOnly: true })} aria-current={unreadOnly ? "page" : undefined}>{copy.unread}</Link>
+          <Link className={!unreadOnly ? "messages-filter-active" : ""} href={messageInboxHref({ query })} aria-current={!unreadOnly ? "page" : undefined}>{copy.all}</Link>
+          <Link className={unreadOnly ? "messages-filter-active" : ""} href={messageInboxHref({ query, unreadOnly: true })} aria-current={unreadOnly ? "page" : undefined}>{copy.unread}</Link>
         </nav>
       </section>
 
@@ -137,7 +129,7 @@ export async function MessagesInboxPane({ userId, page = 1, query = "", unreadOn
             return (
               <Link
                 className={`conversation-card messages-workspace-conversation${active ? " is-active" : ""}`}
-                href={conversationHref(conversation.id, query, unreadOnly)}
+                href={messageConversationHref({ id: conversation.id, page, query, unreadOnly })}
                 key={conversation.id}
                 aria-current={active ? "page" : undefined}
               >
@@ -161,9 +153,9 @@ export async function MessagesInboxPane({ userId, page = 1, query = "", unreadOn
 
       {(page > 1 || hasNextPage) && (
         <nav className="messages-pagination messages-workspace-pagination" aria-label={copy.pagesAria}>
-          {page > 1 ? <Link className="secondary-button link-button" href={inboxHref({ page: page - 1, query, unreadOnly })}>{copy.newer}</Link> : <span />}
+          {page > 1 ? <Link className="secondary-button link-button" href={messageInboxHref({ page: page - 1, query, unreadOnly })}>{copy.newer}</Link> : <span />}
           <span className="messages-page-number">{formatWorkflowText(copy.page, { page: formatNumber(page, locale) })}</span>
-          {hasNextPage ? <Link className="secondary-button link-button" href={inboxHref({ page: page + 1, query, unreadOnly })}>{copy.older}</Link> : <span />}
+          {hasNextPage ? <Link className="secondary-button link-button" href={messageInboxHref({ page: page + 1, query, unreadOnly })}>{copy.older}</Link> : <span />}
         </nav>
       )}
     </aside>

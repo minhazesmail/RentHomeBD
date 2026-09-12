@@ -10,6 +10,8 @@ import { formatCurrency, formatDate } from "@/i18n/format";
 import { getLocale } from "@/i18n/get-locale";
 import { formatWorkflowText, getWorkflowCopy, type WorkflowCopy } from "@/i18n/workflow-copy";
 import { requireUser } from "@/lib/auth";
+import { messageInboxHref, normalizeMessagePage } from "@/lib/message-navigation";
+import { serverNowMs } from "@/lib/server-clock";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +34,7 @@ type Conversation = {
 type Message = { id: string; sender_id: string; body: string; created_at: string };
 type ParticipantTrust = { phone_verified: boolean };
 type PropertySummary = { rent_bdt: number | null; available_from: string | null };
-type ThreadSearchParams = { q?: string | string[]; filter?: string | string[] };
+type ThreadSearchParams = { page?: string | string[]; q?: string | string[]; filter?: string | string[] };
 type ThreadCopy = WorkflowCopy["messages"]["thread"];
 
 function firstValue(value: string | string[] | undefined) {
@@ -43,11 +45,12 @@ function propertyAvailability(
   value: string | null | undefined,
   locale: Awaited<ReturnType<typeof getLocale>>,
   copy: ThreadCopy,
+  nowMs: number,
 ) {
   if (!value) return copy.availabilityMissing;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return copy.availabilityMissing;
-  if (date.getTime() <= Date.now()) return copy.availableNow;
+  if (date.getTime() <= nowMs) return copy.availableNow;
   return formatWorkflowText(copy.availableDate, {
     date: formatDate(date, locale, { day: "numeric", month: "short", timeZone: "Asia/Dhaka" }),
   });
@@ -65,8 +68,10 @@ export default async function MessageThreadPage({
   const copy = getWorkflowCopy(locale).messages.thread;
   const { id } = await params;
   const resolvedSearchParams = await searchParams;
+  const page = normalizeMessagePage(resolvedSearchParams.page);
   const query = (firstValue(resolvedSearchParams.q) || "").trim().slice(0, 120);
   const unreadOnly = firstValue(resolvedSearchParams.filter) === "unread";
+  const nowMs = serverNowMs();
   const supabase = (await createClient()) as unknown as SupabaseClient;
 
   const { data: conversationData } = await supabase
@@ -118,11 +123,12 @@ export default async function MessageThreadPage({
   const propertyRent = propertySummary?.rent_bdt
     ? `${formatCurrency(Number(propertySummary.rent_bdt), locale)}${copy.perMonth}`
     : copy.rentOnRequest;
-  const availability = propertyAvailability(propertySummary?.available_from, locale, copy);
+  const availability = propertyAvailability(propertySummary?.available_from, locale, copy, nowMs);
   const { data: signedCover } = propertyMedia?.storage_path
     ? await supabase.storage.from("property-media").createSignedUrl(propertyMedia.storage_path as string, MESSAGE_MEDIA_TTL_SECONDS)
     : { data: null };
   const propertyCoverUrl = signedCover?.signedUrl ?? null;
+  const inboxHref = messageInboxHref({ page, query, unreadOnly });
 
   return (
     <main className="messages-page messages-thread-route">
@@ -130,6 +136,8 @@ export default async function MessageThreadPage({
       <div className="messages-workspace-shell">
         <MessagesInboxPane
           userId={auth.userId}
+          renderedAtMs={nowMs}
+          page={page}
           query={query}
           unreadOnly={unreadOnly}
           currentConversationId={conversation.id}
@@ -139,12 +147,12 @@ export default async function MessageThreadPage({
           <div className="thread-shell messages-thread-shell">
             <header className="thread-header modern-thread-header">
               <div className="thread-identity-wrap">
-                <Link className="thread-back-button" href="/messages" aria-label={copy.back}>←</Link>
+                <Link className="thread-back-button" href={inboxHref} aria-label={copy.back}>←</Link>
                 <div className="thread-avatar" aria-hidden="true">{initial}</div>
                 <div className="thread-identity">
                   <div className="thread-name-row">
                     <h1>{displayOtherName}</h1>
-                    {phoneVerified && <span className="message-verified-badge" title={copy.phoneVerified}>{copy.verified}</span>}
+                    {phoneVerified && <span className="message-verified-badge" title={copy.phoneVerified}>{copy.phoneVerified}</span>}
                   </div>
                   <p>{otherRole}</p>
                   <ConversationSafetyControls conversationId={conversation.id} otherUserId={otherUserId} />
