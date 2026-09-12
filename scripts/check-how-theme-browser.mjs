@@ -151,6 +151,15 @@ async function captureSection(page, label) {
   await section.screenshot({ path: path.join(artifactRoot, `${label}.png`) });
 }
 
+async function selectPersona(page, persona) {
+  const owner = persona === "owner";
+  await page.locator(owner ? "#landing-persona-tab-owner" : "#landing-persona-tab-renter").click();
+  await page.waitForFunction(
+    (shouldBeOwner) => document.querySelector(".landing-how-tabs-shell")?.classList.contains("owner") === shouldBeOwner,
+    owner,
+  );
+}
+
 async function main() {
   await fs.mkdir(artifactRoot, { recursive: true });
   const browser = await chromium.launch({ headless: true });
@@ -158,27 +167,36 @@ async function main() {
   const snapshots = [];
 
   try {
-    for (const viewport of viewports) {
-      for (const scenario of scenarios) {
-        for (const locale of locales) {
-          const context = await browser.newContext({
-            viewport: { width: viewport.width, height: viewport.height },
-            colorScheme: scenario.colorScheme,
-            reducedMotion: "reduce",
-          });
+    // Locale and theme preference are request inputs, so each combination gets
+    // one real server navigation. Viewport is purely responsive state: resize the
+    // same hydrated page instead of repeatedly re-rendering the dynamic landing
+    // route. This preserves every breakpoint/persona assertion while keeping the
+    // specialized suite from exhausting the server after the larger theme matrix.
+    for (const scenario of scenarios) {
+      for (const locale of locales) {
+        const context = await browser.newContext({
+          viewport: { width: viewports[0].width, height: viewports[0].height },
+          colorScheme: scenario.colorScheme,
+          reducedMotion: "reduce",
+        });
 
-          await context.addCookies([
-            { name: "nb_theme", value: scenario.preference, url: baseURL, sameSite: "Lax" },
-            { name: "nb_locale", value: locale, url: baseURL, sameSite: "Lax" },
-          ]);
+        await context.addCookies([
+          { name: "nb_theme", value: scenario.preference, url: baseURL, sameSite: "Lax" },
+          { name: "nb_locale", value: locale, url: baseURL, sameSite: "Lax" },
+        ]);
 
-          const page = await context.newPage();
-          const prefix = `how-${locale}-${scenario.name}-${viewport.name}`;
+        const page = await context.newPage();
+        const requestPrefix = `how-${locale}-${scenario.name}`;
 
-          try {
-            const response = await page.goto(`${baseURL}/`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-            if (!response || response.status() >= 400) throw new Error(`HTTP ${response?.status() ?? "no response"}`);
-            await page.waitForFunction(() => document.documentElement.dataset.themeReady === "true", null, { timeout: 8_000 });
+        try {
+          const response = await page.goto(`${baseURL}/`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+          if (!response || response.status() >= 400) throw new Error(`HTTP ${response?.status() ?? "no response"}`);
+          await page.waitForFunction(() => document.documentElement.dataset.themeReady === "true", null, { timeout: 8_000 });
+
+          for (const viewport of viewports) {
+            const prefix = `${requestPrefix}-${viewport.name}`;
+            await page.setViewportSize({ width: viewport.width, height: viewport.height });
+            await selectPersona(page, "renter");
             await page.locator(".landing-how").scrollIntoViewIfNeeded();
             await page.waitForTimeout(120);
 
@@ -187,8 +205,7 @@ async function main() {
             validateSnapshot(renter, `${prefix}-renter`, failures);
             await captureSection(page, `${prefix}-renter`);
 
-            await page.locator("#landing-persona-tab-owner").click();
-            await page.waitForFunction(() => document.querySelector(".landing-how-tabs-shell")?.classList.contains("owner"));
+            await selectPersona(page, "owner");
             await page.waitForTimeout(80);
 
             const owner = await inspectJourney(page);
@@ -196,13 +213,13 @@ async function main() {
             validateSnapshot(owner, `${prefix}-owner`, failures);
             if (owner.persona !== "owner") failures.push(`${prefix}-owner: owner interaction did not activate owner state`);
             await captureSection(page, `${prefix}-owner`);
-          } catch (error) {
-            failures.push(`${prefix}: ${error instanceof Error ? error.message : String(error)}`);
-            try { await captureSection(page, `${prefix}-failure`); } catch { /* page may not have rendered */ }
           }
-
-          await context.close();
+        } catch (error) {
+          failures.push(`${requestPrefix}: ${error instanceof Error ? error.message : String(error)}`);
+          try { await captureSection(page, `${requestPrefix}-failure`); } catch { /* page may not have rendered */ }
         }
+
+        await context.close();
       }
     }
   } finally {
