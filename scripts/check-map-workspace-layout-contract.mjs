@@ -61,13 +61,18 @@ requirePattern(
   "toolbar legacy-card geometry reset",
 );
 
-// The guard must load after the canonical workspace stylesheet in the same
-// component-appearance layer so it can neutralize declarations inherited from
-// route-base without escalating specificity or using !important.
+// The guard belongs to route-fixes: later than the legacy route-base declarations
+// it neutralizes, but earlier than the canonical component-appearance stylesheet.
+// This avoids duplicate component ownership while preserving the intended cascade.
 requireText(
   manifest,
-  '@import "./map-workspace.css" layer(component-appearance);\n@import "./map-workspace-layout-fixes.css" layer(component-appearance);',
-  "map workspace layout guard import order",
+  '@import "./property-detail-spacing-fixes.css" layer(route-fixes);\n@import "./map-workspace-layout-fixes.css" layer(route-fixes);',
+  "map workspace residual guard route-fixes ownership",
+);
+requireText(
+  manifest,
+  '@import "./map-workspace.css" layer(component-appearance);',
+  "canonical map workspace component-appearance ownership",
 );
 
 if (failures.length) {
@@ -75,4 +80,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Map workspace layout contract QA passed: legacy grid/card geometry is neutralized.");
+console.log("Map workspace layout contract QA passed: legacy grid/card geometry is neutralized without duplicate component ownership.");
