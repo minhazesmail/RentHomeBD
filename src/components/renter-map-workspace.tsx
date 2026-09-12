@@ -263,7 +263,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     searchAbortRef.current = null;
     setBusy(false);
     setMessage(null);
-  }, []);
+  }, [setBusy, setMessage]);
 
   const validateFilters = useCallback(() => {
     if (!tenantType) return workspaceCopy.toolbar.tenantRequired;
@@ -372,7 +372,28 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setMapDirty(false);
     searchAbortRef.current = null;
     setBusy(false);
-  }, [bedrooms, center, copy, currentAreaLabel, customArea, customAreaActive, maxRent, minRent, radiusKm, sortOption, supabase, tenantType, validateFilters, workspaceCopy.results.customArea]);
+  }, [
+    bedrooms,
+    center,
+    copy,
+    currentAreaLabel,
+    customArea,
+    customAreaActive,
+    maxRent,
+    minRent,
+    radiusKm,
+    setAppliedQuery,
+    setBusy,
+    setListings,
+    setMapDirty,
+    setMessage,
+    setSelectedId,
+    sortOption,
+    supabase,
+    tenantType,
+    validateFilters,
+    workspaceCopy.results.customArea,
+  ]);
 
   const handleCustomAreaChange = useCallback((points: [number, number][]) => {
     if (points.length > MAX_CUSTOM_AREA_VERTICES) {
@@ -381,7 +402,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     }
     setCustomArea(points);
     if (!drawingCustomArea && points.length >= 3) setMapDirty(true);
-  }, [copy, drawingCustomArea]);
+  }, [copy, drawingCustomArea, setCustomArea, setMapDirty, setMessage]);
 
   useEffect(() => { runSearchRef.current = runSearch; }, [runSearch]);
   useEffect(() => {
@@ -390,13 +411,12 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       else setBusy(false);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [initialTenantType]);
+  }, [initialTenantType, setBusy]);
   useEffect(() => {
     if (tenantType || !preferredTenantType || preferredTenantType === "everyone") return;
-    setTenantType(preferredTenantType);
-    const timer = window.setTimeout(() => { void runSearchRef.current(initialCenterRef.current); }, 0);
+    const timer = window.setTimeout(() => setTenantType(preferredTenantType), 0);
     return () => window.clearTimeout(timer);
-  }, [preferredTenantType, tenantType]);
+  }, [preferredTenantType, setTenantType, tenantType]);
   useEffect(() => () => {
     searchRequestIdRef.current += 1;
     searchAbortRef.current?.abort();
@@ -433,13 +453,13 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     window.requestAnimationFrame(() => {
       document.querySelector<HTMLElement>(`[data-property-id="${CSS.escape(propertyId)}"]`)?.scrollIntoView({ block: "nearest" });
     });
-  }, []);
+  }, [setSelectedId]);
 
   const handleShowOnMap = useCallback((propertyId: string) => {
     setSelectedId(propertyId);
     setMapFocusId(propertyId);
     setMapFocusVersion((version) => version + 1);
-  }, []);
+  }, [setMapFocusId, setMapFocusVersion, setSelectedId]);
 
   function stopLiveLocation() {
     if (watchIdRef.current !== null && navigator.geolocation) {
@@ -629,7 +649,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
         <strong>{resultCountText}</strong>
       </div>
 
-      <section className="renter-search-toolbar" aria-label={workspaceCopy.toolbar.aria} data-mobile-filter-title={workspaceCopy.mobile.filtersTitle}>
+      <section className="renter-search-toolbar renter-filter-panel" aria-label={workspaceCopy.toolbar.aria} data-mobile-filter-title={workspaceCopy.mobile.filtersTitle}>
         <div className="renter-toolbar-heading">
           <div><span>{copy.eyebrow}</span><strong>{copy.title}</strong></div>
           <p>{copy.description}</p>
