@@ -39,13 +39,14 @@ function TenantBadge({ types, preference }: { types: TenantType[]; preference?: 
   return <span className={`tenant-match-badge tenant-${tone}${compatibility === "match" ? " is-profile-match" : ""}`}>{icon}<span>{summary}</span></span>;
 }
 
-const RenterResultCard = memo(function RenterResultCard({ listing, selected, preference, userId, href, onSelect, onMediaError }: {
+const RenterResultCard = memo(function RenterResultCard({ listing, selected, preference, userId, href, onSelect, onHighlight, onMediaError }: {
   listing: MapListing;
   selected: boolean;
   preference?: TenantType;
   userId: string | null;
   href: string;
   onSelect: (id: string) => void;
+  onHighlight: (id: string | null) => void;
   onMediaError: (path: string) => void;
 }) {
   const { locale } = useLocale();
@@ -59,7 +60,16 @@ const RenterResultCard = memo(function RenterResultCard({ listing, selected, pre
     : formatWorkflowText(copy.kilometersAway, { distance: formatNumber(listing.distance_meters / 1000, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) });
 
   return (
-    <div className={`renter-result-card-wrap tenant-compatibility-${compatibility}${selected ? " active" : ""}`}>
+    <div
+      className={`renter-result-card-wrap tenant-compatibility-${compatibility}${selected ? " active" : ""}`}
+      data-property-id={listing.id}
+      onMouseEnter={() => onHighlight(listing.id)}
+      onMouseLeave={() => onHighlight(null)}
+      onFocusCapture={() => onHighlight(listing.id)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) onHighlight(null);
+      }}
+    >
       <Link className="renter-result-card" href={href}>
         <div className="renter-result-image">
           {listing.cover_url ? <Image src={listing.cover_url} alt="" width={320} height={220} sizes="(max-width: 900px) 40vw, 220px" onError={() => { if (listing.cover_media_path) onMediaError(listing.cover_media_path); }} /> : <span>⌂</span>}
@@ -80,7 +90,7 @@ const RenterResultCard = memo(function RenterResultCard({ listing, selected, pre
   );
 });
 
-export const RenterResultsList = memo(function RenterResultsList({ listings, busy, customAreaActive, selectedId, preference, userId, propertyHref, onSelect }: {
+export const RenterResultsList = memo(function RenterResultsList({ listings, busy, customAreaActive, selectedId, preference, userId, propertyHref, onSelect, onHighlight = () => {} }: {
   listings: MapListing[];
   busy: boolean;
   customAreaActive: boolean;
@@ -89,6 +99,7 @@ export const RenterResultsList = memo(function RenterResultsList({ listings, bus
   userId: string | null;
   propertyHref: (propertyId: string) => string;
   onSelect: (id: string) => void;
+  onHighlight?: (id: string | null) => void;
 }) {
   const { locale } = useLocale();
   const copy = getRenterResultsCopy(locale);
@@ -100,7 +111,7 @@ export const RenterResultsList = memo(function RenterResultsList({ listings, bus
     <div className="renter-results-list">
       {!busy && liveListings.length === 0 && <div className="renter-empty">{customAreaActive ? copy.noCustomAreaResults : copy.noResults}</div>}
       {liveListings.map((listing) => (
-        <RenterResultCard key={listing.id} listing={listing} selected={selectedId === listing.id} preference={preference} userId={userId} href={propertyHref(listing.id)} onSelect={onSelect} onMediaError={(path) => void refresh(path)} />
+        <RenterResultCard key={listing.id} listing={listing} selected={selectedId === listing.id} preference={preference} userId={userId} href={propertyHref(listing.id)} onSelect={onSelect} onHighlight={onHighlight} onMediaError={(path) => void refresh(path)} />
       ))}
     </div>
   );
