@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 import { MarketingNavigation } from "@/components/marketing-navigation";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getInformationCopy } from "@/i18n/information-copy";
 import { getLocale } from "@/i18n/get-locale";
 
 export default async function AboutPage() {
   const locale = await getLocale();
-  const dictionary = getDictionary(locale);
-  const copy = dictionary.information.about;
-  const common = dictionary.information.common;
+  const dictionary = getInformationCopy(locale);
+  const copy = dictionary.about;
+  const common = dictionary.common;
 
   return (
     <main className="info-page info-about">

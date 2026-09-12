@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { MarketingNavigation } from "@/components/marketing-navigation";
 import { SupportRequestForm } from "@/components/support-request-form";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getInformationCopy } from "@/i18n/information-copy";
 import { getLocale } from "@/i18n/get-locale";
 import type { SupportCategory } from "@/i18n/support-copy";
 
@@ -25,16 +25,18 @@ export default async function ContactPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const locale = await getLocale();
-  const dictionary = getDictionary(locale);
-  const copy = dictionary.information.contact;
-  const common = dictionary.information.common;
-  const nav = dictionary.navigation;
+  const dictionary = getInformationCopy(locale);
+  const copy = dictionary.contact;
+  const common = dictionary.common;
 
   const params = await searchParams;
   const requestedCategory = first(params.category) as SupportCategory | undefined;
   const initialCategory =
     requestedCategory && SUPPORT_CATEGORIES.has(requestedCategory) ? requestedCategory : "other";
   const conversation = first(params.conversation)?.slice(0, 80);
+
+  const privacyLabel = locale === "bn" ? "গোপনীয়তা" : "Privacy";
+  const termsLabel = locale === "bn" ? "শর্তাবলি" : "Terms";
 
   return (
     <main className="info-page info-contact">
@@ -76,8 +78,8 @@ export default async function ContactPage({
             <h2>{copy.privacyRequestsTitle}</h2>
             <p>{copy.privacyRequestsBody}</p>
             <div className="info-inline-links">
-              <Link href="/privacy">{nav.privacy}</Link>
-              <Link href="/terms">{nav.terms}</Link>
+              <Link href="/privacy">{privacyLabel}</Link>
+              <Link href="/terms">{termsLabel}</Link>
             </div>
           </article>
         </section>

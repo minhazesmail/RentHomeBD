@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 import { MarketingNavigation } from "@/components/marketing-navigation";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getInformationCopy } from "@/i18n/information-copy";
 import { getLocale } from "@/i18n/get-locale";
 
 export default async function PrivacyPage() {
   const locale = await getLocale();
-  const dictionary = getDictionary(locale);
-  const copy = dictionary.information.privacy;
-  const common = dictionary.information.common;
+  const dictionary = getInformationCopy(locale);
+  const copy = dictionary.privacy;
+  const common = dictionary.common;
   const sections = Object.values(copy.sections);
 
   return (

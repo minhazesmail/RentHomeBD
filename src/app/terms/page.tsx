@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 import { MarketingNavigation } from "@/components/marketing-navigation";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getInformationCopy } from "@/i18n/information-copy";
 import { getLocale } from "@/i18n/get-locale";
 
 export default async function TermsPage() {
   const locale = await getLocale();
-  const dictionary = getDictionary(locale);
-  const copy = dictionary.information.terms;
-  const common = dictionary.information.common;
+  const dictionary = getInformationCopy(locale);
+  const copy = dictionary.terms;
+  const common = dictionary.common;
   const sections = Object.values(copy.sections);
 
   return (
