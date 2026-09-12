@@ -15,19 +15,21 @@ function requireContract(source, contract, file) {
   }
 }
 
-const mapSearchFile = "src/components/renter-map-search.tsx";
+const mapSearchFile = "src/components/renter-map-workspace.tsx";
 const migrationFile = "supabase/migrations/20260911040000_server_side_polygon_search.sql";
 const mapSearch = read(mapSearchFile);
 const migration = read(migrationFile).toLowerCase();
 
 // F10: a finished/edited polygon must become part of the server request. The
-// old browser-only point-in-polygon filter must not survive, because it can only
-// filter the already-truncated radius response.
+// browser must never filter only the already-truncated radius response. Finished
+// polygons run immediately; edited polygons mark the map dirty and are sent by
+// the explicit Search this area action.
 for (const contract of [
   "customAreaGeoJson",
   "search_polygon: searchPolygon",
   "void runSearch(center, sortOption, customArea)",
-  "void runSearch(center, sortOption, points)",
+  "setMapDirty(true)",
+  "customAreaActive ? customArea : null",
   "void runSearch(center, sortOption, null)",
   "const visibleListings = orderedListings",
   "customAreaActive={customAreaActive}",

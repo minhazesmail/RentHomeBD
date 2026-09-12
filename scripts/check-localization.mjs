@@ -58,7 +58,7 @@ requireText("src/i18n/workflow-copy.ts", "propertyDraftLimit", "property-draft q
 requireText("src/app/page.tsx", "dictionary.landing", "landing dictionary usage");
 requireText("src/app/login/auth-form.tsx", "dictionary.auth.form", "auth dictionary usage");
 requireText("src/components/phone-verification-form.tsx", "dictionary.auth.phoneVerification", "phone verification dictionary usage");
-requireText("src/components/renter-map-search.tsx", "getWorkflowCopy(locale).homes.search", "renter map workflow copy");
+requireText("src/components/renter-map-workspace.tsx", "getWorkflowCopy(locale).homes.search", "renter map workflow copy");
 requireText("src/components/renter-results-list.tsx", "getRenterResultsCopy(locale)", "renter result-card workflow copy");
 requireText("src/app/saved/page.tsx", "const copy = workflow.saved", "saved page workflow copy");
 requireText("src/components/saved-search-card.tsx", "getWorkflowCopy(locale).saved.searchCard", "saved-search editor workflow copy");
@@ -80,7 +80,7 @@ forbidText("src/components/marketing-navigation.tsx", ">Find on map<", "marketin
 forbidText("src/components/product-navigation.tsx", 'label: "Explore"', "product nav must source labels from dictionaries");
 forbidText("src/app/page.tsx", "Find a home close to the life you already live.", "landing hero must source copy from dictionaries");
 forbidText("src/app/login/auth-form.tsx", ">Welcome back<", "auth form must source copy from dictionaries");
-forbidText("src/components/renter-map-search.tsx", "Find a home around you.", "renter map title must source workflow copy");
+forbidText("src/components/renter-map-workspace.tsx", "Find a home around you.", "renter map title must source workflow copy");
 forbidText("src/components/saved-search-card.tsx", ">Save changes<", "saved-search actions must source workflow copy");
 forbidText("src/components/message-composer.tsx", "Write a polite message about this property", "message composer placeholder must source workflow copy");
 forbidText("src/components/property-listing-form.tsx", ">Property basics<", "listing form sections must source workflow copy");

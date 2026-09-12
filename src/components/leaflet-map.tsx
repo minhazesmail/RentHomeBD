@@ -6,6 +6,8 @@ import { divIcon } from "leaflet";
 import type { LatLngBoundsExpression } from "leaflet";
 
 import styles from "./leaflet-map.module.css";
+import { getMapWorkspaceRedesignCopy } from "@/i18n/map-workspace-redesign-copy";
+import { useLocale } from "@/i18n/use-locale";
 import { tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
 import { useTheme } from "@/theme/use-theme";
 
@@ -55,16 +57,18 @@ type MapAppearance = {
   userRing: string;
 };
 
+type MapCopy = ReturnType<typeof getMapWorkspaceRedesignCopy>["map"];
+
 const LIGHT_MAP: MapAppearance = {
-  areaStroke: "#126b4d",
-  areaFill: "#126b4d",
+  areaStroke: "#0b4f3c",
+  areaFill: "#0b4f3c",
   userLocation: "#167d78",
   userRing: "#ffffff",
 };
 
 const DARK_MAP: MapAppearance = {
-  areaStroke: "#65d8a8",
-  areaFill: "#42b987",
+  areaStroke: "#75b59f",
+  areaFill: "#75b59f",
   userLocation: "#66d4cc",
   userRing: "#07130f",
 };
@@ -110,11 +114,59 @@ function FitToResults({ listings, center, liveTracking }: { listings: MapListing
   return null;
 }
 
+function FocusListing({ listings, focusId, focusVersion }: { listings: MapListing[]; focusId?: string | null; focusVersion: number }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!focusId) return;
+    const listing = listings.find((item) => item.id === focusId);
+    if (!listing) return;
+    map.setView([listing.latitude, listing.longitude], Math.max(map.getZoom(), 15), { animate: true });
+  }, [focusId, focusVersion, listings, map]);
+
+  return null;
+}
+
+function ResponsiveMapSize() {
+  const map = useMap();
+
+  useEffect(() => {
+    const host = document.querySelector<HTMLElement>("[data-mobile-sheet]");
+    let delayed: number | null = null;
+    const refresh = () => {
+      window.requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+      if (delayed !== null) window.clearTimeout(delayed);
+      delayed = window.setTimeout(() => map.invalidateSize({ pan: false }), 240);
+    };
+    const observer = host ? new MutationObserver(refresh) : null;
+    if (host && observer) observer.observe(host, { attributes: true, attributeFilter: ["data-mobile-sheet", "data-mobile-view", "data-mobile-filters"] });
+    window.addEventListener("resize", refresh);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", refresh);
+      if (delayed !== null) window.clearTimeout(delayed);
+    };
+  }, [map]);
+
+  return null;
+}
+
 function ManualMapCenter({ disabled, onChange }: { disabled: boolean; onChange?: (center: [number, number]) => void }) {
   const map = useMap();
+  const userZoomRef = useRef(false);
+
   useMapEvents({
     dragend: () => {
       if (disabled || !onChange) return;
+      const next = map.getCenter();
+      onChange([next.lat, next.lng]);
+    },
+    zoomstart: (event) => {
+      userZoomRef.current = Boolean((event as { originalEvent?: unknown }).originalEvent);
+    },
+    zoomend: () => {
+      if (!userZoomRef.current || disabled || !onChange) return;
+      userZoomRef.current = false;
       const next = map.getCenter();
       onChange([next.lat, next.lng]);
     },
@@ -202,30 +254,37 @@ function clusterBucketKey(cellX: number, cellY: number) {
   return `${cellX}:${cellY}`;
 }
 
-function ListingMarker({ listing, selected, onSelect }: { listing: MapListing; selected: boolean; onSelect: (id: string) => void }) {
+function sameCoordinate(listings: MapListing[]) {
+  if (listings.length < 2) return false;
+  const [first] = listings;
+  return listings.every((listing) => Math.abs(listing.latitude - first.latitude) < 0.0000001 && Math.abs(listing.longitude - first.longitude) < 0.0000001);
+}
+
+function ListingMarker({ listing, selected, onSelect, copy }: { listing: MapListing; selected: boolean; onSelect: (id: string) => void; copy: MapCopy }) {
   const tone = clusterTone([listing]);
+  const policy = tenantSummary(listing.tenant_types ?? []);
   return (
     <Marker
       position={[listing.latitude, listing.longitude]}
       icon={markerIcon(compactRent(listing.rent_bdt), tone, selected)}
       riseOnHover
       zIndexOffset={selected ? 1000 : 0}
-      title={listing.title || "Rental property"}
+      title={`${listing.title || copy.rentalProperty}. ${policy}`}
       eventHandlers={{ click: () => onSelect(listing.id) }}
     >
       <Popup>
         <div className="map-popup">
-          <strong>{listing.title || "Rental property"}</strong>
-          <span>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}/month` : "Rent on request"}</span>
-          <small>{tenantSummary(listing.tenant_types ?? [])}</small>
-          <small>{listing.address_text || "Exact location shown on map"}</small>
+          <strong>{listing.title || copy.rentalProperty}</strong>
+          <span>{listing.rent_bdt ? `৳${listing.rent_bdt.toLocaleString("en-BD")}` : copy.rentOnRequest}</span>
+          <small>{policy}</small>
+          <small>{listing.address_text || copy.exactLocation}</small>
         </div>
       </Popup>
     </Marker>
   );
 }
 
-function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapListing[]; selectedId: string | null; onSelect: (id: string) => void }) {
+function ClusteredListings({ listings, selectedId, onSelect, copy }: { listings: MapListing[]; selectedId: string | null; onSelect: (id: string) => void; copy: MapCopy }) {
   const map = useMap();
   const [zoom, setZoom] = useState(() => map.getZoom());
 
@@ -327,18 +386,21 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
 
         if (cluster.listings.length === 1) {
           const listing = cluster.listings[0];
-          return <ListingMarker key={listing.id} listing={listing} selected={false} onSelect={onSelect} />;
+          return <ListingMarker key={listing.id} listing={listing} selected={false} onSelect={onSelect} copy={copy} />;
         }
 
+        const exactPin = sameCoordinate(cluster.listings);
+        const clusterTitle = copy.clusterTitle.replace("{count}", String(cluster.listings.length));
         return (
           <Marker
             key={cluster.id}
             position={[cluster.latitude, cluster.longitude]}
             icon={markerIcon(String(cluster.listings.length), tone, false, true)}
             riseOnHover
-            title={`${cluster.listings.length} homes in this area. Activate to zoom in.`}
+            title={exactPin ? `${copy.samePinTitle}. ${copy.samePinHint}` : `${clusterTitle}. ${copy.clusterHint}`}
             eventHandlers={{
               click: () => {
+                if (exactPin) return;
                 const bounds = cluster.listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
                 map.fitBounds(bounds, { padding: [70, 70], maxZoom: Math.min(15, zoom + 2), animate: true });
               },
@@ -346,24 +408,36 @@ function ClusteredListings({ listings, selectedId, onSelect }: { listings: MapLi
           >
             <Popup>
               <div className="map-popup map-cluster-popup">
-                <strong>{cluster.listings.length} homes in this area</strong>
-                <span>{tone === "neutral" ? "Mixed renter fit" : tenantSummary(cluster.listings[0].tenant_types ?? [])}</span>
-                <small>Activate the cluster to zoom in and compare individual homes.</small>
+                <strong>{exactPin ? copy.samePinTitle : clusterTitle}</strong>
+                <small>{exactPin ? copy.samePinHint : copy.clusterHint}</small>
+                {exactPin && (
+                  <div className="map-cluster-chooser">
+                    {cluster.listings.map((listing) => (
+                      <button key={listing.id} type="button" onClick={() => onSelect(listing.id)}>
+                        <span>{listing.title || copy.rentalProperty}</span>
+                        <small>{listing.rent_bdt ? compactRent(listing.rent_bdt) : copy.rentOnRequest}</small>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </Popup>
           </Marker>
         );
       })}
-      {selectedListing && <ListingMarker key={`selected:${selectedListing.id}`} listing={selectedListing} selected onSelect={onSelect} />}
+      {selectedListing && <ListingMarker key={`selected:${selectedListing.id}`} listing={selectedListing} selected onSelect={onSelect} copy={copy} />}
     </>
   );
 }
 
-export default function LeafletMap({ listings, center, radiusKm, selectedId, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange }: {
+export default function LeafletMap({ listings, center, radiusKm, selectedId, focusId, focusVersion = 0, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange }: {
   listings: MapListing[];
   center: [number, number];
   radiusKm: number | null;
   selectedId: string | null;
+  activeSelectedId?: string | null;
+  focusId?: string | null;
+  focusVersion?: number;
   onSelect: (id: string) => void;
   onCenterChange?: (center: [number, number]) => void;
   userLocation?: UserMapLocation | null;
@@ -373,6 +447,8 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, onS
   onCustomAreaChange?: (points: [number, number][]) => void;
 }) {
   const { resolvedTheme } = useTheme();
+  const { locale } = useLocale();
+  const copy = getMapWorkspaceRedesignCopy(locale).map;
   const userCenter: [number, number] | null = userLocation ? [userLocation.latitude, userLocation.longitude] : null;
   const editingCustomArea = !drawingCustomArea && customArea.length >= 3;
   const basemap = resolvedTheme === "dark" ? DARK_BASEMAP : LIGHT_BASEMAP;
@@ -381,14 +457,16 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, onS
   return (
     <MapContainer center={center} zoom={12} scrollWheelZoom className={`renter-map-canvas basemap-${resolvedTheme}${drawingCustomArea ? " drawing-custom-area" : ""}`}>
       <TileLayer key={resolvedTheme} attribution={basemap.attribution} url={basemap.url} />
+      <ResponsiveMapSize />
       <FitToResults listings={listings} center={center} liveTracking={liveTracking} />
+      <FocusListing listings={listings} focusId={focusId} focusVersion={focusVersion} />
       <ManualMapCenter disabled={drawingCustomArea || editingCustomArea} onChange={onCenterChange} />
       <CustomAreaDrawing active={drawingCustomArea} points={customArea} onChange={onCustomAreaChange ?? (() => {})} />
       {radiusKm !== null && customArea.length < 3 && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: appearance.areaStroke, fillColor: appearance.areaFill, fillOpacity: resolvedTheme === "dark" ? 0.08 : 0.04, weight: 1 }} />}
       {customArea.length >= 2 && <Polygon positions={customArea} pathOptions={{ color: appearance.areaStroke, fillColor: appearance.areaFill, fillOpacity: customArea.length >= 3 ? (resolvedTheme === "dark" ? 0.18 : 0.12) : (resolvedTheme === "dark" ? 0.08 : 0.04), weight: 3 }} />}
       <CustomAreaVertices points={customArea} editable={editingCustomArea} appearance={appearance} onChange={onCustomAreaChange ?? (() => {})} />
-      {userCenter && <><Circle center={userCenter} radius={Math.max(userLocation?.accuracy ?? 0, 5)} pathOptions={{ color: appearance.userLocation, fillColor: appearance.userLocation, fillOpacity: resolvedTheme === "dark" ? 0.14 : 0.08, weight: 1 }} /><CircleMarker center={userCenter} radius={9} pathOptions={{ color: appearance.userRing, fillColor: appearance.userLocation, fillOpacity: 1, weight: 4 }}><Popup><div className="map-popup"><strong>Your live location</strong><small>Accuracy ±{Math.round(userLocation?.accuracy ?? 0)} m</small></div></Popup></CircleMarker></>}
-      <ClusteredListings listings={listings} selectedId={selectedId} onSelect={onSelect} />
+      {userCenter && <><Circle center={userCenter} radius={Math.max(userLocation?.accuracy ?? 0, 5)} pathOptions={{ color: appearance.userLocation, fillColor: appearance.userLocation, fillOpacity: resolvedTheme === "dark" ? 0.14 : 0.08, weight: 1 }} /><CircleMarker center={userCenter} radius={9} pathOptions={{ color: appearance.userRing, fillColor: appearance.userLocation, fillOpacity: 1, weight: 4 }}><Popup><div className="map-popup"><strong>{copy.liveLocation}</strong><small>±{Math.round(userLocation?.accuracy ?? 0)} m</small></div></Popup></CircleMarker></>}
+      <ClusteredListings listings={listings} selectedId={selectedId} onSelect={onSelect} copy={copy} />
     </MapContainer>
   );
 }
