@@ -4,17 +4,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getPropertyDetailCopy } from "@/i18n/property-detail-copy";
+import { useLocale } from "@/i18n/use-locale";
 import { createClient } from "@/lib/supabase/client";
-
-function friendlyRevealError(message: string) {
-  const lower = message.toLowerCase();
-  if (lower.includes("phone verification required")) return "Verify your phone before revealing owner contact details.";
-  if (lower.includes("owner phone is not verified")) return "This owner has not verified a phone number yet.";
-  if (lower.includes("rate limit")) return "You’ve revealed several phone numbers recently. Try again later or use in-app chat.";
-  if (lower.includes("not currently available")) return "This listing is no longer available for direct contact.";
-  if (lower.includes("own contact")) return "You can’t reveal your own phone number from your listing.";
-  return "Could not reveal the phone number. You can still contact the owner through NearBasha chat.";
-}
 
 export function PhoneRevealButton({
   propertyId,
@@ -29,24 +21,36 @@ export function PhoneRevealButton({
   ownerPhoneVerified: boolean;
   signInHref: string;
 }) {
+  const { locale } = useLocale();
+  const copy = getPropertyDetailCopy(locale).contact.phoneReveal;
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const [phone, setPhone] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function friendlyRevealError(message: string) {
+    const lower = message.toLowerCase();
+    if (lower.includes("phone verification required")) return copy.verifyRequired;
+    if (lower.includes("owner phone is not verified")) return copy.ownerNotVerified;
+    if (lower.includes("rate limit")) return copy.rateLimit;
+    if (lower.includes("not currently available")) return copy.unavailable;
+    if (lower.includes("own contact")) return copy.ownContact;
+    return copy.generic;
+  }
+
   if (!ownerPhoneVerified) {
-    return <p className="contact-note">Direct phone reveal is unavailable because this owner has not verified a phone number. In-app chat remains available.</p>;
+    return <p className="contact-note">{copy.ownerUnavailable}</p>;
   }
 
   if (!signedIn) {
-    return <Link className="secondary-button link-button property-contact-button phone-reveal-button" href={signInHref}>Sign in to reveal phone</Link>;
+    return <Link className="secondary-button link-button property-contact-button phone-reveal-button" href={signInHref}>{copy.signIn}</Link>;
   }
 
   if (!viewerPhoneVerified) {
     return (
       <div className="phone-reveal-gate">
-        <Link className="secondary-button link-button property-contact-button phone-reveal-button" href="/account/phone">Verify phone to reveal</Link>
-        <p className="contact-note">Your number stays private. Verification only proves you control a Bangladesh mobile number before direct contact is unlocked.</p>
+        <Link className="secondary-button link-button property-contact-button phone-reveal-button" href="/account/phone">{copy.verify}</Link>
+        <p className="contact-note">{copy.viewerVerificationNote}</p>
       </div>
     );
   }
@@ -64,7 +68,7 @@ export function PhoneRevealButton({
     const row = Array.isArray(data) ? data[0] : data;
     const revealedPhone = row && typeof row === "object" && "phone" in row ? String(row.phone ?? "") : "";
     if (!revealedPhone) {
-      setError("The owner’s verified phone number is currently unavailable. Use in-app chat instead.");
+      setError(copy.empty);
       setBusy(false);
       return;
     }
@@ -76,9 +80,9 @@ export function PhoneRevealButton({
   if (phone) {
     return (
       <div className="phone-reveal-result" role="status" aria-live="polite">
-        <span>Verified owner phone</span>
+        <span>{copy.verifiedOwnerPhone}</span>
         <a href={`tel:${phone}`}>{phone}</a>
-        <small>Shown only after your phone verification. Please use it only for this rental enquiry.</small>
+        <small>{copy.revealedNote}</small>
       </div>
     );
   }
@@ -86,9 +90,9 @@ export function PhoneRevealButton({
   return (
     <div className="phone-reveal-gate">
       <button className="secondary-button property-contact-button phone-reveal-button" type="button" onClick={() => void reveal()} disabled={busy}>
-        {busy ? "Checking verification…" : "Reveal verified phone"}
+        {busy ? copy.checking : copy.reveal}
       </button>
-      <p className="contact-note">Click-to-reveal is gated by phone verification and protected against bulk lookups.</p>
+      <p className="contact-note">{copy.gateNote}</p>
       {error && <p className="contact-error" role="alert">{error}</p>}
     </div>
   );
