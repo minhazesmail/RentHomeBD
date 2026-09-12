@@ -34,7 +34,6 @@ export function GlobalShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const shell = resolveShell(pathname);
   const isPropertyDetail = /^\/homes\/[^/]+$/.test(pathname);
-  const renterCompatibilityClass = shell === "renter" ? " shell-renter" : "";
 
   function handleShellClick(event: ReactMouseEvent<HTMLDivElement>) {
     if (!isPropertyDetail) return;
@@ -51,7 +50,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className={`nb-global-shell nb-global-shell--${shell}${renterCompatibilityClass}`} data-shell={shell} data-route={pathname} onClickCapture={handleShellClick}>
+    <div className={`nb-global-shell nb-global-shell--${shell}`} data-shell={shell} data-route={pathname} onClickCapture={handleShellClick}>
       <div className="nb-shell-atmosphere" aria-hidden="true" />
       <div className="nb-shell-grid" aria-hidden="true" />
       <div className="nb-shell-content">
