@@ -3,7 +3,6 @@
 @import "./homes-redesign.css" layer(route-redesign);
 @import "./property-detail-redesign.css" layer(route-detail);
 @import "./property-detail-spacing-fixes.css" layer(route-fixes);
-@import "./homes-spacing-fixes.css" layer(route-fixes);
 @import "./property-detail-flow-redesign.css" layer(route-contrast);
 @import "./homes-theme.css" layer(theme);
-@import "./map-workspace-v2.css" layer(component-appearance);
+@import "./map-workspace.css" layer(component-appearance);

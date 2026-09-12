@@ -127,7 +127,7 @@ requireText("src/app/information-styles.css", "information-navigation-redesign.c
 
 // Landing FAQ should remain a compact editorial knowledge layer with native
 // disclosure semantics, topic filtering, horizontal-safe mobile topics, and reduced motion support.
-requireText("src/app/landing-styles.css", "landing-faq-redesign.css", "landing FAQ style layer");
+requireText("src/app/landing-foundation.css", "landing-faq-redesign.css", "landing FAQ style layer");
 requireText("src/components/landing-faq-section.tsx", "<details", "native FAQ disclosure semantics");
 requireText("src/components/landing-faq-section.tsx", "aria-pressed", "FAQ topic pressed-state semantics");
 requireText("src/app/landing-faq-redesign.css", "@media (max-width: 820px)", "FAQ tablet/mobile breakpoint");
@@ -136,7 +136,7 @@ requireText("src/app/landing-faq-redesign.css", "prefers-reduced-motion", "FAQ r
 
 // Open FAQ rows must keep readable semantic colors despite legacy accordion rules
 // that color every summary span white.
-requireText("src/app/landing-styles.css", "landing-faq-open-contrast-fix.css", "FAQ open-state contrast fix layer");
+requireText("src/app/landing-foundation.css", "landing-faq-open-contrast-fix.css", "FAQ open-state contrast fix layer");
 requireRegex("src/app/landing-faq-open-contrast-fix.css", /landing-faq-editorial-item\[open\][\s\S]*?landing-faq-question[\s\S]*?color:\s*var\(--landing-ink\)/, "dark open FAQ question text");
 requireRegex("src/app/landing-faq-open-contrast-fix.css", /landing-faq-editorial-item\[open\][\s\S]*?landing-faq-number[\s\S]*?color:\s*rgba\(8,\s*118,\s*83,\s*\.82\)/, "visible open FAQ number color");
 requireRegex("src/app/landing-faq-open-contrast-fix.css", /landing-faq-editorial-item\[open\][\s\S]*?landing-faq-disclosure[\s\S]*?color:\s*#fff/, "white open FAQ disclosure icon");

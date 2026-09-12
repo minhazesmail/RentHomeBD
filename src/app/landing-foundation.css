@@ -1,7 +1,8 @@
-/* Canonical layered style manifest for the landing page.
-   The final layers preserve the deliberate post-redesign reconciliation order
-   used by the production homepage. */
-@import "./landing.css" layer(route-base);
+/* Canonical foundation manifest for the landing page.
+   These layers remain active beneath the tenant-first final appearance layer.
+   Keep their established cascade order until each layer is independently proven
+   redundant by rendered regression coverage. */
+@import "./landing-foundation-base.css" layer(route-base);
 @import "./landing-alignment.css" layer(route-polish);
 @import "./landing-redesign.css" layer(route-redesign);
 @import "./landing-pointed-fixes.css" layer(route-fixes);
