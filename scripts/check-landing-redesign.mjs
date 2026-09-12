@@ -32,7 +32,10 @@ requireText(page, "<LandingMapPreview />", "real landing map preview composition
 requireText(page, "dictionary.landing", "existing landing dictionary usage");
 forbidText(page, 'name="bedrooms"', "bedrooms must not remain a primary landing-page field");
 
-requirePattern(hero, /<select[\s\S]*?name="area"[\s\S]*?required/, "required area selector");
+requirePattern(hero, /<input[\s\S]*?type="search"[\s\S]*?list="landing-location-options"[\s\S]*?required/, "required searchable area input");
+requireText(hero, '<datalist id="landing-location-options">', "supported location suggestions");
+requireText(hero, 'name="area" value={area}', "canonical area URL handoff");
+requireText(hero, "setCustomValidity", "unsupported-area native validation");
 requirePattern(hero, /<select[\s\S]*?name="tenant"[\s\S]*?required/, "required tenant selector");
 requireText(hero, '{ value: "family"', "family renter option");
 requireText(hero, '{ value: "bachelor"', "bachelor renter option");
@@ -52,6 +55,7 @@ requireText(copy, "const enLandingRedesignCopy", "English redesign copy");
 requireText(copy, "const bnLandingRedesignCopy", "Bangla redesign copy");
 requireText(copy, "Find a home that fits your life.", "planned hero message");
 requireText(copy, "আপনার জীবনের সঙ্গে মানানসই বাসা খুঁজুন।", "localized planned hero message");
+requireText(copy, "unsupportedArea", "localized supported-area validation copy");
 
 requireText(css, "--landing-v2-primary: #0b4f3c", "deep emerald primary token");
 requireText(css, "--landing-v2-background: #f7f5ef", "warm ivory background token");
