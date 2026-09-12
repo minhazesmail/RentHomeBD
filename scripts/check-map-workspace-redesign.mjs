@@ -39,7 +39,7 @@ const compatibilityEntry = read("src/components/renter-map-search.tsx");
 
 // Desktop workspace composition and draft/apply contract.
 requireText(compatibilityEntry, 'RenterMapWorkspace as RenterMapSearch', "existing renter search entrypoint routed through redesigned workspace");
-requireText(workspace, 'className="renter-search-toolbar"', "persistent desktop search toolbar");
+requirePattern(workspace, /className="[^"]*\brenter-search-toolbar\b[^"]*"/, "persistent desktop search toolbar");
 requireText(workspace, 'className="renter-workspace"', "map/results workspace split");
 requireText(workspace, 'className="renter-results-pane"', "independently scrollable results pane");
 requireText(css, "grid-template-columns: clamp(420px, 31vw, 480px) minmax(0, 1fr)", "420–480px result pane contract");
