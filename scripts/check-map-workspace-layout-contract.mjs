@@ -25,6 +25,9 @@ const manifest = read("src/app/homes/styles.css");
 const baseCss = read("src/app/homes/homes.css");
 const workspaceCss = read("src/app/homes/map-workspace.css");
 const fixesCss = read("src/app/homes/map-workspace-layout-fixes.css");
+const packageJson = read("package.json");
+const ci = read(".github/workflows/ci.yml");
+const browserQa = read("scripts/check-map-workspace-browser.mjs");
 
 // This guard exists because the route-base stylesheet still contains the old
 // side-by-side search shell. The redesigned workspace must explicitly collapse
@@ -75,9 +78,24 @@ requireText(
   "canonical map workspace component-appearance ownership",
 );
 
+// Keep a rendered geometry check in CI. Static selector checks alone cannot catch
+// this regression because all individual declarations can exist while the final
+// computed grid still places the toolbar and workspace side-by-side.
+requireText(
+  packageJson,
+  '"mapworkspacebrowser": "node scripts/check-map-workspace-browser.mjs"',
+  "map workspace browser QA package script",
+);
+requireText(ci, "- name: Map workspace geometry QA", "dedicated rendered map workspace CI step");
+requireText(ci, "run: npm run mapworkspacebrowser", "rendered map workspace CI command");
+requireText(browserQa, 'name: "reported-desktop", width: 1272, height: 638', "reported desktop viewport coverage");
+requireText(browserQa, 'const scenarios = ["light", "dark"]', "light/dark geometry coverage");
+requireText(browserQa, "toolbar does not span the full renter search shell", "toolbar full-span rendered assertion");
+requireText(browserQa, "workspace starts beside/under the toolbar instead of below it", "toolbar/workspace stacking rendered assertion");
+
 if (failures.length) {
   console.error("Map workspace layout contract QA failed:\n" + failures.map((failure) => `- ${failure}`).join("\n"));
   process.exit(1);
 }
 
-console.log("Map workspace layout contract QA passed: legacy grid/card geometry is neutralized without duplicate component ownership.");
+console.log("Map workspace layout contract QA passed: legacy grid/card geometry is neutralized and rendered coverage is wired into CI.");
