@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -68,7 +69,7 @@ export default async function ModerationDetailPage({ params, searchParams }: { p
   return (
     <main className="listing-shell moderation-shell moderation-detail-shell">
       <header className="listing-page-header moderation-header">
-        <div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">{copy.listingDetail.eyebrow}</p><h1 className="listing-page-title">{property.title || copy.common.untitled}</h1><p className="intro">{formatModerationText(copy.listingDetail.submittedBy, { name: owner?.display_name || copy.common.unnamedOwner, role: ownerRole })}</p></div>
+        <div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.listingDetail.eyebrow}</p><h1 className="listing-page-title">{property.title || copy.common.untitled}</h1><p className="intro">{formatModerationText(copy.listingDetail.submittedBy, { name: owner?.display_name || copy.common.unnamedOwner, role: ownerRole })}</p></div>
         <Link className="text-link" href="/moderation">{copy.listingDetail.back}</Link>
       </header>
       <ModerationWorkbenchNav current="listings" counts={counts} />

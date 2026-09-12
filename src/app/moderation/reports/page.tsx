@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -27,7 +28,7 @@ export default async function ReportQueuePage({ searchParams }: { searchParams: 
 
   return (
     <main className="owner-shell moderation-shell moderation-reports-shell">
-      <header className="owner-header moderation-header"><div><Link className="brand-link compact-brand" href="/">NearBasha</Link><p className="eyebrow">{copy.common.trustSafety}</p><h1 className="owner-title">{copy.reports.title}</h1><p className="intro">{copy.reports.intro}</p></div></header>
+      <header className="owner-header moderation-header"><div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.common.trustSafety}</p><h1 className="owner-title">{copy.reports.title}</h1><p className="intro">{copy.reports.intro}</p></div></header>
       <ModerationWorkbenchNav current="reports" counts={counts} />
       {params.notice === "hide_listing" && <div className="success-message">{copy.reports.hidden}</div>}
       {(params.notice === "dismiss" || params.notice === "resolve") && <div className="success-message">{copy.reports.closed}</div>}
