@@ -36,6 +36,8 @@ const page = read("src/app/homes/page.tsx");
 const copy = read("src/i18n/map-workspace-redesign-copy.ts");
 const docs = read("docs/map-workspace-redesign.md");
 const compatibilityEntry = read("src/components/renter-map-search.tsx");
+const globalShell = read("src/components/global-shell.tsx");
+const darkCompat = read("src/app/theme-dark-compat.css");
 
 // Desktop workspace composition and draft/apply contract.
 requireText(compatibilityEntry, 'RenterMapWorkspace as RenterMapSearch', "existing renter search entrypoint routed through redesigned workspace");
@@ -84,21 +86,33 @@ requireText(workspace, 'className="mobile-filter-footer"', "persistent mobile fi
 requireText(map, "function ResponsiveMapSize", "Leaflet resize synchronization");
 requireText(map, 'attributeFilter: ["data-mobile-sheet", "data-mobile-view", "data-mobile-filters"]', "sheet/view resize observation");
 
+// Shell/theme integration. The map workspace must use the same canonical renter
+// shell class that GlobalShell actually emits. A stale shell selector disables
+// the desktop grid, responsive visibility rules, and dark map variables at once.
+requireText(globalShell, 'className={`nb-global-shell nb-global-shell--${shell}`}', "canonical global shell class contract");
+forbidPattern(globalShell, /shell-renter/, "global shell must not reintroduce the retired shell-renter compatibility class");
+requireText(css, ".nb-global-shell--renter .mobile-filter-footer,\n.nb-global-shell--renter .mobile-search-summary {\n  display: none;", "desktop hides mobile-only search controls");
+requireText(css, ".nb-global-shell--renter .renter-search-toolbar {", "desktop toolbar scoped to canonical renter shell");
+forbidPattern(css, /\.shell-renter\b/, "map workspace must not depend on retired .shell-renter selectors");
+requireText(darkCompat, 'html[data-resolved-theme="dark"] .nb-global-shell--renter', "dark renter shell background guard");
+requireText(darkCompat, "background: var(--background);", "dark renter shell uses semantic background token");
+
 // Visual/localization/architecture contract.
 requireText(css, "--map-v2-primary: #0b4f3c", "deep emerald map token");
 requireText(css, "--map-v2-background: #f7f5ef", "warm ivory map token");
 requireText(css, "--map-v2-sand: #e8dfcf", "sand map token");
-requireText(css, '[data-resolved-theme="dark"] .shell-renter .homes-page', "dark map workspace contract");
+requireText(css, '[data-resolved-theme="dark"] .nb-global-shell--renter .homes-page', "dark map workspace contract");
 requireText(css, "@media (prefers-reduced-motion: reduce)", "map workspace reduced-motion contract");
 requireText(manifest, '@import "./map-workspace.css" layer(component-appearance);', "final map workspace appearance layer");
 requireText(copy, "const enMapWorkspaceRedesignCopy", "English map workspace copy");
 requireText(copy, "const bnMapWorkspaceRedesignCopy", "Bangla map workspace copy");
 requireText(docs, "Phase 3 — desktop map workspace", "desktop map workspace documentation");
 requireText(docs, "Phase 4 — mobile map experience", "mobile map workspace documentation");
+requireText(docs, "Renter shell integration", "renter shell integration documentation");
 
 if (failures.length) {
   console.error("Map workspace redesign QA failed:\n" + failures.map((failure) => `- ${failure}`).join("\n"));
   process.exit(1);
 }
 
-console.log("Map workspace redesign QA passed: desktop and mobile map contracts are intact.");
+console.log("Map workspace redesign QA passed: desktop, mobile, shell, and dark-theme map contracts are intact.");

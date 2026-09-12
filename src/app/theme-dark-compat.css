@@ -15,3 +15,10 @@ html[data-resolved-theme="dark"] [data-route]:not([data-route="/"]) :where(
 ) :where(h1, h2, h3, h4, h5, h6) {
   color: #fff !important;
 }
+
+/* The renter shell must never expose its light route-family gradient while the
+   resolved theme is dark. Route-local map surfaces can layer on top of this
+   semantic base without producing a light gutter during loading or resize. */
+html[data-resolved-theme="dark"] .nb-global-shell--renter {
+  background: var(--background);
+}
