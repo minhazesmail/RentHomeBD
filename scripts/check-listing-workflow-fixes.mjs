@@ -126,12 +126,20 @@ for (const contract of ["randomUUID()", "?draft=", "existingDraft", "propertyId=
 
 const actionsPath = path.join(root, "src", "components", "listing-freshness-actions.tsx");
 const actionsSource = fs.readFileSync(actionsPath, "utf8");
-for (const contract of ['"begin_property_edit"', '"Relist as draft"', '"Edit & re-review"']) {
+for (const contract of ['"begin_property_edit"', "copy.relist", "copy.edit"]) {
   if (!actionsSource.includes(contract)) {
-    throw new Error(`${actionsPath} is missing owner edit/relist action: ${contract}`);
+    throw new Error(`${actionsPath} is missing owner edit/relist action contract: ${contract}`);
+  }
+}
+
+const ownerCopyPath = path.join(root, "src", "i18n", "owner-portfolio-copy.ts");
+const ownerCopySource = fs.readFileSync(ownerCopyPath, "utf8");
+for (const contract of ['relist: "Relist as draft"', 'edit: "Edit & re-review"']) {
+  if (!ownerCopySource.includes(contract)) {
+    throw new Error(`${ownerCopyPath} is missing localized owner lifecycle copy contract: ${contract}`);
   }
 }
 
 console.log(
-  `Listing workflow QA passed: bounded media ordering, ${snapshotColumns.length} owner snapshot fields, retry-safe atomic saves, and edit/relist lifecycle contracts are present.`,
+  `Listing workflow QA passed: bounded media ordering, ${snapshotColumns.length} owner snapshot fields, retry-safe atomic saves, and localized edit/relist lifecycle contracts are present.`,
 );
