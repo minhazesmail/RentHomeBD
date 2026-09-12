@@ -11,14 +11,14 @@
   z-index: 1;
   pointer-events: none;
   overflow: visible;
-  filter: drop-shadow(0 0 2px white) drop-shadow(0 0 6px white) drop-shadow(0 0 12px rgb(190 255 228 / .9));
+  filter: drop-shadow(0 0 1px rgb(255 255 255 / .55)) drop-shadow(0 0 3px rgb(255 255 255 / .4));
 }
 
 .edge {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: rgb(255 255 255 / .18);
+  background: rgb(255 255 255 / .06);
   mask: url("/nearbasha-wordmark-glow.svg") center / 100% 100% no-repeat;
   -webkit-mask: url("/nearbasha-wordmark-glow.svg") center / 100% 100% no-repeat;
 }
@@ -28,11 +28,11 @@
   position: absolute;
   left: 25%;
   top: 23%;
-  width: 45%;
+  width: 32%;
   aspect-ratio: 1;
-  background: radial-gradient(ellipse, white 0% 30%, rgb(255 255 255 / .8) 48%, transparent 72%);
+  background: radial-gradient(ellipse, rgb(255 255 255 / .7) 0% 25%, rgb(255 255 255 / .35) 48%, transparent 72%);
   transform: translate(-50%, -50%);
-  animation: wordmark-orbit 3s linear infinite;
+  animation: wordmark-orbit 4.5s linear infinite;
 }
 
 /* An unmasked point of light makes the travel legible even when the base
@@ -42,14 +42,14 @@
   z-index: 2;
   left: 25%;
   top: 23%;
-  width: 5px;
-  height: 5px;
+  width: 3px;
+  height: 3px;
   border-radius: 50%;
   background: white;
-  box-shadow: 0 0 3px 1px white, 0 0 9px 3px rgb(255 255 255 / .95), 0 0 18px 5px rgb(166 255 220 / .65);
+  box-shadow: 0 0 2px rgb(255 255 255 / .8), 0 0 5px 1px rgb(255 255 255 / .5);
   pointer-events: none;
   transform: translate(-50%, -50%);
-  animation: wordmark-orbit 3s linear infinite;
+  animation: wordmark-orbit 4.5s linear infinite;
 }
 
 @keyframes wordmark-orbit {
@@ -62,7 +62,7 @@
 @media (prefers-reduced-motion: reduce) {
   .edge::before, .traveler { animation: none; }
   .traveler { display: none; }
-  .edge { background: rgb(255 255 255 / .4); }
+  .edge { background: rgb(255 255 255 / .15); }
 }
 
 @media (forced-colors: active) {
