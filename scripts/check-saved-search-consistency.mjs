@@ -18,7 +18,7 @@ function requireContract(source, contract, file) {
 const saveButtonFile = "src/components/save-home-button.tsx";
 const savedStateFile = "src/components/saved-homes-state.tsx";
 const experienceFile = "src/components/homes-search-experience.tsx";
-const mapSearchFile = "src/components/renter-map-search.tsx";
+const mapSearchFile = "src/components/renter-map-workspace.tsx";
 const resultsFile = "src/components/renter-results-list.tsx";
 const migrationFile = "supabase/migrations/20260911033000_server_side_search_ordering.sql";
 
@@ -68,10 +68,13 @@ for (const retiredPattern of ["initiallySaved", "savedPropertyIds: Set<string>"]
 }
 
 // F09: the client must send ordering intent and the database must rank/count
-// candidates before applying the bounded 200-row response.
+// candidates before applying the bounded 200-row response. The redesign makes
+// tenant identity explicit: a profile preference may prefill the selector, but
+// the selected tenant type is the server filter and no secondary ranking hint is sent.
 for (const contract of [
   "sort_mode: requestedSort",
-  "preferred_tenant_type: tenantType ? null : preferredTenantType ?? null",
+  "renter_tenant_type: tenantType",
+  "preferred_tenant_type: null",
   "total_matches",
   "results_truncated",
   "void runSearch(center, nextSort)",
