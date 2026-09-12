@@ -45,7 +45,8 @@ requireText(hero, 'params.set("maxRent", maxRent)', "budget URL handoff");
 requireText(hero, 'params.set("bedrooms", bedrooms)', "bedroom URL handoff");
 requireText(hero, 'params.set("radius", DEFAULT_RENTER_SEARCH_RADIUS)', "explicit radius handoff");
 requireText(hero, 'type="button"', "criteria-preserving popular-area controls");
-requireText(hero, "mapReady ?", "minimum-criteria map CTA gate");
+requireText(hero, "customBudgetReady", "custom-budget validity gate");
+requireText(hero, "const mapReady = Boolean(area && tenant && customBudgetReady)", "shared form/map minimum-criteria gate");
 
 requireText(copy, "const enLandingRedesignCopy", "English redesign copy");
 requireText(copy, "const bnLandingRedesignCopy", "Bangla redesign copy");
