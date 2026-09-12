@@ -3,27 +3,35 @@
   isolation: isolate;
 }
 
-/* The mask follows only the letter edges of the approved artwork. */
+/* Apply the halo AFTER the child is masked, so it can radiate beyond the
+   letter edges. Masking this wrapper would clip away the visible glow. */
 .glow {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  overflow: hidden;
-  mask: url("/nearbasha-wordmark-edge.svg") center / 100% 100% no-repeat;
-  -webkit-mask: url("/nearbasha-wordmark-edge.svg") center / 100% 100% no-repeat;
+  overflow: visible;
+  filter: drop-shadow(0 0 2px white) drop-shadow(0 0 5px rgb(255 255 255 / .95)) drop-shadow(0 0 9px rgb(190 255 228 / .65));
 }
 
-.glow::before {
+.edge {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  mask: url("/nearbasha-wordmark-glow.svg") center / 100% 100% no-repeat;
+  -webkit-mask: url("/nearbasha-wordmark-glow.svg") center / 100% 100% no-repeat;
+}
+
+.edge::before {
   content: "";
   position: absolute;
   left: 61%;
   top: 50%;
   width: 220%;
   aspect-ratio: 1;
-  background: conic-gradient(from 0deg, transparent 0deg 235deg, rgb(255 255 255 / .12) 265deg, rgb(255 255 255 / .65) 290deg, white 310deg, rgb(255 255 255 / .5) 325deg, transparent 345deg 360deg);
+  background: conic-gradient(from 0deg, transparent 0deg 25deg, rgb(255 255 255 / .35) 45deg, white 65deg 95deg, transparent 120deg 205deg, rgb(255 255 255 / .35) 225deg, white 245deg 275deg, transparent 300deg 360deg);
   transform: translate(-50%, -50%) rotate(0turn);
-  animation: wordmark-orbit 7s linear infinite;
+  animation: wordmark-orbit 4s linear infinite;
 }
 
 @keyframes wordmark-orbit {
@@ -32,7 +40,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .glow { display: none; }
-  .glow::before { animation: none; }
+  .edge::before { animation: none; }
 }
 
 @media (forced-colors: active) {
