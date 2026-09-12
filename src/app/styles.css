@@ -33,3 +33,4 @@
 @import "./theme-dark-compat.css" layer(theme);
 @import "./landing-theme.css" layer(theme);
 @import "./landing-how-theme.css" layer(component-appearance);
+@import "./landing-redesign-v2.css" layer(component-appearance);
