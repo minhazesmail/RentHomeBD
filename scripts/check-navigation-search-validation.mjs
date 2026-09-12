@@ -16,7 +16,7 @@ function requireContract(source, contract, file) {
 }
 
 const detailFile = "src/app/homes/[id]/page.tsx";
-const mapSearchFile = "src/components/renter-map-search.tsx";
+const mapSearchFile = "src/components/renter-map-workspace.tsx";
 const redirectFile = "src/lib/safe-redirect.ts";
 const defaultsFile = "src/lib/search-defaults.ts";
 const savedSearchFile = "src/components/saved-search-card.tsx";
@@ -29,9 +29,10 @@ const defaults = read(defaultsFile);
 const savedSearch = read(savedSearchFile);
 const boundsMigration = read(boundsMigrationFile).toLowerCase();
 
-// F12: the map already serializes its current center/filter/sort/selection into
-// returnTo. The detail route must consume that value, restrict it to /homes,
-// and feed the complete relative URL (including query/hash) back to Next Link.
+// F12: the map serializes its current center/filter/sort/selection into returnTo.
+// The redesigned workspace also adds result-list scroll position. The detail route
+// must consume the value, restrict it to /homes, and feed the complete relative
+// URL (including query/hash) back to Next Link.
 for (const contract of [
   "searchReturnPath(propertyId)",
   "returnTo=${encodeURIComponent(searchReturnPath(propertyId))}",
