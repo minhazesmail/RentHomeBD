@@ -26,6 +26,7 @@ export default async function HomesPage({
     bedrooms: params.bedrooms,
     selectedId: params.selected,
     sort: params.sort,
+    listScroll: params.listScroll,
   };
 
   return (
