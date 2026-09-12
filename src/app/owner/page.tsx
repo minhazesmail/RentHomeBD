@@ -9,6 +9,7 @@ import { formatCurrency, formatDate, formatNumber } from "@/i18n/format";
 import { getLocale } from "@/i18n/get-locale";
 import { formatOwnerPortfolioText, getOwnerPortfolioCopy, type OwnerPortfolioCopy } from "@/i18n/owner-portfolio-copy";
 import { requireOwnerOrAgent } from "@/lib/auth";
+import { serverNowMs } from "@/lib/server-clock";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./portfolio-controls.module.css";
 
@@ -102,7 +103,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
   const status = requestedStatus === "attention" || requestedStatus === "all" || sortableStatuses.includes(requestedStatus as (typeof sortableStatuses)[number]) ? requestedStatus : "all";
   const requestedSort = firstValue(params.sort) || "updated-desc";
   const sort = ["updated-desc", "updated-asc", "rent-high", "rent-low", "title"].includes(requestedSort) ? requestedSort : "updated-desc";
-  const now = Date.now();
+  const now = serverNowMs();
   const supabase = await createClient();
   const { data: properties } = await supabase.from("properties").select("id, title, address_text, rent_bdt, status, updated_at, expires_at, last_confirmed_at, moderation_notes").eq("owner_id", auth.userId).order("updated_at", { ascending: false });
 
