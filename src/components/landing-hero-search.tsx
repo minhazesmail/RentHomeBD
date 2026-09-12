@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Banknote, BedDouble, MapPin, Search, ShieldCheck, SlidersHorizontal, Users } from "lucide-react";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { formatCurrency, formatNumber } from "@/i18n/format";
 import { getLandingRedesignCopy } from "@/i18n/landing-redesign-copy";
@@ -20,10 +20,13 @@ type LandingHeroSearchProps = {
 };
 
 const BUDGET_PRESETS = [15_000, 25_000, 40_000, 60_000] as const;
-const POPULAR_AREAS = ["Dhanmondi", "Banani", "Uttara", "BUET"] as const;
 const MIN_CUSTOM_BUDGET = 1_000;
 const MAX_CUSTOM_BUDGET = 10_000_000;
 const CUSTOM_BUDGET_STEP = 500;
+
+function normalizeAreaValue(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
 
 function buildHomesHref({
   area,
@@ -48,11 +51,34 @@ function buildHomesHref({
 export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
   const { locale, dictionary } = useLocale();
   const copy = getLandingRedesignCopy(locale).hero;
+  const areaInputRef = useRef<HTMLInputElement>(null);
+  const [areaQuery, setAreaQuery] = useState("");
   const [area, setArea] = useState("");
   const [tenant, setTenant] = useState<SearchTenantType | "">("");
   const [budgetChoice, setBudgetChoice] = useState("");
   const [customBudget, setCustomBudget] = useState("");
   const [bedrooms, setBedrooms] = useState("");
+
+  function findSupportedArea(value: string) {
+    const query = normalizeAreaValue(value);
+    if (!query) return undefined;
+
+    return LOCATION_PRESETS.find((location) => {
+      const candidates = [
+        location.label,
+        localizeLocationLabel(location.label, dictionary),
+        ...(location.aliases ?? []),
+      ];
+      return candidates.some((candidate) => normalizeAreaValue(candidate) === query);
+    });
+  }
+
+  function handleAreaChange(value: string, input: HTMLInputElement) {
+    const match = findSupportedArea(value);
+    setAreaQuery(value);
+    setArea(match?.label ?? "");
+    input.setCustomValidity(value.trim() && !match ? copy.unsupportedArea : "");
+  }
 
   const maxRent = budgetChoice === "custom" ? customBudget.trim() : budgetChoice;
   const customBudgetNumber = Number(customBudget);
@@ -76,12 +102,12 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
     { value: "job_holder", label: dictionary.common.tenant.jobHolder },
   ];
 
-  const popularLabels: Record<(typeof POPULAR_AREAS)[number], string> = {
-    Dhanmondi: dictionary.common.locations.dhanmondi,
-    Banani: dictionary.common.locations.banani,
-    Uttara: dictionary.common.locations.uttara,
-    BUET: dictionary.common.locations.nearBuet,
-  };
+  const popularAreas = [
+    { value: "Dhanmondi, Dhaka", label: dictionary.common.locations.dhanmondi },
+    { value: "Banani, Dhaka", label: dictionary.common.locations.banani },
+    { value: "Uttara, Dhaka", label: dictionary.common.locations.uttara },
+    { value: "BUET", label: dictionary.common.locations.nearBuet },
+  ];
 
   return (
     <section className="landing-hero landing-hero-reference" data-scroll-theme="hero">
@@ -100,18 +126,23 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
             <label className="landing-search-console-field landing-search-console-area">
               <MapPin aria-hidden="true" />
               <span>{copy.areaLabel}</span>
-              <select
-                name="area"
-                value={area}
-                onChange={(event) => setArea(event.target.value)}
+              <input
+                ref={areaInputRef}
+                type="search"
+                value={areaQuery}
+                onChange={(event) => handleAreaChange(event.target.value, event.currentTarget)}
+                list="landing-location-options"
+                placeholder={copy.chooseLocation}
+                autoComplete="off"
                 required
                 aria-describedby="landing-search-help"
-              >
-                <option value="" disabled>{copy.chooseLocation}</option>
+              />
+              <datalist id="landing-location-options">
                 {LOCATION_PRESETS.map((location) => (
-                  <option key={location.label} value={location.label}>{localizeLocationLabel(location.label, dictionary)}</option>
+                  <option key={location.label} value={localizeLocationLabel(location.label, dictionary)} />
                 ))}
-              </select>
+              </datalist>
+              <input type="hidden" name="area" value={area} />
             </label>
 
             <label className="landing-search-console-field landing-search-console-tenant">
@@ -194,15 +225,19 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
         <div className="landing-popular-searches">
           <div className="landing-popular-heading"><span>{copy.popular}</span><small>{copy.popularHint}</small></div>
           <div className="landing-popular-actions">
-            {POPULAR_AREAS.map((popularArea) => (
+            {popularAreas.map((popularArea) => (
               <button
                 type="button"
-                key={popularArea}
-                className={area === popularArea ? "is-selected" : undefined}
-                aria-pressed={area === popularArea}
-                onClick={() => setArea(popularArea)}
+                key={popularArea.value}
+                className={area === popularArea.value ? "is-selected" : undefined}
+                aria-pressed={area === popularArea.value}
+                onClick={() => {
+                  setArea(popularArea.value);
+                  setAreaQuery(popularArea.label);
+                  areaInputRef.current?.setCustomValidity("");
+                }}
               >
-                {popularLabels[popularArea]}
+                {popularArea.label}
               </button>
             ))}
           </div>
