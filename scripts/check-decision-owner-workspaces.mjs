@@ -23,7 +23,8 @@ const savedCard = read("src/components/saved-search-card.tsx");
 const savedCopy = read("src/i18n/saved-decision-copy.ts");
 const ownerPage = read("src/app/owner/page.tsx");
 const ownerControls = read("src/components/owner-portfolio-controls.tsx");
-const freshness = read("src/components/listing-freshness-actions.tsx");
+const freshnessActions = read("src/components/listing-freshness-actions.tsx");
+const freshnessContract = read("src/lib/listing-freshness.ts");
 const ownerCopy = read("src/i18n/owner-portfolio-copy.ts");
 const serverClock = read("src/lib/server-clock.ts");
 const docs = read("docs/decision-owner-workspaces.md");
@@ -46,10 +47,11 @@ expect(savedCopy, 'en: {', "saved decision copy must include English");
 expect(savedCopy, 'bn: {', "saved decision copy must include Bangla");
 
 expect(ownerPage, 'getOwnerPortfolioCopy(locale)', "owner page must use localized portfolio copy");
-expect(ownerPage, 'const RECONFIRM_SOON_DAYS = 3;', "owner attention horizon must remain explicit");
-expect(ownerPage, 'function listingNeedsAttention', "owner portfolio must centralize attention logic");
-expect(ownerPage, 'listing.status !== "available"', "owner attention logic must consider live listings separately");
-expect(ownerPage, 'days <= RECONFIRM_SOON_DAYS', "live listings nearing expiry must enter attention state");
+expect(ownerPage, 'from "@/lib/listing-freshness"', "owner portfolio must consume the shared attention contract");
+expect(freshnessContract, 'export const RECONFIRM_SOON_DAYS = 3;', "owner attention horizon must remain explicit");
+expect(freshnessContract, 'export function listingNeedsAttention', "owner attention logic must remain centralized");
+expect(freshnessContract, 'listing.status !== "available"', "owner attention logic must consider live listings separately");
+expect(freshnessContract, 'days <= RECONFIRM_SOON_DAYS', "live listings nearing expiry must enter attention state");
 expect(ownerPage, 'listings.filter((property) => listingNeedsAttention(property, now))', "attention summary/queue must use the shared attention predicate");
 expect(ownerPage, 'status === "attention" ? listingNeedsAttention(listing, now)', "attention filter must use the same shared predicate");
 expect(ownerPage, 'const now = serverNowMs();', "owner page must consume one server-only request clock value");
@@ -61,13 +63,13 @@ expect(ownerPage, 'formatDate(new Date(property.updated_at), locale', "owner upd
 expect(ownerPage, 'formatNumber(attentionCount, locale)', "owner summary counts must be locale-aware");
 expect(ownerControls, 'getOwnerPortfolioCopy(locale).controls', "owner portfolio controls must use localized copy");
 expect(ownerControls, 'useLocale()', "owner portfolio controls must react to locale changes");
-expect(freshness, 'getOwnerPortfolioCopy(locale).actions', "owner freshness actions must use localized copy");
-expect(freshness, 'useLocale()', "owner freshness actions must react to locale changes");
+expect(freshnessActions, 'getOwnerPortfolioCopy(locale).actions', "owner freshness actions must use localized copy");
+expect(freshnessActions, 'useLocale()', "owner freshness actions must react to locale changes");
 expect(ownerCopy, 'en: {', "owner portfolio copy must include English");
 expect(ownerCopy, 'bn: {', "owner portfolio copy must include Bangla");
 reject(ownerPage, '>Manage your properties<', "owner page must not hard-code English heading copy");
 reject(ownerControls, 'label: "Needs action"', "owner filters must not hard-code English labels");
-reject(freshness, '"Could not reconfirm this listing. Please try again."', "freshness errors must not be hard-coded English");
+reject(freshnessActions, '"Could not reconfirm this listing. Please try again."', "freshness errors must not be hard-coded English");
 expect(docs, "`Everyone` remains a listing-policy value", "workspace contract must document renter identity vs listing policy");
 expect(docs, "available` listings whose confirmation expires within 3 days", "workspace contract must document proactive owner freshness attention");
 
@@ -77,4 +79,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Task 8/9 workspace QA passed: saved-search tenant enforcement, gated match counts, and localized owner action-queue contracts are intact.");
+console.log("Task 8/9 workspace QA passed: saved-search tenant enforcement, gated match counts, and localized shared owner action-queue contracts are intact.");
