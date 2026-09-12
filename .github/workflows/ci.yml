@@ -196,6 +196,8 @@ jobs:
           exit 1
       - name: Rendered theme QA
         run: npm run themebrowser
+      - name: Map workspace geometry QA
+        run: npm run mapworkspacebrowser
       - name: How-it-works dark theme QA
         run: node scripts/check-how-theme-browser.mjs
       - name: Upload theme QA artifacts

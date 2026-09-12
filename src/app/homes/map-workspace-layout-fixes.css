@@ -1,0 +1,35 @@
+/* Residual-layout guard for the redesigned /homes workspace.
+   homes.css still carries the pre-redesign two-column shell and filter-card
+   chrome as route-base fallbacks. The canonical map workspace is a vertical
+   stack: full-width toolbar first, then the full-width results/map split. */
+
+@media (min-width: 961px) {
+  .nb-global-shell--renter .renter-search-shell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-flow: row;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .nb-global-shell--renter .renter-search-toolbar,
+  .nb-global-shell--renter .renter-workspace {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Pin the two top-level grid children to deterministic rows. This makes the
+     layout contract explicit and prevents a future legacy column declaration
+     or auto-placement change from putting the workspace beside the toolbar. */
+  .nb-global-shell--renter .renter-search-toolbar {
+    grid-row: 1;
+    margin: 0;
+    border: 0;
+    border-bottom: 1px solid var(--map-v2-border);
+    border-radius: 0;
+  }
+
+  .nb-global-shell--renter .renter-workspace {
+    grid-row: 2;
+  }
+}
