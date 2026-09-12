@@ -22,7 +22,7 @@ function forbidText(relativePath, text, label = text) {
 }
 
 const routeThemes = [
-  ["src/app/landing-theme.css", "src/app/landing-styles.css", "landing-theme.css"],
+  ["src/app/landing-theme.css", "src/app/landing-foundation.css", "landing-theme.css"],
   ["src/app/homes/homes-theme.css", "src/app/homes/styles.css", "homes-theme.css"],
   ["src/app/saved/saved-theme.css", "src/app/saved/styles.css", "saved-theme.css"],
   ["src/app/messages/messages-theme.css", "src/app/messages/styles.css", "messages-theme.css"],
