@@ -21,6 +21,9 @@ type LandingHeroSearchProps = {
 
 const BUDGET_PRESETS = [15_000, 25_000, 40_000, 60_000] as const;
 const POPULAR_AREAS = ["Dhanmondi", "Banani", "Uttara", "BUET"] as const;
+const MIN_CUSTOM_BUDGET = 1_000;
+const MAX_CUSTOM_BUDGET = 10_000_000;
+const CUSTOM_BUDGET_STEP = 500;
 
 function buildHomesHref({
   area,
@@ -52,7 +55,15 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
   const [bedrooms, setBedrooms] = useState("");
 
   const maxRent = budgetChoice === "custom" ? customBudget.trim() : budgetChoice;
-  const mapReady = Boolean(area && tenant);
+  const customBudgetNumber = Number(customBudget);
+  const customBudgetReady = budgetChoice !== "custom" || (
+    customBudget.trim().length > 0
+    && Number.isFinite(customBudgetNumber)
+    && customBudgetNumber >= MIN_CUSTOM_BUDGET
+    && customBudgetNumber <= MAX_CUSTOM_BUDGET
+    && (customBudgetNumber - MIN_CUSTOM_BUDGET) % CUSTOM_BUDGET_STEP === 0
+  );
+  const mapReady = Boolean(area && tenant && customBudgetReady);
   const mapHref = useMemo(
     () => buildHomesHref({ area, tenant, maxRent, bedrooms }),
     [area, bedrooms, maxRent, tenant],
@@ -144,9 +155,9 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
                   type="number"
                   value={customBudget}
                   onChange={(event) => setCustomBudget(event.target.value)}
-                  min="1000"
-                  max="10000000"
-                  step="500"
+                  min={MIN_CUSTOM_BUDGET}
+                  max={MAX_CUSTOM_BUDGET}
+                  step={CUSTOM_BUDGET_STEP}
                   inputMode="numeric"
                   placeholder={copy.customBudgetPlaceholder}
                   required
