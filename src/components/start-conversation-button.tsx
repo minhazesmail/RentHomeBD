@@ -4,26 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getPropertyDetailCopy } from "@/i18n/property-detail-copy";
+import { useLocale } from "@/i18n/use-locale";
 import { createClient } from "@/lib/supabase/client";
-
-function friendlyConversationError(message: string) {
-  const lower = message.toLowerCase();
-  if (lower.includes("conversation start limit reached")) {
-    return "You’ve opened many new conversations recently. Please try again later.";
-  }
-  if (lower.includes("not currently available")) {
-    return "This home is no longer available for new conversations.";
-  }
-  if (lower.includes("own listing")) {
-    return "You can’t start a renter conversation on your own listing.";
-  }
-  return "Could not open this conversation. Please try again.";
-}
 
 export function StartConversationButton({ propertyId, userId }: { propertyId: string; userId: string }) {
   const router = useRouter();
+  const { locale } = useLocale();
+  const copy = getPropertyDetailCopy(locale).contact.conversation;
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  function friendlyConversationError(raw: string) {
+    const lower = raw.toLowerCase();
+    if (lower.includes("conversation start limit reached")) return copy.limit;
+    if (lower.includes("not currently available")) return copy.unavailable;
+    if (lower.includes("own listing")) return copy.ownListing;
+    return copy.generic;
+  }
 
   async function startConversation() {
     setBusy(true);
@@ -38,7 +36,7 @@ export function StartConversationButton({ propertyId, userId }: { propertyId: st
       .maybeSingle();
 
     if (existingError) {
-      setMessage("Could not check your existing conversations. Please try again.");
+      setMessage(copy.checkFailed);
       setBusy(false);
       return;
     }
@@ -78,7 +76,7 @@ export function StartConversationButton({ propertyId, userId }: { propertyId: st
   return (
     <div className="contact-action-stack">
       <button className="primary-button property-contact-button" type="button" disabled={busy} onClick={() => void startConversation()}>
-        {busy ? "Opening conversation…" : "Message owner"}
+        {busy ? copy.opening : copy.messageOwner}
       </button>
       {message && <p className="contact-error">{message}</p>}
     </div>

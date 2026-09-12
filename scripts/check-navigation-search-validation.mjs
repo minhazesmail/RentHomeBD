@@ -32,7 +32,7 @@ const boundsMigration = read(boundsMigrationFile).toLowerCase();
 // F12: the map serializes its current center/filter/sort/selection into returnTo.
 // The redesigned workspace also adds result-list scroll position. The detail route
 // must consume the value, restrict it to /homes, and feed the complete relative
-// URL (including query/hash) back to Next Link.
+// URL (including query/hash) back to Next Link. Link copy may be localized.
 for (const contract of [
   "searchReturnPath(propertyId)",
   "returnTo=${encodeURIComponent(searchReturnPath(propertyId))}",
@@ -40,7 +40,7 @@ for (const contract of [
   "searchParams: Promise<Record<string, string | string[] | undefined>>;",
   'typeof query.returnTo === "string" ? query.returnTo : null',
   "safeHomesReturnPath",
-  'href={returnTo}>Back to map</Link>',
+  'href={returnTo}>{copy.nav.backToMap}</Link>',
 ]) {
   requireContract(contract.includes("searchReturnPath") || contract.includes("returnTo=${") ? mapSearch : detail, contract, contract.includes("searchReturnPath") || contract.includes("returnTo=${") ? mapSearchFile : detailFile);
 }
