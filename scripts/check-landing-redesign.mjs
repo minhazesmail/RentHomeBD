@@ -23,7 +23,7 @@ function forbidText(source, text, label) {
 const page = read("src/app/page.tsx");
 const hero = read("src/components/landing-hero-search.tsx");
 const copy = read("src/i18n/landing-redesign-copy.ts");
-const css = read("src/app/landing-redesign-v2.css");
+const css = read("src/app/landing.css");
 const manifest = read("src/app/styles.css");
 const baseline = read("docs/redesign-system.md");
 
@@ -63,7 +63,7 @@ requireText(css, "--landing-v2-sand: #e8dfcf", "sand accent token");
 requireText(css, "grid-template-columns: minmax(0, 0.82fr) minmax(500px, 1fr)", "45/55 desktop hero balance");
 requireText(css, '[data-resolved-theme="dark"] .landing-shell', "dark appearance contract");
 requireText(css, "@media (prefers-reduced-motion: reduce)", "reduced-motion contract");
-requireText(manifest, '@import "./landing-redesign-v2.css" layer(component-appearance);', "canonical final landing style layer");
+requireText(manifest, '@import "./landing.css" layer(component-appearance);', "canonical final landing style layer");
 requireText(baseline, "Tenant type is therefore a primary search input", "documented tenant-first product rule");
 
 if (failures.length) {

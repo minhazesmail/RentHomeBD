@@ -1,22 +1,15 @@
-/* Batch 4 typography-spacing normalization for dynamic property titles.
-   Listing titles are user-generated and may wrap unpredictably, so keep the
-   display treatment premium without compressing adjacent lines or glyphs. */
+/* Typography and micro-spacing normalization for the property-detail surface. */
 
 .property-detail-page .property-detail-hero h1 {
   line-height: .96;
   letter-spacing: -.05em;
 }
 
-/* Batch 7 — detail sections and compatibility cards should separate their
-   heading from supporting copy consistently instead of using the tighter 6px
-   route default. */
 .property-detail-page .section-copy,
 .property-detail-page .tenant-compatibility-card p {
   margin-top: var(--text-gap-control);
 }
 
-/* Batch 8 — phone-reveal guidance is explanatory copy for a full-width contact
-   action. Keep it clearly subordinate without letting it cling to the button. */
 .property-detail-page .phone-reveal-gate > .contact-note {
   margin: var(--text-gap-action) 0 0;
   line-height: var(--leading-helper);
@@ -27,15 +20,18 @@
   line-height: 1.5;
 }
 
+/* This was the only live detail rule left in the retired homes-spacing-fixes.css. */
+.property-detail-page .trust-report-control > .form-hint {
+  margin-top: var(--text-gap-action);
+  line-height: var(--leading-helper);
+}
+
 @media (max-width: 720px) {
   .property-detail-page .property-detail-hero h1 {
     line-height: .98;
     letter-spacing: -.045em;
   }
 
-  /* Batch 9 mobile text review — long listing titles and addresses are both
-     dynamic. Keep enough separation for wrapped text while retaining the
-     compact mobile hero and section-card density. */
   .property-detail-page .property-detail-address {
     margin-top: var(--text-gap-related);
     line-height: var(--leading-helper);
