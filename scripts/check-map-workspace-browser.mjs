@@ -29,6 +29,8 @@ async function inspect(page) {
         display: style.display,
         marginTop: style.marginTop,
         borderRadius: style.borderRadius,
+        gridRowStart: style.gridRowStart,
+        gridRowEnd: style.gridRowEnd,
       };
     }
 
@@ -72,8 +74,15 @@ function validate(snapshot, viewport, scenario) {
   if (!approxEqual(workspace.left, shell.left) || !approxEqual(workspace.right, shell.right) || workspace.width < viewport.width * 0.94) {
     failures.push(`${label}: results/map workspace does not span the full renter search shell`);
   }
-  if (workspace.top < toolbar.bottom - 2) {
-    failures.push(`${label}: workspace starts beside/under the toolbar instead of below it`);
+
+  /* The toolbar is sticky, so getBoundingClientRect() reflects its visual sticky
+     offset and is not a reliable way to infer the grid's normal-flow row order.
+     Assert the explicit grid placement instead. */
+  if (toolbar.gridRowStart !== "1") {
+    failures.push(`${label}: toolbar is not pinned to desktop grid row 1 (${toolbar.gridRowStart})`);
+  }
+  if (workspace.gridRowStart !== "2") {
+    failures.push(`${label}: results/map workspace is not pinned to desktop grid row 2 (${workspace.gridRowStart})`);
   }
 
   if (sidebar.width < 400 || sidebar.width > 490) {
@@ -141,7 +150,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log("Map workspace browser geometry QA passed: toolbar and results/map workspace retain the intended desktop stack.");
+  console.log("Map workspace browser geometry QA passed: toolbar and results/map workspace retain the intended desktop grid stack.");
 }
 
 await main();
