@@ -3,16 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { getDashboardCopy } from "@/i18n/dashboard-copy";
+import { useLocale } from "@/i18n/use-locale";
 import { createClient } from "@/lib/supabase/client";
-import { TENANT_PROFILE_LABELS, type TenantType } from "@/lib/tenant-match";
+import { normalizeTenantType, type TenantType } from "@/lib/tenant-match";
 
-const options: Array<["" | Exclude<TenantType, "everyone">, string]> = [
-  ["", "No preference"],
-  ["family", TENANT_PROFILE_LABELS.family],
-  ["bachelor", TENANT_PROFILE_LABELS.bachelor],
-  ["student", TENANT_PROFILE_LABELS.student],
-  ["job_holder", TENANT_PROFILE_LABELS.job_holder],
-];
+type SearchTenantType = Exclude<TenantType, "everyone">;
+
+const tenantValues: SearchTenantType[] = ["family", "bachelor", "student", "job_holder"];
+
+function validSearchTenant(value: string): value is SearchTenantType {
+  return tenantValues.includes(value as SearchTenantType);
+}
 
 export function RenterPreferenceForm({
   userId,
@@ -22,26 +24,42 @@ export function RenterPreferenceForm({
   initialPreference: string | null;
 }) {
   const router = useRouter();
-  const [preference, setPreference] = useState(initialPreference ?? "");
+  const { locale, dictionary } = useLocale();
+  const copy = getDashboardCopy(locale).preference;
+  const normalizedInitial = normalizeTenantType(initialPreference);
+  const startingPreference: SearchTenantType | "" = normalizedInitial && normalizedInitial !== "everyone" ? normalizedInitial : "";
+  const [preference, setPreference] = useState<SearchTenantType | "">(startingPreference);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  const labels: Record<SearchTenantType, string> = {
+    family: dictionary.common.tenant.family,
+    bachelor: dictionary.common.tenant.bachelor,
+    student: dictionary.common.tenant.student,
+    job_holder: dictionary.common.tenant.jobHolder,
+  };
+
   async function save() {
+    if (!validSearchTenant(preference)) {
+      setMessage(copy.required);
+      return;
+    }
+
     setBusy(true);
     setMessage(null);
     const supabase = createClient();
     const { error } = await supabase
       .from("profiles")
-      .update({ preferred_tenant_type: preference || null } as never)
+      .update({ preferred_tenant_type: preference } as never)
       .eq("id", userId);
 
     if (error) {
-      setMessage("We couldn't update your renter type preference. Please try again.");
+      setMessage(copy.error);
       setBusy(false);
       return;
     }
 
-    setMessage("Renter type preference updated. Your map results will use it as a matching signal.");
+    setMessage(copy.success);
     setBusy(false);
     router.refresh();
   }
@@ -49,18 +67,20 @@ export function RenterPreferenceForm({
   return (
     <div className="renter-preference-control">
       <label htmlFor="preferred-tenant-type">
-        <span>Renter type</span>
+        <span>{copy.label}</span>
         <select
           id="preferred-tenant-type"
           value={preference}
-          onChange={(event) => setPreference(event.target.value)}
+          onChange={(event) => setPreference(event.target.value as SearchTenantType | "")}
           disabled={busy}
+          required
         >
-          {options.map(([value, label]) => <option key={value || "none"} value={value}>{label}</option>)}
+          <option value="" disabled>{copy.choose}</option>
+          {tenantValues.map((value) => <option key={value} value={value}>{labels[value]}</option>)}
         </select>
       </label>
       <button className="secondary-button" type="button" onClick={() => void save()} disabled={busy}>
-        {busy ? "Saving…" : "Save preference"}
+        {busy ? copy.saving : copy.save}
       </button>
       {message && <p className="renter-preference-message" role="status" aria-live="polite">{message}</p>}
     </div>

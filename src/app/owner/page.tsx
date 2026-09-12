@@ -9,6 +9,7 @@ import { formatCurrency, formatDate, formatNumber } from "@/i18n/format";
 import { getLocale } from "@/i18n/get-locale";
 import { formatOwnerPortfolioText, getOwnerPortfolioCopy, type OwnerPortfolioCopy } from "@/i18n/owner-portfolio-copy";
 import { requireOwnerOrAgent } from "@/lib/auth";
+import { daysUntilListingExpiry, listingNeedsAttention, RECONFIRM_SOON_DAYS } from "@/lib/listing-freshness";
 import { serverNowMs } from "@/lib/server-clock";
 import { createClient } from "@/lib/supabase/server";
 import styles from "./portfolio-controls.module.css";
@@ -16,7 +17,6 @@ import styles from "./portfolio-controls.module.css";
 export const dynamic = "force-dynamic";
 
 const OWNER_PROPERTY_MEDIA_TTL_SECONDS = 300;
-const RECONFIRM_SOON_DAYS = 3;
 const sortableStatuses = ["available", "pending_confirmation", "pending_review", "draft", "rejected", "rented", "expired"] as const;
 
 type OwnerSearchParams = { notice?: string | string[]; q?: string | string[]; status?: string | string[]; sort?: string | string[] };
@@ -37,20 +37,6 @@ function firstValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function daysUntilExpiry(expiresAt: string | null, now: number) {
-  if (!expiresAt) return null;
-  const expires = new Date(expiresAt).getTime();
-  if (!Number.isFinite(expires)) return null;
-  return Math.max(0, Math.ceil((expires - now) / 86_400_000));
-}
-
-function listingNeedsAttention(listing: Listing, now: number) {
-  if (["pending_confirmation", "rejected"].includes(listing.status)) return true;
-  if (listing.status !== "available") return false;
-  const days = daysUntilExpiry(listing.expires_at, now);
-  return days !== null && days <= RECONFIRM_SOON_DAYS;
-}
-
 function listingStatusPresentation(listing: Listing, now: number, copy: OwnerPortfolioCopy): StatusPresentation {
   const status = listing.status;
   const statusCopy = copy.status;
@@ -59,7 +45,7 @@ function listingStatusPresentation(listing: Listing, now: number, copy: OwnerPor
   if (status === "draft") return { label: statusCopy.draft, detail: statusCopy.draftDetail, tone: "neutral" };
   if (status === "pending_review") return { label: statusCopy.pendingReview, detail: statusCopy.pendingReviewDetail, tone: "neutral" };
   if (status === "available") {
-    const days = daysUntilExpiry(listing.expires_at, now);
+    const days = daysUntilListingExpiry(listing.expires_at, now);
     if (days === null) return { label: statusCopy.available, detail: statusCopy.availableDetail, tone: "good" };
     const unit = days === 1 ? statusCopy.day : statusCopy.days;
     if (days <= RECONFIRM_SOON_DAYS) {
