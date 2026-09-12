@@ -139,7 +139,7 @@ function ResponsiveMapSize() {
       delayed = window.setTimeout(() => map.invalidateSize({ pan: false }), 240);
     };
     const observer = host ? new MutationObserver(refresh) : null;
-    observer?.observe(host, { attributes: true, attributeFilter: ["data-mobile-sheet", "data-mobile-view", "data-mobile-filters"] });
+    if (host && observer) observer.observe(host, { attributes: true, attributeFilter: ["data-mobile-sheet", "data-mobile-view", "data-mobile-filters"] });
     window.addEventListener("resize", refresh);
     return () => {
       observer?.disconnect();
@@ -435,6 +435,7 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, foc
   center: [number, number];
   radiusKm: number | null;
   selectedId: string | null;
+  activeSelectedId?: string | null;
   focusId?: string | null;
   focusVersion?: number;
   onSelect: (id: string) => void;
