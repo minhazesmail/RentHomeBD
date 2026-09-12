@@ -2,7 +2,9 @@
 
 import { useLocale } from "@/i18n/use-locale";
 import { getOwnerEditorCopy } from "@/i18n/owner-editor-copy";
+import { getListingTenantPolicyCopy } from "@/i18n/listing-tenant-policy-copy";
 import { formatWorkflowText } from "@/i18n/workflow-copy";
+import { isValidListingTenantPolicy } from "@/lib/listing-tenant-policy";
 
 type Props = {
   title: string;
@@ -50,9 +52,12 @@ export function ListingReadiness({
 }: Props) {
   const { locale, formatNumber } = useLocale();
   const copy = getOwnerEditorCopy(locale).readiness;
+  const tenantCopy = getListingTenantPolicyCopy(locale);
+  const tenantPolicyValid = isValidListingTenantPolicy(tenantTypes);
+  const tenantCheckCopy = tenantPolicyValid ? tenantCopy.valid : tenantCopy.invalid;
   const essentials: Check[] = [
     { label: copy.checks.basics[0], detail: copy.checks.basics[1], done: title.trim().length >= 5 && Boolean(propertyType) && positiveNumber(rent) && Boolean(availableFrom) },
-    { label: copy.checks.tenant[0], detail: copy.checks.tenant[1], done: tenantTypes.length > 0 },
+    { label: tenantCheckCopy[0], detail: tenantCheckCopy[1], done: tenantPolicyValid },
     { label: copy.checks.pin[0], detail: copy.checks.pin[1], done: hasExactPin },
     { label: copy.checks.photo[0], detail: copy.checks.photo[1], done: hasPhoto },
   ];

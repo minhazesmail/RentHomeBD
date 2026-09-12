@@ -115,6 +115,17 @@ jobs:
           docker exec -i "$DB_CONTAINER" \
             psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
             < supabase/tests/f26_public_media_signing.sql
+      - name: Verify listing tenant policy exclusivity
+        run: |
+          set -euo pipefail
+          DB_CONTAINER="$(docker ps --filter 'name=supabase_db_' --format '{{.ID}}' | head -n 1)"
+          if [ -z "$DB_CONTAINER" ]; then
+            echo "Supabase database container was not found."
+            exit 1
+          fi
+          docker exec -i "$DB_CONTAINER" \
+            psql -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            < supabase/tests/f27_listing_tenant_policy.sql
 
   verify:
     runs-on: ubuntu-latest
