@@ -1,0 +1,226 @@
+/* Landing footer redesign.
+   Keep the existing NearBasha content and brand palette, but make the footer a
+   tighter editorial closing panel with clearer hierarchy, stronger link
+   grouping and a quieter metadata row. */
+
+.landing-shell .landing-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1.38fr) minmax(0, 2.05fr);
+  column-gap: clamp(52px, 7vw, 96px);
+  row-gap: 0;
+  width: min(1240px, 100%);
+  margin: clamp(56px, 7vw, 78px) auto 0;
+  padding: clamp(38px, 4.5vw, 54px) clamp(28px, 5vw, 60px) 22px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, .22) !important;
+  border-radius: 0 0 28px 28px;
+  background:
+    radial-gradient(circle at 9% 0%, rgba(185, 242, 39, .11), transparent 24rem),
+    radial-gradient(circle at 88% -8%, rgba(217, 166, 63, .10), transparent 21rem),
+    linear-gradient(135deg, #0a2b21 0%, #113a2f 100%) !important;
+  color: rgba(255, 255, 255, .76);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .05),
+    0 -18px 54px rgba(7, 31, 24, .07);
+}
+
+.landing-shell .landing-footer-brand {
+  grid-column: 1;
+  max-width: 340px;
+  align-self: start;
+}
+
+.landing-shell .landing-footer-brand .brand-logo {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 22px;
+}
+
+.landing-shell .landing-footer-brand .brand-logo img {
+  width: clamp(136px, 12vw, 156px);
+  height: auto;
+}
+
+.landing-shell .landing-footer-brand p {
+  max-width: 330px;
+  margin: 0;
+  color: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.35rem, 2vw, 1.72rem);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+}
+
+.landing-shell .landing-footer-links {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(30px, 4vw, 58px);
+  margin: 0;
+  padding: 2px 0 0;
+  align-self: start;
+  border-top: 0;
+}
+
+.landing-shell .landing-footer-links > div {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.landing-shell .landing-footer-links strong {
+  margin: 0 0 4px;
+  color: rgba(255, 255, 255, .76);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.landing-shell .landing-footer-links a {
+  display: inline-flex;
+  width: fit-content;
+  padding: 2px 0 3px;
+  color: rgba(255, 255, 255, .70);
+  font-size: .91rem;
+  line-height: 1.35;
+  text-decoration: none;
+  background-image: linear-gradient(90deg, rgba(185, 242, 39, .88), rgba(255, 253, 248, .82));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0 1px;
+  transition:
+    color 180ms ease,
+    transform 180ms ease,
+    background-size 180ms ease;
+}
+
+.landing-shell .landing-footer-links a:hover {
+  color: #f7f9e9;
+  transform: translateX(3px);
+  background-size: 100% 1px;
+}
+
+.landing-shell .landing-footer-links a:focus-visible {
+  outline: 2px solid rgba(185, 242, 39, .78);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
+.landing-shell .landing-footer-bottom {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 34px;
+  padding-top: 18px;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, .17) !important;
+  color: rgba(255, 255, 255, .56);
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+.landing-shell .landing-footer-bottom > span:first-child {
+  justify-self: start;
+}
+
+.landing-shell .landing-footer-bottom > span:last-child {
+  justify-self: end;
+  text-align: right;
+}
+
+.landing-shell .landing-footer-studio {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-self: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, .62);
+  font-size: .72rem;
+  font-weight: 680;
+}
+
+.landing-shell .landing-footer-studio-logo {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  object-fit: contain;
+  opacity: .78;
+}
+
+@media (max-width: 900px) {
+  .landing-shell .landing-footer {
+    grid-template-columns: 1fr;
+    row-gap: 34px;
+    padding-inline: clamp(24px, 6vw, 48px);
+  }
+
+  .landing-shell .landing-footer-brand,
+  .landing-shell .landing-footer-links {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .landing-shell .landing-footer-brand {
+    max-width: 420px;
+  }
+
+  .landing-shell .landing-footer-links {
+    padding-top: 0;
+  }
+
+  .landing-shell .landing-footer-bottom {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-shell .landing-footer {
+    margin-top: 52px;
+    padding: 34px 22px 20px;
+    row-gap: 30px;
+    border-radius: 0;
+  }
+
+  .landing-shell .landing-footer-brand .brand-logo {
+    margin-bottom: 18px;
+  }
+
+  .landing-shell .landing-footer-brand p {
+    max-width: 300px;
+    font-size: 1.35rem;
+    line-height: 1.22;
+  }
+
+  .landing-shell .landing-footer-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px 22px;
+  }
+
+  .landing-shell .landing-footer-links > div {
+    gap: 10px;
+  }
+
+  .landing-shell .landing-footer-bottom {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding-top: 16px;
+  }
+
+  .landing-shell .landing-footer-bottom > span:first-child,
+  .landing-shell .landing-footer-bottom > span:last-child,
+  .landing-shell .landing-footer-studio {
+    justify-self: start;
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-shell .landing-footer-links a {
+    transition: none;
+  }
+}

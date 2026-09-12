@@ -1,6 +1,6 @@
 "use client";
 
-import "@/app/landing-styles.css";
+import "@/app/landing-foundation.css";
 import { useEffect } from "react";
 
 type SiteAtmosphereProps = {

@@ -1,0 +1,508 @@
+/* Guided journey redesign for the renter / owner how-it-works block.
+   The route keeps one structural surface and lets the three steps read as a
+   connected sequence instead of a grid of nested cards. */
+
+.landing-shell .landing-how,
+.landing-shell #how-heading {
+  scroll-margin-top: 112px;
+}
+
+.landing-shell .landing-how-tabs-shell {
+  --journey-accent: #087653;
+  --journey-accent-strong: #082f25;
+  --journey-soft: #dfeee5;
+  --journey-line: rgba(8, 71, 53, .14);
+  --journey-copy: #5d6f66;
+  width: min(1120px, 100%);
+  max-width: none;
+  margin-top: 32px;
+  overflow: clip;
+  border: 1px solid rgba(11, 67, 50, .15);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(185, 242, 39, .12), transparent 21rem),
+    radial-gradient(circle at 6% 108%, rgba(8, 118, 83, .08), transparent 24rem),
+    rgba(255, 253, 248, .86);
+  box-shadow: 0 22px 54px rgba(11, 35, 27, .08);
+}
+
+.landing-shell .landing-how-tabs-shell.owner {
+  --journey-accent: #9b563c;
+  --journey-accent-strong: #653a2c;
+  --journey-soft: #f3e5dc;
+  --journey-line: rgba(112, 66, 48, .15);
+  --journey-copy: #6d625c;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(217, 166, 63, .15), transparent 21rem),
+    radial-gradient(circle at 8% 108%, rgba(155, 86, 60, .07), transparent 24rem),
+    rgba(255, 253, 248, .88);
+}
+
+.landing-shell .landing-how-controls {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  min-height: 72px;
+  padding: 12px 14px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid var(--journey-line);
+  background: rgba(255, 255, 255, .34);
+}
+
+.landing-shell .landing-persona-tabs {
+  display: inline-grid;
+  width: fit-content;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 4px;
+  border: 0;
+  border-radius: 15px;
+  background: rgba(8, 47, 37, .06);
+  box-shadow: inset 0 0 0 1px rgba(8, 47, 37, .07);
+}
+
+.landing-shell .landing-persona-tabs button {
+  min-width: 146px;
+  min-height: 42px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: #66766e;
+  cursor: pointer;
+  font-size: .82rem;
+  font-weight: 820;
+  letter-spacing: -.01em;
+  transition: color 180ms ease, background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.landing-shell .landing-persona-tabs button:hover {
+  color: var(--journey-accent-strong);
+}
+
+.landing-shell .landing-persona-tabs button.active {
+  background: var(--journey-accent-strong);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(8, 47, 37, .14);
+}
+
+.landing-shell .landing-persona-tabs button:focus-visible {
+  outline: 3px solid rgba(8, 118, 83, .2);
+  outline-offset: 2px;
+}
+
+.landing-shell .landing-how-tabs-shell.owner .landing-persona-tabs button:focus-visible {
+  outline-color: rgba(155, 86, 60, .2);
+}
+
+.landing-shell .landing-how-primary-link {
+  display: inline-flex;
+  min-height: 42px;
+  padding: 10px 14px 10px 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 999px;
+  background: var(--journey-accent-strong);
+  color: #fff;
+  font-size: .79rem;
+  font-weight: 820;
+  letter-spacing: -.01em;
+  text-decoration: none;
+  box-shadow: 0 9px 22px rgba(8, 47, 37, .12);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.landing-shell .landing-how-primary-link > span:last-child {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .12);
+  font-size: .9rem;
+  line-height: 1;
+}
+
+.landing-shell .landing-how-primary-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(8, 47, 37, .16);
+}
+
+.landing-shell .landing-how-primary-link:focus-visible {
+  outline: 3px solid rgba(185, 242, 39, .38);
+  outline-offset: 3px;
+}
+
+.landing-shell .landing-how-panel {
+  margin: 0;
+  padding: clamp(30px, 4.2vw, 48px);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.landing-shell .landing-how-panel-heading {
+  display: block;
+  margin: 0;
+}
+
+.landing-shell .landing-persona-kicker {
+  color: var(--journey-accent);
+  font-size: .72rem;
+  font-weight: 860;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.landing-shell .landing-how-panel-heading h3 {
+  max-width: 790px;
+  margin: 9px 0 0;
+  color: #0b231b;
+  font-size: clamp(2.3rem, 4.2vw, 3.85rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -.052em;
+  text-wrap: balance;
+}
+
+.landing-shell .landing-step-cards {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: 38px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-shell .landing-step-cards::before {
+  position: absolute;
+  top: 47px;
+  right: 44px;
+  left: 44px;
+  z-index: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--journey-line) 8%, var(--journey-line) 92%, transparent);
+  content: "";
+}
+
+.landing-shell .landing-step-cards li {
+  position: relative;
+  z-index: 1;
+  min-height: 224px;
+  padding: 20px 28px 24px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.landing-shell .landing-step-cards li + li {
+  border-left: 1px solid var(--journey-line);
+}
+
+.landing-shell .landing-step-topline {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.landing-shell .landing-step-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  flex: 0 0 52px;
+  place-items: center;
+  border: 1px solid rgba(8, 118, 83, .11);
+  border-radius: 16px;
+  background: var(--journey-soft);
+  color: var(--journey-accent);
+  box-shadow: 0 7px 18px rgba(11, 35, 27, .05);
+}
+
+.landing-shell .landing-step-cards li:nth-child(2) .landing-step-icon {
+  background: #f4ebda;
+  color: #9a7430;
+}
+
+.landing-shell .landing-step-cards li:nth-child(3) .landing-step-icon {
+  background: #eaf1d8;
+  color: #58772b;
+}
+
+.landing-shell .landing-how-tabs-shell.owner .landing-step-cards li:nth-child(2) .landing-step-icon {
+  background: #f1e5d5;
+  color: #8a6734;
+}
+
+.landing-shell .landing-how-tabs-shell.owner .landing-step-cards li:nth-child(3) .landing-step-icon {
+  background: #eee6df;
+  color: #7a5849;
+}
+
+.landing-shell .landing-step-icon svg {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.landing-shell .landing-step-meta {
+  display: inline-flex;
+  padding: 6px 8px;
+  align-items: baseline;
+  gap: 6px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, .92);
+  color: #7a8981;
+  box-shadow: 0 0 0 1px rgba(11, 35, 27, .06);
+}
+
+.landing-shell .landing-step-meta > span {
+  color: var(--journey-accent);
+  font-size: .72rem;
+  font-weight: 880;
+  letter-spacing: .04em;
+}
+
+.landing-shell .landing-step-meta > small {
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.landing-shell .landing-step-copy {
+  display: grid;
+  margin-top: 24px;
+  align-content: start;
+  gap: 9px;
+}
+
+.landing-shell .landing-step-copy strong {
+  color: #0b231b;
+  font-size: 1.08rem;
+  font-weight: 820;
+  letter-spacing: -.022em;
+}
+
+.landing-shell .landing-step-copy p {
+  max-width: 30rem;
+  margin: 0;
+  color: var(--journey-copy);
+  font-size: .91rem;
+  line-height: 1.66;
+}
+
+.landing-shell .landing-how-outcome {
+  display: flex;
+  margin-top: 8px;
+  padding: 20px 28px 2px;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--journey-line);
+  color: var(--journey-copy);
+}
+
+.landing-shell .landing-how-outcome > span {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: var(--journey-accent);
+  box-shadow: 0 0 0 5px rgba(8, 118, 83, .09);
+}
+
+.landing-shell .landing-how-tabs-shell.owner .landing-how-outcome > span {
+  box-shadow: 0 0 0 5px rgba(155, 86, 60, .09);
+}
+
+.landing-shell .landing-how-outcome p {
+  margin: 0;
+  font-size: .81rem;
+  font-weight: 740;
+  letter-spacing: -.005em;
+}
+
+@media (max-width: 900px) {
+  .landing-shell .landing-how-panel {
+    padding-inline: 28px;
+  }
+
+  .landing-shell .landing-step-cards li {
+    padding-inline: 20px;
+  }
+
+  .landing-shell .landing-step-meta {
+    padding-inline: 7px;
+  }
+
+  .landing-shell .landing-step-meta > small {
+    font-size: .61rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .landing-shell .landing-how,
+  .landing-shell #how-heading {
+    scroll-margin-top: 88px;
+  }
+
+  .landing-shell .landing-how-tabs-shell {
+    margin-top: 26px;
+    border-radius: 24px;
+  }
+
+  .landing-shell .landing-how-controls {
+    min-height: 0;
+    padding: 12px;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .landing-shell .landing-persona-tabs {
+    width: 100%;
+  }
+
+  .landing-shell .landing-persona-tabs button {
+    min-width: 0;
+    min-height: 42px;
+    padding-inline: 10px;
+  }
+
+  .landing-shell .landing-how-primary-link {
+    width: fit-content;
+    align-self: flex-start;
+  }
+
+  .landing-shell .landing-how-panel {
+    padding: 28px 20px 24px;
+  }
+
+  .landing-shell .landing-how-panel-heading h3 {
+    max-width: 620px;
+    font-size: clamp(2.15rem, 10.2vw, 3.2rem);
+    line-height: 1.04;
+    letter-spacing: -.047em;
+  }
+
+  .landing-shell .landing-step-cards {
+    grid-template-columns: 1fr;
+    margin-top: 24px;
+  }
+
+  .landing-shell .landing-step-cards::before {
+    top: 25px;
+    right: auto;
+    bottom: 25px;
+    left: 25px;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(180deg, transparent, var(--journey-line) 7%, var(--journey-line) 93%, transparent);
+  }
+
+  .landing-shell .landing-step-cards li {
+    display: grid;
+    min-height: 0;
+    grid-template-columns: 54px minmax(0, 1fr);
+    column-gap: 16px;
+    padding: 18px 0;
+  }
+
+  .landing-shell .landing-step-cards li + li {
+    border-left: 0;
+  }
+
+  .landing-shell .landing-step-topline {
+    grid-column: 1;
+    min-height: 0;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .landing-shell .landing-step-icon {
+    width: 50px;
+    height: 50px;
+    flex-basis: 50px;
+    border-radius: 15px;
+  }
+
+  .landing-shell .landing-step-meta {
+    padding: 5px 6px;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    border-radius: 10px;
+  }
+
+  .landing-shell .landing-step-meta > small {
+    font-size: .55rem;
+    letter-spacing: .055em;
+  }
+
+  .landing-shell .landing-step-copy {
+    grid-column: 2;
+    margin-top: 2px;
+    padding: 4px 0 16px;
+    align-self: start;
+  }
+
+  .landing-shell .landing-step-copy strong {
+    font-size: 1.07rem;
+  }
+
+  .landing-shell .landing-step-copy p {
+    font-size: .89rem;
+    line-height: 1.64;
+  }
+
+  .landing-shell .landing-how-outcome {
+    margin-top: 2px;
+    padding: 18px 0 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .landing-shell .landing-persona-tabs button {
+    font-size: .76rem;
+  }
+
+  .landing-shell .landing-how-primary-link {
+    min-height: 40px;
+    font-size: .76rem;
+  }
+
+  .landing-shell .landing-how-panel {
+    padding-inline: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-shell .landing-persona-tabs button,
+  .landing-shell .landing-how-primary-link {
+    transition: none;
+  }
+
+  .landing-shell .landing-how-primary-link:hover {
+    transform: none;
+  }
+}
