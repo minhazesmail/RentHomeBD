@@ -18,13 +18,18 @@
     min-width: 0;
   }
 
-  /* renter-search-toolbar intentionally reuses renter-filter-panel markup for
-     shared form semantics. Neutralize legacy card geometry so the toolbar does
-     not become a rounded, offset sidebar card. */
+  /* Pin the two top-level grid children to deterministic rows. This makes the
+     layout contract explicit and prevents a future legacy column declaration
+     or auto-placement change from putting the workspace beside the toolbar. */
   .nb-global-shell--renter .renter-search-toolbar {
+    grid-row: 1;
     margin: 0;
     border: 0;
     border-bottom: 1px solid var(--map-v2-border);
     border-radius: 0;
+  }
+
+  .nb-global-shell--renter .renter-workspace {
+    grid-row: 2;
   }
 }
