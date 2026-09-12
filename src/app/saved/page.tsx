@@ -22,6 +22,12 @@ type SavedSearchMatchRow = {
 };
 
 type SavedCopy = WorkflowCopy["saved"];
+type SavedSearchTenantType = Exclude<TenantType, "everyone">;
+
+function savedSearchTenantType(value: unknown): SavedSearchTenantType | null {
+  const tenant = normalizeTenantType(value);
+  return tenant && tenant !== "everyone" ? tenant : null;
+}
 
 function searchHref(search: {
   center_lat: number;
@@ -36,7 +42,8 @@ function searchHref(search: {
   if (search.radius_km !== null) params.set("radius", String(search.radius_km));
   if (search.min_rent !== null) params.set("minRent", String(search.min_rent));
   if (search.max_rent !== null) params.set("maxRent", String(search.max_rent));
-  if (search.tenant_type) params.set("tenant", search.tenant_type);
+  const tenant = savedSearchTenantType(search.tenant_type);
+  if (tenant) params.set("tenant", tenant);
   if (search.min_bedrooms !== null) params.set("bedrooms", String(search.min_bedrooms));
   return `/homes?${params.toString()}`;
 }
@@ -141,13 +148,16 @@ export default async function SavedPage() {
   ]);
 
   const matchStateEntries = await Promise.all((searches ?? []).map(async (search) => {
+    const renterTenantType = savedSearchTenantType(search.tenant_type);
+    if (!renterTenantType) return [search.id as string, null] as const;
+
     const { data, error } = await supabase.rpc("count_saved_search_matches", {
       center_lat: Number(search.center_lat),
       center_long: Number(search.center_long),
       radius_km: search.radius_km == null ? null : Number(search.radius_km),
       min_rent: search.min_rent == null ? null : Number(search.min_rent),
       max_rent: search.max_rent == null ? null : Number(search.max_rent),
-      renter_tenant_type: normalizeTenantType(search.tenant_type),
+      renter_tenant_type: renterTenantType,
       min_bedrooms: search.min_bedrooms == null ? null : Number(search.min_bedrooms),
       changed_since: search.updated_at,
     });
