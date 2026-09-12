@@ -48,5 +48,5 @@ $$;
 revoke all on function private.enforce_listing_tenant_policy_exclusivity() from public;
 
 create trigger property_tenant_types_enforce_exclusivity
-before insert on public.property_tenant_types
+before insert or update of tenant_type, property_id on public.property_tenant_types
 for each row execute function private.enforce_listing_tenant_policy_exclusivity();
