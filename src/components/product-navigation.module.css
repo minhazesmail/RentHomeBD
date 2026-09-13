@@ -261,7 +261,7 @@
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .productNav {
     padding-inline: max(9px, env(safe-area-inset-left)) max(9px, env(safe-area-inset-right));
   }
