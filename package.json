@@ -35,6 +35,7 @@
     "themeqa": "node scripts/check-theme.mjs",
     "themebrowser": "node scripts/check-theme-browser.mjs",
     "mapworkspacebrowser": "node scripts/check-map-workspace-browser.mjs",
+    "mobileconceptqa": "node scripts/check-mobile-concept-browser.mjs",
     "i18nqa": "node scripts/check-localization.mjs",
     "typecheck": "tsc --noEmit"
   },
