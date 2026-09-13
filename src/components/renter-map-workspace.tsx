@@ -659,7 +659,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
           <label className="field renter-toolbar-area">
             {workspaceCopy.toolbar.area}
             <select value={locationPreset} onChange={(event) => choosePresetLocation(event.target.value)} disabled={busy}>
-              <option value="">{copy.chooseDhakaLocation}</option>
+              <option value="">{workspaceCopy.toolbar.areaPlaceholder}</option>
               {LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label}>{localizeLocationLabel(location.label, dictionary)}</option>)}
             </select>
           </label>
