@@ -7,4 +7,8 @@
 @import "./property-detail-flow-redesign.css" layer(route-contrast);
 @import "./homes-theme.css" layer(theme);
 @import "./map-workspace.css" layer(component-appearance);
-@import "./mobile-concept-alignment.css" layer(component-appearance);
+
+/* Deliberately unlayered and loaded last: this is a narrow mobile continuity
+   bridge over the canonical map workspace rather than a second owner of the
+   component-appearance layer. Unlayered normal rules outrank layered rules. */
+@import "./mobile-concept-alignment.css";
