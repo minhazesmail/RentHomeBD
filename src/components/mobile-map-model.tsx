@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronDown, ChevronUp, List, Map, Minus, SlidersHorizontal } from "lucide-react";
-import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
-import { useState } from "react";
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import { useRef, useState } from "react";
 
 import { getMapWorkspaceRedesignCopy } from "@/i18n/map-workspace-redesign-copy";
 import { useLocale } from "@/i18n/use-locale";
@@ -11,6 +11,9 @@ import styles from "./mobile-map-model.module.css";
 
 type MobileView = "map" | "list";
 type SheetState = "collapsed" | "partial" | "expanded";
+
+const SHEET_STATES: SheetState[] = ["collapsed", "partial", "expanded"];
+const SHEET_SWIPE_THRESHOLD = 44;
 
 function mobileViewport() {
   return typeof window !== "undefined" && window.matchMedia("(max-width: 960px)").matches;
@@ -30,6 +33,7 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
   const [view, setView] = useState<MobileView>("map");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sheet, setSheet] = useState<SheetState>("partial");
+  const sheetDragStartY = useRef<number | null>(null);
 
   function showView(nextView: MobileView) {
     setFiltersOpen(false);
@@ -41,6 +45,30 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
   function toggleFilters() {
     setFiltersOpen((open) => !open);
     window.setTimeout(() => focusSelector(".renter-search-toolbar"), 0);
+  }
+
+  function stepSheet(direction: "up" | "down") {
+    setSheet((current) => {
+      const currentIndex = SHEET_STATES.indexOf(current);
+      const nextIndex = direction === "up"
+        ? Math.min(SHEET_STATES.length - 1, currentIndex + 1)
+        : Math.max(0, currentIndex - 1);
+      return SHEET_STATES[nextIndex];
+    });
+  }
+
+  function handleSheetPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    sheetDragStartY.current = event.clientY;
+  }
+
+  function handleSheetPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    const startY = sheetDragStartY.current;
+    sheetDragStartY.current = null;
+    if (startY === null) return;
+    const delta = event.clientY - startY;
+    if (Math.abs(delta) < SHEET_SWIPE_THRESHOLD) return;
+    stepSheet(delta < 0 ? "up" : "down");
   }
 
   function handleClickCapture(event: ReactMouseEvent<HTMLDivElement>) {
@@ -69,37 +97,47 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
         />
       )}
 
-      <div className={styles.sheetControls} role="group" aria-label={copy.results}>
-        <button
-          className={sheet === "collapsed" ? styles.sheetActive : undefined}
-          type="button"
-          aria-label={copy.collapseResults}
-          aria-pressed={sheet === "collapsed"}
-          onClick={() => setSheet("collapsed")}
-        >
-          <ChevronDown size={16} aria-hidden="true" />
-          <span>{copy.collapsed}</span>
-        </button>
-        <button
-          className={sheet === "partial" ? styles.sheetActive : undefined}
-          type="button"
-          aria-label={copy.partialResults}
-          aria-pressed={sheet === "partial"}
-          onClick={() => setSheet("partial")}
-        >
-          <Minus size={16} aria-hidden="true" />
-          <span>{copy.partial}</span>
-        </button>
-        <button
-          className={sheet === "expanded" ? styles.sheetActive : undefined}
-          type="button"
-          aria-label={copy.expandResults}
-          aria-pressed={sheet === "expanded"}
-          onClick={() => setSheet("expanded")}
-        >
-          <ChevronUp size={16} aria-hidden="true" />
-          <span>{copy.expanded}</span>
-        </button>
+      <div
+        className={styles.sheetControls}
+        role="group"
+        aria-label={copy.results}
+        onPointerDown={handleSheetPointerDown}
+        onPointerUp={handleSheetPointerUp}
+        onPointerCancel={() => { sheetDragStartY.current = null; }}
+      >
+        <span className={styles.sheetGrip} aria-hidden="true" />
+        <div className={styles.sheetControlButtons}>
+          <button
+            className={sheet === "collapsed" ? styles.sheetActive : undefined}
+            type="button"
+            aria-label={copy.collapseResults}
+            aria-pressed={sheet === "collapsed"}
+            onClick={() => setSheet("collapsed")}
+          >
+            <ChevronDown size={16} aria-hidden="true" />
+            <span>{copy.collapsed}</span>
+          </button>
+          <button
+            className={sheet === "partial" ? styles.sheetActive : undefined}
+            type="button"
+            aria-label={copy.partialResults}
+            aria-pressed={sheet === "partial"}
+            onClick={() => setSheet("partial")}
+          >
+            <Minus size={16} aria-hidden="true" />
+            <span>{copy.partial}</span>
+          </button>
+          <button
+            className={sheet === "expanded" ? styles.sheetActive : undefined}
+            type="button"
+            aria-label={copy.expandResults}
+            aria-pressed={sheet === "expanded"}
+            onClick={() => setSheet("expanded")}
+          >
+            <ChevronUp size={16} aria-hidden="true" />
+            <span>{copy.expanded}</span>
+          </button>
+        </div>
       </div>
 
       <nav className={styles.mobileMapNavigator} aria-label={`${copy.map}, ${copy.list}, ${copy.filters}`}>
@@ -109,7 +147,7 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
           aria-pressed={view === "map" && !filtersOpen}
           onClick={() => showView("map")}
         >
-          <Map size={17} aria-hidden="true" />
+          <Map size={18} aria-hidden="true" />
           {copy.map}
         </button>
         <button
@@ -118,7 +156,7 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
           aria-pressed={view === "list" && !filtersOpen}
           onClick={() => showView("list")}
         >
-          <List size={17} aria-hidden="true" />
+          <List size={18} aria-hidden="true" />
           {copy.list}
         </button>
         <button
@@ -127,7 +165,7 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
           aria-expanded={filtersOpen}
           onClick={toggleFilters}
         >
-          <SlidersHorizontal size={17} aria-hidden="true" />
+          <SlidersHorizontal size={18} aria-hidden="true" />
           <span>{filtersOpen ? copy.done : copy.filters}</span>
         </button>
       </nav>

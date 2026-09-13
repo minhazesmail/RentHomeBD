@@ -10,10 +10,13 @@
 
 @media (max-width: 960px) {
   .mobileMapModel.mobileMapLayout {
-    --mobile-nav-offset: calc(70px + env(safe-area-inset-bottom));
+    --mobile-topbar-height: 108px;
+    --mobile-app-nav-height: 0px;
+    --mobile-mode-nav-height: 64px;
+    --mobile-bottom-stack: calc(var(--mobile-app-nav-height) + var(--mobile-mode-nav-height));
     --mobile-sheet-height: 38svh;
     display: block;
-    min-height: calc(100svh - 112px);
+    min-height: calc(100svh - var(--mobile-topbar-height));
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-sheet="collapsed"] {
@@ -27,38 +30,40 @@
   .mobileMapNavigator {
     position: fixed;
     left: 50%;
-    bottom: max(10px, env(safe-area-inset-bottom));
-    z-index: 1500;
+    bottom: calc(var(--mobile-app-nav-height) + 8px);
+    z-index: 1680;
     width: min(390px, calc(100% - 20px));
     display: grid;
     grid-template-columns: 1fr 1fr auto;
     gap: 5px;
     padding: 5px;
     border: 1px solid var(--border-strong);
-    border-radius: 17px;
-    background: color-mix(in srgb, var(--surface-elevated) 94%, transparent);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--surface-elevated) 95%, transparent);
     box-shadow: var(--shadow-float);
-    backdrop-filter: blur(20px) saturate(1.12);
-    -webkit-backdrop-filter: blur(20px) saturate(1.12);
+    backdrop-filter: blur(22px) saturate(1.14);
+    -webkit-backdrop-filter: blur(22px) saturate(1.14);
     transform: translateX(-50%);
   }
 
   .mobileMapNavigator button,
   .sheetControls button {
-    min-height: 44px;
+    min-height: 46px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
     padding: 0 12px;
     border: 0;
-    border-radius: 12px;
+    border-radius: 13px;
     background: transparent;
     color: var(--ink-soft);
     font: inherit;
     font-size: .79rem;
     font-weight: 800;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   .mobileMapNavigator button.active {
@@ -76,25 +81,41 @@
   .sheetControls {
     position: fixed;
     left: 50%;
-    bottom: calc(var(--mobile-nav-offset) + var(--mobile-sheet-height) - 22px);
-    z-index: 1460;
+    bottom: calc(var(--mobile-bottom-stack) + var(--mobile-sheet-height) - 20px);
+    z-index: 1660;
+    width: min(300px, calc(100% - 40px));
     display: grid;
-    grid-template-columns: repeat(3, auto);
-    gap: 3px;
-    padding: 4px;
+    gap: 2px;
+    padding: 5px 6px 6px;
     border: 1px solid var(--border-strong);
-    border-radius: 999px;
+    border-radius: 18px;
     background: color-mix(in srgb, var(--surface-elevated) 96%, transparent);
     box-shadow: var(--shadow-md);
     transform: translateX(-50%);
+    touch-action: pan-x;
+    user-select: none;
+  }
+
+  .sheetGrip {
+    width: 38px;
+    height: 4px;
+    justify-self: center;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ink-soft) 38%, transparent);
+  }
+
+  .sheetControlButtons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
   }
 
   .sheetControls button {
-    min-height: 38px;
+    min-height: 36px;
     gap: 4px;
-    padding-inline: 10px;
-    border-radius: 999px;
-    font-size: .7rem;
+    padding-inline: 8px;
+    border-radius: 11px;
+    font-size: .68rem;
   }
 
   .sheetControls button.sheetActive {
@@ -117,7 +138,7 @@
   .filterScrim {
     position: fixed;
     inset: 0;
-    z-index: 1360;
+    z-index: 1700;
     display: block;
     width: 100%;
     height: 100%;
@@ -149,9 +170,9 @@
     display: block;
     position: relative;
     top: auto;
-    height: calc(100svh - 112px);
+    height: calc(100svh - var(--mobile-topbar-height));
     min-height: 470px;
-    padding: 8px 8px calc(var(--mobile-nav-offset) + 8px);
+    padding: 8px 8px calc(var(--mobile-bottom-stack) + 8px);
     background: var(--surface-muted);
   }
 
@@ -159,8 +180,8 @@
     position: fixed;
     left: 8px;
     right: 8px;
-    bottom: var(--mobile-nav-offset);
-    z-index: 1420;
+    bottom: var(--mobile-bottom-stack);
+    z-index: 1640;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     width: auto;
@@ -170,11 +191,12 @@
     margin: 0;
     padding: 0;
     border: 1px solid var(--border-strong);
-    border-radius: 22px 22px 16px 16px;
+    border-radius: 24px 24px 16px 16px;
     background: color-mix(in srgb, var(--surface-elevated) 97%, transparent);
     box-shadow: var(--shadow-float);
-    backdrop-filter: blur(18px) saturate(1.08);
-    -webkit-backdrop-filter: blur(18px) saturate(1.08);
+    backdrop-filter: blur(20px) saturate(1.08);
+    -webkit-backdrop-filter: blur(20px) saturate(1.08);
+    transition: height 220ms cubic-bezier(.2,.8,.2,1), max-height 220ms cubic-bezier(.2,.8,.2,1);
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-sheet="collapsed"] :global(.renter-results-pane) {
@@ -192,11 +214,11 @@
     grid-template-rows: auto minmax(0, 1fr);
     position: relative;
     z-index: 3;
-    min-height: calc(100svh - 112px);
+    min-height: calc(100svh - var(--mobile-topbar-height));
     max-height: none;
     overflow: visible;
     margin: 0;
-    padding: 18px 14px calc(92px + env(safe-area-inset-bottom));
+    padding: 14px 12px calc(var(--mobile-bottom-stack) + 22px);
     border: 0;
     border-radius: 0;
     background: var(--surface-elevated);
@@ -217,14 +239,14 @@
   .mobileMapModel.mobileMapLayout[data-mobile-filters="open"] :global(.renter-search-toolbar) {
     position: fixed;
     inset: 0;
-    z-index: 1400;
+    z-index: 1720;
     display: block;
     width: 100%;
     height: 100svh;
     max-height: 100svh;
     overflow-y: auto;
     margin: 0;
-    padding: 34px 14px calc(92px + env(safe-area-inset-bottom));
+    padding: max(26px, env(safe-area-inset-top)) 14px calc(84px + env(safe-area-inset-bottom));
     border: 0;
     border-radius: 0;
     background: var(--surface-elevated);
@@ -236,7 +258,7 @@
     display: block;
     margin: 0 0 18px;
     color: var(--ink);
-    font-size: 1.18rem;
+    font-size: 1.22rem;
     font-weight: 850;
     letter-spacing: -.035em;
     content: attr(data-mobile-filter-title);
@@ -267,7 +289,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
     gap: 8px;
-    margin: 24px -14px calc(-92px - env(safe-area-inset-bottom));
+    margin: 24px -14px calc(-84px - env(safe-area-inset-bottom));
     padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border-strong);
     background: color-mix(in srgb, var(--surface-elevated) 96%, transparent);
@@ -284,6 +306,7 @@
   .mobileMapModel.mobileMapLayout[data-mobile-view="list"] :global(.mobile-search-summary) {
     position: sticky;
     top: 0;
+    z-index: 8;
     width: 100%;
     border-width: 0 0 1px;
     border-radius: 0;
@@ -303,45 +326,48 @@
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-sheet="expanded"] :global(.mobile-map-sheet) {
-    bottom: calc(var(--mobile-nav-offset) + 86px);
+    bottom: calc(var(--mobile-bottom-stack) + 86px);
   }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 767px) {
   .mobileMapModel.mobileMapLayout {
-    --mobile-nav-offset: calc(64px + env(safe-area-inset-bottom));
+    --mobile-topbar-height: 58px;
+    --mobile-app-nav-height: calc(64px + env(safe-area-inset-bottom));
+    --mobile-mode-nav-height: 62px;
     --mobile-sheet-height: 36svh;
-    min-height: calc(100svh - 104px);
+    min-height: calc(100svh - var(--mobile-topbar-height));
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-sheet="collapsed"] {
-    --mobile-sheet-height: 92px;
+    --mobile-sheet-height: 90px;
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-sheet="expanded"] {
-    --mobile-sheet-height: min(72svh, 690px);
+    --mobile-sheet-height: min(68svh, 660px);
   }
 
   .mobileMapNavigator {
-    bottom: max(7px, env(safe-area-inset-bottom));
+    bottom: calc(var(--mobile-app-nav-height) + 6px);
     width: calc(100% - 14px);
-    border-radius: 15px;
+    border-radius: 16px;
   }
 
   .mobileMapNavigator button {
-    min-height: 43px;
+    min-height: 45px;
     gap: 5px;
     padding-inline: 8px;
-    font-size: .75rem;
+    font-size: .74rem;
   }
 
   .sheetControls {
-    max-width: calc(100% - 26px);
+    width: min(270px, calc(100% - 34px));
+    bottom: calc(var(--mobile-bottom-stack) + var(--mobile-sheet-height) - 18px);
   }
 
   .sheetControls button {
-    min-height: 36px;
-    padding-inline: 8px;
+    min-height: 34px;
+    padding-inline: 6px;
   }
 
   .sheetControls button span {
@@ -349,20 +375,20 @@
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-view="map"] :global(.renter-map-panel) {
-    height: calc(100svh - 104px);
+    height: calc(100svh - var(--mobile-topbar-height));
     min-height: 420px;
-    padding: 6px 6px calc(var(--mobile-nav-offset) + 6px);
+    padding: 5px 5px calc(var(--mobile-bottom-stack) + 5px);
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-view="map"] :global(.renter-search-sidebar) {
     left: 6px;
     right: 6px;
-    border-radius: 19px 19px 14px 14px;
+    border-radius: 22px 22px 15px 15px;
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-view="list"] :global(.renter-search-sidebar) {
-    min-height: calc(100svh - 104px);
-    padding: 16px 10px calc(86px + env(safe-area-inset-bottom));
+    min-height: calc(100svh - var(--mobile-topbar-height));
+    padding: 12px 10px calc(var(--mobile-bottom-stack) + 18px);
   }
 }
 

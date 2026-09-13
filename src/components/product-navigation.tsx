@@ -38,6 +38,9 @@ export function ProductNavigation({
   if (canList) items.push({ key: "properties", href: "/owner", label: nav.properties, icon: Building2 });
 
   const AccountIcon = authenticated ? LayoutDashboard : LogIn;
+  const accountLabel = authenticated ? nav.dashboard : nav.signIn;
+  const accountHref = authenticated ? "/dashboard" : "/login";
+  const accountActive = current === "dashboard";
 
   return (
     <div className={styles.productNavShell} data-product-navigation>
@@ -64,15 +67,41 @@ export function ProductNavigation({
           <LanguageSwitcher />
           <ThemeSwitcher compact />
           <Link
-            className={current === "dashboard" ? styles.productNavAccountActive : styles.productNavAccountLink}
-            href={authenticated ? "/dashboard" : "/login"}
-            aria-current={current === "dashboard" ? "page" : undefined}
+            className={accountActive ? styles.productNavAccountActive : styles.productNavAccountLink}
+            href={accountHref}
+            aria-current={accountActive ? "page" : undefined}
           >
             <AccountIcon size={15} strokeWidth={2.15} aria-hidden="true" />
-            <span>{authenticated ? nav.dashboard : nav.signIn}</span>
+            <span>{accountLabel}</span>
           </Link>
         </div>
       </header>
+
+      <nav className={styles.mobileTabBar} aria-label={nav.productNavigationAria}>
+        {items.map((item) => {
+          const Icon = item.icon;
+          const active = current === item.key;
+          return (
+            <Link
+              className={active ? styles.mobileTabActive : styles.mobileTab}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              key={`mobile-${item.key}`}
+            >
+              <Icon size={20} strokeWidth={active ? 2.45 : 2.1} aria-hidden="true" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+        <Link
+          className={accountActive ? styles.mobileTabActive : styles.mobileTab}
+          href={accountHref}
+          aria-current={accountActive ? "page" : undefined}
+        >
+          <AccountIcon size={20} strokeWidth={accountActive ? 2.45 : 2.1} aria-hidden="true" />
+          <span>{accountLabel}</span>
+        </Link>
+      </nav>
     </div>
   );
 }

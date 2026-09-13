@@ -106,9 +106,15 @@
 .productNavLink:focus-visible,
 .productNavLinkActive:focus-visible,
 .productNavAccountLink:focus-visible,
-.productNavAccountActive:focus-visible {
+.productNavAccountActive:focus-visible,
+.mobileTab:focus-visible,
+.mobileTabActive:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+.mobileTabBar {
+  display: none;
 }
 
 /* Move to the two-row navigation before the center links and account actions
@@ -156,41 +162,126 @@
   .productNavLinks::-webkit-scrollbar { display: none; }
 }
 
-@media (max-width: 480px) {
+/* Phone navigation behaves like a native app: a compact utility bar stays at
+   the top while primary destinations remain thumb-reachable in a safe-area
+   aware tab bar. */
+@media (max-width: 767px) {
+  .productNavShell {
+    z-index: 1650;
+    min-height: 58px;
+    box-shadow: 0 1px 0 var(--nav-border);
+  }
+
   .productNav {
-    width: calc(100% - 20px);
-    gap: 6px 8px;
-    padding-block: 7px 8px;
+    width: 100%;
+    min-height: 58px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 7px max(12px, env(safe-area-inset-right)) 7px max(12px, env(safe-area-inset-left));
   }
 
   .productNavBrand img {
-    width: 120px;
+    width: 118px;
+  }
+
+  .productNavLinks {
+    display: none;
+  }
+
+  .productNavAccount {
+    gap: 5px;
   }
 
   .productNavAccountLink,
   .productNavAccountActive {
-    min-height: 36px;
-    gap: 5px;
-    padding-inline: 10px;
-    font-size: .76rem;
+    display: none;
   }
 
-  .productNavLinks {
-    margin-inline: -1px;
+  .mobileTabBar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1750;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 2px;
+    padding: 5px max(7px, env(safe-area-inset-right)) calc(5px + env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
+    border-top: 1px solid var(--nav-border);
+    background: color-mix(in srgb, var(--surface-elevated) 96%, transparent);
+    box-shadow: 0 -12px 32px color-mix(in srgb, var(--shadow-color, #071b14) 10%, transparent);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
   }
 
-  .productNavLink,
-  .productNavLinkActive {
-    min-height: 37px;
-    gap: 6px;
-    padding-inline: 11px;
-    font-size: .79rem;
+  .mobileTab,
+  .mobileTabActive {
+    min-width: 0;
+    min-height: 52px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 5px 3px;
+    border-radius: 14px;
+    color: var(--ink-soft);
+    font-size: clamp(.61rem, 2.6vw, .69rem);
+    font-weight: 790;
+    letter-spacing: -.01em;
+    line-height: 1.08;
+    text-align: center;
+    text-decoration: none;
+    transition: color 160ms ease, background-color 160ms ease, transform 160ms ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .productNavLink svg,
-  .productNavLinkActive svg {
-    width: 14px;
-    height: 14px;
+  .mobileTab svg,
+  .mobileTabActive svg {
+    flex: 0 0 auto;
+  }
+
+  .mobileTab span,
+  .mobileTabActive span {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobileTabActive {
+    color: var(--accent-contrast);
+    background: var(--accent-soft);
+  }
+
+  .mobileTab:active,
+  .mobileTabActive:active {
+    transform: scale(.96);
+  }
+}
+
+@media (max-width: 480px) {
+  .productNav {
+    padding-inline: max(9px, env(safe-area-inset-left)) max(9px, env(safe-area-inset-right));
+  }
+
+  .productNavBrand img {
+    width: 110px;
+  }
+
+  .mobileTab,
+  .mobileTabActive {
+    min-height: 50px;
+    gap: 3px;
+    border-radius: 12px;
+    font-size: .61rem;
+  }
+
+  .mobileTab svg,
+  .mobileTabActive svg {
+    width: 19px;
+    height: 19px;
   }
 }
 
@@ -198,7 +289,9 @@
   .productNavLink,
   .productNavLinkActive,
   .productNavAccountLink,
-  .productNavAccountActive {
+  .productNavAccountActive,
+  .mobileTab,
+  .mobileTabActive {
     transition: none;
   }
 }

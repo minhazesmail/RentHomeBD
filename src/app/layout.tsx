@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Hind_Siliguri, Inter } from "next/font/google";
 import "leaflet/dist/leaflet.css";
 import "./styles.css";
@@ -29,7 +29,27 @@ export const metadata: Metadata = {
     default: "NearBasha",
     template: "%s | NearBasha",
   },
+  applicationName: "NearBasha",
   description: "Search moderated rental homes on a live map in Dhaka. NearBasha is a Bangladesh-focused rental marketplace launching first in Dhaka.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "NearBasha",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f9f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#071610" },
+  ],
 };
 
 /* Runs synchronously while the document is parsed. This is intentionally tiny:

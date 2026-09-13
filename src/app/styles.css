@@ -34,3 +34,8 @@
 @import "./landing-theme.css" layer(theme);
 @import "./landing-how-theme.css" layer(component-appearance);
 @import "./landing.css" layer(component-appearance);
+
+/* Cross-product mobile composition participates in the established final
+   appearance layer and loads last within it, preserving the architecture's
+   ownership contract while retaining mobile override precedence. */
+@import "./mobile-app.css" layer(component-appearance);
