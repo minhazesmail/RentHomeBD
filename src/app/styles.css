@@ -39,3 +39,7 @@
 /* Cross-product mobile composition participates in the canonical component layer;
    route-specific responsive bridges may refine it later in mobile-appearance. */
 @import "./mobile-app.css" layer(component-appearance);
+
+/* Final mobile hero geometry hotfix stays unlayered so it can safely override the
+   component module's older absolute-positioned artwork rules. */
+@import "./mobile-hero-visibility-fix.css";
