@@ -192,8 +192,9 @@
 
   .heroStage {
     position: relative;
-    min-height: clamp(560px, 147vw, 675px);
+    min-height: clamp(630px, 160vw, 720px);
     padding: 0 18px;
+    overflow: clip;
   }
 
   .heroCopy {
@@ -239,21 +240,26 @@
     z-index: 2;
     top: clamp(218px, 57vw, 280px);
     right: -9px;
+    bottom: 0;
     width: min(48vw, 212px);
+    overflow: hidden;
     pointer-events: none;
   }
 
   .heroArtwork :global(img) {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: contain;
+    object-position: right top;
     filter: saturate(.92) contrast(.99);
   }
 
   .signals {
+    position: relative;
+    z-index: 4;
     width: calc(100% - 36px);
-    margin: -3px 18px 0;
+    margin: 12px 18px 0;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
     align-items: center;
@@ -645,7 +651,7 @@
   }
 
   .heroStage {
-    min-height: clamp(545px, 152vw, 610px);
+    min-height: clamp(620px, 165vw, 650px);
     padding-inline: 15px;
   }
 
@@ -701,7 +707,7 @@
   }
 
   .heroStage {
-    min-height: 650px;
+    min-height: 760px;
     padding-inline: 30px;
   }
 
@@ -716,8 +722,9 @@
   }
 
   .heroArtwork {
+    top: 240px;
     right: 8px;
-    width: 230px;
+    width: 210px;
   }
 
   .signals,
