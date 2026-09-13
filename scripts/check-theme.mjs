@@ -83,9 +83,10 @@ requireText("src/components/product-navigation.tsx", "<ThemeSwitcher compact />"
 requireText("src/app/login/page.tsx", "<ThemeSwitcher compact />", "login appearance control");
 requireText("src/app/account/phone/page.tsx", "<ThemeSwitcher compact />", "phone verification appearance control");
 
-/* Cascade ownership: route-wide appearance resolves in theme; complete local
-   component contracts may resolve one final step later. */
-requireText("src/app/styles.css", 'route-atmosphere, theme, component-appearance;', "component appearance as final cascade layer");
+/* Cascade ownership: route-wide appearance resolves in theme; canonical complete
+   component contracts resolve next, then narrow responsive continuity may resolve
+   one final step later in mobile-appearance. */
+requireText("src/app/styles.css", 'route-atmosphere, theme, component-appearance, mobile-appearance;', "mobile appearance as final cascade layer");
 requireText("src/app/styles.css", '@import "./theme-tokens.css" layer(theme);', "appearance tokens in route-wide theme layer");
 requireText("src/app/styles.css", '@import "./theme.css" layer(theme);', "global appearance behavior in route-wide theme layer");
 requireText("src/app/styles.css", '@import "./landing-theme.css" layer(theme);', "root landing appearance bridge");
