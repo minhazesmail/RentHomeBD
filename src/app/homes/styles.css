@@ -7,3 +7,7 @@
 @import "./property-detail-flow-redesign.css" layer(route-contrast);
 @import "./homes-theme.css" layer(theme);
 @import "./map-workspace.css" layer(component-appearance);
+
+/* Narrow responsive bridge that intentionally resolves after the canonical
+   map workspace without sharing ownership of its component layer. */
+@import "./mobile-concept-alignment.css" layer(mobile-appearance);

@@ -8,6 +8,7 @@ import { LandingHeroSearch } from "@/components/landing-hero-search";
 import { LandingMapPreview } from "@/components/landing-map-preview";
 import { LandingScrollAtmosphere } from "@/components/landing-scroll-atmosphere";
 import { MarketingNavigation } from "@/components/marketing-navigation";
+import { MobileLandingExperience } from "@/components/mobile-landing-experience";
 import { formatNumber } from "@/i18n/format";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { getLocale } from "@/i18n/get-locale";
@@ -37,11 +38,14 @@ export default async function HomePage() {
     <main className="landing-shell" data-landing-theme="hero" data-atmosphere="hero" data-scroll-direction="down">
       <LandingScrollAtmosphere />
       <div className="landing-frame">
-        <MarketingNavigation variant="landing" />
+        <MobileLandingExperience />
 
-        <LandingHeroSearch>
-          <LandingMapPreview />
-        </LandingHeroSearch>
+        <div className="landing-desktop-primary">
+          <MarketingNavigation variant="landing" />
+          <LandingHeroSearch>
+            <LandingMapPreview />
+          </LandingHeroSearch>
+        </div>
 
         <section className="landing-trust-section" data-scroll-theme="trust" aria-labelledby="trust-heading">
           <div className="landing-trust-heading">

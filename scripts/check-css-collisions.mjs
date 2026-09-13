@@ -8,8 +8,8 @@ const appDir = path.resolve("src/app");
 // audit layers load first, then route-local styles refine them. Landing-specific
 // reconciliation layers intentionally come last because they repair older style
 // generations without forcing large rewrites of stable CSS. Route-wide theme
-// resolves near the end; component-appearance is the final, narrowly scoped
-// owner for components that need a complete semantic surface contract.
+// resolves near the end; component-appearance owns canonical component surfaces,
+// while mobile-appearance is the final narrowly scoped responsive refinement.
 const requiredLayerOrder = [
   "tokens",
   "globals",
@@ -31,6 +31,7 @@ const requiredLayerOrder = [
   "route-atmosphere",
   "theme",
   "component-appearance",
+  "mobile-appearance",
 ];
 const allowedLayers = new Set(requiredLayerOrder);
 
