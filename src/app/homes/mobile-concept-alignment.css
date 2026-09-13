@@ -1,0 +1,277 @@
+/* Mobile continuity layer: carries the concept landing palette and geometry into /homes
+   without changing the map/search behavior. */
+@media (max-width: 820px) {
+  .nb-global-shell--renter .homes-page {
+    --map-v2-primary: #0b4f3c;
+    --map-v2-primary-strong: #073d2f;
+    --map-v2-background: #f7f2e8;
+    --map-v2-sand: #e9dcc3;
+    --map-v2-surface: #fffefa;
+    --map-v2-ink: #153229;
+    --map-v2-muted: #65756d;
+    --map-v2-border: rgba(21,50,41,.13);
+    --map-v2-shadow: 0 18px 48px rgba(23,45,37,.11);
+    min-height: 100dvh;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(233,220,195,.55), transparent 18rem),
+      var(--map-v2-background);
+  }
+
+  .nb-global-shell--renter [data-product-navigation] {
+    z-index: 1650;
+    border-bottom: 0;
+    background: #082b22;
+    box-shadow: 0 12px 30px rgba(7,35,27,.16);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .nb-global-shell--renter [data-product-navigation] > header {
+    width: 100%;
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+  }
+
+  .nb-global-shell--renter [data-product-navigation] > header > nav {
+    display: none !important;
+  }
+
+  .nb-global-shell--renter [data-product-navigation] > header .brand-logo img {
+    content: url("/nearbasha-logo-on-dark.svg");
+    width: clamp(112px, 31vw, 136px);
+    height: auto;
+  }
+
+  .nb-global-shell--renter [data-product-navigation] > header > div:last-child {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .nb-global-shell--renter [data-product-navigation] > header > div:last-child > a {
+    display: none !important;
+  }
+
+  .nb-global-shell--renter [data-product-navigation] > header [data-language-switcher],
+  .nb-global-shell--renter [data-product-navigation] > header summary[aria-haspopup="menu"] {
+    min-height: 42px;
+    border-color: rgba(255,255,255,.14);
+    color: #fff;
+    background: rgba(255,255,255,.07);
+  }
+
+  .nb-global-shell--renter [data-product-navigation] > nav {
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1750;
+    display: grid !important;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0,1fr);
+    gap: 3px;
+    padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+    border-top: 1px solid rgba(21,50,41,.12);
+    color: #32483f;
+    background: rgba(255,254,250,.96);
+    box-shadow: 0 -14px 34px rgba(23,45,37,.11);
+    backdrop-filter: blur(20px) saturate(1.1);
+    -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  }
+
+  .nb-global-shell--renter [data-product-navigation] > nav a {
+    min-height: 52px;
+    border-radius: 14px;
+  }
+
+  .nb-global-shell--renter [data-product-navigation] > nav a[aria-current="page"] {
+    color: #0b4f3c;
+    background: rgba(11,79,60,.09);
+  }
+
+  .nb-global-shell--renter .renter-search-shell {
+    min-height: calc(100dvh - 64px);
+    background: var(--map-v2-background);
+  }
+
+  .nb-global-shell--renter .mobile-search-summary {
+    top: 76px;
+    width: min(520px, calc(100% - 18px));
+    min-height: 50px;
+    padding: 9px 12px;
+    border-color: var(--map-v2-border);
+    border-radius: 16px;
+    background: rgba(255,254,250,.96);
+    box-shadow: 0 10px 28px rgba(23,45,37,.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .nb-global-shell--renter .renter-search-toolbar {
+    padding: 19px 14px 16px;
+    border: 1px solid var(--map-v2-border);
+    border-radius: 26px 26px 0 0;
+    background: var(--map-v2-surface);
+    box-shadow: 0 -12px 40px rgba(23,45,37,.1);
+  }
+
+  .nb-global-shell--renter .renter-toolbar-heading {
+    margin-bottom: 12px;
+  }
+
+  .nb-global-shell--renter .renter-toolbar-heading span {
+    color: #0b4f3c;
+  }
+
+  .nb-global-shell--renter .renter-toolbar-heading strong {
+    color: #153229;
+    font-size: 1.14rem;
+  }
+
+  .nb-global-shell--renter .renter-search-toolbar .field input,
+  .nb-global-shell--renter .renter-search-toolbar .field select,
+  .nb-global-shell--renter .renter-more-filters > summary {
+    min-height: 50px;
+    border-color: var(--map-v2-border);
+    border-radius: 15px;
+    background: #fbfaf7;
+    color: var(--map-v2-ink);
+    font-size: 16px;
+  }
+
+  .nb-global-shell--renter .renter-more-filters > summary {
+    color: var(--map-v2-primary);
+    font-size: .82rem;
+  }
+
+  .nb-global-shell--renter .mobile-filter-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: .8fr 1.2fr;
+    gap: 8px;
+    margin: 12px -2px -2px;
+    padding-top: 10px;
+    background: linear-gradient(transparent, var(--map-v2-surface) 22%);
+  }
+
+  .nb-global-shell--renter .mobile-filter-footer .primary-button,
+  .nb-global-shell--renter .mobile-filter-footer .secondary-button {
+    min-height: 52px;
+    border-radius: 999px;
+  }
+
+  .nb-global-shell--renter .mobile-filter-footer .primary-button {
+    background: var(--map-v2-primary);
+    box-shadow: 0 11px 25px rgba(11,79,60,.16);
+  }
+
+  .nb-global-shell--renter .renter-workspace {
+    background: var(--map-v2-background);
+  }
+
+  .nb-global-shell--renter .renter-results-header {
+    background: rgba(255,254,250,.96);
+    border-color: var(--map-v2-border);
+  }
+
+  .nb-global-shell--renter .renter-results-pane {
+    background: var(--map-v2-background);
+  }
+
+  .nb-global-shell--renter .renter-result-card {
+    border-color: var(--map-v2-border);
+    border-radius: 18px;
+    background: var(--map-v2-surface);
+    box-shadow: 0 7px 20px rgba(23,45,37,.05);
+  }
+
+  .nb-global-shell--renter .renter-result-image {
+    border-radius: 14px;
+  }
+
+  .nb-global-shell--renter .renter-map-panel {
+    padding: 8px;
+    background: var(--map-v2-background);
+  }
+
+  .nb-global-shell--renter .renter-map-canvas {
+    border-color: var(--map-v2-border);
+    border-radius: 22px;
+    box-shadow: 0 12px 34px rgba(23,45,37,.09);
+  }
+
+  .nb-global-shell--renter .renter-map-actions > button {
+    border-color: var(--map-v2-border);
+    border-radius: 14px;
+    background: rgba(255,254,250,.96);
+    color: var(--map-v2-primary);
+    box-shadow: 0 9px 24px rgba(23,45,37,.12);
+  }
+
+  .nb-global-shell--renter .renter-map-actions > .primary-button {
+    border-color: var(--map-v2-primary);
+    color: #fff;
+    background: var(--map-v2-primary);
+  }
+
+  .nb-global-shell--renter .mobile-map-sheet {
+    border-color: var(--map-v2-border);
+    border-radius: 22px;
+    background: var(--map-v2-surface);
+    box-shadow: 0 20px 50px rgba(23,45,37,.16);
+  }
+}
+
+@media (max-width: 390px) {
+  .nb-global-shell--renter .mobile-search-summary {
+    top: 72px;
+    width: calc(100% - 12px);
+  }
+
+  .nb-global-shell--renter .renter-search-toolbar {
+    padding-inline: 12px;
+  }
+}
+
+[data-resolved-theme="dark"] .nb-global-shell--renter .homes-page {
+  --map-v2-primary: #75b59f;
+  --map-v2-primary-strong: #9bcbb9;
+  --map-v2-background: #071b16;
+  --map-v2-sand: #30443b;
+  --map-v2-surface: #0f2a22;
+  --map-v2-ink: #f0f5f2;
+  --map-v2-muted: #a9b9b2;
+  --map-v2-border: rgba(220,235,227,.16);
+  --map-v2-shadow: 0 18px 48px rgba(0,0,0,.28);
+}
+
+@media (max-width: 820px) {
+  [data-resolved-theme="dark"] .nb-global-shell--renter [data-product-navigation] {
+    background: #061c16;
+  }
+
+  [data-resolved-theme="dark"] .nb-global-shell--renter [data-product-navigation] > nav,
+  [data-resolved-theme="dark"] .nb-global-shell--renter .mobile-search-summary,
+  [data-resolved-theme="dark"] .nb-global-shell--renter .renter-search-toolbar,
+  [data-resolved-theme="dark"] .nb-global-shell--renter .renter-results-header,
+  [data-resolved-theme="dark"] .nb-global-shell--renter .renter-result-card,
+  [data-resolved-theme="dark"] .nb-global-shell--renter .mobile-map-sheet {
+    border-color: var(--map-v2-border);
+    background: rgba(15,42,34,.97);
+  }
+
+  [data-resolved-theme="dark"] .nb-global-shell--renter .renter-search-toolbar .field input,
+  [data-resolved-theme="dark"] .nb-global-shell--renter .renter-search-toolbar .field select,
+  [data-resolved-theme="dark"] .nb-global-shell--renter .renter-more-filters > summary {
+    border-color: var(--map-v2-border);
+    background: #0b241d;
+    color: var(--map-v2-ink);
+  }
+}
