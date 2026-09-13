@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Banknote, BedDouble, MapPin, Search, ShieldCheck, SlidersHorizontal, Users, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -187,13 +186,16 @@ export function MobileLandingExperience() {
             <p>{copy.description}</p>
           </div>
           <div className={styles.heroArtwork} aria-hidden="true">
-            <Image
+            {/* This is a small decorative local asset. Direct rendering preserves its
+                transparency exactly; the optimizer previously produced a blank crop in QA. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/nearbasha-mobile-home.webp"
               alt=""
               width={300}
               height={710}
-              priority
-              sizes="(max-width: 820px) 48vw, 1px"
+              loading="eager"
+              decoding="async"
             />
           </div>
         </div>
