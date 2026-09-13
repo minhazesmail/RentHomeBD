@@ -31,9 +31,12 @@ try {
         const map = element.querySelector(".leaflet-container").getBoundingClientRect();
         const rail = element.querySelector(".landing-map-rail").getBoundingClientRect();
         const zoom = element.querySelector(".leaflet-control-zoom").getBoundingClientRect();
-        return { mapBottom: map.bottom, railTop: rail.top, zoomRight: zoom.right, mapRight: map.right, overflow: document.documentElement.scrollWidth - innerWidth };
+        const caption = document.querySelector(".landing-map-caption").getBoundingClientRect();
+        const header = element.firstElementChild.getBoundingClientRect();
+        return { captionBottom: caption.bottom, previewTop: element.getBoundingClientRect().top, headerHeight: header.height, mapBottom: map.bottom, railTop: rail.top, zoomRight: zoom.right, mapRight: map.right, overflow: document.documentElement.scrollWidth - innerWidth };
       });
       if (bounds.mapBottom > bounds.railTop + 2 || bounds.zoomRight > bounds.mapRight || bounds.overflow > 2) failures.push(`${label}: landing map geometry overlaps or overflows`);
+      if (bounds.captionBottom > bounds.previewTop + 2 || bounds.headerHeight > 130) failures.push(`${label}: legacy caption or stretched rows distort the map card`);
       await preview.screenshot({ path: `${output}/landing-${label}.png` });
       await link.click();
       await page.waitForURL("**/homes?**");
