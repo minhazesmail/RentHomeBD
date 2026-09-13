@@ -2,6 +2,12 @@
    Intentionally unlayered and loaded last so phone-specific composition can
    override route design layers without increasing selector specificity. */
 
+/* The concept artwork and compact launch signals are mobile-only. */
+.landing-mobile-home-visual,
+.landing-mobile-quick-signals {
+  display: none;
+}
+
 @media (max-width: 767px) {
   :root {
     --mobile-app-topbar-height: 58px;
@@ -68,34 +74,361 @@
     -webkit-backdrop-filter: blur(22px) saturate(1.12);
   }
 
+  /* Landing page — concept-driven mobile composition. The desktop landing
+     remains product/map-forward; on phones the launch story, lifestyle image,
+     tenant fit and one-handed search become the first interaction. */
+  .landing-shell {
+    background:
+      radial-gradient(circle at 92% 12%, rgba(11,79,60,.08), transparent 19rem),
+      radial-gradient(circle at 8% 4%, rgba(232,223,207,.78), transparent 18rem),
+      #f8f4eb;
+  }
+
+  .landing-shell::before {
+    opacity: .14;
+    background-size: 58px 58px;
+  }
+
+  .landing-shell::after {
+    display: none;
+  }
+
+  .landing-frame {
+    width: 100%;
+  }
+
   .landing-nav[data-marketing-navigation] {
-    background: color-mix(in srgb, #0b261d 88%, transparent);
-    border-color: rgba(255,255,255,.12);
+    top: max(8px, env(safe-area-inset-top));
+    width: calc(100% - 20px);
+    min-height: 66px;
+    margin: 8px 10px 0;
+    padding: 8px 9px 8px 14px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 22px;
+    background:
+      radial-gradient(circle at 22% 0%, rgba(255,255,255,.06), transparent 10rem),
+      rgba(9,42,32,.96);
+    box-shadow: 0 16px 40px rgba(7,31,24,.18);
+    backdrop-filter: blur(22px) saturate(1.16);
+    -webkit-backdrop-filter: blur(22px) saturate(1.16);
+  }
+
+  .landing-nav[data-marketing-navigation] .brand-logo img {
+    height: 34px;
+  }
+
+  .landing-nav-actions {
+    gap: 7px;
+  }
+
+  .landing-nav-actions .primary-button {
+    min-height: 44px;
+    padding-inline: 13px;
+    border: 0;
+    border-radius: 15px;
+    background: #e8dcc6;
+    color: #17251f;
+    box-shadow: none;
+    font-size: .76rem;
+    font-weight: 820;
+  }
+
+  .landing-nav [data-language-switcher],
+  .landing-nav summary[aria-haspopup="menu"] {
+    min-height: 38px;
+    border-color: rgba(255,255,255,.15);
+    background: rgba(255,255,255,.07);
+  }
+
+  .landing-hero {
+    display: block;
+    min-height: 0;
+    padding: 38px 18px 72px;
+  }
+
+  .landing-copy {
+    max-width: none;
+  }
+
+  .landing-live-kicker {
+    margin-bottom: 20px;
+    padding: 8px 11px;
+    border-color: rgba(11,79,60,.13);
+    border-radius: 999px;
+    background: rgba(255,255,255,.64);
+    box-shadow: 0 8px 24px rgba(23,45,37,.05);
+    font-size: .66rem;
+    letter-spacing: .045em;
+  }
+
+  .landing-live-kicker > span {
+    width: 9px;
+    height: 9px;
+  }
+
+  .landing-copy > h1 {
+    max-width: 8.2ch;
+    margin: 0;
+    font-size: clamp(3.45rem, 17vw, 4.8rem);
+    line-height: .91;
+    letter-spacing: -.064em;
+    text-wrap: balance;
+  }
+
+  .landing-copy > .intro {
+    max-width: 33ch;
+    margin-top: 22px;
+    color: #627169;
+    font-size: 1.02rem;
+    line-height: 1.58;
+  }
+
+  .landing-mobile-home-visual {
+    display: block;
+    width: min(78vw, 320px);
+    height: clamp(300px, 88vw, 374px);
+    margin: -10px -18px 0 auto;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .landing-mobile-home-visual img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 46%;
+    filter: saturate(.92) contrast(.98);
+  }
+
+  .landing-mobile-quick-signals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 10px;
+    margin-top: 6px;
+  }
+
+  .landing-mobile-quick-signals > div {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 1px solid rgba(23,45,37,.08);
+    border-radius: 16px;
+    background: rgba(255,255,255,.4);
+  }
+
+  .landing-mobile-quick-signals span {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    place-items: center;
+    border-radius: 13px;
+    background: #dfe1bd;
+    color: #0b4f3c;
+  }
+
+  .landing-mobile-quick-signals svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .landing-mobile-quick-signals strong {
+    color: #415149;
+    font-size: .82rem;
+    line-height: 1.2;
   }
 
   .landing-search-console,
   .landing-search-console-form {
-    border-radius: 22px;
+    margin-top: 22px;
+    padding: 18px 14px 14px;
+    border: 1px solid rgba(23,45,37,.09);
+    border-radius: 28px;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 22px 54px rgba(23,45,37,.11);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .landing-search-console::before {
+    left: 20px;
+    width: 86px;
+    height: 4px;
+    border-radius: 0 0 999px 999px;
+    background: #0b4f3c;
+  }
+
+  .landing-search-console-heading {
+    min-height: 66px;
+    padding: 4px 4px 14px;
+    border-bottom: 0;
+  }
+
+  .landing-search-console-heading span {
+    color: #69776f;
+    font-size: .68rem;
+    letter-spacing: .065em;
+  }
+
+  .landing-search-console-heading strong {
+    max-width: 14ch;
+    color: #153229;
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+
+  .landing-search-console-heading > svg {
+    width: 25px;
+    height: 25px;
+    color: #0b4f3c;
   }
 
   .landing-search-console-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+    padding-top: 6px;
+  }
+
+  .landing-search-console-area,
+  .landing-search-budget-custom,
+  .landing-search-submit {
+    grid-column: 1 / -1;
+  }
+
+  .landing-search-console-field {
+    min-height: 70px;
+    padding: 10px 10px 8px 39px;
+    border-color: rgba(23,45,37,.12);
+    border-radius: 18px;
+    background: #fbfaf7;
+  }
+
+  .landing-search-console-area {
+    min-height: 84px;
+    padding-top: 13px;
+  }
+
+  .landing-search-console-field > svg {
+    top: 21px;
+    left: 13px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .landing-search-console-area > svg {
+    top: 28px;
+  }
+
+  .landing-search-console-field > span {
+    font-size: .63rem;
+  }
+
+  .landing-search-console-field input,
+  .landing-search-console-field select {
+    min-height: 28px;
+    color: #20362d;
+    font-size: 16px;
+    font-weight: 680;
   }
 
   .landing-search-submit {
-    min-height: 52px;
-    border-radius: 16px;
+    min-height: 58px;
+    margin-top: 2px;
+    border-radius: 999px;
+    background: #0b4f3c;
+    box-shadow: 0 12px 28px rgba(11,79,60,.16);
+    font-size: 1rem;
   }
 
-  .landing-popular-searches {
-    margin-inline: calc(-1 * var(--mobile-gutter, 14px));
-    padding-inline: var(--mobile-gutter, 14px);
-    scroll-snap-type: inline proximity;
-    overscroll-behavior-inline: contain;
+  .landing-search-submit svg:last-child {
+    display: none;
   }
 
-  .landing-popular-searches > * {
-    scroll-snap-align: start;
+  .landing-search-more {
+    margin-top: 10px;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .landing-search-more summary {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+    padding: 8px 12px;
+    border: 1px solid rgba(23,45,37,.1);
+    border-radius: 999px;
+    background: #f7f5ef;
+    font-size: .82rem;
+  }
+
+  .landing-search-more-panel {
+    grid-template-columns: 1fr;
+    padding-top: 8px;
+  }
+
+  .landing-search-bedroom-field {
+    grid-column: 1;
+  }
+
+  .landing-search-help {
+    margin: 10px 5px 0;
+    color: #718078;
+    font-size: .73rem;
+    line-height: 1.48;
+  }
+
+  .landing-popular-searches,
+  .landing-confidence-row,
+  .landing-visual {
+    display: none;
+  }
+
+  [data-resolved-theme="dark"] .landing-mobile-quick-signals > div {
+    border-color: rgba(220,235,227,.12);
+    background: rgba(15,42,34,.62);
+  }
+
+  [data-resolved-theme="dark"] .landing-mobile-quick-signals span {
+    background: #30443b;
+    color: #9bcbb9;
+  }
+
+  [data-resolved-theme="dark"] .landing-mobile-quick-signals strong,
+  [data-resolved-theme="dark"] .landing-copy > .intro {
+    color: #a9b9b2;
+  }
+
+  [data-resolved-theme="dark"] .landing-search-console {
+    border-color: rgba(220,235,227,.14);
+    background: rgba(15,42,34,.96);
+    box-shadow: 0 22px 54px rgba(0,0,0,.24);
+  }
+
+  [data-resolved-theme="dark"] .landing-search-console-heading strong {
+    color: #f0f5f2;
+  }
+
+  [data-resolved-theme="dark"] .landing-search-console-heading span,
+  [data-resolved-theme="dark"] .landing-search-help {
+    color: #a9b9b2;
+  }
+
+  [data-resolved-theme="dark"] .landing-search-console-field {
+    border-color: rgba(220,235,227,.13);
+    background: #0b241d;
+  }
+
+  [data-resolved-theme="dark"] .landing-search-console-field input,
+  [data-resolved-theme="dark"] .landing-search-console-field select {
+    color: #f0f5f2;
+  }
+
+  [data-resolved-theme="dark"] .landing-search-more summary {
+    border-color: rgba(220,235,227,.13);
+    background: #0b241d;
   }
 
   /* Mobile home search is map-first. Remove the desktop explanatory preface
@@ -262,6 +595,61 @@
 @media (max-width: 420px) {
   :root {
     --mobile-app-edge: max(9px, env(safe-area-inset-left));
+  }
+
+  .landing-nav[data-marketing-navigation] {
+    width: calc(100% - 14px);
+    margin-inline: 7px;
+    padding-left: 11px;
+  }
+
+  .landing-nav[data-marketing-navigation] .brand-logo img {
+    height: 31px;
+  }
+
+  .landing-nav-actions .primary-button {
+    padding-inline: 10px;
+    font-size: .7rem;
+  }
+
+  .landing-hero {
+    padding-inline: 14px;
+  }
+
+  .landing-copy > h1 {
+    font-size: clamp(3.2rem, 17.2vw, 4.3rem);
+  }
+
+  .landing-mobile-home-visual {
+    width: min(82vw, 305px);
+    margin-right: -14px;
+  }
+
+  .landing-mobile-quick-signals {
+    gap: 7px;
+  }
+
+  .landing-mobile-quick-signals > div {
+    gap: 8px;
+    padding-inline: 8px;
+  }
+
+  .landing-mobile-quick-signals span {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+
+  .landing-search-console-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-search-console-area,
+  .landing-search-console-tenant,
+  .landing-search-console-budget,
+  .landing-search-budget-custom,
+  .landing-search-submit {
+    grid-column: 1;
   }
 
   .property-summary-grid {
