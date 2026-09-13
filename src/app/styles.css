@@ -34,3 +34,8 @@
 @import "./landing-theme.css" layer(theme);
 @import "./landing-how-theme.css" layer(component-appearance);
 @import "./landing.css" layer(component-appearance);
+
+/* Mobile app composition intentionally loads unlayered and last so it can
+   coordinate route families, safe areas and persistent navigation without
+   selector escalation or route-specific !important overrides. */
+@import "./mobile-app.css";
