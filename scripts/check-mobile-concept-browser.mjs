@@ -39,6 +39,7 @@ async function inspectLanding(page, label) {
       searchWidth: searchRect?.width ?? 0,
       headingWidth: headingRect?.width ?? 0,
       artworkWidth: artworkRect?.width ?? 0,
+      artworkLoaded: Boolean(artwork instanceof HTMLImageElement && artwork.complete && artwork.naturalWidth >= 300 && artwork.naturalHeight >= 700),
       italicExists: Boolean(italic),
       overflow: document.documentElement.scrollWidth - window.innerWidth,
       searchButton: mobile?.querySelector('button[type="submit"]')?.textContent?.trim() ?? "",
@@ -52,6 +53,7 @@ async function inspectLanding(page, label) {
   if (snapshot.searchWidth < 300) failures.push(`${label}: search card is unexpectedly narrow (${snapshot.searchWidth})`);
   if (snapshot.headingWidth < 150) failures.push(`${label}: editorial hero heading collapsed`);
   if (snapshot.artworkWidth < 130) failures.push(`${label}: organic home artwork collapsed`);
+  if (!snapshot.artworkLoaded) failures.push(`${label}: organic home artwork did not finish loading`);
   if (!snapshot.italicExists) failures.push(`${label}: italic hero accent is missing`);
   if (snapshot.overflow > 2) failures.push(`${label}: horizontal overflow ${snapshot.overflow}px`);
   if (snapshot.navLinks.length !== 3) failures.push(`${label}: expected 3 second-row navigation links`);
