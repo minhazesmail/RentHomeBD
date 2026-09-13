@@ -45,8 +45,10 @@
 }
 
 .nb-global-shell--renter .renter-toolbar-heading > div {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
 }
 
 .nb-global-shell--renter .renter-toolbar-heading span {
@@ -186,6 +188,9 @@
 }
 
 .nb-global-shell--renter .renter-toolbar-meta .tenant-match-legend {
+  margin: 0;
+  padding: 0;
+  border: 0;
   display: flex;
   gap: 5px;
   overflow-x: auto;
@@ -254,20 +259,21 @@
   position: relative;
   z-index: 6;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
   align-items: center;
   margin: 0;
-  padding: 12px 14px;
+  padding: 14px;
   border-bottom: 1px solid var(--map-v2-border);
   background: color-mix(in srgb, var(--map-v2-surface) 94%, transparent);
   box-shadow: 0 8px 20px rgba(23, 45, 37, .035);
 }
 
 .nb-global-shell--renter .renter-results-context {
+  grid-column: 1 / -1;
   min-width: 0;
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 2px 8px;
   align-items: baseline;
 }
@@ -295,7 +301,7 @@
 
 .nb-global-shell--renter .renter-results-sort {
   display: grid;
-  grid-template-columns: auto 118px;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 6px;
   align-items: center;
   color: var(--map-v2-muted);
