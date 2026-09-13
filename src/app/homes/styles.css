@@ -8,7 +8,6 @@
 @import "./homes-theme.css" layer(theme);
 @import "./map-workspace.css" layer(component-appearance);
 
-/* Deliberately unlayered and loaded last: this is a narrow mobile continuity
-   bridge over the canonical map workspace rather than a second owner of the
-   component-appearance layer. Unlayered normal rules outrank layered rules. */
-@import "./mobile-concept-alignment.css";
+/* Narrow responsive bridge that intentionally resolves after the canonical
+   map workspace without sharing ownership of its component layer. */
+@import "./mobile-concept-alignment.css" layer(mobile-appearance);
