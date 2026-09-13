@@ -352,8 +352,9 @@
 }
 
 .landing-map-caption-disabled {
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: rgba(255, 255, 255, 0.56);
+  border: 1px solid var(--landing-v2-border);
+  background: var(--landing-v2-background);
+  color: var(--landing-v2-muted);
   cursor: not-allowed;
 }
 
