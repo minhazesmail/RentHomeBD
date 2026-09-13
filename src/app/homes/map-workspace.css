@@ -21,8 +21,9 @@
 }
 
 .nb-global-shell--renter .renter-search-toolbar {
-  position: sticky;
-  top: 72px;
+  /* The shell owns desktop scrolling; a sticky offset here overlaps row 2. */
+  position: relative;
+  top: auto;
   z-index: 900;
   display: grid;
   grid-template-columns: minmax(180px, 250px) minmax(0, 1fr);
@@ -65,13 +66,11 @@
 }
 
 .nb-global-shell--renter .renter-toolbar-heading p {
-  overflow: hidden;
   margin: 0;
   color: var(--map-v2-muted);
   font-size: .7rem;
   line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-wrap: pretty;
 }
 
 .nb-global-shell--renter .renter-primary-filters {
@@ -222,7 +221,8 @@
   display: grid;
   grid-template-columns: clamp(420px, 31vw, 480px) minmax(0, 1fr);
   min-height: 0;
-  height: calc(100svh - 72px - 116px);
+  /* Fill the remaining grid track, including when translated filters wrap. */
+  height: 100%;
 }
 
 .nb-global-shell--renter .renter-search-sidebar {
@@ -449,6 +449,7 @@
 
 .nb-global-shell--renter .renter-map-panel {
   position: relative;
+  isolation: isolate;
   top: auto;
   height: 100%;
   min-height: 0;
@@ -590,7 +591,6 @@
   }
 
   .nb-global-shell--renter .renter-workspace {
-    height: calc(100svh - 72px - 104px);
     grid-template-columns: 420px minmax(0, 1fr);
   }
 }

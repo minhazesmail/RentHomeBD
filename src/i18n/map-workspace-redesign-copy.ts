@@ -4,6 +4,7 @@ const enMapWorkspaceRedesignCopy = {
   toolbar: {
     aria: "Rental map search filters",
     area: "Area",
+    areaPlaceholder: "Choose Dhaka area",
     tenant: "Tenant type",
     tenantRequired: "Choose tenant type",
     budget: "Max budget",
@@ -65,6 +66,7 @@ const bnMapWorkspaceRedesignCopy = {
   toolbar: {
     aria: "ভাড়া বাসার ম্যাপ সার্চ ফিল্টার",
     area: "এলাকা",
+    areaPlaceholder: "ঢাকার এলাকা বাছুন",
     tenant: "ভাড়াটিয়ার ধরন",
     tenantRequired: "ভাড়াটিয়ার ধরন বেছে নিন",
     budget: "সর্বোচ্চ বাজেট",

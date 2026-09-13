@@ -3,6 +3,7 @@ import { chromium } from "playwright";
 const baseURL = process.env.THEME_QA_BASE_URL ?? "http://127.0.0.1:3000";
 const scenarios = ["light", "dark"];
 const viewports = [
+  { name: "screenshot-desktop", width: 1348, height: 602 },
   { name: "reported-desktop", width: 1272, height: 638 },
   { name: "desktop", width: 1440, height: 900 },
   { name: "compact-desktop", width: 1024, height: 768 },
@@ -41,6 +42,8 @@ async function inspect(page) {
 
     return {
       shell: rect(".renter-search-shell"),
+      zoom: rect(".renter-map-panel .leaflet-control-zoom"),
+      resultsHeader: rect(".renter-results-header"),
       toolbar: rect(".renter-search-toolbar"),
       workspace: rect(".renter-workspace"),
       sidebar: rect(".renter-search-sidebar"),
@@ -75,9 +78,23 @@ function validate(snapshot, viewport, scenario) {
     failures.push(`${label}: results/map workspace does not span the full renter search shell`);
   }
 
-  /* The toolbar is sticky, so getBoundingClientRect() reflects its visual sticky
-     offset and is not a reliable way to infer the grid's normal-flow row order.
-     Assert the explicit grid placement instead. */
+  /* The toolbar is sticky in the legacy implementation. Grid-row assertions
+     alone missed its visual displacement over the workspace. Check both. */
+  if (!approxEqual(toolbar.top, shell.top)) {
+    failures.push(`${label}: toolbar is displaced below the search shell`);
+  }
+  if (!approxEqual(toolbar.bottom, workspace.top)) {
+    failures.push(`${label}: toolbar overlaps or leaves a gap above the workspace`);
+  }
+  if (!approxEqual(workspace.bottom, shell.bottom)) {
+    failures.push(`${label}: workspace does not fill the remaining shell height`);
+  }
+  if (!snapshot.resultsHeader || snapshot.resultsHeader.top < toolbar.bottom - 2) {
+    failures.push(`${label}: results header is hidden behind the toolbar`);
+  }
+  if (!snapshot.zoom || snapshot.zoom.top < mapPanel.top || snapshot.zoom.bottom > mapPanel.bottom) {
+    failures.push(`${label}: map zoom controls escape the map panel`);
+  }
   if (toolbar.gridRowStart !== "1") {
     failures.push(`${label}: toolbar is not pinned to desktop grid row 1 (${toolbar.gridRowStart})`);
   }
@@ -134,6 +151,7 @@ async function main() {
         await page.waitForSelector(".renter-search-toolbar", { timeout: 8_000 });
         await page.waitForSelector(".renter-workspace", { timeout: 8_000 });
         await page.waitForSelector(".renter-map-panel", { timeout: 8_000 });
+        await page.waitForSelector(".renter-map-panel .leaflet-control-zoom", { timeout: 8_000 });
         await page.waitForTimeout(250);
 
         const snapshot = await inspect(page);
