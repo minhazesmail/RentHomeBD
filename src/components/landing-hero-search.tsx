@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Banknote, BedDouble, MapPin, Search, ShieldCheck, SlidersHorizontal, Users } from "lucide-react";
 import type { ReactNode } from "react";
@@ -116,17 +115,6 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
         <div className="landing-live-kicker"><span aria-hidden="true" />{copy.kicker}</div>
         <h1>{copy.title}</h1>
         <p className="intro">{copy.description}</p>
-
-        <div className="landing-mobile-home-visual" aria-hidden="true">
-          <Image
-            src="/nearbasha-mobile-home.webp"
-            alt=""
-            width={300}
-            height={710}
-            priority
-            sizes="(max-width: 767px) 76vw, 1px"
-          />
-        </div>
 
         <div className="landing-mobile-quick-signals" aria-label={copy.mobileSignalsAria}>
           <div>
