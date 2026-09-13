@@ -2,7 +2,13 @@
 
 import { divIcon } from "leaflet";
 import { useEffect, useMemo } from "react";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents, ZoomControl } from "react-leaflet";
+
+import chrome from "@/components/map-chrome.module.css";
+import { LIGHT_BASEMAP, DARK_BASEMAP } from "@/lib/map-basemaps";
+import { useTheme } from "@/theme/use-theme";
+import { useLocale } from "@/i18n/use-locale";
+import { getMapExperienceCopy } from "@/i18n/map-experience-copy";
 
 const DHAKA_CENTER: [number, number] = [23.8103, 90.4125];
 
@@ -39,6 +45,10 @@ export function OwnerLocationPicker({
   disabled?: boolean;
   onChange: (lat: number, lng: number) => void;
 }) {
+  const { resolvedTheme } = useTheme();
+  const { locale } = useLocale();
+  const copy = getMapExperienceCopy(locale);
+  const basemap = resolvedTheme === "dark" ? DARK_BASEMAP : LIGHT_BASEMAP;
   const exactPosition: [number, number] | null = latitude !== null && longitude !== null
     ? [latitude, longitude]
     : null;
@@ -53,12 +63,10 @@ export function OwnerLocationPicker({
   }), []);
 
   return (
-    <div className="owner-location-map" aria-label="Exact property location picker">
-      <MapContainer center={viewportPosition} zoom={viewportZoom} scrollWheelZoom className="owner-location-map-canvas">
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+    <div className="owner-location-map" aria-label={copy.pickerLabel}>
+      <MapContainer center={viewportPosition} zoom={viewportZoom} scrollWheelZoom zoomControl={false} className={`owner-location-map-canvas ${chrome.surface}`}>
+        <TileLayer key={resolvedTheme} attribution={basemap.attribution} url={basemap.url} />
+        <ZoomControl position="topright" />
         <ClickToPlace disabled={disabled} onChange={onChange} />
         {(exactPosition || focusPosition) && <Recenter position={viewportPosition} zoom={viewportZoom} />}
         {exactPosition && (
@@ -76,8 +84,8 @@ export function OwnerLocationPicker({
         )}
       </MapContainer>
       <div className="owner-location-map-tip">
-        <strong>{focusPosition ? "Map centered near the typed area" : exactPosition ? "Exact pin placed" : "Place the property pin"}</strong>
-        <span>{disabled ? "Location is locked for this listing." : focusPosition ? "This is only an approximate area. Click the actual building entrance to place the exact pin." : exactPosition ? "Drag the pin to the building gate, or click elsewhere on the map." : "Click the map where the building entrance is located."}</span>
+        <strong>{focusPosition ? copy.pickerArea : exactPosition ? copy.pickerPlaced : copy.pickerPlace}</strong>
+        <span>{disabled ? copy.pickerLocked : focusPosition ? copy.pickerApprox : exactPosition ? copy.pickerDrag : copy.pickerClick}</span>
       </div>
     </div>
   );

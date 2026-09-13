@@ -289,6 +289,11 @@
 }
 
 .landing-visual {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-content: start;
+  min-height: 0;
+  height: auto;
   padding: 15px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 24px;
@@ -311,6 +316,9 @@
 }
 
 .landing-map-caption {
+  position: relative;
+  inset: auto;
+  width: auto;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 11px;
@@ -344,8 +352,9 @@
 }
 
 .landing-map-caption-disabled {
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: rgba(255, 255, 255, 0.56);
+  border: 1px solid var(--landing-v2-border);
+  background: var(--landing-v2-background);
+  color: var(--landing-v2-muted);
   cursor: not-allowed;
 }
 
