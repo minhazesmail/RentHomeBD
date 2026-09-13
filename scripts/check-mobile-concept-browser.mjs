@@ -58,11 +58,16 @@ async function inspectLanding(page, label) {
   if (!snapshot.searchButton) failures.push(`${label}: primary search CTA is missing`);
 }
 
+async function openSettled(page, url, settleMs = 650) {
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(settleMs);
+}
+
 try {
   for (const viewport of viewports) {
     const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height }, colorScheme: "light" });
     const page = await context.newPage();
-    await page.goto(`${baseURL}/`, { waitUntil: "networkidle" });
+    await openSettled(page, `${baseURL}/`);
     await inspectLanding(page, viewport.name);
     await page.screenshot({ path: path.join(artifactRoot, `landing-light-${viewport.name}.png`), fullPage: true });
     await context.close();
@@ -70,18 +75,18 @@ try {
 
   const darkContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "dark" });
   const darkPage = await darkContext.newPage();
-  await darkPage.goto(`${baseURL}/`, { waitUntil: "networkidle" });
+  await openSettled(darkPage, `${baseURL}/`);
   await darkPage.evaluate(() => {
     document.documentElement.dataset.theme = "dark";
     document.documentElement.dataset.resolvedTheme = "dark";
   });
+  await darkPage.waitForTimeout(150);
   await darkPage.screenshot({ path: path.join(artifactRoot, "landing-dark-390x844.png"), fullPage: true });
   await darkContext.close();
 
   const homesContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
   const homesPage = await homesContext.newPage();
-  await homesPage.goto(`${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, { waitUntil: "domcontentloaded" });
-  await homesPage.waitForTimeout(1200);
+  await openSettled(homesPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 1200);
   const homesSnapshot = await homesPage.evaluate(() => ({
     productNav: Boolean(document.querySelector("[data-product-navigation]")),
     mapPanel: Boolean(document.querySelector(".renter-map-panel")),
