@@ -1,0 +1,62 @@
+name: Mobile concept QA
+
+on:
+  pull_request:
+    paths:
+      - "src/app/**"
+      - "src/components/**"
+      - "src/i18n/**"
+      - "scripts/check-mobile-concept-browser.mjs"
+      - "package.json"
+      - ".github/workflows/mobile-concept.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/app/**"
+      - "src/components/**"
+      - "src/i18n/**"
+      - "scripts/check-mobile-concept-browser.mjs"
+      - "package.json"
+      - ".github/workflows/mobile-concept.yml"
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://ci-placeholder.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_ci_placeholder' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build
+        run: npm run build
+      - name: Start production server
+        run: |
+          npm run start > /tmp/nearbasha-mobile-concept.log 2>&1 &
+          echo $! > /tmp/nearbasha-mobile-concept.pid
+          for i in {1..45}; do
+            if curl --fail --silent http://127.0.0.1:3000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/nearbasha-mobile-concept.log
+          exit 1
+      - name: Capture and validate mobile concept
+        run: npm run mobileconceptqa
+      - name: Upload mobile concept screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-concept-${{ github.run_id }}
+          path: artifacts/mobile-concept
+          if-no-files-found: ignore
+          retention-days: 14
