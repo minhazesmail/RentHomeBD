@@ -1,0 +1,46 @@
+/* Shared Leaflet chrome. Unlayered module styles own these controls across routes. */
+.surface {
+  background: var(--surface-muted);
+  font-family: inherit;
+  isolation: isolate;
+}
+.surface :global(.leaflet-control-container) { display: block; }
+.surface :global(.leaflet-tooltip) { background: var(--surface-elevated); color: var(--ink); border-color: var(--border); box-shadow: var(--shadow-sm); }
+.surface :global(.leaflet-control-zoom) {
+  margin: 16px !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--shadow-md) !important;
+  overflow: hidden;
+}
+.surface :global(.leaflet-control-zoom a) {
+  width: 42px !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  background: var(--surface-elevated) !important;
+  color: var(--ink) !important;
+  font-size: 23px;
+}
+.surface :global(.leaflet-control-zoom a:hover) { background: var(--surface-muted) !important; }
+.surface :global(.leaflet-control-zoom a:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: -4px;
+}
+.surface :global(.leaflet-control-attribution) {
+  max-width: calc(100% - 16px);
+  padding: 3px 8px;
+  border-radius: 8px 0 0;
+  background: var(--surface-elevated) !important;
+  color: var(--muted) !important;
+  font-size: 10px;
+}
+.surface :global(.leaflet-control-attribution a) { color: var(--accent-contrast) !important; }
+.surface :global(.leaflet-popup-content-wrapper),
+.surface :global(.leaflet-popup-tip) {
+  background: var(--surface-elevated);
+  color: var(--ink);
+}
+.surface :global(.leaflet-popup-content-wrapper) { border-radius: 16px; box-shadow: var(--shadow-md); }
+@media (max-width: 600px) {
+  .surface :global(.leaflet-control-zoom) { margin: 10px !important; }
+}

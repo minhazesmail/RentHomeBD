@@ -1,11 +1,13 @@
 "use client";
 
-import { Circle, CircleMarker, MapContainer, Marker, Polygon, Popup, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import { Circle, CircleMarker, MapContainer, Marker, Polygon, Popup, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from "react-leaflet";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { divIcon } from "leaflet";
 import type { LatLngBoundsExpression } from "leaflet";
 
 import styles from "./leaflet-map.module.css";
+import chrome from "./map-chrome.module.css";
+import { LIGHT_BASEMAP, DARK_BASEMAP } from "@/lib/map-basemaps";
 import { getMapWorkspaceRedesignCopy } from "@/i18n/map-workspace-redesign-copy";
 import { useLocale } from "@/i18n/use-locale";
 import { tenantSummary, tenantTone, type TenantType } from "@/lib/tenant-match";
@@ -71,16 +73,6 @@ const DARK_MAP: MapAppearance = {
   areaFill: "#75b59f",
   userLocation: "#66d4cc",
   userRing: "#07130f",
-};
-
-const LIGHT_BASEMAP = {
-  url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-};
-
-const DARK_BASEMAP = {
-  url: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
 };
 
 function FitToResults({ listings, center, liveTracking }: { listings: MapListing[]; center: [number, number]; liveTracking: boolean }) {
@@ -455,8 +447,9 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, foc
   const appearance = resolvedTheme === "dark" ? DARK_MAP : LIGHT_MAP;
 
   return (
-    <MapContainer center={center} zoom={12} scrollWheelZoom className={`renter-map-canvas basemap-${resolvedTheme}${drawingCustomArea ? " drawing-custom-area" : ""}`}>
+    <MapContainer center={center} zoom={12} scrollWheelZoom zoomControl={false} className={`${chrome.surface} renter-map-canvas basemap-${resolvedTheme}${drawingCustomArea ? " drawing-custom-area" : ""}`}>
       <TileLayer key={resolvedTheme} attribution={basemap.attribution} url={basemap.url} />
+      <ZoomControl position="topright" />
       <ResponsiveMapSize />
       <FitToResults listings={listings} center={center} liveTracking={liveTracking} />
       <FocusListing listings={listings} focusId={focusId} focusVersion={focusVersion} />

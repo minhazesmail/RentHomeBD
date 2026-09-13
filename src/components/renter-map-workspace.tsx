@@ -12,6 +12,7 @@ import { SaveHomeButton } from "@/components/save-home-button";
 import type { MapListing, UserMapLocation } from "@/components/leaflet-map";
 import { RenterResultsList } from "@/components/renter-results-list";
 import { formatCurrency, formatNumber } from "@/i18n/format";
+import { getMapExperienceCopy } from "@/i18n/map-experience-copy";
 import { getMapWorkspaceRedesignCopy } from "@/i18n/map-workspace-redesign-copy";
 import { localizeLocationLabel } from "@/i18n/presentation";
 import { useLocale } from "@/i18n/use-locale";
@@ -172,6 +173,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const router = useRouter();
   const { locale, dictionary } = useLocale();
   const copy = getWorkflowCopy(locale).homes.search;
+  const experienceCopy = getMapExperienceCopy(locale);
   const workspaceCopy = getMapWorkspaceRedesignCopy(locale);
   const tenantLabels = useMemo<TenantLabels>(() => ({
     family: dictionary.common.tenant.family,
@@ -651,8 +653,8 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
 
       <section className="renter-search-toolbar renter-filter-panel" aria-label={workspaceCopy.toolbar.aria} data-mobile-filter-title={workspaceCopy.mobile.filtersTitle}>
         <div className="renter-toolbar-heading">
-          <div><span>{copy.eyebrow}</span><strong>{copy.title}</strong></div>
-          <p>{copy.description}</p>
+          <div><span>{copy.eyebrow}</span><strong>{experienceCopy.searchTitle}</strong></div>
+          <p>{experienceCopy.searchHint}</p>
         </div>
 
         <div className="renter-primary-filters">
@@ -768,7 +770,13 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
                 <span>{workspaceCopy.results.updatingHint}</span>
               </div>
             )}
-            <RenterResultsList
+            {!tenantType ? (
+              <div className="renter-map-intro">
+                <MapPinned size={28} aria-hidden="true" />
+                <strong>{workspaceCopy.toolbar.tenantRequired}</strong>
+                <p>{experienceCopy.tenantHint}</p>
+              </div>
+            ) : <RenterResultsList
               listings={visibleListings}
               busy={busy}
               customAreaActive={customAreaActive}
@@ -778,7 +786,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
               propertyHref={propertyHref}
               onSelect={handleShowOnMap}
               onHighlight={setHighlightedId}
-            />
+            />}
           </div>
         </aside>
 
