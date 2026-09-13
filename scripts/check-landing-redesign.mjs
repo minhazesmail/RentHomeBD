@@ -22,13 +22,17 @@ function forbidText(source, text, label) {
 
 const page = read("src/app/page.tsx");
 const hero = read("src/components/landing-hero-search.tsx");
+const mobileHero = read("src/components/mobile-landing-experience.tsx");
+const mobileCss = read("src/components/mobile-landing-experience.module.css");
 const copy = read("src/i18n/landing-redesign-copy.ts");
 const css = read("src/app/landing.css");
 const manifest = read("src/app/styles.css");
 const baseline = read("docs/redesign-system.md");
 
-requireText(page, "<LandingHeroSearch>", "landing hero search composition");
-requireText(page, "<LandingMapPreview />", "real landing map preview composition");
+requireText(page, "<MobileLandingExperience />", "dedicated mobile landing composition");
+requireText(page, 'className="landing-desktop-primary"', "desktop-only primary wrapper");
+requireText(page, "<LandingHeroSearch>", "desktop landing hero search composition");
+requireText(page, "<LandingMapPreview />", "real desktop landing map preview composition");
 requireText(page, "dictionary.landing", "existing landing dictionary usage");
 forbidText(page, 'name="bedrooms"', "bedrooms must not remain a primary landing-page field");
 
@@ -51,10 +55,31 @@ requireText(hero, 'type="button"', "criteria-preserving popular-area controls");
 requireText(hero, "customBudgetReady", "custom-budget validity gate");
 requireText(hero, "const mapReady = Boolean(area && tenant && customBudgetReady)", "shared form/map minimum-criteria gate");
 
+requireText(mobileHero, "mobileTitleLead", "mobile editorial headline lead");
+requireText(mobileHero, "mobileTitleAccent", "mobile editorial italic headline accent");
+requireText(mobileHero, 'src="/nearbasha-mobile-home.webp"', "mobile concept lifestyle artwork");
+requireText(mobileHero, 'data-mobile-filter="budget"', "mobile budget filter pill");
+requireText(mobileHero, 'data-mobile-filter="tenant"', "mobile tenant filter pill");
+requireText(mobileHero, 'openFilter("bedrooms"', "mobile bedrooms filter pill");
+requireText(mobileHero, 'openFilter("more"', "mobile more-filters pill");
+requireText(mobileHero, 'name="radius" value={radius}', "mobile radius URL handoff");
+requireText(mobileHero, 'name="tenant" value={tenant}', "mobile tenant URL handoff");
+requireText(mobileHero, "showModal()", "accessible native modal filter sheet");
+forbidText(mobileHero, "Property type", "mobile landing must not invent unsupported property type filtering");
+forbidText(mobileHero, "Room type", "mobile landing must not invent unsupported room type filtering");
+
+requireText(mobileCss, "@media (max-width: 820px)", "mobile/tablet concept breakpoint");
+requireText(mobileCss, "object-fit: contain", "uncropped organic hero artwork");
+requireText(mobileCss, "grid-template-columns: repeat(3, minmax(0, 1fr))", "three-link second navigation row");
+requireText(mobileCss, ".filterDialog::backdrop", "modal filter sheet backdrop");
+requireText(mobileCss, ':global(html[data-resolved-theme="dark"]) .root', "mobile concept dark appearance");
+requireText(mobileCss, "@media (prefers-reduced-motion: reduce)", "mobile concept reduced-motion handling");
+
 requireText(copy, "const enLandingRedesignCopy", "English redesign copy");
 requireText(copy, "const bnLandingRedesignCopy", "Bangla redesign copy");
 requireText(copy, "Find a home that fits your life.", "planned hero message");
 requireText(copy, "আপনার জীবনের সঙ্গে মানানসই বাসা খুঁজুন।", "localized planned hero message");
+requireText(copy, "mobileSearchHomes", "localized mobile search CTA");
 requireText(copy, "unsupportedArea", "localized supported-area validation copy");
 
 requireText(css, "--landing-v2-primary: #0b4f3c", "deep emerald primary token");
@@ -71,4 +96,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Landing redesign QA passed: design-system and tenant-aware landing handoff contracts are intact.");
+console.log("Landing redesign QA passed: desktop behavior and dedicated mobile concept contracts are intact.");
