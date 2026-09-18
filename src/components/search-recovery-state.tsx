@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, LoaderCircle, LocateOff, MapOff, SearchX } from "lucide-react";
+import { AlertTriangle, LoaderCircle, LocateOff, MapPinned, SearchX } from "lucide-react";
 
 import styles from "./search-recovery-state.module.css";
 
@@ -24,7 +24,7 @@ const icons = {
   empty: SearchX,
   error: AlertTriangle,
   location: LocateOff,
-  map: MapOff,
+  map: MapPinned,
   slow: LoaderCircle,
 } as const;
 
