@@ -274,4 +274,16 @@
     background: #0b241d;
     color: var(--map-v2-ink);
   }
+
+  [data-resolved-theme="dark"] .nb-global-shell--renter .renter-map-actions > button {
+    border-color: var(--map-v2-border);
+    background: #0f2a22;
+    color: var(--map-v2-primary-strong);
+  }
+
+  [data-resolved-theme="dark"] .nb-global-shell--renter .renter-map-actions > .primary-button {
+    border-color: var(--map-v2-primary);
+    background: var(--map-v2-primary);
+    color: #071b16;
+  }
 }
