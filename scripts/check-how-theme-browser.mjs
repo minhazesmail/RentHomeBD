@@ -11,11 +11,12 @@ const scenarios = [
 ];
 
 const locales = ["en", "bn"];
+// The persona-tab journey is part of the desktop landing. At <=820px the
+// dedicated mobile landing replaces it; mobile dark-mode coverage lives in
+// check-theme-browser.mjs and check-mobile-concept-browser.mjs.
 const viewports = [
   { name: "desktop", width: 1440, height: 1000 },
   { name: "tablet-landscape", width: 1024, height: 900 },
-  { name: "tablet", width: 768, height: 900 },
-  { name: "mobile", width: 390, height: 844 },
 ];
 
 function parseRgb(value) {
