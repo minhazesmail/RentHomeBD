@@ -5,7 +5,7 @@
 @import "./property-detail-spacing-fixes.css" layer(route-fixes);
 @import "./map-workspace-layout-fixes.css" layer(route-fixes);
 @import "./property-detail-flow-redesign.css" layer(route-contrast);
-@import "./property-detail-mobile-task5.css" layer(route-contrast);
+@import "./property-detail-mobile-task5.css" layer(route-atmosphere);
 @import "./homes-theme.css" layer(theme);
 @import "./map-workspace.css" layer(component-appearance);
 
