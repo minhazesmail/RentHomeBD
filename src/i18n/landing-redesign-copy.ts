@@ -42,7 +42,7 @@ const enLandingRedesignCopy = {
     mobileApplyFilter: "Apply filter",
     mobileBedroomShort: "bedrooms",
     radiusLabel: "Search radius",
-    searchHelp: "Tenant type is required. Budget, bedrooms, and radius stay optional refinements, and the same criteria carry into the full map."
+    searchHelp: "Tenant type is required. Budget, bedrooms, and radius stay optional refinements, and the same criteria carry into the full map.",
     popular: "Popular areas",
     popularHint: "Pick an area without losing your tenant type or budget.",
     safeguardsAria: "NearBasha marketplace safeguards",
@@ -101,7 +101,7 @@ const bnLandingRedesignCopy = {
     mobileApplyFilter: "ফিল্টার প্রয়োগ করুন",
     mobileBedroomShort: "বেডরুম",
     radiusLabel: "সার্চের দূরত্ব",
-    searchHelp: "ভাড়াটিয়ার ধরন বেছে নেওয়া আবশ্যক। বাজেট, বেডরুম ও সার্চের দূরত্ব ঐচ্ছিক, এবং একই শর্ত পূর্ণ ম্যাপে যাবে।"
+    searchHelp: "ভাড়াটিয়ার ধরন বেছে নেওয়া আবশ্যক। বাজেট, বেডরুম ও সার্চের দূরত্ব ঐচ্ছিক, এবং একই শর্ত পূর্ণ ম্যাপে যাবে।",
     popular: "জনপ্রিয় এলাকা",
     popularHint: "ভাড়াটিয়ার ধরন বা বাজেট না হারিয়ে এলাকা বেছে নিন।",
     safeguardsAria: "NearBasha মার্কেটপ্লেস সুরক্ষা",
