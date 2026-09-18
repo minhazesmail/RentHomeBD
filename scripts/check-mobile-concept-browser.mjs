@@ -41,6 +41,8 @@ async function inspectLanding(page) {
       accentExists: Boolean(accent),
       overflow: document.documentElement.scrollWidth - window.innerWidth,
       searchButton: mobile?.querySelector('button[type="submit"]')?.textContent?.trim() ?? "",
+      fieldOrder: Array.from(mobile?.querySelectorAll("[data-mobile-search-field]") ?? []).map((node) => node.getAttribute("data-mobile-search-field") ?? ""),
+      moreFiltersExists: Boolean(mobile?.querySelector("[data-mobile-more-filters]")),
       tabLabels: Array.from(primaryTabs?.querySelectorAll("a span") ?? []).map((node) => node.textContent?.trim() ?? ""),
       tabHrefs: Array.from(primaryTabs?.querySelectorAll("a") ?? []).map((node) => node.getAttribute("href") ?? ""),
     };
@@ -56,6 +58,8 @@ function validateLanding(snapshot, label) {
   if (!snapshot.accentExists) failures.push(`${label}: hero emphasis is missing`);
   if (snapshot.overflow > 2) failures.push(`${label}: horizontal overflow ${snapshot.overflow}px`);
   if (!snapshot.searchButton) failures.push(`${label}: primary search CTA is missing`);
+  if (snapshot.fieldOrder.join("|") !== "area|tenant|budget") failures.push(`${label}: primary search order drifted (${snapshot.fieldOrder.join(", ")})`);
+  if (!snapshot.moreFiltersExists) failures.push(`${label}: More filters disclosure is missing`);
 
   const expectedHrefs = ["/homes", "/saved", "/messages", "/login"];
   if (snapshot.tabLabels.length !== 4) failures.push(`${label}: expected 4 primary mobile tabs`);
@@ -82,6 +86,32 @@ try {
     }
     await context.close();
   }
+
+  const entryContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  const entryPage = await entryContext.newPage();
+  await openSettled(entryPage, `${baseURL}/`);
+  await entryPage.locator('[data-mobile-search-field="area"] input[type="search"]').fill("Dhanmondi, Dhaka");
+  await entryPage.locator('[data-mobile-search-field="tenant"] select').selectOption("family");
+  await entryPage.locator('[data-mobile-search-field="budget"] select').selectOption("25000");
+  await entryPage.locator("[data-mobile-more-filters] summary").click();
+  await entryPage.locator('[data-mobile-more-filters] select[name="bedrooms"]').selectOption("2");
+  await entryPage.locator('[data-mobile-more-filters] select[name="radius"]').selectOption("10");
+
+  const mapHrefValue = await entryPage.locator('[data-mobile-concept-landing] a[href^="/homes?"]').first().getAttribute("href");
+  const mapHref = new URL(mapHrefValue ?? "/homes", baseURL);
+  for (const [key, expected] of [["area", "Dhanmondi, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "2"], ["radius", "10"]]) {
+    if (mapHref.searchParams.get(key) !== expected) failures.push(`entry-search: map CTA lost ${key}=${expected}`);
+  }
+
+  await Promise.all([
+    entryPage.waitForURL("**/homes?**"),
+    entryPage.locator("[data-mobile-entry-search] button[type='submit']").click(),
+  ]);
+  const submitted = new URL(entryPage.url());
+  for (const [key, expected] of [["area", "Dhanmondi, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "2"], ["radius", "10"]]) {
+    if (submitted.searchParams.get(key) !== expected) failures.push(`entry-search: submitted URL lost ${key}=${expected}`);
+  }
+  await entryContext.close();
 
   const darkContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "dark" });
   const darkPage = await darkContext.newPage();
