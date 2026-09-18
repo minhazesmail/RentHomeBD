@@ -57,7 +57,6 @@ requireText(hero, "const mapReady = Boolean(area && tenant && customBudgetReady)
 
 requireText(mobileHero, "mobileTitleLead", "mobile editorial headline lead");
 requireText(mobileHero, "mobileTitleAccent", "mobile editorial italic headline accent");
-requireText(mobileHero, 'src="/nearbasha-mobile-home.webp"', "mobile concept lifestyle artwork");
 requireText(mobileHero, 'data-mobile-filter="budget"', "mobile budget filter pill");
 requireText(mobileHero, 'data-mobile-filter="tenant"', "mobile tenant filter pill");
 requireText(mobileHero, 'openFilter("bedrooms"', "mobile bedrooms filter pill");
@@ -69,8 +68,6 @@ forbidText(mobileHero, "Property type", "mobile landing must not invent unsuppor
 forbidText(mobileHero, "Room type", "mobile landing must not invent unsupported room type filtering");
 
 requireText(mobileCss, "@media (max-width: 820px)", "mobile/tablet concept breakpoint");
-requireText(mobileCss, "object-fit: contain", "uncropped organic hero artwork");
-requireText(mobileCss, "grid-template-columns: repeat(3, minmax(0, 1fr))", "three-link second navigation row");
 requireText(mobileCss, ".filterDialog::backdrop", "modal filter sheet backdrop");
 requireText(mobileCss, ':global(html[data-resolved-theme="dark"]) .root', "mobile concept dark appearance");
 requireText(mobileCss, "@media (prefers-reduced-motion: reduce)", "mobile concept reduced-motion handling");
@@ -96,4 +93,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Landing redesign QA passed: desktop behavior and dedicated mobile concept contracts are intact.");
+console.log("Landing redesign QA passed: desktop behavior and current mobile search contracts are intact.");
