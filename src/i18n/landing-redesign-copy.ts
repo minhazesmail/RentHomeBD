@@ -3,9 +3,9 @@ import type { Locale } from "@/i18n/config";
 const enLandingRedesignCopy = {
   hero: {
     kicker: "Bangladesh-focused · launching in Dhaka",
-    title: "Find a home that fits your life.",
-    mobileTitleLead: "Find a home that fits",
-    mobileTitleAccent: "your life.",
+    title: "Find a home that fits.",
+    mobileTitleLead: "Find a home",
+    mobileTitleAccent: "that fits.",
     description: "Explore rentals across Dhaka by location, budget, and tenant type—so you know a home fits before you spend time on it.",
     mobileSignalsAria: "NearBasha launch focus",
     mobileDhakaFocused: "Dhaka focused",
@@ -21,6 +21,8 @@ const enLandingRedesignCopy = {
     tenantLabel: "Tenant type",
     chooseTenant: "Choose who will rent",
     budgetLabel: "Budget",
+    optionalLabel: "Optional",
+    requiredLabel: "Required",
     anyBudget: "Any budget",
     upTo: "Up to",
     customBudget: "Custom maximum",
@@ -39,8 +41,8 @@ const enLandingRedesignCopy = {
     mobileCloseFilters: "Close filters",
     mobileApplyFilter: "Apply filter",
     mobileBedroomShort: "bedrooms",
-    mobileRadiusLabel: "Search radius",
-    searchHelp: "Tenant type is required for a personalized search. Budget and bedrooms stay optional, and the full map opens with the same criteria.",
+    radiusLabel: "Search radius",
+    searchHelp: "Tenant type is required. Budget, bedrooms, and radius stay optional refinements, and the same criteria carry into the full map."
     popular: "Popular areas",
     popularHint: "Pick an area without losing your tenant type or budget.",
     safeguardsAria: "NearBasha marketplace safeguards",
@@ -60,8 +62,8 @@ const enLandingRedesignCopy = {
 const bnLandingRedesignCopy = {
   hero: {
     kicker: "বাংলাদেশের জন্য তৈরি · শুরু ঢাকা থেকে",
-    title: "আপনার জীবনের সঙ্গে মানানসই বাসা খুঁজুন।",
-    mobileTitleLead: "আপনার জীবনের সঙ্গে মানানসই",
+    title: "আপনার জন্য মানানসই বাসা খুঁজুন।",
+    mobileTitleLead: "আপনার জন্য মানানসই",
     mobileTitleAccent: "বাসা খুঁজুন।",
     description: "লোকেশন, বাজেট ও ভাড়াটিয়ার ধরন মিলিয়ে ঢাকার ভাড়া বাসা খুঁজুন—সময় দেওয়ার আগেই বুঝুন বাসাটি আপনার জন্য মানানসই কি না।",
     mobileSignalsAria: "NearBasha লঞ্চ ফোকাস",
@@ -78,6 +80,8 @@ const bnLandingRedesignCopy = {
     tenantLabel: "ভাড়াটিয়ার ধরন",
     chooseTenant: "কার জন্য বাসা খুঁজছেন?",
     budgetLabel: "বাজেট",
+    optionalLabel: "ঐচ্ছিক",
+    requiredLabel: "আবশ্যক",
     anyBudget: "যেকোনো বাজেট",
     upTo: "সর্বোচ্চ",
     customBudget: "নিজের সর্বোচ্চ বাজেট",
@@ -96,8 +100,8 @@ const bnLandingRedesignCopy = {
     mobileCloseFilters: "ফিল্টার বন্ধ করুন",
     mobileApplyFilter: "ফিল্টার প্রয়োগ করুন",
     mobileBedroomShort: "বেডরুম",
-    mobileRadiusLabel: "সার্চের দূরত্ব",
-    searchHelp: "ব্যক্তিগত সার্চের জন্য ভাড়াটিয়ার ধরন বেছে নেওয়া আবশ্যক। বাজেট ও বেডরুম ঐচ্ছিক, এবং একই শর্ত নিয়ে পূর্ণ ম্যাপ খুলবে।",
+    radiusLabel: "সার্চের দূরত্ব",
+    searchHelp: "ভাড়াটিয়ার ধরন বেছে নেওয়া আবশ্যক। বাজেট, বেডরুম ও সার্চের দূরত্ব ঐচ্ছিক, এবং একই শর্ত পূর্ণ ম্যাপে যাবে।"
     popular: "জনপ্রিয় এলাকা",
     popularHint: "ভাড়াটিয়ার ধরন বা বাজেট না হারিয়ে এলাকা বেছে নিন।",
     safeguardsAria: "NearBasha মার্কেটপ্লেস সুরক্ষা",
