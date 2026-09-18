@@ -814,6 +814,34 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
                 <span>{workspaceCopy.results.updatingHint}</span>
               </div>
             )}
+
+            {mapTileFailed && (
+              <SearchRecoveryState
+                variant="map"
+                title={resultsCopy.mapUnavailableTitle}
+                description={resultsCopy.mapUnavailableHint}
+                compact={visibleListings.length > 0}
+                primaryAction={{ label: resultsCopy.retryMap, onClick: retryMapTiles }}
+              />
+            )}
+
+            {locationRecovery && (
+              <SearchRecoveryState
+                variant="location"
+                title={resultsCopy.locationUnavailableTitle}
+                description={locationRecovery.message}
+                compact={visibleListings.length > 0 || mapTileFailed}
+                primaryAction={locationRecovery.retryable ? { label: resultsCopy.tryLocationAgain, onClick: startLiveLocation } : undefined}
+                secondaryAction={{
+                  label: resultsCopy.useMapInstead,
+                  onClick: () => {
+                    setLocationRecovery(null);
+                    mobileMapModel.showMap();
+                  },
+                }}
+              />
+            )}
+
             {!tenantType ? (
               <div className="renter-map-intro">
                 <MapPinned size={28} aria-hidden="true" />
@@ -823,12 +851,16 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
             ) : <RenterResultsList
               listings={visibleListings}
               busy={busy}
+              slow={slowSearch}
+              searchError={searchError}
               customAreaActive={customAreaActive}
               selectedId={effectiveSelectedId}
               preference={activePreference}
               userId={userId}
               propertyHref={propertyHref}
               onSelect={handleShowOnMap}
+              onRetry={() => void runSearch()}
+              onClearFilters={clearFilters}
               onHighlight={setHighlightedId}
             />}
           </div>
@@ -850,6 +882,9 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
             customArea={customArea}
             drawingCustomArea={drawingCustomArea}
             onCustomAreaChange={handleCustomAreaChange}
+            tileRetryVersion={tileRetryVersion}
+            onTileFailure={handleMapTileFailure}
+            onTilesReady={() => setMapTileFailed(false)}
           />
 
           <div className="renter-map-actions" aria-label={copy.title}>
