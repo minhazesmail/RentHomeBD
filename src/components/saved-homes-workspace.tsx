@@ -4,6 +4,7 @@ import { Check, GitCompareArrows, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+import { PropertyCard } from "@/components/property-card";
 import { SaveHomeButton } from "@/components/save-home-button";
 import { useLocale } from "@/i18n/use-locale";
 import { formatWorkflowText, getWorkflowCopy } from "@/i18n/workflow-copy";
@@ -85,24 +86,25 @@ export function SavedHomesWorkspace({ userId, homes, unavailablePropertyIds }: P
                     <span><Check aria-hidden="true" />{copy.compare}</span>
                   </label>
 
-                  <Link className={styles.cardLink} href={`/homes/${home.id}`}>
-                    <div className={styles.media} aria-hidden={!home.coverUrl}>
-                      {home.coverUrl ? <img src={home.coverUrl} alt="" loading="lazy" /> : <span>{copy.noPhoto}</span>}
+                  <PropertyCard
+                    href={`/homes/${home.id}`}
+                    imageUrl={home.coverUrl}
+                    imageSizes="(max-width: 620px) 116px, (max-width: 840px) 35vw, 240px"
+                    fallback={copy.noPhoto}
+                    classes={{ link: styles.cardLink, media: styles.media, body: styles.copy }}
+                  >
+                    <div className={styles.heading}>
+                      <strong>{home.title}</strong>
+                      <span>{home.address}</span>
                     </div>
-                    <div className={styles.copy}>
-                      <div className={styles.heading}>
-                        <strong>{home.title}</strong>
-                        <span>{home.address}</span>
-                      </div>
-                      <div className={styles.price}>{rentLabel(home.rentBdt)}</div>
-                      <div className={styles.metadata} aria-label={copy.detailsAria}>
-                        <span><b>{home.bedrooms == null ? "—" : formatNumber(home.bedrooms)}</b> {copy.bed}</span>
-                        <span><b>{home.bathrooms == null ? "—" : formatNumber(home.bathrooms)}</b> {copy.bath}</span>
-                        <span><b>{home.sizeSqft ? formatNumber(home.sizeSqft) : "—"}</b> {copy.sqFt}</span>
-                      </div>
-                      <div className={styles.fit}>{home.renterFit.length ? home.renterFit.join(" · ") : copy.renterFitUnspecified}</div>
+                    <div className={styles.price}>{rentLabel(home.rentBdt)}</div>
+                    <div className={styles.metadata} aria-label={copy.detailsAria}>
+                      {home.bedrooms != null && <span><b>{formatNumber(home.bedrooms)}</b> {copy.bed}</span>}
+                      {home.bathrooms != null && <span><b>{formatNumber(home.bathrooms)}</b> {copy.bath}</span>}
+                      {home.sizeSqft != null && <span><b>{formatNumber(home.sizeSqft)}</b> {copy.sqFt}</span>}
                     </div>
-                  </Link>
+                    <div className={styles.fit}>{home.renterFit.length ? home.renterFit.join(" · ") : copy.renterFitUnspecified}</div>
+                  </PropertyCard>
 
                   <div className={styles.saveControl}>
                     <SaveHomeButton propertyId={home.id} userId={userId} initialSaved compact />
