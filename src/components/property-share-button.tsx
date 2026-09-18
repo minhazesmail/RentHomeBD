@@ -7,7 +7,7 @@ import { formatPropertyDetailText, getPropertyDetailCopy } from "@/i18n/property
 import { useLocale } from "@/i18n/use-locale";
 import styles from "./property-share-button.module.css";
 
-export function PropertyShareButton({ title }: { title: string }) {
+export function PropertyShareButton({ title, compact = false }: { title: string; compact?: boolean }) {
   const { locale } = useLocale();
   const copy = getPropertyDetailCopy(locale).share;
   const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
@@ -37,9 +37,9 @@ export function PropertyShareButton({ title }: { title: string }) {
 
   return (
     <div className={styles.wrapper}>
-      <button className={`secondary-button ${styles.button}`} type="button" onClick={shareProperty}>
+      <button className={`secondary-button ${styles.button}${compact ? ` ${styles.compact}` : ""}`} type="button" onClick={shareProperty} aria-label={copy.button}>
         {status === "copied" ? <Check size={16} aria-hidden="true" /> : <Share2 size={16} aria-hidden="true" />}
-        {status === "copied" ? copy.copied : copy.button}
+        {!compact && (status === "copied" ? copy.copied : copy.button)}
       </button>
       <span className={styles.status} role="status" aria-live="polite">
         {status === "error" ? copy.failed : ""}

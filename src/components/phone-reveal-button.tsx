@@ -14,12 +14,14 @@ export function PhoneRevealButton({
   viewerPhoneVerified,
   ownerPhoneVerified,
   signInHref,
+  verifyHref = "/account/phone",
 }: {
   propertyId: string;
   signedIn: boolean;
   viewerPhoneVerified: boolean;
   ownerPhoneVerified: boolean;
   signInHref: string;
+  verifyHref?: string;
 }) {
   const { locale } = useLocale();
   const copy = getPropertyDetailCopy(locale).contact.phoneReveal;
@@ -49,7 +51,7 @@ export function PhoneRevealButton({
   if (!viewerPhoneVerified) {
     return (
       <div className="phone-reveal-gate">
-        <Link className="secondary-button link-button property-contact-button phone-reveal-button" href="/account/phone">{copy.verify}</Link>
+        <Link className="secondary-button link-button property-contact-button phone-reveal-button" href={verifyHref}>{copy.verify}</Link>
         <p className="contact-note">{copy.viewerVerificationNote}</p>
       </div>
     );

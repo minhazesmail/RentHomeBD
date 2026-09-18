@@ -1,0 +1,499 @@
+/* Task 5 — Mobile property decision flow.
+   Reorders emphasis for small screens without changing contact permissions,
+   trust semantics, media signing, or property data. */
+
+.property-detail-desktop-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.property-detail-mobile-actions,
+.property-mobile-price-row {
+  display: none;
+}
+
+@media (min-width: 761px) {
+  .property-detail-shell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .property-detail-shell > .property-detail-hero {
+    order: 0;
+  }
+
+  .property-detail-shell > [data-property-mobile-gallery] {
+    order: 1;
+  }
+
+  .property-detail-shell > .property-detail-layout {
+    order: 2;
+  }
+}
+
+.property-detail-page .property-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.property-detail-page .property-summary-grid .summary-stat:last-child {
+  border-right: 0;
+}
+
+.property-detail-page .tenant-fit-status {
+  width: fit-content;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 18px;
+  padding: 0 12px;
+  border: 1px solid rgba(15, 107, 77, .14);
+  border-radius: 999px;
+  background: rgba(255,255,255,.78);
+  color: var(--emerald-900);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.property-detail-page .tenant-compatibility-card.is-mismatch .tenant-fit-status {
+  border-color: color-mix(in srgb, var(--danger) 22%, transparent);
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface-solid));
+  color: var(--danger);
+}
+
+.property-detail-page .tenant-compatibility-card.is-neutral .tenant-fit-status {
+  border-color: rgba(101, 116, 108, .2);
+  background: rgba(245, 247, 245, .88);
+  color: #596a61;
+}
+
+.property-cost-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 20px 0 0;
+  overflow: hidden;
+  border: 1px solid rgba(16, 37, 29, .08);
+  border-radius: 18px;
+  background: rgba(16, 37, 29, .08);
+}
+
+.property-cost-list > div {
+  min-height: 84px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  padding: 16px 18px;
+  background: rgba(250,252,248,.94);
+}
+
+.property-cost-list dt {
+  color: var(--muted);
+  font-size: .7rem;
+  font-weight: 780;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.property-cost-list dd {
+  margin: 0;
+  color: var(--emerald-950);
+  font-size: 1.02rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+.property-renter-policy .tenant-compatibility-tags {
+  margin-top: 18px;
+}
+
+.property-contact-utility-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.property-contact-utility-actions > * {
+  min-width: 0;
+}
+
+.property-contact-utility-actions .save-home-button {
+  min-height: 44px;
+}
+
+.property-detail-page .conversation-action {
+  display: grid;
+  min-width: 0;
+}
+
+.property-detail-page .conversation-action .property-contact-button {
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  .property-detail-page {
+    background: var(--surface-muted);
+  }
+
+  .property-detail-topbar {
+    height: calc(58px + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) max(10px, env(safe-area-inset-right)) 0 max(10px, env(safe-area-inset-left));
+    border-bottom-color: rgba(16,37,29,.1);
+    background: color-mix(in srgb, var(--surface-elevated) 94%, transparent);
+    box-shadow: 0 8px 24px rgba(16,37,29,.06);
+  }
+
+  .property-detail-desktop-bar {
+    display: none;
+  }
+
+  .property-detail-mobile-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .property-mobile-back {
+    min-width: 0;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 10px;
+    border-radius: 13px;
+    color: var(--ink);
+    font-size: .78rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .property-mobile-back svg {
+    width: 19px;
+    height: 19px;
+    flex: 0 0 auto;
+  }
+
+  .property-mobile-back span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .property-mobile-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .property-mobile-action-buttons .save-home-wrap {
+    display: block;
+  }
+
+  .property-mobile-action-buttons .save-home-button,
+  .property-mobile-action-buttons button {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: 999px;
+    background: var(--surface-solid);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .property-detail-shell {
+    width: calc(100% - 16px);
+    padding-top: 8px;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+
+  .property-detail-shell > .property-detail-hero {
+    margin: 14px 2px 0;
+    padding: 4px 6px 0;
+  }
+
+  .property-detail-hero {
+    gap: 0;
+  }
+
+  .property-detail-hero-kicker {
+    margin-bottom: 8px;
+  }
+
+  .property-detail-hero-kicker .eyebrow {
+    font-size: .68rem;
+  }
+
+  .property-detail-availability {
+    min-height: 28px;
+    padding-inline: 9px;
+    font-size: .68rem;
+  }
+
+  .property-mobile-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 4px 0 9px;
+  }
+
+  .property-mobile-price-row > span {
+    display: none;
+  }
+
+  .property-mobile-price-row strong {
+    color: var(--emerald-950);
+    font-size: 1.75rem;
+    line-height: 1;
+    letter-spacing: -.045em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .property-mobile-price-row small {
+    color: var(--muted);
+    font-size: .72rem;
+    font-weight: 720;
+  }
+
+  .property-detail-hero h1 {
+    font-size: clamp(1.65rem, 7.4vw, 2.05rem);
+    line-height: 1.05;
+    letter-spacing: -.04em;
+    text-wrap: pretty;
+  }
+
+  .property-detail-address {
+    margin-top: 9px;
+    align-items: flex-start;
+    font-size: .82rem;
+    line-height: 1.45;
+  }
+
+  .property-detail-price {
+    display: none;
+  }
+
+  .property-detail-layout {
+    margin-top: 14px;
+    gap: 10px;
+  }
+
+  .property-detail-main {
+    border-radius: 20px;
+  }
+
+  .property-detail-main > .property-detail-section {
+    padding: 20px 16px;
+  }
+
+  .property-detail-main > .property-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0;
+  }
+
+  .property-detail-page .summary-stat {
+    min-height: 82px;
+    padding: 12px;
+  }
+
+  .property-detail-page .summary-stat:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .property-detail-page .summary-stat:nth-child(n+3) {
+    border-top: 1px solid rgba(16,37,29,.08);
+  }
+
+  .property-cost-list {
+    grid-template-columns: 1fr;
+    margin-top: 16px;
+    border-radius: 15px;
+  }
+
+  .property-cost-list > div {
+    min-height: 72px;
+    padding: 14px;
+  }
+
+  .property-cost-list > div + div {
+    border-top: 1px solid rgba(16,37,29,.08);
+  }
+
+  .property-section-heading h2,
+  .trust-section-heading h2,
+  .tenant-compatibility-card h2 {
+    font-size: 1.18rem;
+  }
+
+  .section-copy,
+  .tenant-compatibility-card p {
+    font-size: .8rem;
+    line-height: 1.55;
+  }
+
+  .tenant-compatibility-top {
+    gap: 12px;
+  }
+
+  .tenant-compatibility-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    border-radius: 13px;
+  }
+
+  .tenant-fit-status {
+    max-width: 100%;
+    height: auto;
+    min-height: 36px;
+    align-items: flex-start;
+    padding-block: 8px;
+    border-radius: 13px;
+    line-height: 1.4;
+  }
+
+  .tenant-compatibility-tags {
+    gap: 7px;
+  }
+
+  .tenant-compatibility-tags span,
+  .amenity-item {
+    min-height: 34px;
+    padding-inline: 10px;
+    font-size: .72rem;
+  }
+
+  .property-description {
+    margin: 16px 0 18px;
+    font-size: .9rem;
+    line-height: 1.65;
+  }
+
+  .property-facts {
+    grid-template-columns: 1fr;
+    border-radius: 15px;
+  }
+
+  .property-map,
+  .property-map iframe {
+    min-height: 280px;
+    height: 280px;
+  }
+
+  .trust-signal-grid {
+    gap: 8px;
+  }
+
+  .trust-signal {
+    padding: 13px;
+  }
+
+  .property-contact-card {
+    margin-top: 10px;
+    padding: 18px 16px;
+  }
+
+  .property-contact-utility-actions {
+    display: none;
+  }
+
+  .property-contact-card::after {
+    height: calc(70px + env(safe-area-inset-bottom));
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack {
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, .85fr);
+    gap: 7px;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack > .conversation-action {
+    display: grid;
+    min-width: 0;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack > .phone-reveal-gate {
+    display: grid;
+    min-width: 0;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack > .contact-note {
+    display: none;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack:has(> .contact-note) {
+    grid-template-columns: 1fr;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack .property-contact-button,
+  .property-detail-page .property-contact-card > .contact-action-stack .primary-button,
+  .property-detail-page .property-contact-card > .contact-action-stack .secondary-button {
+    min-height: 52px;
+    border-radius: 14px;
+    font-size: .74rem;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack .conversation-action .contact-error,
+  .property-detail-page .property-contact-card > .contact-action-stack > .phone-reveal-gate .contact-error,
+  .property-detail-page .property-contact-card > .contact-action-stack > .phone-reveal-result {
+    position: fixed;
+    z-index: 1604;
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: calc(78px + env(safe-area-inset-bottom));
+    margin: 0;
+    padding: 11px 13px;
+    border: 1px solid rgba(16,37,29,.12);
+    border-radius: 13px;
+    background: var(--surface-elevated);
+    box-shadow: 0 12px 34px rgba(8,44,33,.14);
+  }
+}
+
+@media (max-width: 390px) {
+  .property-detail-shell {
+    width: calc(100% - 12px);
+  }
+
+  .property-mobile-back span {
+    max-width: 118px;
+  }
+
+  .property-detail-main > .property-detail-section {
+    padding-inline: 14px;
+  }
+
+  .property-detail-page .property-contact-card > .contact-action-stack .property-contact-button,
+  .property-detail-page .property-contact-card > .contact-action-stack .primary-button,
+  .property-detail-page .property-contact-card > .contact-action-stack .secondary-button {
+    padding-inline: 7px;
+    font-size: .69rem;
+  }
+}
+
+[data-resolved-theme="dark"] .property-detail-page .property-cost-list {
+  background: var(--border);
+}
+
+[data-resolved-theme="dark"] .property-detail-page .property-cost-list > div,
+[data-resolved-theme="dark"] .property-detail-page .tenant-fit-status {
+  background: var(--surface-soft);
+}
+
+[data-resolved-theme="dark"] .property-detail-page .property-cost-list dd,
+[data-resolved-theme="dark"] .property-detail-page .property-mobile-price-row strong {
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .property-mobile-back,
+  .property-mobile-action-buttons button {
+    transition: none;
+  }
+}

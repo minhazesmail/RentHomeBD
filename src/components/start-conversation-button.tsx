@@ -74,7 +74,7 @@ export function StartConversationButton({ propertyId, userId }: { propertyId: st
   }
 
   return (
-    <div className="contact-action-stack">
+    <div className="conversation-action">
       <button className="primary-button property-contact-button" type="button" disabled={busy} onClick={() => void startConversation()}>
         {busy ? copy.opening : copy.messageOwner}
       </button>

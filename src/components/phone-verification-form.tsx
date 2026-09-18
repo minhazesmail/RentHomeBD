@@ -49,9 +49,11 @@ function maskPhone(value: string | null, fallback: string) {
 export function PhoneVerificationForm({
   currentPhone,
   isVerified,
+  returnTo,
 }: {
   currentPhone: string | null;
   isVerified: boolean;
+  returnTo?: string;
 }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
@@ -140,7 +142,8 @@ export function PhoneVerificationForm({
     setResendSeconds(0);
     setStage("verified");
     setBusy(false);
-    router.refresh();
+    if (returnTo) router.replace(returnTo);
+    else router.refresh();
   }
 
   function editNumber() {

@@ -14,6 +14,7 @@ const propertyDetailCopy = {
       depositNotListed: "Deposit not listed",
       noneListed: "None listed",
       notSpecified: "Not specified",
+      notProvided: "Not provided",
     },
     availability: {
       dateNotListed: "Availability date not listed",
@@ -21,6 +22,12 @@ const propertyDetailCopy = {
       availableFrom: "Available from {date}",
     },
     stats: { bedrooms: "Bedrooms", bathrooms: "Bathrooms", squareFeet: "Sq ft", floor: "Floor" },
+    costs: {
+      heading: "Costs",
+      description: "Only costs stored on this listing are shown here.",
+      monthlyRent: "Monthly rent",
+      deposit: "Security deposit",
+    },
     about: {
       heading: "About this home",
       description: "The practical details you’ll want before arranging a viewing.",
@@ -48,6 +55,8 @@ const propertyDetailCopy = {
       searchSource: "search",
       profileSource: "profile",
       unspecified: "Renter type not specified",
+      acceptedHeading: "Accepted renter types",
+      acceptedDescription: "The owner marked these renter types as suitable for this home.",
       backToCompatibleHomes: "Back to compatible homes",
       mismatchContactNote: "The owner’s renter policy conflicts with the renter type you selected. Review compatible homes before contacting this owner.",
       unknownContactNote: "The listing has no usable renter policy, so NearBasha cannot confirm compatibility for your selected renter type.",
@@ -199,6 +208,7 @@ const propertyDetailCopy = {
       depositNotListed: "জামানত উল্লেখ নেই",
       noneListed: "কিছু উল্লেখ নেই",
       notSpecified: "উল্লেখ করা নেই",
+      notProvided: "তথ্য দেওয়া নেই",
     },
     availability: {
       dateNotListed: "কবে থেকে পাওয়া যাবে তা উল্লেখ নেই",
@@ -206,6 +216,12 @@ const propertyDetailCopy = {
       availableFrom: "{date} থেকে পাওয়া যাবে",
     },
     stats: { bedrooms: "বেডরুম", bathrooms: "বাথরুম", squareFeet: "বর্গফুট", floor: "তলা" },
+    costs: {
+      heading: "খরচ",
+      description: "এই লিস্টিংয়ে সংরক্ষিত খরচের তথ্যগুলোই এখানে দেখানো হয়েছে।",
+      monthlyRent: "মাসিক ভাড়া",
+      deposit: "নিরাপত্তা জামানত",
+    },
     about: {
       heading: "বাসাটি সম্পর্কে",
       description: "ভিউয়িং ঠিক করার আগে দরকারি মূল তথ্যগুলো এক নজরে দেখুন।",
@@ -233,6 +249,8 @@ const propertyDetailCopy = {
       searchSource: "সার্চ",
       profileSource: "প্রোফাইল",
       unspecified: "ভাড়াটিয়ার ধরন উল্লেখ নেই",
+      acceptedHeading: "গ্রহণযোগ্য ভাড়াটিয়ার ধরন",
+      acceptedDescription: "মালিক যেসব ভাড়াটিয়া ধরনকে এই বাসার জন্য উপযুক্ত হিসেবে চিহ্নিত করেছেন।",
       backToCompatibleHomes: "উপযুক্ত বাসাগুলোতে ফিরে যান",
       mismatchContactNote: "মালিকের ভাড়াটিয়া নীতি আপনার নির্বাচিত ভাড়াটিয়া ধরনের সঙ্গে মেলে না। মালিককে যোগাযোগ করার আগে উপযুক্ত বাসাগুলো দেখুন।",
       unknownContactNote: "লিস্টিংয়ে ব্যবহারযোগ্য ভাড়াটিয়া নীতি নেই, তাই আপনার নির্বাচিত ধরনের জন্য NearBasha উপযোগিতা নিশ্চিত করতে পারছে না।",

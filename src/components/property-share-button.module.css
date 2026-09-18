@@ -15,3 +15,20 @@
   line-height: 1.35;
   color: var(--text-muted, #66756f);
 }
+
+
+.compact {
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 999px;
+}
+
+.compact + .status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
