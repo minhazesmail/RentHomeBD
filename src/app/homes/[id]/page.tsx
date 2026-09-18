@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Bath, BedDouble, Building2, CircleAlert, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
+import { ArrowLeft, Bath, BedDouble, Building2, CircleAlert, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { BrandLogo } from "@/components/brand-logo";
@@ -36,14 +36,14 @@ const PUBLIC_MEDIA_TTL_SECONDS = 300;
 export const dynamic = "force-dynamic";
 
 function displayValue(value: string | null | undefined, values: Record<string, string>) {
-  if (!value) return "—";
+  if (!value) return "";
   return values[value] ?? value.replaceAll("_", " ");
 }
 
 function formatPropertyDate(value: string | null | undefined, locale: "en" | "bn") {
-  if (!value) return "—";
+  if (!value) return "";
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "—";
+  if (Number.isNaN(parsed.getTime())) return "";
   return formatDate(parsed, locale, {
     timeZone: "Asia/Dhaka",
     day: "numeric",
@@ -145,32 +145,62 @@ export default async function PublicPropertyPage({
   const returnQuery = returnTo !== "/homes" ? `?returnTo=${encodeURIComponent(returnTo)}` : "";
   const detailPath = `/homes/${property.id}${returnQuery}`;
   const signInHref = `/login?next=${encodeURIComponent(`${detailPath}#contact`)}`;
+  const saveSignInHref = `/login?next=${encodeURIComponent(detailPath)}`;
   const reportSignInHref = `/login?next=${encodeURIComponent(`${detailPath}#trust`)}`;
   const roleVerified = Boolean(property.owner_role_verified_at && property.owner_role_verified_role === property.owner_role);
   const ownerPhoneVerified = Boolean(property.owner_phone_verified_at);
   const viewerPhoneVerified = Boolean(viewerProfile?.phone_verified_at);
-  const ownerRoleLabel = displayValue(property.owner_role, copy.values);
+  const ownerRoleLabel = displayValue(property.owner_role, copy.values) || copy.contact.propertyOwner;
   const rentLabel = property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.common.rentOnRequest;
-  const depositLabel = formatCurrency(property.deposit_bdt, locale);
+  const depositLabel = property.deposit_bdt > 0 ? formatCurrency(property.deposit_bdt, locale) : copy.common.notProvided;
   const showCompatibilityReturn = Boolean(searchTenantType && renterFit !== "match");
+  const hasSummaryFacts = property.bedrooms != null || property.bathrooms != null || property.size_sqft != null || property.floor_number != null || property.total_floors != null;
+  const propertyTypeLabel = displayValue(property.property_type, copy.values);
+  const furnishingLabel = displayValue(property.furnishing, copy.values);
+  const genderLabel = displayValue(property.gender_preference, copy.values);
 
   return (
-    <main className="property-detail-page">
+    <main className="property-detail-page" data-mobile-property-detail>
       <header className="property-detail-topbar">
-        <BrandLogo className="property-brand-logo" />
-        <div className="property-detail-nav">
-          <Link className="text-link" href={returnTo}>{copy.nav.backToMap}</Link>
-          {auth && <Link className="text-link" href="/saved">{copy.nav.saved}</Link>}
-          <Link className="text-link" href={auth ? "/messages" : "/login"}>{auth ? copy.nav.messages : copy.nav.signIn}</Link>
+        <div className="property-detail-desktop-bar">
+          <BrandLogo className="property-brand-logo" />
+          <div className="property-detail-nav">
+            <Link className="text-link" href={returnTo}>{copy.nav.backToMap}</Link>
+            {auth && <Link className="text-link" href="/saved">{copy.nav.saved}</Link>}
+            <Link className="text-link" href={auth ? "/messages" : "/login"}>{auth ? copy.nav.messages : copy.nav.signIn}</Link>
+          </div>
+        </div>
+        <div className="property-detail-mobile-actions" data-property-mobile-actions>
+          <Link className="property-mobile-back" href={returnTo} aria-label={copy.nav.backToMap}>
+            <ArrowLeft aria-hidden="true" />
+            <span>{copy.nav.backToMap}</span>
+          </Link>
+          <div className="property-mobile-action-buttons">
+            <SaveHomeButton
+              propertyId={property.id}
+              userId={auth?.userId ?? null}
+              initialSaved={Boolean(savedRow)}
+              compact
+              signInHref={saveSignInHref}
+            />
+            <PropertyShareButton title={property.title || copy.common.rentalProperty} compact />
+          </div>
         </div>
       </header>
 
       <div className="property-detail-shell">
-        <section className="property-detail-hero">
+        <PropertyMediaGallery media={galleryMedia} propertyTitle={property.title || copy.common.rentalProperty} />
+
+        <section className="property-detail-hero" data-property-detail-section="intro">
           <div className="property-detail-hero-main">
             <div className="property-detail-hero-kicker">
-              <p className="eyebrow">{displayValue(property.property_type, copy.values)}</p>
+              {propertyTypeLabel && <p className="eyebrow">{propertyTypeLabel}</p>}
               <span className="property-detail-availability"><CircleCheck size={13} aria-hidden="true" />{availability}</span>
+            </div>
+            <div className="property-mobile-price-row">
+              <span>{copy.common.monthlyRent}</span>
+              <strong>{rentLabel}</strong>
+              <small>{copy.common.perMonth}</small>
             </div>
             <h1>{property.title || copy.common.rentalProperty}</h1>
             <p className="property-detail-address"><MapPin size={17} aria-hidden="true" />{property.address_text || copy.common.exactLocationFallback}</p>
@@ -179,42 +209,23 @@ export default async function PublicPropertyPage({
             <span className="property-detail-price-label">{copy.common.monthlyRent}</span>
             <strong>{rentLabel}</strong>
             <span>{copy.common.perMonth}</span>
-            <small>{property.deposit_bdt > 0 ? `${copy.common.deposit} ${depositLabel}` : copy.common.noDepositListed}</small>
+            <small>{property.deposit_bdt > 0 ? `${copy.common.deposit} ${depositLabel}` : copy.common.notProvided}</small>
           </div>
         </section>
 
-        <PropertyMediaGallery media={galleryMedia} propertyTitle={property.title || copy.common.rentalProperty} />
-
         <div className="property-detail-layout">
           <div className="property-detail-main">
-            <section className="property-detail-section property-summary-grid">
-              <div className="summary-stat"><span className="summary-stat-icon"><BedDouble size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.bedrooms == null ? "—" : formatNumber(property.bedrooms, locale)}</strong><span>{copy.stats.bedrooms}</span></span></div>
-              <div className="summary-stat"><span className="summary-stat-icon"><Bath size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.bathrooms == null ? "—" : formatNumber(property.bathrooms, locale)}</strong><span>{copy.stats.bathrooms}</span></span></div>
-              <div className="summary-stat"><span className="summary-stat-icon"><Ruler size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.size_sqft ? formatNumber(property.size_sqft, locale) : "—"}</strong><span>{copy.stats.squareFeet}</span></span></div>
-              <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.floor_number == null ? "—" : formatNumber(property.floor_number, locale)}{property.total_floors ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>
-            </section>
-
-            <section className="property-detail-section">
-              <div className="property-section-heading"><div><h2>{copy.about.heading}</h2><p className="section-copy">{copy.about.description}</p></div><Sparkles size={20} aria-hidden="true" /></div>
-              <p className="property-description">{property.description || copy.about.noDescription}</p>
-              <dl className="property-facts">
-                <div><dt>{copy.about.propertyType}</dt><dd>{displayValue(property.property_type, copy.values)}</dd></div>
-                <div><dt>{copy.about.furnishing}</dt><dd>{displayValue(property.furnishing, copy.values)}</dd></div>
-                <div><dt>{copy.about.availableFrom}</dt><dd>{formatPropertyDate(property.available_from, locale)}</dd></div>
-                <div><dt>{copy.about.deposit}</dt><dd>{depositLabel}</dd></div>
-                <div><dt>{copy.about.genderPreference}</dt><dd>{displayValue(property.gender_preference, copy.values)}</dd></div>
-              </dl>
-            </section>
-
-            <section className={`property-detail-section tenant-compatibility-card is-${renterFit}`}>
+            <section className={`property-detail-section tenant-compatibility-card is-${renterFit}`} data-property-detail-section="fit">
               <div className="tenant-compatibility-top">
                 <div className="tenant-compatibility-icon"><Users size={22} aria-hidden="true" /></div>
                 <div><h2>{copy.renter.heading}</h2><p>{personalizedRenterFit}</p></div>
               </div>
-              <div className="tenant-compatibility-tags">
-                {renterFitStatus && <span>{renterFit === "match" ? <CircleCheck size={14} aria-hidden="true" /> : <CircleAlert size={14} aria-hidden="true" />}{renterFitStatus}</span>}
-                {renterTypes.length ? renterTypes.map((type) => <span key={type}><CircleCheck size={14} aria-hidden="true" />{tenantLabels[type]}</span>) : <span><CircleAlert size={14} aria-hidden="true" />{copy.renter.unspecified}</span>}
-              </div>
+              {renterFitStatus && (
+                <div className="tenant-fit-status">
+                  {renterFit === "match" ? <CircleCheck size={15} aria-hidden="true" /> : <CircleAlert size={15} aria-hidden="true" />}
+                  <span>{renterFitStatus}</span>
+                </div>
+              )}
               {showCompatibilityReturn && (
                 <div className="owner-trust-summary">
                   <CircleAlert size={17} aria-hidden="true" />
@@ -227,7 +238,33 @@ export default async function PublicPropertyPage({
               )}
             </section>
 
-            <section className="property-detail-section">
+            {hasSummaryFacts && (
+              <section className="property-detail-section property-summary-grid" aria-label={copy.about.description} data-property-detail-section="facts">
+                {property.bedrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><BedDouble size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bedrooms, locale)}</strong><span>{copy.stats.bedrooms}</span></span></div>}
+                {property.bathrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><Bath size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bathrooms, locale)}</strong><span>{copy.stats.bathrooms}</span></span></div>}
+                {property.size_sqft != null && <div className="summary-stat"><span className="summary-stat-icon"><Ruler size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.size_sqft, locale)}</strong><span>{copy.stats.squareFeet}</span></span></div>}
+                {(property.floor_number != null || property.total_floors != null) && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.floor_number != null ? formatNumber(property.floor_number, locale) : copy.common.notProvided}{property.total_floors != null ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>}
+              </section>
+            )}
+
+            <section className="property-detail-section property-cost-section" data-property-detail-section="costs">
+              <div className="property-section-heading"><div><h2>{copy.costs.heading}</h2><p className="section-copy">{copy.costs.description}</p></div></div>
+              <dl className="property-cost-list">
+                <div><dt>{copy.costs.monthlyRent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.common.notProvided}</dd></div>
+                <div><dt>{copy.costs.deposit}</dt><dd>{depositLabel}</dd></div>
+              </dl>
+            </section>
+
+            <section className="property-detail-section property-renter-policy" data-property-detail-section="accepted-renters">
+              <div className="property-section-heading"><div><h2>{copy.renter.acceptedHeading}</h2><p className="section-copy">{copy.renter.acceptedDescription}</p></div></div>
+              <div className="tenant-compatibility-tags">
+                {renterTypes.length
+                  ? renterTypes.map((type) => <span key={type}><CircleCheck size={14} aria-hidden="true" />{tenantLabels[type]}</span>)
+                  : <span><CircleAlert size={14} aria-hidden="true" />{copy.renter.unspecified}</span>}
+              </div>
+            </section>
+
+            <section className="property-detail-section" data-property-detail-section="amenities">
               <div className="property-section-heading"><div><h2>{copy.amenities.heading}</h2><p className="section-copy">{copy.amenities.description}</p></div></div>
               <div className="property-tag-groups">
                 <div><h3>{copy.amenities.amenities}</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} aria-hidden="true" />{amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} aria-hidden="true" />{copy.amenities.noneListed}</span>}</div></div>
@@ -235,13 +272,25 @@ export default async function PublicPropertyPage({
               </div>
             </section>
 
-            <section className="property-detail-section">
+            <section className="property-detail-section" data-property-detail-section="description">
+              <div className="property-section-heading"><div><h2>{copy.about.heading}</h2><p className="section-copy">{copy.about.description}</p></div><Sparkles size={20} aria-hidden="true" /></div>
+              <p className="property-description">{property.description || copy.about.noDescription}</p>
+              {(propertyTypeLabel || furnishingLabel || genderLabel) && (
+                <dl className="property-facts">
+                  {propertyTypeLabel && <div><dt>{copy.about.propertyType}</dt><dd>{propertyTypeLabel}</dd></div>}
+                  {furnishingLabel && <div><dt>{copy.about.furnishing}</dt><dd>{furnishingLabel}</dd></div>}
+                  {genderLabel && <div><dt>{copy.about.genderPreference}</dt><dd>{genderLabel}</dd></div>}
+                </dl>
+              )}
+            </section>
+
+            <section className="property-detail-section" data-property-detail-section="location">
               <div className="property-section-heading"><div><h2>{copy.location.heading}</h2><p className="section-copy">{copy.location.description}</p></div><MapPin size={20} aria-hidden="true" /></div>
               <div className="property-map"><iframe title={copy.location.iframeTitle} src={mapUrl} loading="lazy" /></div>
               <PropertyLocationActions latitude={property.latitude} longitude={property.longitude} locale={locale} />
             </section>
 
-            <section className="property-detail-section property-trust-section" id="trust">
+            <section className="property-detail-section property-trust-section" id="trust" data-property-detail-section="trust">
               <div className="trust-section-heading"><div><h2>{copy.trust.heading}</h2><p className="section-copy">{copy.trust.description}</p></div><div className="trust-shield" aria-hidden="true"><ShieldCheck size={23} /></div></div>
               <div className="trust-signal-grid">
                 <div className="trust-signal"><div className="trust-signal-icon"><CircleCheck size={17} /></div><div className="trust-signal-copy"><strong>{copy.trust.listingReviewed}</strong><span>{copy.trust.listingReviewedText}</span></div></div>
@@ -256,10 +305,12 @@ export default async function PublicPropertyPage({
             </section>
           </div>
 
-          <aside className="property-contact-card" id="contact">
-            <div className="contact-price-summary"><span>{copy.common.monthlyRent}</span><strong>{rentLabel}</strong><small>{property.deposit_bdt > 0 ? `${copy.common.deposit} ${depositLabel}` : copy.common.depositNotListed}</small></div>
-            <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} />
-            <PropertyShareButton title={property.title || copy.common.rentalProperty} />
+          <aside className="property-contact-card" id="contact" data-property-contact-card>
+            <div className="contact-price-summary"><span>{copy.common.monthlyRent}</span><strong>{rentLabel}</strong><small>{property.deposit_bdt > 0 ? `${copy.common.deposit} ${depositLabel}` : copy.common.notProvided}</small></div>
+            <div className="property-contact-utility-actions">
+              <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} signInHref={saveSignInHref} />
+              <PropertyShareButton title={property.title || copy.common.rentalProperty} />
+            </div>
             <div className="owner-identity-row"><div className="owner-badge">{property.owner_display_name?.slice(0, 1).toUpperCase() || "O"}</div><div className="owner-identity-copy"><p className="eyebrow">{formatPropertyDetailText(copy.contact.listedBy, { role: ownerRoleLabel })}</p><h2>{property.owner_display_name || copy.contact.propertyOwner}</h2></div></div>
             <div className="owner-verification-badges">
               <span className={`owner-verification-badge${ownerPhoneVerified ? "" : " is-neutral"}`}><Phone size={12} aria-hidden="true" />{ownerPhoneVerified ? copy.contact.phoneVerified : copy.contact.phoneUnverified}</span>
@@ -276,7 +327,7 @@ export default async function PublicPropertyPage({
                 </div>
               </div>
             )}
-            <div className="contact-action-stack">
+            <div className="contact-action-stack" data-property-sticky-actions>
               {auth ? <StartConversationButton propertyId={property.id} userId={auth.userId} /> : <Link className="primary-button link-button property-contact-button" href={signInHref}>{copy.contact.signInToContact}</Link>}
               <PhoneRevealButton propertyId={property.id} signedIn={Boolean(auth)} viewerPhoneVerified={viewerPhoneVerified} ownerPhoneVerified={ownerPhoneVerified} signInHref={signInHref} />
             </div>
