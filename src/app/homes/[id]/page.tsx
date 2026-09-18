@@ -155,7 +155,7 @@ export default async function PublicPropertyPage({
   const rentLabel = property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.common.rentOnRequest;
   const depositLabel = property.deposit_bdt > 0 ? formatCurrency(property.deposit_bdt, locale) : copy.common.notProvided;
   const showCompatibilityReturn = Boolean(searchTenantType && renterFit !== "match");
-  const hasSummaryFacts = property.bedrooms != null || property.bathrooms != null || property.size_sqft != null || property.floor_number != null || property.total_floors != null;
+  const hasSummaryFacts = property.bedrooms != null || property.bathrooms != null || property.size_sqft != null || property.floor_number != null;
   const propertyTypeLabel = displayValue(property.property_type, copy.values);
   const furnishingLabel = displayValue(property.furnishing, copy.values);
   const genderLabel = displayValue(property.gender_preference, copy.values);
@@ -244,7 +244,7 @@ export default async function PublicPropertyPage({
                 {property.bedrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><BedDouble size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bedrooms, locale)}</strong><span>{copy.stats.bedrooms}</span></span></div>}
                 {property.bathrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><Bath size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bathrooms, locale)}</strong><span>{copy.stats.bathrooms}</span></span></div>}
                 {property.size_sqft != null && <div className="summary-stat"><span className="summary-stat-icon"><Ruler size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.size_sqft, locale)}</strong><span>{copy.stats.squareFeet}</span></span></div>}
-                {(property.floor_number != null || property.total_floors != null) && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.floor_number != null ? formatNumber(property.floor_number, locale) : copy.common.notProvided}{property.total_floors != null ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>}
+                {property.floor_number != null && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.floor_number, locale)}{property.total_floors != null ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>}
               </section>
             )}
 
