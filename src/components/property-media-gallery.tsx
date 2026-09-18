@@ -110,7 +110,7 @@ export function PropertyMediaGallery({ media, propertyTitle }: { media: Property
 
   return (
     <>
-      <section className={styles.gallery} aria-label={copy.regionAria}>
+      <section className={styles.gallery} aria-label={copy.regionAria} data-property-mobile-gallery>
         <div className={styles.grid}>
           {previewItems.map((item, index) => {
             const current = formatNumber(index + 1, locale);
@@ -127,7 +127,7 @@ export function PropertyMediaGallery({ media, propertyTitle }: { media: Property
             );
           })}
         </div>
-        <button className={styles.countButton} type="button" onClick={(event) => openGallery(0, event.currentTarget)}><Camera size={15} aria-hidden="true" /><span>{mediaCount}</span></button>
+        <button className={styles.countButton} type="button" data-property-media-count onClick={(event) => openGallery(0, event.currentTarget)}><Camera size={15} aria-hidden="true" /><span>{mediaCount}</span></button>
       </section>
 
       {activeItem && activeIndex !== null && (
