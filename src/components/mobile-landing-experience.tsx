@@ -335,7 +335,7 @@ export function MobileLandingExperience() {
         </section>
       </main>
 
-      <nav className={styles.bottomNav} aria-label={dictionary.navigation.productNavigationAria}>
+      <nav className={styles.bottomNav} aria-label={dictionary.navigation.productNavigationAria} data-mobile-primary-tabs>
         <Link href="/homes" aria-current="page"><Compass aria-hidden="true" /><span>{dictionary.navigation.explore}</span></Link>
         <Link href="/saved"><Bookmark aria-hidden="true" /><span>{dictionary.navigation.saved}</span></Link>
         <Link href="/messages"><MessageCircle aria-hidden="true" /><span>{dictionary.navigation.messages}</span></Link>
