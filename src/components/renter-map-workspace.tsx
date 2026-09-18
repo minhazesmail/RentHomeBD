@@ -8,12 +8,15 @@ import { Briefcase, CircleCheck, GraduationCap, LocateFixed, MapPinned, Search, 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { useMobileMapModel } from "@/components/mobile-map-model";
 import { SaveHomeButton } from "@/components/save-home-button";
+import { SearchRecoveryState } from "@/components/search-recovery-state";
 import type { MapListing, UserMapLocation } from "@/components/leaflet-map";
 import { RenterResultsList } from "@/components/renter-results-list";
 import { formatCurrency, formatNumber } from "@/i18n/format";
 import { getMapExperienceCopy } from "@/i18n/map-experience-copy";
 import { getMapWorkspaceRedesignCopy } from "@/i18n/map-workspace-redesign-copy";
+import { getRenterResultsCopy } from "@/i18n/renter-results-copy";
 import { localizeLocationLabel } from "@/i18n/presentation";
 import { useLocale } from "@/i18n/use-locale";
 import { formatWorkflowText, getWorkflowCopy, type WorkflowCopy } from "@/i18n/workflow-copy";
@@ -37,6 +40,7 @@ type SortOption = "recommended" | "distance" | "rent-asc" | "rent-desc";
 type SearchCopy = WorkflowCopy["homes"]["search"];
 type SearchTenantType = Exclude<TenantType, "everyone">;
 type TenantLabels = Record<TenantType, string> & { unspecified: string };
+type LocationRecovery = { message: string; retryable: boolean };
 
 type InitialSearch = {
   centerLat?: number;
@@ -175,6 +179,8 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const copy = getWorkflowCopy(locale).homes.search;
   const experienceCopy = getMapExperienceCopy(locale);
   const workspaceCopy = getMapWorkspaceRedesignCopy(locale);
+  const resultsCopy = getRenterResultsCopy(locale);
+  const mobileMapModel = useMobileMapModel();
   const tenantLabels = useMemo<TenantLabels>(() => ({
     family: dictionary.common.tenant.family,
     bachelor: dictionary.common.tenant.bachelor,
@@ -205,12 +211,17 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const [sortOption, setSortOption] = useState<SortOption>(initialSort(initialSearch.sort));
   const [searchName, setSearchName] = useState("");
   const [busy, setBusy] = useState(Boolean(initialTenantType));
+  const [slowSearch, setSlowSearch] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [savingSearch, setSavingSearch] = useState(false);
   const [locating, setLocating] = useState(false);
   const [liveTracking, setLiveTracking] = useState(false);
   const [userLocation, setUserLocation] = useState<UserMapLocation | null>(null);
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
+  const [locationRecovery, setLocationRecovery] = useState<LocationRecovery | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [mapTileFailed, setMapTileFailed] = useState(false);
+  const [tileRetryVersion, setTileRetryVersion] = useState(0);
   const [customArea, setCustomArea] = useState<[number, number][]>([]);
   const [drawingCustomArea, setDrawingCustomArea] = useState(false);
   const [mapDirty, setMapDirty] = useState(false);
@@ -264,8 +275,9 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     searchAbortRef.current?.abort();
     searchAbortRef.current = null;
     setBusy(false);
+    setSearchError(null);
     setMessage(null);
-  }, [setBusy, setMessage]);
+  }, [setBusy, setMessage, setSearchError]);
 
   const validateFilters = useCallback(() => {
     if (!tenantType) return workspaceCopy.toolbar.tenantRequired;
