@@ -712,8 +712,8 @@
   .bottomNav {
     position: fixed;
     z-index: 55;
-    left: 10px;
-    right: 10px;
+    left: var(--mobile-app-safe-left, max(16px, env(safe-area-inset-left)));
+    right: var(--mobile-app-safe-right, max(16px, env(safe-area-inset-right)));
     bottom: max(8px, env(safe-area-inset-bottom));
     min-height: 68px;
     display: grid;
