@@ -356,6 +356,7 @@ export function MobileLandingExperience() {
               <button
                 type="button"
                 key={location.label}
+                data-mobile-popular-area={location.label}
                 className={area === location.label ? styles.locationSelected : undefined}
                 aria-pressed={area === location.label}
                 onClick={() => choosePopularArea(location.label)}
