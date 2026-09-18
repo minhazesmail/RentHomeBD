@@ -1088,6 +1088,19 @@
     max-width: 36rem;
   }
 
+  .primaryFields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .areaField,
+  .customBudgetField {
+    grid-column: 1 / -1;
+  }
+
+  .morePanel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .featureGrid {
     grid-template-columns: repeat(3, minmax(0,1fr));
   }
@@ -1163,6 +1176,18 @@
 :global(html[data-resolved-theme="dark"]) .sectionHeadingRow h2,
 :global(html[data-resolved-theme="dark"]) .featureGrid article strong {
   color: var(--app-ink);
+}
+
+:global(html[data-resolved-theme="dark"]) .areaField span,
+:global(html[data-resolved-theme="dark"]) .fieldLabelRow > span,
+:global(html[data-resolved-theme="dark"]) .customBudgetField > span,
+:global(html[data-resolved-theme="dark"]) .morePanel small {
+  color: var(--app-muted);
+}
+
+:global(html[data-resolved-theme="dark"]) .areaField input::placeholder,
+:global(html[data-resolved-theme="dark"]) .customBudgetField input::placeholder {
+  color: #91a39a;
 }
 
 :global(html[data-resolved-theme="dark"]) .featureGrid article {
