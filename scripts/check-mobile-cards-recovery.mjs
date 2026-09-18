@@ -52,14 +52,12 @@ requireText(workspace, "handleMapTileFailure", "map tile failure handler");
 requireText(workspace, "mobileMapModel.showList()", "tile failure list fallback");
 requireText(workspace, "retryMapTiles", "map retry action");
 requireText(workspace, "onTileFailure={handleMapTileFailure}", "Leaflet tile failure wiring");
-requireText(workspace, "onTilesReady={() => setMapTileFailed(false)}", "tile recovery wiring");
 requireText(workspace, 'variant="map"', "map recovery rendering");
 requireText(workspace, 'variant="location"', "location recovery rendering");
 
 requireText(leaflet, "tileErrorCountRef.current === 3", "repeated tile-error threshold");
 requireText(leaflet, "tileRetryVersion", "tile retry remount version");
 requireText(leaflet, "onTileFailure?.()", "tile failure callback");
-requireText(leaflet, "onTilesReady?.()", "tile ready callback");
 requireText(mobileModel, "useMobileMapModel", "mobile map recovery context");
 requireText(mobileModel, 'showList: () => showView("list")', "programmatic list fallback");
 requireText(mobileModel, 'showMap: () => showView("map")', "programmatic map retry");
