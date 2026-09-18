@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronUp, List, Map, Minus, SlidersHorizontal } from "lucide-react";
+import { createContext, useContext } from "react";
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { useRef, useState } from "react";
 
@@ -14,6 +15,20 @@ type SheetState = "collapsed" | "partial" | "expanded";
 
 const SHEET_STATES: SheetState[] = ["collapsed", "partial", "expanded"];
 const SHEET_SWIPE_THRESHOLD = 44;
+
+type MobileMapModelContextValue = {
+  showList: () => void;
+  showMap: () => void;
+};
+
+const MobileMapModelContext = createContext<MobileMapModelContextValue>({
+  showList: () => {},
+  showMap: () => {},
+});
+
+export function useMobileMapModel() {
+  return useContext(MobileMapModelContext);
+}
 
 function mobileViewport() {
   return typeof window !== "undefined" && window.matchMedia("(max-width: 960px)").matches;
@@ -169,7 +184,9 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
           <span>{filtersOpen ? copy.done : copy.filters}</span>
         </button>
       </nav>
-      {children}
+      <MobileMapModelContext.Provider value={{ showList: () => showView("list"), showMap: () => showView("map") }}>
+        {children}
+      </MobileMapModelContext.Provider>
     </div>
   );
 }
