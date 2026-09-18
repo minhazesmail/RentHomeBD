@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { Briefcase, CircleCheck, GraduationCap, User, Users } from "lucide-react";
 import { memo, useMemo } from "react";
 
 import type { MapListing } from "@/components/leaflet-map";
+import { PropertyCard } from "@/components/property-card";
 import { SaveHomeButton } from "@/components/save-home-button";
+import { SearchRecoveryState } from "@/components/search-recovery-state";
 import { useRenewingPublicMedia } from "@/hooks/use-renewing-public-media";
 import { formatCurrency, formatNumber } from "@/i18n/format";
 import { getRenterResultsCopy } from "@/i18n/renter-results-copy";
@@ -70,35 +70,54 @@ const RenterResultCard = memo(function RenterResultCard({ listing, selected, pre
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) onHighlight(null);
       }}
     >
-      <Link className="renter-result-card" href={href}>
-        <div className="renter-result-image">
-          {listing.cover_url ? <Image src={listing.cover_url} alt="" width={320} height={220} sizes="(max-width: 900px) 40vw, 220px" onError={() => { if (listing.cover_media_path) onMediaError(listing.cover_media_path); }} /> : <span>⌂</span>}
-        </div>
-        <div className="renter-result-copy">
-          <TenantBadge types={listing.tenant_types ?? []} preference={preference} />
-          <strong>{listing.title || copy.rentalProperty}</strong>
-          <span>{listing.address_text || copy.locationOnMap}</span>
-          {compatibility === "match" && <small className="tenant-preference-note is-match">{copy.matchesType}</small>}
-          {compatibility === "mismatch" && <small className="tenant-preference-note is-mismatch">{copy.differentType}</small>}
-          <div className="renter-result-meta"><b>{rent}</b><small>{bedrooms} {copy.bed} · {bathrooms} {copy.bath}</small></div>
-          {distance && <small>{distance}</small>}
-        </div>
-      </Link>
+      <PropertyCard
+        href={href}
+        imageUrl={listing.cover_url}
+        imageSizes="(max-width: 900px) 40vw, 220px"
+        classes={{ link: "renter-result-card", media: "renter-result-image", body: "renter-result-copy" }}
+        onMediaError={() => { if (listing.cover_media_path) onMediaError(listing.cover_media_path); }}
+      >
+        <TenantBadge types={listing.tenant_types ?? []} preference={preference} />
+        <strong>{listing.title || copy.rentalProperty}</strong>
+        <span>{listing.address_text || copy.locationOnMap}</span>
+        {compatibility === "match" && <small className="tenant-preference-note is-match">{copy.matchesType}</small>}
+        {compatibility === "mismatch" && <small className="tenant-preference-note is-mismatch">{copy.differentType}</small>}
+        <div className="renter-result-meta"><b>{rent}</b><small>{bedrooms} {copy.bed} · {bathrooms} {copy.bath}</small></div>
+        {distance && <small>{distance}</small>}
+      </PropertyCard>
       <button className="text-button renter-result-map-button" type="button" onClick={() => onSelect(listing.id)} aria-pressed={selected}>{selected ? copy.shownOnMap : copy.showOnMap}</button>
       <SaveHomeButton propertyId={listing.id} userId={userId} compact />
     </div>
   );
 });
 
-export const RenterResultsList = memo(function RenterResultsList({ listings, busy, customAreaActive, selectedId, preference, userId, propertyHref, onSelect, onHighlight = () => {} }: {
+export const RenterResultsList = memo(function RenterResultsList({
+  listings,
+  busy,
+  slow,
+  searchError,
+  customAreaActive,
+  selectedId,
+  preference,
+  userId,
+  propertyHref,
+  onSelect,
+  onRetry,
+  onClearFilters,
+  onHighlight = () => {},
+}: {
   listings: MapListing[];
   busy: boolean;
+  slow: boolean;
+  searchError?: string | null;
   customAreaActive: boolean;
   selectedId: string | null;
   preference?: TenantType;
   userId: string | null;
   propertyHref: (propertyId: string) => string;
   onSelect: (id: string) => void;
+  onRetry?: () => void;
+  onClearFilters?: () => void;
   onHighlight?: (id: string | null) => void;
 }) {
   const { locale } = useLocale();
@@ -108,10 +127,46 @@ export const RenterResultsList = memo(function RenterResultsList({ listings, bus
   const liveListings = useMemo(() => listings.map((listing) => listing.cover_media_path && urls[listing.cover_media_path] ? { ...listing, cover_url: urls[listing.cover_media_path] } : listing), [listings, urls]);
 
   return (
-    <div className="renter-results-list">
-      {!busy && liveListings.length === 0 && <div className="renter-empty">{customAreaActive ? copy.noCustomAreaResults : copy.noResults}</div>}
+    <div className="renter-results-list" data-shared-property-results>
+      {searchError && (
+        <SearchRecoveryState
+          variant="error"
+          title={copy.searchErrorTitle}
+          description={searchError}
+          compact={liveListings.length > 0}
+          primaryAction={onRetry ? { label: copy.retrySearch, onClick: onRetry } : undefined}
+        />
+      )}
+
+      {!searchError && busy && slow && liveListings.length === 0 && (
+        <SearchRecoveryState
+          variant="slow"
+          title={copy.slowSearchTitle}
+          description={copy.slowSearchHint}
+        />
+      )}
+
+      {!searchError && !busy && liveListings.length === 0 && (
+        <SearchRecoveryState
+          variant="empty"
+          title={customAreaActive ? copy.noCustomAreaTitle : copy.noResultsTitle}
+          description={customAreaActive ? copy.noCustomAreaResults : copy.noResults}
+          primaryAction={onClearFilters ? { label: copy.broadenSearch, onClick: onClearFilters } : undefined}
+        />
+      )}
+
       {liveListings.map((listing) => (
-        <RenterResultCard key={listing.id} listing={listing} selected={selectedId === listing.id} preference={preference} userId={userId} href={propertyHref(listing.id)} onSelect={onSelect} onHighlight={onHighlight} onMediaError={(path) => void refresh(path)} />
+        <RenterResultCard
+          key={listing.id}
+          listing={listing}
+          selected={selectedId === listing.id}
+          preference={preference}
+          userId={userId}
+          href={propertyHref(listing.id)}
+          onSelect={onSelect}
+          onHighlight={onHighlight}
+          onMediaError={(path) => void refresh(path)}
+        />
       ))}
     </div>
   );
