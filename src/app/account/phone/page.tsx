@@ -9,13 +9,14 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { getLocale } from "@/i18n/get-locale";
 import { requireUser } from "@/lib/auth";
+import { safeRelativePath } from "@/lib/safe-redirect";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function PhoneVerificationPage() {
-  const auth = await requireUser();
-  const locale = await getLocale();
+export default async function PhoneVerificationPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const [auth, locale, query] = await Promise.all([requireUser(), getLocale(), searchParams]);
+  const returnTo = safeRelativePath(typeof query.next === "string" ? query.next : null, "/dashboard");
   const copy = getDictionary(locale).auth.phoneVerification;
   const supabase = (await createClient()) as unknown as SupabaseClient;
   const { data: trustProfile } = await supabase.from("profiles").select("phone_verified_at").eq("id", auth.userId).maybeSingle();
@@ -33,7 +34,7 @@ export default async function PhoneVerificationPage() {
         <div className="phone-verification-header-actions"><LanguageSwitcher /><ThemeSwitcher compact /><Link className="text-link" href="/dashboard">{copy.backToDashboard}</Link></div>
       </header>
 
-      <PhoneVerificationForm currentPhone={auth.phone ?? null} isVerified={isVerified} />
+      <PhoneVerificationForm currentPhone={auth.phone ?? null} isVerified={isVerified} returnTo={returnTo !== "/dashboard" ? returnTo : undefined} />
 
       <section className="phone-verification-trust-note" aria-labelledby="phone-trust-note-heading">
         <div className="phone-verification-trust-note-heading">
