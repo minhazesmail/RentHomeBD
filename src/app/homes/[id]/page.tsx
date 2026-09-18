@@ -146,6 +146,7 @@ export default async function PublicPropertyPage({
   const detailPath = `/homes/${property.id}${returnQuery}`;
   const signInHref = `/login?next=${encodeURIComponent(`${detailPath}#contact`)}`;
   const saveSignInHref = `/login?next=${encodeURIComponent(detailPath)}`;
+  const phoneVerifyHref = `/account/phone?next=${encodeURIComponent(`${detailPath}#contact`)}`;
   const reportSignInHref = `/login?next=${encodeURIComponent(`${detailPath}#trust`)}`;
   const roleVerified = Boolean(property.owner_role_verified_at && property.owner_role_verified_role === property.owner_role);
   const ownerPhoneVerified = Boolean(property.owner_phone_verified_at);
@@ -329,7 +330,7 @@ export default async function PublicPropertyPage({
             )}
             <div className="contact-action-stack" data-property-sticky-actions>
               {auth ? <StartConversationButton propertyId={property.id} userId={auth.userId} /> : <Link className="primary-button link-button property-contact-button" href={signInHref}>{copy.contact.signInToContact}</Link>}
-              <PhoneRevealButton propertyId={property.id} signedIn={Boolean(auth)} viewerPhoneVerified={viewerPhoneVerified} ownerPhoneVerified={ownerPhoneVerified} signInHref={signInHref} />
+              <PhoneRevealButton propertyId={property.id} signedIn={Boolean(auth)} viewerPhoneVerified={viewerPhoneVerified} ownerPhoneVerified={ownerPhoneVerified} signInHref={signInHref} verifyHref={phoneVerifyHref} />
             </div>
             <div className="freshness-note"><Clock size={17} aria-hidden="true" /><div><strong>{copy.contact.freshListing}</strong><span>{formatPropertyDetailText(copy.contact.published, { date: formatPropertyDate(property.published_at, locale) })}{property.expires_at ? ` · ${formatPropertyDetailText(copy.contact.reconfirmationDue, { date: formatPropertyDate(property.expires_at, locale) })}` : ""}</span></div></div>
           </aside>
