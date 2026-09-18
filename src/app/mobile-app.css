@@ -489,7 +489,7 @@
     top: 0;
     z-index: 1450;
     min-height: 58px;
-    padding: 7px max(12px, env(safe-area-inset-right)) 7px max(12px, env(safe-area-inset-left));
+    padding: 7px var(--mobile-app-safe-right) 7px var(--mobile-app-safe-left);
     border-bottom: 1px solid var(--nav-border);
     background: color-mix(in srgb, var(--surface-elevated) 95%, transparent);
     backdrop-filter: blur(22px) saturate(1.12);
