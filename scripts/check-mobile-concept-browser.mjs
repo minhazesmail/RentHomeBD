@@ -151,6 +151,69 @@ try {
   if (homesSnapshot.overflow > 2) failures.push(`homes: horizontal overflow ${homesSnapshot.overflow}px`);
   await homesPage.screenshot({ path: path.join(artifactRoot, "homes-light-390x844.png"), fullPage: true });
   await homesContext.close();
+
+  const recoveryContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  const recoveryPage = await recoveryContext.newPage();
+  await recoveryPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({
+    status: 500,
+    contentType: "application/json",
+    body: JSON.stringify({ message: "forced browser QA search failure" }),
+  }));
+  await openSettled(recoveryPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 500);
+  await recoveryPage.locator('[data-search-recovery="error"]').waitFor({ state: "visible" });
+  await recoveryPage.screenshot({ path: path.join(artifactRoot, "homes-search-error-390x844.png"), fullPage: true });
+  await recoveryContext.close();
+
+  const emptyContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  const emptyPage = await emptyContext.newPage();
+  await emptyPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: "[]",
+  }));
+  await openSettled(emptyPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 500);
+  await emptyPage.locator('[data-search-recovery="empty"]').waitFor({ state: "visible" });
+  await emptyContext.close();
+
+  const tileContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  const tilePage = await tileContext.newPage();
+  await tilePage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: "[]",
+  }));
+  await tilePage.route(/https:\/\/[^/]+\.tile\.openstreetmap\.org\/.*\.png/, (route) => route.fulfill({ status: 503, body: "" }));
+  await openSettled(tilePage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 500);
+  await tilePage.locator('[data-search-recovery="map"]').waitFor({ state: "visible" });
+  if (await tilePage.locator("[data-mobile-view]").getAttribute("data-mobile-view") !== "list") {
+    failures.push("recovery: repeated tile failures did not switch mobile map to list");
+  }
+  await tilePage.screenshot({ path: path.join(artifactRoot, "homes-tile-fallback-390x844.png"), fullPage: true });
+  await tileContext.close();
+
+  const locationContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  await locationContext.addInitScript(() => {
+    Object.defineProperty(navigator, "geolocation", {
+      configurable: true,
+      value: {
+        watchPosition: (_success, error) => {
+          setTimeout(() => error({ code: 1, PERMISSION_DENIED: 1 }), 0);
+          return 1;
+        },
+        clearWatch: () => {},
+      },
+    });
+  });
+  const locationPage = await locationContext.newPage();
+  await locationPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: "[]",
+  }));
+  await openSettled(locationPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 500);
+  await locationPage.getByRole("button", { name: "My location", exact: true }).click();
+  await locationPage.locator('[data-search-recovery="location"]').waitFor({ state: "visible" });
+  await locationContext.close();
 } finally {
   await browser.close();
 }
