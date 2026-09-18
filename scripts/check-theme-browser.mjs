@@ -11,6 +11,12 @@ const routes = [
     path: "/",
     highRisk: true,
     critical: [".landing-frame", ".landing-search-console", ".landing-how-panel", ".landing-faq-editorial"],
+    mobileCritical: [
+      "[data-mobile-concept-landing]",
+      '[data-mobile-concept-landing] form[role="search"]',
+      "[data-mobile-primary-tabs]",
+    ],
+    mobileReplacesCritical: true,
   },
   {
     name: "homes",
@@ -334,10 +340,13 @@ async function main() {
 
           const label = `${route.name}-${scenario.name}-${viewport.name}`;
           const failureStart = failures.length;
-          const critical = [
-            ...route.critical,
-            ...(viewport.width >= 900 ? (route.desktopCritical ?? []) : (route.mobileCritical ?? [])),
-          ];
+          const mobileReplacesCritical = viewport.width <= 820 && route.mobileReplacesCritical && route.mobileCritical?.length;
+          const critical = mobileReplacesCritical
+            ? route.mobileCritical
+            : [
+                ...route.critical,
+                ...(viewport.width >= 900 ? (route.desktopCritical ?? []) : (route.mobileCritical ?? [])),
+              ];
 
           try {
             const response = await page.goto(`${baseURL}${route.path}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
