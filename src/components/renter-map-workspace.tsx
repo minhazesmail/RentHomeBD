@@ -582,6 +582,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
 
   function choosePresetLocation(label: string) {
     cancelActiveSearch();
+    setLocationRecovery(null);
     setLocationPreset(label);
     const preset = LOCATION_PRESETS.find((location) => location.label === label);
     if (!preset) return;
@@ -600,6 +601,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       stopLiveLocation();
       setLocationStatus(copy.pausedForMapMove);
     }
+    setLocationRecovery(null);
     setLocationPreset("");
     setCenter(nextCenter);
     setMapDirty(true);
@@ -884,7 +886,6 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
             onCustomAreaChange={handleCustomAreaChange}
             tileRetryVersion={tileRetryVersion}
             onTileFailure={handleMapTileFailure}
-            onTilesReady={() => setMapTileFailed(false)}
           />
 
           <div className="renter-map-actions" aria-label={copy.title}>
