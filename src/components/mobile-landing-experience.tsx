@@ -5,15 +5,17 @@ import {
   ArrowRight,
   Banknote,
   BedDouble,
-  Heart,
-  Home,
+  Bookmark,
+  Compass,
   Map,
   MapPin,
+  MessageCircle,
   Plus,
   Search,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  UserRound,
   Users,
   X,
 } from "lucide-react";
@@ -174,10 +176,6 @@ export function MobileLandingExperience() {
     }
   }
 
-  const homeLabel = locale === "bn" ? "হোম" : "Home";
-  const savedLabel = locale === "bn" ? "সেভড" : "Saved";
-  const listLabel = locale === "bn" ? "লিস্ট" : "List";
-
   return (
     <div className={styles.root} data-mobile-concept-landing>
       <header className={styles.appBar}>
@@ -337,11 +335,11 @@ export function MobileLandingExperience() {
         </section>
       </main>
 
-      <nav className={styles.bottomNav} aria-label={dictionary.navigation.primaryNavigationAria}>
-        <Link href="/" aria-current="page"><Home aria-hidden="true" /><span>{homeLabel}</span></Link>
-        <Link href="/homes"><Map aria-hidden="true" /><span>{dictionary.navigation.findOnMap}</span></Link>
-        <Link href="/saved"><Heart aria-hidden="true" /><span>{savedLabel}</span></Link>
-        <Link href={LIST_PROPERTY_HREF}><Plus aria-hidden="true" /><span>{listLabel}</span></Link>
+      <nav className={styles.bottomNav} aria-label={dictionary.navigation.productNavigationAria}>
+        <Link href="/homes" aria-current="page"><Compass aria-hidden="true" /><span>{dictionary.navigation.explore}</span></Link>
+        <Link href="/saved"><Bookmark aria-hidden="true" /><span>{dictionary.navigation.saved}</span></Link>
+        <Link href="/messages"><MessageCircle aria-hidden="true" /><span>{dictionary.navigation.messages}</span></Link>
+        <Link href="/login"><UserRound aria-hidden="true" /><span>{dictionary.navigation.account}</span></Link>
       </nav>
 
       <dialog
