@@ -498,7 +498,11 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   }
 
   function startLiveLocation() {
-    if (!navigator.geolocation) { setMessage(copy.locationUnsupported); return; }
+    if (!navigator.geolocation) {
+      setLocationRecovery({ message: copy.locationUnsupported, retryable: false });
+      setMessage(null);
+      return;
+    }
     cancelActiveSearch();
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
@@ -510,6 +514,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       setSelectedId(null);
     }
     setLocating(true);
+    setLocationRecovery(null);
     setMessage(null);
     setLocationStatus(copy.requestingLocation);
     lastLiveCenterRef.current = null;
@@ -539,6 +544,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
         setLocationPreset("");
         setLocating(false);
         setLiveTracking(true);
+        setLocationRecovery(null);
       }
       if (shouldUpdateDisplay) {
         const nextDisplayLocation = { latitude: coords.latitude, longitude: coords.longitude, accuracy };
@@ -565,7 +571,11 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
       }
-      setMessage(error.code === error.PERMISSION_DENIED ? copy.permissionDenied : copy.locationTrackingError);
+      setLocationRecovery({
+        message: error.code === error.PERMISSION_DENIED ? copy.permissionDenied : copy.locationTrackingError,
+        retryable: true,
+      });
+      setMessage(null);
       setLocationStatus(null);
     }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
   }
@@ -593,6 +603,17 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setLocationPreset("");
     setCenter(nextCenter);
     setMapDirty(true);
+  }
+
+  function handleMapTileFailure() {
+    setMapTileFailed(true);
+    mobileMapModel.showList();
+  }
+
+  function retryMapTiles() {
+    setMapTileFailed(false);
+    setTileRetryVersion((version) => version + 1);
+    mobileMapModel.showMap();
   }
 
   function clearFilters() {
