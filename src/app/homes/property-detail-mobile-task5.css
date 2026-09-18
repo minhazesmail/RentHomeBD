@@ -15,8 +15,23 @@
   display: none;
 }
 
-.property-detail-shell > .property-detail-hero {
-  margin-top: 30px;
+@media (min-width: 761px) {
+  .property-detail-shell {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .property-detail-shell > .property-detail-hero {
+    order: 0;
+  }
+
+  .property-detail-shell > [data-property-mobile-gallery] {
+    order: 1;
+  }
+
+  .property-detail-shell > .property-detail-layout {
+    order: 2;
+  }
 }
 
 .property-detail-page .property-summary-grid {
