@@ -53,8 +53,10 @@ const RenterResultCard = memo(function RenterResultCard({ listing, selected, pre
   const copy = getRenterResultsCopy(locale);
   const compatibility = tenantCompatibility(listing.tenant_types ?? [], preference);
   const rent = listing.rent_bdt ? formatCurrency(listing.rent_bdt, locale) : copy.rentOnRequest;
-  const bedrooms = listing.bedrooms == null ? "—" : formatNumber(listing.bedrooms, locale);
-  const bathrooms = listing.bathrooms == null ? "—" : formatNumber(listing.bathrooms, locale);
+  const facts = [
+    listing.bedrooms == null ? null : `${formatNumber(listing.bedrooms, locale)} ${copy.bed}`,
+    listing.bathrooms == null ? null : `${formatNumber(listing.bathrooms, locale)} ${copy.bath}`,
+  ].filter((value): value is string => Boolean(value));
   const distance = listing.distance_meters === null ? null : listing.distance_meters < 1000
     ? formatWorkflowText(copy.metersAway, { distance: formatNumber(Math.round(listing.distance_meters), locale) })
     : formatWorkflowText(copy.kilometersAway, { distance: formatNumber(listing.distance_meters / 1000, locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) });
@@ -82,7 +84,7 @@ const RenterResultCard = memo(function RenterResultCard({ listing, selected, pre
         <span>{listing.address_text || copy.locationOnMap}</span>
         {compatibility === "match" && <small className="tenant-preference-note is-match">{copy.matchesType}</small>}
         {compatibility === "mismatch" && <small className="tenant-preference-note is-mismatch">{copy.differentType}</small>}
-        <div className="renter-result-meta"><b>{rent}</b><small>{bedrooms} {copy.bed} · {bathrooms} {copy.bath}</small></div>
+        <div className="renter-result-meta"><b>{rent}</b>{facts.length > 0 && <small>{facts.join(" · ")}</small>}</div>
         {distance && <small>{distance}</small>}
       </PropertyCard>
       <button className="text-button renter-result-map-button" type="button" onClick={() => onSelect(listing.id)} aria-pressed={selected}>{selected ? copy.shownOnMap : copy.showOnMap}</button>
