@@ -177,7 +177,7 @@
     min-height: 58px;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
-    padding: 7px max(12px, env(safe-area-inset-right)) 7px max(12px, env(safe-area-inset-left));
+    padding: 7px var(--mobile-app-safe-right, max(16px, env(safe-area-inset-right))) 7px var(--mobile-app-safe-left, max(16px, env(safe-area-inset-left)));
   }
 
   .productNavBrand img {
@@ -207,7 +207,7 @@
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
     gap: 2px;
-    padding: 5px max(7px, env(safe-area-inset-right)) calc(5px + env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
+    padding: 5px var(--mobile-app-safe-right, max(16px, env(safe-area-inset-right))) calc(5px + env(safe-area-inset-bottom)) var(--mobile-app-safe-left, max(16px, env(safe-area-inset-left)));
     border-top: 1px solid var(--nav-border);
     background: color-mix(in srgb, var(--surface-elevated) 96%, transparent);
     box-shadow: 0 -12px 32px color-mix(in srgb, var(--shadow-color, #071b14) 10%, transparent);
@@ -263,7 +263,7 @@
 
 @media (max-width: 480px) {
   .productNav {
-    padding-inline: max(9px, env(safe-area-inset-left)) max(9px, env(safe-area-inset-right));
+    padding-inline: var(--mobile-app-safe-left, max(16px, env(safe-area-inset-left))) var(--mobile-app-safe-right, max(16px, env(safe-area-inset-right)));
   }
 
   .productNavBrand img {
