@@ -912,7 +912,17 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
                   <h2>{selectedListing.title || copy.rentalProperty}</h2>
                   <p>{selectedListing.address_text || copy.locationOnMap}</p>
                   {tenantCompatibility(selectedListing.tenant_types ?? [], activePreference) === "mismatch" && <small className="tenant-preference-note is-mismatch">{copy.differentRenterPreference}</small>}
-                  <div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? formatCurrency(selectedListing.rent_bdt, locale) : copy.rentOnRequest}</strong><span>{selectedListing.bedrooms == null ? "—" : formatNumber(selectedListing.bedrooms, locale)} {copy.bed} · {selectedListing.bathrooms == null ? "—" : formatNumber(selectedListing.bathrooms, locale)} {copy.bath}</span></div>
+                  <div className="mobile-map-sheet-meta">
+                    <strong>{selectedListing.rent_bdt ? formatCurrency(selectedListing.rent_bdt, locale) : copy.rentOnRequest}</strong>
+                    {(selectedListing.bedrooms != null || selectedListing.bathrooms != null) && (
+                      <span>
+                        {[
+                          selectedListing.bedrooms == null ? null : `${formatNumber(selectedListing.bedrooms, locale)} ${copy.bed}`,
+                          selectedListing.bathrooms == null ? null : `${formatNumber(selectedListing.bathrooms, locale)} ${copy.bath}`,
+                        ].filter(Boolean).join(" · ")}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} compact /><Link className="primary-button link-button" href={propertyHref(selectedListing.id)}>{copy.viewFullListing}</Link></div>
