@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Banknote, BedDouble, MapPin, Search, ShieldCheck, SlidersHorizontal, Users } from "lucide-react";
+import { ArrowRight, Banknote, BedDouble, Map, MapPin, Search, ShieldCheck, SlidersHorizontal, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
 
@@ -23,6 +23,7 @@ const BUDGET_PRESETS = [15_000, 25_000, 40_000, 60_000] as const;
 const MIN_CUSTOM_BUDGET = 1_000;
 const MAX_CUSTOM_BUDGET = 10_000_000;
 const CUSTOM_BUDGET_STEP = 500;
+const RADIUS_OPTIONS = ["2", "5", "10", "15", "25"] as const;
 
 function normalizeAreaValue(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
@@ -33,18 +34,20 @@ function buildHomesHref({
   tenant,
   maxRent,
   bedrooms,
+  radius,
 }: {
   area: string;
   tenant: SearchTenantType | "";
   maxRent: string;
   bedrooms: string;
+  radius: string;
 }) {
   const params = new URLSearchParams();
   if (area) params.set("area", area);
   if (tenant) params.set("tenant", tenant);
   if (maxRent) params.set("maxRent", maxRent);
   if (bedrooms) params.set("bedrooms", bedrooms);
-  params.set("radius", DEFAULT_RENTER_SEARCH_RADIUS);
+  if (radius) params.set("radius", radius);
   return `/homes?${params.toString()}`;
 }
 
@@ -58,6 +61,7 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
   const [budgetChoice, setBudgetChoice] = useState("");
   const [customBudget, setCustomBudget] = useState("");
   const [bedrooms, setBedrooms] = useState("");
+  const [radius, setRadius] = useState(String(DEFAULT_RENTER_SEARCH_RADIUS));
 
   function findSupportedArea(value: string) {
     const query = normalizeAreaValue(value);
@@ -91,8 +95,8 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
   );
   const mapReady = Boolean(area && tenant && customBudgetReady);
   const mapHref = useMemo(
-    () => buildHomesHref({ area, tenant, maxRent, bedrooms }),
-    [area, bedrooms, maxRent, tenant],
+    () => buildHomesHref({ area, tenant, maxRent, bedrooms, radius }),
+    [area, bedrooms, maxRent, radius, tenant],
   );
 
   const tenantOptions: { value: SearchTenantType; label: string }[] = [
@@ -209,7 +213,6 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
           </div>
 
           {maxRent && <input type="hidden" name="maxRent" value={maxRent} />}
-          <input type="hidden" name="radius" value={DEFAULT_RENTER_SEARCH_RADIUS} />
 
           <details className="landing-search-more">
             <summary><SlidersHorizontal aria-hidden="true" /><span>{copy.moreFilters}</span></summary>
@@ -223,6 +226,18 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
                   {[2, 3].map((count) => (
                     <option value={String(count)} key={count}>
                       {interpolate(copy.bedroomMany, { count: formatNumber(count, locale, { useGrouping: false }) })}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="landing-search-console-field landing-search-radius-field">
+                <Map aria-hidden="true" />
+                <span>{copy.radiusLabel}</span>
+                <select name="radius" value={radius} onChange={(event) => setRadius(event.target.value)}>
+                  {RADIUS_OPTIONS.map((value) => (
+                    <option value={value} key={value}>
+                      {formatNumber(Number(value), locale, { useGrouping: false })} {locale === "bn" ? "কিমি" : "km"}
                     </option>
                   ))}
                 </select>
