@@ -205,6 +205,11 @@ try {
     });
   });
   const locationPage = await locationContext.newPage();
+  await locationPage.route(/https:\/\/[^/]+\.tile\.openstreetmap\.org\/.*\.png/, (route) => route.fulfill({
+    status: 200,
+    contentType: "image/png",
+    body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6Gf8AAAAASUVORK5CYII=", "base64"),
+  }));
   await locationPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
