@@ -676,6 +676,7 @@
 
   .mapCta h2 {
     margin: 0;
+    color: #fff;
     font-size: 1.08rem;
     line-height: 1.15;
     letter-spacing: -.02em;
@@ -712,8 +713,8 @@
   .bottomNav {
     position: fixed;
     z-index: 55;
-    left: 10px;
-    right: 10px;
+    left: var(--mobile-app-safe-left, max(16px, env(safe-area-inset-left)));
+    right: var(--mobile-app-safe-right, max(16px, env(safe-area-inset-right)));
     bottom: max(8px, env(safe-area-inset-bottom));
     min-height: 68px;
     display: grid;
@@ -734,7 +735,7 @@
     align-content: center;
     gap: 3px;
     border-radius: 18px;
-    color: #7a8781;
+    color: #5f6f68;
     text-decoration: none;
     font-size: .59rem;
     font-weight: 760;
@@ -989,6 +990,15 @@
 :global(html[data-resolved-theme="dark"]) .bottomNav {
   border-color: rgba(255,255,255,.08);
   background: rgba(13,27,22,.92);
+}
+
+:global(html[data-resolved-theme="dark"]) .bottomNav a {
+  color: #b7c9c0;
+}
+
+:global(html[data-resolved-theme="dark"]) .bottomNav a[aria-current="page"] {
+  color: #d8f3e7;
+  background: #17382b;
 }
 
 :global(html[data-resolved-theme="dark"]) .languageButton,

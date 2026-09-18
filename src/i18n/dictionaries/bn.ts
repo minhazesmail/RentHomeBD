@@ -61,6 +61,7 @@ export const bn = {
     messages: "মেসেজ",
     properties: "আমার বাসা",
     dashboard: "ড্যাশবোর্ড",
+    account: "অ্যাকাউন্ট",
   },
   landing: {
     hero: {

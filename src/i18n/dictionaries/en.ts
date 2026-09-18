@@ -59,6 +59,7 @@ export const en = {
     messages: "Messages",
     properties: "Properties",
     dashboard: "Dashboard",
+    account: "Account",
   },
   landing: {
     hero: {

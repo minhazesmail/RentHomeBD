@@ -10,10 +10,17 @@
 
 @media (max-width: 767px) {
   :root {
+    --mobile-app-gutter: 16px;
+    --mobile-app-safe-left: max(var(--mobile-app-gutter), env(safe-area-inset-left));
+    --mobile-app-safe-right: max(var(--mobile-app-gutter), env(safe-area-inset-right));
     --mobile-app-topbar-height: 58px;
     --mobile-app-tabbar-height: calc(64px + env(safe-area-inset-bottom));
-    --mobile-app-edge: max(12px, env(safe-area-inset-left));
+    --mobile-app-control-height: 48px;
+    --mobile-app-hit-target: 44px;
+    --mobile-app-radius: 16px;
     --mobile-app-card-radius: 20px;
+    --mobile-app-edge: var(--mobile-app-safe-left);
+    --mobile-app-bottom-action-offset: max(10px, env(safe-area-inset-bottom));
   }
 
   html {
@@ -37,9 +44,14 @@
     touch-action: manipulation;
   }
 
-  /* Pages that opt into ProductNavigation gain persistent-tab safe space.
-     The map route owns its own viewport stack and therefore opts out. */
-  .nb-route-stage:has([data-product-navigation]) {
+  /* Top-level product destinations reserve room for persistent tabs. Contextual
+     screens intentionally suppress those tabs and keep only the active task bar. */
+  .nb-route-stage {
+    --mobile-app-bottom-action-offset: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .nb-route-stage:has([data-product-navigation][data-mobile-tabs="true"]) {
+    --mobile-app-bottom-action-offset: var(--mobile-app-tabbar-height);
     padding-bottom: var(--mobile-app-tabbar-height);
   }
 
@@ -477,7 +489,7 @@
     top: 0;
     z-index: 1450;
     min-height: 58px;
-    padding: 7px max(12px, env(safe-area-inset-right)) 7px max(12px, env(safe-area-inset-left));
+    padding: 7px var(--mobile-app-safe-right) 7px var(--mobile-app-safe-left);
     border-bottom: 1px solid var(--nav-border);
     background: color-mix(in srgb, var(--surface-elevated) 95%, transparent);
     backdrop-filter: blur(22px) saturate(1.12);
@@ -576,8 +588,12 @@
     min-height: calc(100dvh - var(--mobile-app-topbar-height) - var(--mobile-app-tabbar-height));
   }
 
+  .nb-global-shell[data-route^="/messages/"] .messages-page {
+    min-height: calc(100dvh - var(--mobile-app-topbar-height));
+  }
+
   .thread-shell {
-    height: calc(100dvh - var(--mobile-app-topbar-height) - var(--mobile-app-tabbar-height) - 12px);
+    height: calc(100dvh - var(--mobile-app-topbar-height) - 12px);
     border-radius: 18px 18px 0 0;
   }
 
@@ -588,14 +604,11 @@
   .listing-form-actions,
   .owner-bottom-actions,
   .sticky-action-bar {
-    bottom: var(--mobile-app-tabbar-height);
+    bottom: var(--mobile-app-bottom-action-offset);
   }
 }
 
 @media (max-width: 420px) {
-  :root {
-    --mobile-app-edge: max(9px, env(safe-area-inset-left));
-  }
 
   .landing-nav[data-marketing-navigation] {
     width: calc(100% - 14px);

@@ -17,29 +17,41 @@ try {
       await context.addCookies([{ name: "nb_theme", value: theme, url: baseURL }, { name: "nb_locale", value: locale, url: baseURL }]);
       const page = await context.newPage();
       const label = `${viewport.width}-${theme}-${locale}`;
-      await page.goto(baseURL, { waitUntil: "domcontentloaded" });
-      const preview = page.locator(".landing-map-preview");
-      await preview.scrollIntoViewIfNeeded();
-      await preview.locator(".leaflet-control-zoom").waitFor();
-      const active = preview.locator("button[aria-pressed]").nth(1);
-      await active.click();
-      if (await active.getAttribute("aria-pressed") !== "true") failures.push(`${label}: neighborhood selection not reflected`);
-      const link = preview.locator('a[href^="/homes?"]');
-      const href = new URL(await link.getAttribute("href"), baseURL);
-      if (href.searchParams.get("area") !== "Banani, Dhaka" || href.searchParams.get("radius") !== "5") failures.push(`${label}: selected neighborhood handoff lost`);
-      const bounds = await preview.evaluate(element => {
-        const map = element.querySelector(".leaflet-container").getBoundingClientRect();
-        const rail = element.querySelector(".landing-map-rail").getBoundingClientRect();
-        const zoom = element.querySelector(".leaflet-control-zoom").getBoundingClientRect();
-        const caption = document.querySelector(".landing-map-caption").getBoundingClientRect();
-        const header = element.firstElementChild.getBoundingClientRect();
-        return { captionBottom: caption.bottom, previewTop: element.getBoundingClientRect().top, headerHeight: header.height, mapBottom: map.bottom, railTop: rail.top, zoomRight: zoom.right, mapRight: map.right, overflow: document.documentElement.scrollWidth - innerWidth };
-      });
-      if (bounds.mapBottom > bounds.railTop + 2 || bounds.zoomRight > bounds.mapRight || bounds.overflow > 2) failures.push(`${label}: landing map geometry overlaps or overflows`);
-      if (bounds.captionBottom > bounds.previewTop + 2 || bounds.headerHeight > 130) failures.push(`${label}: legacy caption or stretched rows distort the map card`);
-      await preview.screenshot({ path: `${output}/landing-${label}.png` });
-      await link.click();
-      await page.waitForURL("**/homes?**");
+
+      if (viewport.width > 820) {
+        await page.goto(baseURL, { waitUntil: "domcontentloaded" });
+        const preview = page.locator(".landing-map-preview");
+        await preview.scrollIntoViewIfNeeded();
+        await preview.locator(".leaflet-control-zoom").waitFor();
+        const active = preview.locator("button[aria-pressed]").nth(1);
+        await active.click();
+        if (await active.getAttribute("aria-pressed") !== "true") failures.push(`${label}: neighborhood selection not reflected`);
+        const link = preview.locator('a[href^="/homes?"]');
+        const href = new URL(await link.getAttribute("href"), baseURL);
+        if (href.searchParams.get("area") !== "Banani, Dhaka" || href.searchParams.get("radius") !== "5") failures.push(`${label}: selected neighborhood handoff lost`);
+        const bounds = await preview.evaluate(element => {
+          const map = element.querySelector(".leaflet-container").getBoundingClientRect();
+          const rail = element.querySelector(".landing-map-rail").getBoundingClientRect();
+          const zoom = element.querySelector(".leaflet-control-zoom").getBoundingClientRect();
+          const caption = document.querySelector(".landing-map-caption").getBoundingClientRect();
+          const header = element.firstElementChild.getBoundingClientRect();
+          return { captionBottom: caption.bottom, previewTop: element.getBoundingClientRect().top, headerHeight: header.height, mapBottom: map.bottom, railTop: rail.top, zoomRight: zoom.right, mapRight: map.right, overflow: document.documentElement.scrollWidth - innerWidth };
+        });
+        if (bounds.mapBottom > bounds.railTop + 2 || bounds.zoomRight > bounds.mapRight || bounds.overflow > 2) failures.push(`${label}: landing map geometry overlaps or overflows`);
+        if (bounds.captionBottom > bounds.previewTop + 2 || bounds.headerHeight > 130) failures.push(`${label}: legacy caption or stretched rows distort the map card`);
+        await preview.screenshot({ path: `${output}/landing-${label}.png` });
+        await link.click();
+        await page.waitForURL("**/homes?**");
+      } else {
+        // The dedicated mobile landing intentionally replaces the desktop map
+        // preview. Enter the map workspace with equivalent search state and
+        // validate the actual mobile map/filter interaction model instead.
+        await page.goto(`${baseURL}/homes?area=Banani%2C%20Dhaka&radius=5`, { waitUntil: "domcontentloaded" });
+        await page.waitForURL("**/homes?**");
+        const shell = page.locator("[data-mobile-view]");
+        await shell.waitFor({ state: "visible" });
+      }
+
       if (await page.locator(".renter-toolbar-tenant select").inputValue() !== "") failures.push(`${label}: tenant selection must remain explicit`);
       if (viewport.width > 960) {
         await page.locator(".renter-map-panel .leaflet-control-zoom").waitFor();
@@ -61,4 +73,4 @@ try {
   await browser.close();
 }
 if (failures.length) throw new Error(failures.join("\n"));
-console.log("Map experience browser QA passed: neighborhood selection, tenant handoff and map control separation at desktop/mobile in both themes.");
+console.log("Map experience browser QA passed: desktop neighborhood handoff plus desktop/mobile tenant and map-control interactions are intact in both themes.");
