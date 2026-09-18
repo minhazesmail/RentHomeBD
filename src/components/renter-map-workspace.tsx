@@ -275,6 +275,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     searchAbortRef.current?.abort();
     searchAbortRef.current = null;
     setBusy(false);
+    setSlowSearch(false);
     setSearchError(null);
     setMessage(null);
   }, [setBusy, setMessage, setSearchError]);
@@ -306,12 +307,14 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
         searchAbortRef.current = null;
         setSearchError(validationMessage);
         setMessage(null);
+        setSlowSearch(false);
         setBusy(false);
       }
       return;
     }
 
     setBusy(true);
+    setSlowSearch(false);
     setSearchError(null);
     setMessage(null);
 
@@ -332,6 +335,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (error) {
       searchAbortRef.current = null;
       setSearchError(friendlySearchError(error, copy));
+      setSlowSearch(false);
       setBusy(false);
       return;
     }
@@ -388,6 +392,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     });
     setMapDirty(false);
     searchAbortRef.current = null;
+    setSlowSearch(false);
     setBusy(false);
   }, [
     bedrooms,
@@ -404,7 +409,9 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setListings,
     setMapDirty,
     setMessage,
+    setSearchError,
     setSelectedId,
+    setSlowSearch,
     sortOption,
     supabase,
     tenantType,
@@ -423,10 +430,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
 
   useEffect(() => { runSearchRef.current = runSearch; }, [runSearch]);
   useEffect(() => {
-    if (!busy) {
-      setSlowSearch(false);
-      return;
-    }
+    if (!busy) return;
     const timer = window.setTimeout(() => setSlowSearch(true), 4000);
     return () => window.clearTimeout(timer);
   }, [busy]);
