@@ -278,7 +278,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setSlowSearch(false);
     setSearchError(null);
     setMessage(null);
-  }, [setBusy, setMessage, setSearchError]);
+  }, [setBusy, setMessage, setSearchError, setSlowSearch]);
 
   const validateFilters = useCallback(() => {
     if (!tenantType) return workspaceCopy.toolbar.tenantRequired;
