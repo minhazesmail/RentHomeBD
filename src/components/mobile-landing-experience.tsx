@@ -17,9 +17,8 @@ import {
   Sparkles,
   UserRound,
   Users,
-  X,
 } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -33,7 +32,6 @@ import type { TenantType } from "@/lib/tenant-match";
 import styles from "./mobile-landing-experience.module.css";
 
 type SearchTenantType = Exclude<TenantType, "everyone">;
-type ActiveFilter = "budget" | "tenant" | "bedrooms" | "more" | null;
 
 const LIST_PROPERTY_HREF = "/login?intent=list-property&next=%2Fowner%2Fproperties%2Fnew";
 const BUDGET_PRESETS = [15_000, 25_000, 40_000, 60_000] as const;
@@ -46,12 +44,33 @@ function normalizeAreaValue(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+function buildHomesHref({
+  area,
+  tenant,
+  maxRent,
+  bedrooms,
+  radius,
+}: {
+  area: string;
+  tenant: SearchTenantType | "";
+  maxRent: string;
+  bedrooms: string;
+  radius: string;
+}) {
+  const params = new URLSearchParams();
+  if (area) params.set("area", area);
+  if (tenant) params.set("tenant", tenant);
+  if (maxRent) params.set("maxRent", maxRent);
+  if (bedrooms) params.set("bedrooms", bedrooms);
+  if (radius) params.set("radius", radius);
+  return `/homes?${params.toString()}`;
+}
+
 export function MobileLandingExperience() {
   const { locale, dictionary, setLocale } = useLocale();
   const copy = getLandingRedesignCopy(locale).hero;
   const areaInputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const lastFilterTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const tenantSelectRef = useRef<HTMLSelectElement>(null);
 
   const [areaQuery, setAreaQuery] = useState("");
   const [area, setArea] = useState("");
@@ -60,7 +79,6 @@ export function MobileLandingExperience() {
   const [customBudget, setCustomBudget] = useState("");
   const [bedrooms, setBedrooms] = useState("");
   const [radius, setRadius] = useState(String(DEFAULT_RENTER_SEARCH_RADIUS));
-  const [activeFilter, setActiveFilter] = useState<ActiveFilter>(null);
   const [searchError, setSearchError] = useState("");
 
   const tenantOptions: { value: SearchTenantType; label: string }[] = [
@@ -102,23 +120,6 @@ export function MobileLandingExperience() {
     areaInputRef.current?.setCustomValidity("");
   }
 
-  function openFilter(filter: Exclude<ActiveFilter, null>, trigger: HTMLButtonElement) {
-    lastFilterTriggerRef.current = trigger;
-    setSearchError("");
-    setActiveFilter(filter);
-  }
-
-  function closeFilter() {
-    dialogRef.current?.close();
-  }
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (activeFilter && !dialog.open) dialog.showModal();
-    if (!activeFilter && dialog.open) dialog.close();
-  }, [activeFilter]);
-
   const maxRent = budgetChoice === "custom" ? customBudget.trim() : budgetChoice;
   const customBudgetNumber = Number(customBudget);
   const customBudgetReady = budgetChoice !== "custom" || (
@@ -128,28 +129,13 @@ export function MobileLandingExperience() {
     && customBudgetNumber <= MAX_CUSTOM_BUDGET
     && (customBudgetNumber - MIN_CUSTOM_BUDGET) % CUSTOM_BUDGET_STEP === 0
   );
-
-  const tenantLabel = tenant
-    ? tenantOptions.find((option) => option.value === tenant)?.label ?? copy.tenantLabel
-    : copy.tenantLabel;
-  const budgetLabel = maxRent && customBudgetReady
-    ? formatCurrency(Number(maxRent), locale)
-    : copy.budgetLabel;
-  const bedroomLabel = bedrooms
-    ? `${formatNumber(Number(bedrooms), locale, { useGrouping: false })}+`
-    : copy.bedroomsLabel;
-  const moreLabel = `${formatNumber(Number(radius), locale, { useGrouping: false })} ${locale === "bn" ? "কিমি" : "km"}`;
-
-  const filterTitle = useMemo(() => {
-    if (activeFilter === "budget") return copy.budgetLabel;
-    if (activeFilter === "tenant") return copy.tenantLabel;
-    if (activeFilter === "bedrooms") return copy.bedroomsLabel;
-    return copy.moreFilters;
-  }, [activeFilter, copy]);
+  const mapReady = Boolean(area && tenant && customBudgetReady);
+  const mapHref = buildHomesHref({ area, tenant, maxRent: customBudgetReady ? maxRent : "", bedrooms, radius });
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const input = areaInputRef.current;
     const match = findSupportedArea(areaQuery);
+
     if (!areaQuery.trim() || !match) {
       event.preventDefault();
       if (input) {
@@ -163,17 +149,18 @@ export function MobileLandingExperience() {
     if (!tenant) {
       event.preventDefault();
       setSearchError(copy.mobileTenantRequired);
-      const trigger = document.querySelector<HTMLButtonElement>("[data-mobile-filter='tenant']");
-      if (trigger) openFilter("tenant", trigger);
+      tenantSelectRef.current?.focus();
       return;
     }
 
     if (!customBudgetReady) {
       event.preventDefault();
       setSearchError(copy.mobileBudgetInvalid);
-      const trigger = document.querySelector<HTMLButtonElement>("[data-mobile-filter='budget']");
-      if (trigger) openFilter("budget", trigger);
+      document.querySelector<HTMLInputElement>("[data-mobile-custom-budget]")?.focus();
+      return;
     }
+
+    setSearchError("");
   }
 
   return (
@@ -224,56 +211,138 @@ export function MobileLandingExperience() {
             <div className={styles.verifiedBadge} title={copy.moderatedListings}><ShieldCheck aria-hidden="true" /></div>
           </div>
 
-          <label className={styles.areaField}>
-            <MapPin aria-hidden="true" />
-            <div>
-              <span>{copy.areaLabel}</span>
-              <input
-                ref={areaInputRef}
-                type="search"
-                value={areaQuery}
-                onChange={(event) => handleAreaChange(event.target.value, event.currentTarget)}
-                list="mobile-app-location-options"
-                placeholder={copy.mobileLocationPlaceholder}
-                autoComplete="off"
-                required
-              />
-            </div>
-            <Search aria-hidden="true" />
-            <datalist id="mobile-app-location-options">
-              {LOCATION_PRESETS.map((location) => (
-                <option key={location.label} value={localizeLocationLabel(location.label, dictionary)} />
-              ))}
-            </datalist>
-          </label>
+          <div className={styles.primaryFields}>
+            <label className={styles.areaField}>
+              <MapPin aria-hidden="true" />
+              <div>
+                <span>{copy.areaLabel}</span>
+                <input
+                  ref={areaInputRef}
+                  type="search"
+                  value={areaQuery}
+                  onChange={(event) => handleAreaChange(event.target.value, event.currentTarget)}
+                  list="mobile-app-location-options"
+                  placeholder={copy.mobileLocationPlaceholder}
+                  autoComplete="off"
+                  required
+                  aria-describedby="mobile-search-help"
+                />
+              </div>
+              <Search aria-hidden="true" />
+              <datalist id="mobile-app-location-options">
+                {LOCATION_PRESETS.map((location) => (
+                  <option key={location.label} value={localizeLocationLabel(location.label, dictionary)} />
+                ))}
+              </datalist>
+            </label>
+
+            <label className={styles.primaryField}>
+              <span className={styles.fieldIcon}><Users aria-hidden="true" /></span>
+              <span className={styles.fieldBody}>
+                <span className={styles.fieldLabelRow}>
+                  <span>{copy.tenantLabel}</span>
+                  <small>{copy.requiredLabel}</small>
+                </span>
+                <select
+                  ref={tenantSelectRef}
+                  name="tenant"
+                  value={tenant}
+                  onChange={(event) => {
+                    setTenant(event.target.value as SearchTenantType | "");
+                    setSearchError("");
+                  }}
+                  required
+                  aria-describedby="mobile-search-help"
+                >
+                  <option value="" disabled>{copy.chooseTenant}</option>
+                  {tenantOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </span>
+            </label>
+
+            <label className={styles.primaryField}>
+              <span className={styles.fieldIcon}><Banknote aria-hidden="true" /></span>
+              <span className={styles.fieldBody}>
+                <span className={styles.fieldLabelRow}>
+                  <span>{copy.budgetLabel}</span>
+                  <small>{copy.optionalLabel}</small>
+                </span>
+                <select value={budgetChoice} onChange={(event) => { setBudgetChoice(event.target.value); setSearchError(""); }}>
+                  <option value="">{copy.anyBudget}</option>
+                  {BUDGET_PRESETS.map((amount) => (
+                    <option key={amount} value={String(amount)}>{copy.upTo} {formatCurrency(amount, locale)}</option>
+                  ))}
+                  <option value="custom">{copy.customBudget}</option>
+                </select>
+              </span>
+            </label>
+
+            {budgetChoice === "custom" && (
+              <label className={styles.customBudgetField}>
+                <span>{copy.customBudgetLabel}</span>
+                <input
+                  data-mobile-custom-budget
+                  type="number"
+                  value={customBudget}
+                  onChange={(event) => { setCustomBudget(event.target.value); setSearchError(""); }}
+                  min={MIN_CUSTOM_BUDGET}
+                  max={MAX_CUSTOM_BUDGET}
+                  step={CUSTOM_BUDGET_STEP}
+                  inputMode="numeric"
+                  placeholder={copy.customBudgetPlaceholder}
+                  required
+                />
+              </label>
+            )}
+          </div>
 
           <input type="hidden" name="area" value={area} />
-          {tenant && <input type="hidden" name="tenant" value={tenant} />}
           {maxRent && customBudgetReady && <input type="hidden" name="maxRent" value={maxRent} />}
-          {bedrooms && <input type="hidden" name="bedrooms" value={bedrooms} />}
-          <input type="hidden" name="radius" value={radius} />
 
-          <div className={styles.filterGrid} aria-label={copy.mobileFilterAria}>
-            <button type="button" data-mobile-filter="tenant" className={tenant ? styles.filterSelected : undefined} onClick={(event) => openFilter("tenant", event.currentTarget)}>
-              <Users aria-hidden="true" /><span><small>{copy.tenantLabel}</small><strong>{tenantLabel}</strong></span>
-            </button>
-            <button type="button" data-mobile-filter="budget" onClick={(event) => openFilter("budget", event.currentTarget)}>
-              <Banknote aria-hidden="true" /><span><small>{copy.budgetLabel}</small><strong>{budgetLabel}</strong></span>
-            </button>
-            <button type="button" onClick={(event) => openFilter("bedrooms", event.currentTarget)}>
-              <BedDouble aria-hidden="true" /><span><small>{copy.bedroomsLabel}</small><strong>{bedroomLabel}</strong></span>
-            </button>
-            <button type="button" onClick={(event) => openFilter("more", event.currentTarget)}>
-              <SlidersHorizontal aria-hidden="true" /><span><small>{copy.moreFilters}</small><strong>{moreLabel}</strong></span>
-            </button>
-          </div>
+          <details className={styles.moreFilters}>
+            <summary>
+              <SlidersHorizontal aria-hidden="true" />
+              <span>{copy.moreFilters}</span>
+              <small>{copy.optionalLabel}</small>
+            </summary>
+            <div className={styles.morePanel}>
+              <label>
+                <BedDouble aria-hidden="true" />
+                <span>
+                  <small>{copy.bedroomsLabel}</small>
+                  <select name="bedrooms" value={bedrooms} onChange={(event) => setBedrooms(event.target.value)}>
+                    <option value="">{copy.anySize}</option>
+                    <option value="1">{copy.bedroomOne}</option>
+                    {[2, 3, 4].map((count) => (
+                      <option key={count} value={String(count)}>
+                        {formatNumber(count, locale, { useGrouping: false })}+ {copy.mobileBedroomShort}
+                      </option>
+                    ))}
+                  </select>
+                </span>
+              </label>
+
+              <label>
+                <Map aria-hidden="true" />
+                <span>
+                  <small>{copy.radiusLabel}</small>
+                  <select name="radius" value={radius} onChange={(event) => setRadius(event.target.value)}>
+                    {RADIUS_OPTIONS.map((value) => (
+                      <option key={value} value={value}>{formatNumber(Number(value), locale, { useGrouping: false })} {locale === "bn" ? "কিমি" : "km"}</option>
+                    ))}
+                  </select>
+                </span>
+              </label>
+            </div>
+          </details>
 
           <button className={styles.searchButton} type="submit">
             <Search aria-hidden="true" />
-            <span>{copy.mobileSearchHomes}</span>
+            <span>{copy.findHomes}</span>
             <ArrowRight aria-hidden="true" />
           </button>
 
+          <p className={styles.searchHelp} id="mobile-search-help">{copy.searchHelp}</p>
           <p className={styles.searchError} role="status" aria-live="polite">{searchError}</p>
         </form>
 
@@ -288,6 +357,7 @@ export function MobileLandingExperience() {
                 type="button"
                 key={location.label}
                 className={area === location.label ? styles.locationSelected : undefined}
+                aria-pressed={area === location.label}
                 onClick={() => choosePopularArea(location.label)}
               >
                 <MapPin aria-hidden="true" />
@@ -331,7 +401,13 @@ export function MobileLandingExperience() {
             <h2>{locale === "bn" ? "ম্যাপে পুরো এলাকা দেখুন" : "See the neighborhood, not just the listing."}</h2>
             <p>{copy.mapDescription}</p>
           </div>
-          <Link href="/homes">{copy.exploreArea}<ArrowRight aria-hidden="true" /></Link>
+          {mapReady ? (
+            <Link href={mapHref}>{copy.exploreArea}<ArrowRight aria-hidden="true" /></Link>
+          ) : (
+            <span className={styles.mapCtaDisabled} aria-disabled="true" title={copy.exploreAreaUnavailable}>
+              {copy.exploreArea}<ArrowRight aria-hidden="true" />
+            </span>
+          )}
         </section>
       </main>
 
@@ -341,98 +417,6 @@ export function MobileLandingExperience() {
         <Link href="/messages"><MessageCircle aria-hidden="true" /><span>{dictionary.navigation.messages}</span></Link>
         <Link href="/login"><UserRound aria-hidden="true" /><span>{dictionary.navigation.account}</span></Link>
       </nav>
-
-      <dialog
-        ref={dialogRef}
-        className={styles.filterDialog}
-        aria-labelledby="mobile-filter-title"
-        onCancel={(event) => {
-          event.preventDefault();
-          closeFilter();
-        }}
-        onClose={() => {
-          setActiveFilter(null);
-          requestAnimationFrame(() => lastFilterTriggerRef.current?.focus());
-        }}
-      >
-        <div className={styles.dialogHandle} aria-hidden="true" />
-        <div className={styles.dialogHeader}>
-          <strong id="mobile-filter-title">{filterTitle}</strong>
-          <button type="button" onClick={closeFilter} aria-label={copy.mobileCloseFilters}><X aria-hidden="true" /></button>
-        </div>
-
-        {activeFilter === "budget" && (
-          <div className={styles.dialogBody}>
-            <label>
-              <span>{copy.budgetLabel}</span>
-              <select value={budgetChoice} onChange={(event) => setBudgetChoice(event.target.value)}>
-                <option value="">{copy.anyBudget}</option>
-                {BUDGET_PRESETS.map((amount) => (
-                  <option key={amount} value={String(amount)}>{copy.upTo} {formatCurrency(amount, locale)}</option>
-                ))}
-                <option value="custom">{copy.customBudget}</option>
-              </select>
-            </label>
-            {budgetChoice === "custom" && (
-              <label>
-                <span>{copy.customBudgetLabel}</span>
-                <input
-                  type="number"
-                  value={customBudget}
-                  onChange={(event) => setCustomBudget(event.target.value)}
-                  min={MIN_CUSTOM_BUDGET}
-                  max={MAX_CUSTOM_BUDGET}
-                  step={CUSTOM_BUDGET_STEP}
-                  inputMode="numeric"
-                  placeholder={copy.customBudgetPlaceholder}
-                />
-              </label>
-            )}
-          </div>
-        )}
-
-        {activeFilter === "tenant" && (
-          <div className={styles.dialogBody}>
-            <label>
-              <span>{copy.tenantLabel}</span>
-              <select value={tenant} onChange={(event) => { setTenant(event.target.value as SearchTenantType | ""); setSearchError(""); }}>
-                <option value="" disabled>{copy.chooseTenant}</option>
-                {tenantOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
-            </label>
-          </div>
-        )}
-
-        {activeFilter === "bedrooms" && (
-          <div className={styles.dialogBody}>
-            <label>
-              <span>{copy.bedroomsLabel}</span>
-              <select value={bedrooms} onChange={(event) => setBedrooms(event.target.value)}>
-                <option value="">{copy.anySize}</option>
-                <option value="1">{copy.bedroomOne}</option>
-                {[2, 3, 4].map((count) => (
-                  <option key={count} value={String(count)}>{formatNumber(count, locale, { useGrouping: false })}+ {copy.mobileBedroomShort}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-        )}
-
-        {activeFilter === "more" && (
-          <div className={styles.dialogBody}>
-            <label>
-              <span>{copy.mobileRadiusLabel}</span>
-              <select value={radius} onChange={(event) => setRadius(event.target.value)}>
-                {RADIUS_OPTIONS.map((value) => (
-                  <option key={value} value={value}>{formatNumber(Number(value), locale, { useGrouping: false })} {locale === "bn" ? "কিমি" : "km"}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-        )}
-
-        <button className={styles.dialogApply} type="button" onClick={closeFilter}>{copy.mobileApplyFilter}</button>
-      </dialog>
     </div>
   );
 }
