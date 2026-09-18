@@ -992,6 +992,15 @@
   background: rgba(13,27,22,.92);
 }
 
+:global(html[data-resolved-theme="dark"]) .bottomNav a {
+  color: #b7c9c0;
+}
+
+:global(html[data-resolved-theme="dark"]) .bottomNav a[aria-current="page"] {
+  color: #d8f3e7;
+  background: #17382b;
+}
+
 :global(html[data-resolved-theme="dark"]) .languageButton,
 :global(html[data-resolved-theme="dark"]) .themeControl :global(summary),
 :global(html[data-resolved-theme="dark"]) .filterGrid button,
