@@ -201,7 +201,7 @@ export function MobileLandingExperience() {
           </div>
         </section>
 
-        <form className={styles.searchCard} action="/homes" method="get" role="search" onSubmit={handleSubmit}>
+        <form className={styles.searchCard} action="/homes" method="get" role="search" data-mobile-entry-search onSubmit={handleSubmit}>
           <div className={styles.searchHeader}>
             <div>
               <span>{copy.searchKicker}</span>
@@ -212,7 +212,7 @@ export function MobileLandingExperience() {
           </div>
 
           <div className={styles.primaryFields}>
-            <label className={styles.areaField}>
+            <label className={styles.areaField} data-mobile-search-field="area">
               <MapPin aria-hidden="true" />
               <div>
                 <span>{copy.areaLabel}</span>
@@ -236,7 +236,7 @@ export function MobileLandingExperience() {
               </datalist>
             </label>
 
-            <label className={styles.primaryField}>
+            <label className={styles.primaryField} data-mobile-search-field="tenant">
               <span className={styles.fieldIcon}><Users aria-hidden="true" /></span>
               <span className={styles.fieldBody}>
                 <span className={styles.fieldLabelRow}>
@@ -260,7 +260,7 @@ export function MobileLandingExperience() {
               </span>
             </label>
 
-            <label className={styles.primaryField}>
+            <label className={styles.primaryField} data-mobile-search-field="budget">
               <span className={styles.fieldIcon}><Banknote aria-hidden="true" /></span>
               <span className={styles.fieldBody}>
                 <span className={styles.fieldLabelRow}>
@@ -299,7 +299,7 @@ export function MobileLandingExperience() {
           <input type="hidden" name="area" value={area} />
           {maxRent && customBudgetReady && <input type="hidden" name="maxRent" value={maxRent} />}
 
-          <details className={styles.moreFilters}>
+          <details className={styles.moreFilters} data-mobile-more-filters>
             <summary>
               <SlidersHorizontal aria-hidden="true" />
               <span>{copy.moreFilters}</span>
