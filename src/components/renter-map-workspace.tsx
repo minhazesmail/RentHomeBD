@@ -304,13 +304,15 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (validationMessage) {
       if (isCurrentSearch()) {
         searchAbortRef.current = null;
-        setMessage(validationMessage);
+        setSearchError(validationMessage);
+        setMessage(null);
         setBusy(false);
       }
       return;
     }
 
     setBusy(true);
+    setSearchError(null);
     setMessage(null);
 
     const { data, error } = await supabase.rpc("search_available_properties", {
@@ -329,7 +331,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (!isCurrentSearch()) return;
     if (error) {
       searchAbortRef.current = null;
-      setMessage(friendlySearchError(error, copy));
+      setSearchError(friendlySearchError(error, copy));
       setBusy(false);
       return;
     }
@@ -371,6 +373,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     }));
 
     if (!isCurrentSearch()) return;
+    setSearchError(null);
     setListings(hydrated);
     setSelectedId((current) => current && hydrated.some((listing) => listing.id === current) ? current : null);
     setAppliedQuery({
@@ -419,6 +422,14 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   }, [copy, drawingCustomArea, setCustomArea, setMapDirty, setMessage]);
 
   useEffect(() => { runSearchRef.current = runSearch; }, [runSearch]);
+  useEffect(() => {
+    if (!busy) {
+      setSlowSearch(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setSlowSearch(true), 4000);
+    return () => window.clearTimeout(timer);
+  }, [busy]);
   useEffect(() => {
     const timer = window.setTimeout(() => {
       if (initialTenantType) void runSearchRef.current(initialCenterRef.current);
