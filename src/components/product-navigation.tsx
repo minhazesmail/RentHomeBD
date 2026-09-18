@@ -87,7 +87,7 @@ export function ProductNavigation({
       </header>
 
       {showMobileTabs && (
-        <nav className={styles.mobileTabBar} aria-label={nav.productNavigationAria}>
+        <nav className={styles.mobileTabBar} aria-label={nav.productNavigationAria} data-mobile-primary-tabs>
           {items.map((item) => {
             const Icon = item.icon;
             const active = current === item.key;
