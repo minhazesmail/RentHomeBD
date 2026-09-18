@@ -422,7 +422,7 @@ function ClusteredListings({ listings, selectedId, onSelect, copy }: { listings:
   );
 }
 
-export default function LeafletMap({ listings, center, radiusKm, selectedId, focusId, focusVersion = 0, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange, tileRetryVersion = 0, onTileFailure, onTilesReady }: {
+export default function LeafletMap({ listings, center, radiusKm, selectedId, focusId, focusVersion = 0, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange, tileRetryVersion = 0, onTileFailure }: {
   listings: MapListing[];
   center: [number, number];
   radiusKm: number | null;
@@ -439,7 +439,6 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, foc
   onCustomAreaChange?: (points: [number, number][]) => void;
   tileRetryVersion?: number;
   onTileFailure?: () => void;
-  onTilesReady?: () => void;
 }) {
   const { resolvedTheme } = useTheme();
   const { locale } = useLocale();
@@ -464,10 +463,6 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, foc
           tileerror: () => {
             tileErrorCountRef.current += 1;
             if (tileErrorCountRef.current === 3) onTileFailure?.();
-          },
-          load: () => {
-            tileErrorCountRef.current = 0;
-            onTilesReady?.();
           },
         }}
       />
