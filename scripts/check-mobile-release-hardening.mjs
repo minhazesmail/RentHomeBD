@@ -18,6 +18,8 @@ const packageJson = JSON.parse(read("package.json"));
 const ci = read(".github/workflows/ci.yml");
 const mobileWorkflow = read(".github/workflows/mobile-concept.yml");
 const releaseBrowser = read("scripts/check-mobile-release-browser.mjs");
+const homesMobileAlignment = read("src/app/homes/mobile-concept-alignment.css");
+const globalTheme = read("src/app/theme.css");
 
 expect(mobile, "--mobile-app-topbar-height: calc(58px + env(safe-area-inset-top));", "mobile topbar token must include top safe area");
 expect(mobile, "--mobile-app-tabbar-height: calc(64px + env(safe-area-inset-bottom));", "mobile tabbar token must include bottom safe area");
@@ -49,6 +51,8 @@ expect(read("src/components/mobile-landing-experience.module.css"), ".areaField 
 expect(read("src/components/mobile-landing-experience.module.css"), ".fieldBody select {\n    width: 100%;\n    min-height: 44px;", "mobile landing direct selects must remain 44px");
 expect(read("src/app/homes/map-workspace.css"), "min-height: 44px;", "mobile map quick actions must retain 44px targets");
 expect(read("src/app/auth-verification-redesign.css"), ".auth-tabs button {\n  min-height: 44px;", "final auth method tabs must remain 44px");
+reject(homesMobileAlignment, 'content: url("/nearbasha-logo-on-dark.svg")', "light mobile /homes must not force the on-dark brand asset");
+expect(globalTheme, 'html[data-resolved-theme="dark"] .brand-logo img {\n  content: url("/nearbasha-logo-on-dark.svg");', "dark theme must retain the on-dark brand asset");
 
 const taskContracts = [
   ["scripts/check-mobile-foundation.mjs", "Task 1"],
