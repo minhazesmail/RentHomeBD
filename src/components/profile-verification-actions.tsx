@@ -44,7 +44,7 @@ export function ProfileVerificationActions({ targetUserId, reviewerId, verified 
       {isSelf && <div className="auth-message">{copy.self}</div>}
       {message && <div className="auth-message">{message}</div>}
       <div className="dashboard-actions">
-        {verified ? <button className="secondary-button moderation-action-revoke" type="button" disabled={busy || isSelf} onClick={() => void decide("revoke")}>{copy.revoke}</button> : <button className="primary-button" type="button" disabled={busy || isSelf} onClick={() => void decide("verify")}>{copy.issue}</button>}
+        {verified ? <button className="secondary-button moderation-action-revoke" type="button" disabled={busy || isSelf} onClick={() => void decide("revoke")}>{copy.revoke}</button> : <button className="primary-button moderation-action-verify" type="button" disabled={busy || isSelf} onClick={() => void decide("verify")}>{copy.issue}</button>}
       </div>
     </div>
   );
