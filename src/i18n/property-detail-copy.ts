@@ -20,7 +20,7 @@ const propertyDetailCopy = {
       availableNow: "Available now",
       availableFrom: "Available from {date}",
     },
-    stats: { bedrooms: "Bedrooms", bathrooms: "Bathrooms", squareFeet: "Sq ft", floor: "Floor" },
+    stats: { bedrooms: "Bedrooms", bathrooms: "Bathrooms", squareFeet: "Sq ft", floor: "Floor", totalFloors: "Total floors" },
     about: {
       heading: "About this home",
       description: "The practical details you’ll want before arranging a viewing.",
@@ -212,7 +212,7 @@ const propertyDetailCopy = {
       availableNow: "এখনই পাওয়া যাবে",
       availableFrom: "{date} থেকে পাওয়া যাবে",
     },
-    stats: { bedrooms: "বেডরুম", bathrooms: "বাথরুম", squareFeet: "বর্গফুট", floor: "তলা" },
+    stats: { bedrooms: "বেডরুম", bathrooms: "বাথরুম", squareFeet: "বর্গফুট", floor: "তলা", totalFloors: "মোট তলা" },
     about: {
       heading: "বাসাটি সম্পর্কে",
       description: "ভিউয়িং ঠিক করার আগে দরকারি মূল তথ্যগুলো এক নজরে দেখুন।",
