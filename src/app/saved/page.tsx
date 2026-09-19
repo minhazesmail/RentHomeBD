@@ -223,7 +223,7 @@ export default async function SavedPage() {
   });
 
   return (
-    <main className="saved-page">
+    <main className="saved-page" data-saved-mobile-page>
       <ProductNavigation authenticated canList={canList} current="saved" />
 
       <div className="saved-shell">

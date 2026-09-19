@@ -538,26 +538,56 @@
 
 @media (max-width: 620px) {
   .hasSelection {
-    padding-bottom: 118px;
+    padding-bottom: calc(126px + var(--mobile-app-tabbar-height, 0px));
   }
 
   .toolbar {
+    align-items: center;
+    flex-direction: row;
+    padding: 12px;
+  }
+
+  .toolbar > div {
     align-items: flex-start;
-    flex-direction: column;
+  }
+
+  .toolbar div span {
+    display: none;
   }
 
   .cardLink {
-    grid-template-columns: 116px minmax(0, 1fr);
-    min-height: 164px;
+    grid-template-columns: 112px minmax(0, 1fr);
+    min-height: 154px;
   }
 
   .media,
   .media img {
-    min-height: 164px;
+    min-height: 154px;
   }
 
   .copy {
-    padding: 42px 14px 18px;
+    gap: 6px;
+    padding: 40px 12px 14px;
+  }
+
+  .heading strong {
+    font-size: .98rem;
+  }
+
+  .heading span,
+  .fit {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .metadata {
+    gap: 4px;
+  }
+
+  .metadata span {
+    padding: 3px 6px;
   }
 
   .comparisonHeader {
@@ -566,11 +596,13 @@
   }
 
   .tray {
-    bottom: 9px;
+    bottom: calc(var(--mobile-app-bottom-action-offset, 0px) + 9px);
+    width: calc(100% - 20px);
     align-items: stretch;
     flex-direction: column;
     gap: 9px;
     padding: 12px;
+    border-radius: 17px;
   }
 
   .trayActions {

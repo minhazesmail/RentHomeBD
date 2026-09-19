@@ -86,7 +86,7 @@ export async function MessagesInboxPane({
   const coverUrlByProperty = new Map(coverEntries);
 
   return (
-    <aside className="messages-workspace-inbox" aria-label={copy.conversationsAria}>
+    <aside className="messages-workspace-inbox" aria-label={copy.conversationsAria} data-messages-mobile-inbox>
       <div className="messages-workspace-inbox-head">
         <div>
           <p className="eyebrow">{copy.eyebrow}</p>

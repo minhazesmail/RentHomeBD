@@ -131,7 +131,7 @@ export default async function MessageThreadPage({
   const inboxHref = messageInboxHref({ page, query, unreadOnly });
 
   return (
-    <main className="messages-page messages-thread-route">
+    <main className="messages-page messages-thread-route" data-messages-mobile-thread>
       <ProductNavigation authenticated canList={canList} current="messages" />
       <div className="messages-workspace-shell">
         <MessagesInboxPane

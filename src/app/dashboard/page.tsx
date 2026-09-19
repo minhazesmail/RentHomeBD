@@ -196,7 +196,7 @@ export default async function DashboardPage({
         : copy.common.account;
 
   return (
-    <main className={`shell dashboard-shell renter-dashboard-shell${!isRenter ? " owner-dashboard-shell" : ""}`}>
+    <main className={`shell dashboard-shell renter-dashboard-shell${!isRenter ? " owner-dashboard-shell" : ""}`} data-account-mobile-workspace>
       <ProductNavigation authenticated canList={canList} current="dashboard" />
       <section className={`dashboard-card renter-dashboard-card${!isRenter ? " owner-dashboard-card" : ""}`}>
         <div className={`dashboard-header renter-dashboard-header${!isRenter ? " owner-dashboard-header" : ""}`}>
