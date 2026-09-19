@@ -116,18 +116,18 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
   const draftCount = listings.filter((property) => property.status === "draft").length;
 
   return (
-    <main className="owner-shell owner-management-shell">
+    <main className="owner-shell owner-management-shell" data-owner-mobile-portfolio>
       <ProductNavigation authenticated canList current="properties" />
       <header className="owner-header owner-management-header">
         <div><h1 className="owner-title">{copy.page.title}</h1><p className="intro">{copy.page.description}</p></div>
-        <div className="owner-header-actions"><ActionLink href="/owner/properties/new"><Plus size={16} aria-hidden="true" /> {copy.page.addProperty}</ActionLink></div>
+        <div className="owner-header-actions" data-owner-header-actions><ActionLink href="/owner/properties/new"><Plus size={16} aria-hidden="true" /> {copy.page.addProperty}</ActionLink></div>
       </header>
 
       {notice === "saved" && <div className="success-message">{copy.page.draftSaved}</div>}
       {notice === "submitted" && <div className="success-message">{copy.page.submitted}</div>}
 
       {!!listings.length && (
-        <section className="owner-portfolio-summary" aria-label={copy.page.summaryAria}>
+        <section className="owner-portfolio-summary" aria-label={copy.page.summaryAria} data-owner-portfolio-summary>
           <Link className={`owner-summary-card owner-summary-link is-live${status === "available" ? " is-active" : ""}`} href="/owner?status=available"><span><Home size={18} aria-hidden="true" /></span><div><strong>{formatNumber(liveCount, locale)}</strong><small>{copy.page.liveListings}</small></div><ArrowRight className="owner-summary-arrow" size={16} aria-hidden="true" /></Link>
           <Link className={`owner-summary-card owner-summary-link${attentionCount ? " is-attention" : ""}${status === "attention" ? " is-active" : ""}`} href="/owner?status=attention"><span><AlertTriangle size={18} aria-hidden="true" /></span><div><strong>{formatNumber(attentionCount, locale)}</strong><small>{copy.page.needAttention}</small></div><ArrowRight className="owner-summary-arrow" size={16} aria-hidden="true" /></Link>
           <Link className={`owner-summary-card owner-summary-link${status === "pending_review" ? " is-active" : ""}`} href="/owner?status=pending_review"><span><ShieldCheck size={18} aria-hidden="true" /></span><div><strong>{formatNumber(reviewCount, locale)}</strong><small>{copy.page.inModeration}</small></div><ArrowRight className="owner-summary-arrow" size={16} aria-hidden="true" /></Link>
@@ -136,7 +136,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
       )}
 
       {!!attentionListings.length && (
-        <section className="owner-attention-workbench" aria-labelledby="owner-attention-heading">
+        <section className="owner-attention-workbench" aria-labelledby="owner-attention-heading" data-owner-attention-workbench>
           <div className="owner-attention-workbench-heading">
             <div><p className="eyebrow">{copy.page.priorityEyebrow}</p><h2 id="owner-attention-heading">{copy.page.priorityTitle}</h2><p>{copy.page.priorityDescription}</p></div>
             <Link className="text-link" href="/owner?status=attention">{formatOwnerPortfolioText(copy.page.viewAll, { count: formatNumber(attentionCount, locale) })}</Link>
@@ -157,7 +157,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
         </section>
       )}
 
-      <section className="property-list-panel owner-property-panel">
+      <section className="property-list-panel owner-property-panel" data-owner-property-panel>
         <div className="owner-property-panel-heading"><div><h2>{listings.length ? formatOwnerPortfolioText(listings.length === 1 ? copy.page.listingsOne : copy.page.listingsMany, { count: formatNumber(listings.length, locale) }) : copy.page.yourListings}</h2>{!!listings.length && <p className={styles.ownerPortfolioPolicy}>{copy.page.confirmationPolicy}</p>}</div></div>
 
         {!!listings.length && <OwnerPortfolioControls query={query} status={status} sort={sort} visibleCount={visibleListings.length} totalCount={listings.length} />}
@@ -174,7 +174,7 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
               const coverUrl = coverUrlByProperty.get(property.id);
               const StatusIcon = statusPresentation.tone === "good" ? CheckCircle2 : statusPresentation.tone === "urgent" || statusPresentation.tone === "attention" ? AlertTriangle : Clock3;
               return (
-                <article className={`property-row property-row-with-actions owner-property-card status-card-${property.status}`} key={property.id}>
+                <article className={`property-row property-row-with-actions owner-property-card status-card-${property.status}`} key={property.id} data-owner-listing-status={property.status} data-owner-needs-attention={listingNeedsAttention(property, now) ? "true" : "false"}>
                   <Link className="property-row-link owner-property-card-link" href={`/owner/properties/${property.id}`}>
                     <div className={styles.ownerPortfolioListingBody}>
                       <div className={styles.ownerPortfolioThumbnail} aria-hidden="true">{coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <Home size={22} aria-hidden="true" />}</div>
