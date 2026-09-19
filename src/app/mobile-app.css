@@ -143,8 +143,9 @@
   }
 
   .landing-nav [data-language-switcher],
+  .landing-nav [data-language-switcher] button,
   .landing-nav summary[aria-haspopup="menu"] {
-    min-height: 38px;
+    min-height: 44px !important;
     border-color: rgba(255,255,255,.15);
     background: rgba(255,255,255,.07);
   }
@@ -337,7 +338,7 @@
 
   .landing-search-console-field input,
   .landing-search-console-field select {
-    min-height: 28px;
+    min-height: 44px;
     color: #20362d;
     font-size: 16px;
     font-weight: 680;
