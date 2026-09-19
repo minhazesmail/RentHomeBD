@@ -29,7 +29,7 @@ export function ModerationDecisionForm({ propertyId, reviewerId, nextPropertyId 
   }
 
   return (
-    <section className="listing-section sticky top-4">
+    <section className="listing-section sticky top-4" data-mobile-moderation-actions="listing">
       <div className="section-heading"><span>✓</span><div><h2>{copy.title}</h2><p>{copy.hint}</p></div></div>
       <label className="field">{copy.notes}<textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={5} maxLength={2000} placeholder={copy.placeholder} /></label>
       {message && <div className="auth-message">{message}</div>}
