@@ -130,7 +130,7 @@
   color: #fff;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1040px) {
   .triggerLabel {
     position: absolute;
     width: 1px;
