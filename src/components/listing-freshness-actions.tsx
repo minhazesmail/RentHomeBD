@@ -50,7 +50,7 @@ export function ListingFreshnessActions({ propertyId, status }: { propertyId: st
   const editLabel = status === "rented" || status === "expired" ? copy.relist : copy.edit;
 
   return (
-    <div className="freshness-actions" onClick={(event) => event.preventDefault()} aria-live="polite">
+    <div className="freshness-actions" data-owner-freshness-actions data-listing-status={status} onClick={(event) => event.preventDefault()} aria-live="polite">
       {canConfirmAvailability && (
         <>
           <ActionButton variant="secondary" className="freshness-button" type="button" disabled={busy !== null} aria-busy={busy === "confirm"} onClick={() => void reconfirm()}>{busy === "confirm" ? copy.confirming : copy.stillAvailable}</ActionButton>
