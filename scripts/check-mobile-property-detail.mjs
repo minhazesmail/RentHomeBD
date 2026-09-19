@@ -31,7 +31,7 @@ const fitIndex = page.indexOf("tenant-compatibility-card");
 const factsIndex = page.indexOf("property-summary-grid");
 const costsIndex = page.indexOf("property-costs-section");
 const amenitiesIndex = page.indexOf("copy.amenities.heading");
-const aboutIndex = page.indexOf("copy.about.heading", factsIndex + 1);
+const aboutIndex = page.indexOf('<h2>{copy.about.heading}</h2>');
 const locationIndex = page.indexOf("copy.location.heading");
 
 if (!(galleryIndex >= 0 && galleryIndex < heroIndex)) failures.push("gallery must appear before the rent/title hero");
