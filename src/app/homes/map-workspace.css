@@ -783,7 +783,7 @@
 
   .nb-global-shell--renter .renter-map-actions > button {
     flex: 0 0 auto;
-    min-height: 42px;
+    min-height: 44px;
     background: color-mix(in srgb, var(--map-v2-surface) 96%, transparent);
     color: var(--map-v2-primary);
     border-color: var(--map-v2-border);
@@ -853,7 +853,7 @@
   }
 
   .nb-global-shell--renter .renter-map-actions > button {
-    min-height: 40px;
+    min-height: 44px;
     padding-inline: 10px;
     font-size: .72rem;
   }

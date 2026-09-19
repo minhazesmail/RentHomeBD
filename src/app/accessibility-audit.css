@@ -1,6 +1,6 @@
-/* Step 15 — Cross-product accessibility and reduced-motion audit.
-   Loaded last so keyboard, contrast, motion, reflow, and platform preference rules win consistently. */
-
+/* Cross-product accessibility and preference audit.
+   Loaded in the dedicated accessibility layer; critical focus/preference rules use
+   explicit importance where they must survive later route/component appearance. */\n
 html {
   scroll-padding-top: 5rem;
   -webkit-text-size-adjust: 100%;
@@ -222,5 +222,69 @@ body {
 
   :where(.review-facts, .property-facts-grid, .dashboard-status-grid, .moderation-facts-grid) {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+
+/* Task 10 — final mobile accessibility seam hardening.
+   Keep keyboard focus from landing underneath sticky top bars or bottom action/tab bars. */
+@media (max-width: 767px) {
+  :where(
+    a[href],
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex]:not([tabindex="-1"])
+  ) {
+    scroll-margin-block-start: calc(var(--mobile-app-topbar-height, 58px) + 12px);
+    scroll-margin-block-end: calc(var(--mobile-app-tabbar-height, 64px) + 12px);
+  }
+
+  :where(
+    [data-search-recovery],
+    .listing-section,
+    .property-detail-section,
+    .moderation-inspection-card,
+    .dashboard-next-action
+  ) {
+    scroll-margin-block-start: calc(var(--mobile-app-topbar-height, 58px) + 12px);
+  }
+}
+
+/* Transparency preferences apply to the newer app-level sticky surfaces too. */
+@media (prefers-reduced-transparency: reduce) {
+  :where(
+    [data-product-navigation],
+    [data-mobile-primary-tabs],
+    [data-mobile-moderation-nav],
+    [data-mobile-listing-workflow],
+    .contact-action-stack
+  ) {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: var(--surface-solid) !important;
+  }
+}
+
+/* Forced colors must preserve selected navigation and destructive/primary action boundaries. */
+@media (forced-colors: active) {
+  :where(
+    [data-mobile-primary-tabs] a,
+    [data-mobile-moderation-nav] a,
+    [data-mobile-listing-workflow] button,
+    [data-mobile-moderation-actions] button
+  ) {
+    border: 1px solid ButtonText !important;
+    forced-color-adjust: auto;
+  }
+
+  :where(
+    [data-mobile-primary-tabs] [aria-current="page"],
+    [data-mobile-moderation-nav] [aria-current="page"],
+    [data-mobile-listing-workflow] [aria-current="step"]
+  ) {
+    border: 2px solid Highlight !important;
   }
 }

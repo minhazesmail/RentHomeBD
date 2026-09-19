@@ -7,6 +7,7 @@ on:
       - "src/components/**"
       - "src/i18n/**"
       - "scripts/check-mobile-concept-browser.mjs"
+      - "scripts/check-mobile-release-browser.mjs"
       - "package.json"
       - ".github/workflows/mobile-concept.yml"
   push:
@@ -16,6 +17,7 @@ on:
       - "src/components/**"
       - "src/i18n/**"
       - "scripts/check-mobile-concept-browser.mjs"
+      - "scripts/check-mobile-release-browser.mjs"
       - "package.json"
       - ".github/workflows/mobile-concept.yml"
 
@@ -52,11 +54,15 @@ jobs:
           exit 1
       - name: Capture and validate mobile concept
         run: npm run mobileconceptqa
+      - name: Validate release breakpoint and accessibility matrix
+        run: npm run releasebrowserqa
       - name: Upload mobile concept screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mobile-concept-${{ github.run_id }}
-          path: artifacts/mobile-concept
+          path: |
+            artifacts/mobile-concept
+            artifacts/release-hardening
           if-no-files-found: ignore
           retention-days: 14

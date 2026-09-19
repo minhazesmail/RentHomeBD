@@ -113,3 +113,18 @@ Legacy landing styles remain underneath the new final layer during the staged ro
 ## Next sequential batch
 
 Phase 3 redesigns the desktop map workspace and phase 4 redesigns the mobile map workspace. They should consume the same tenant-first search semantics established here instead of creating parallel state rules.
+
+## Final mobile consolidation — Task 10
+
+Task 10 is the release-hardening pass for the mobile redesign work already merged in Tasks 1–2 and 4–9. It does not implement the intentionally skipped Task 3 `/homes` filter/results-sheet redesign.
+
+The final shared contract is:
+
+- mobile top-bar height includes `safe-area-inset-top`, and the persistent tab-bar height includes `safe-area-inset-bottom`;
+- shared language and appearance controls remain at least 44px through tablet/compact-desktop widths, while primary controls continue to use the 48px mobile target;
+- keyboard focusable content reserves scroll margins above sticky top bars and above bottom navigation/action surfaces;
+- reduced-motion, reduced-transparency and forced-colors preferences cover the newer owner, listing-editor and moderator sticky surfaces;
+- the release browser matrix explicitly covers 320, 360, 390, 430, 768 and 960 CSS-pixel widths, plus reduced-motion and forced-colors scenarios;
+- the final release gate keeps the per-task regression checks for Tasks 1 and 4–9 in the standard `uiqa` path and runs the breakpoint/accessibility browser matrix in both full CI and the dedicated mobile workflow.
+
+Task 10 changes presentation and validation only. Search semantics, renter matching, listing lifecycle RPCs, realtime messaging, moderation authorization/audits and database policy enforcement remain unchanged.

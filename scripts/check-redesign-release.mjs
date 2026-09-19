@@ -39,8 +39,10 @@ if (!landingFoundation.includes('@import "./landing-faq-redesign.css" layer(rout
 if (!homesManifest.includes('@import "./map-workspace.css" layer(component-appearance);')) failures.push("homes manifest must load canonical map-workspace.css");
 if (homesManifest.includes("map-workspace-v2.css")) failures.push("homes manifest still references temporary map v2 file");
 if (homesManifest.includes("homes-spacing-fixes.css")) failures.push("homes manifest still loads retired map-era spacing fixes");
-if (packageJson.scripts?.releaseqa !== "node scripts/check-redesign-release.mjs") failures.push("release QA script is not registered");
+if (packageJson.scripts?.releaseqa !== "node scripts/check-redesign-release.mjs && node scripts/check-mobile-release-hardening.mjs") failures.push("release QA script does not include final mobile hardening");
 if (!packageJson.scripts?.uiqa?.includes("node scripts/check-redesign-release.mjs")) failures.push("release QA is not part of the standard UI validation path");
+if (!packageJson.scripts?.uiqa?.includes("node scripts/check-mobile-release-hardening.mjs")) failures.push("final mobile hardening is not part of the standard UI validation path");
+if (packageJson.scripts?.releasebrowserqa !== "node scripts/check-mobile-release-browser.mjs") failures.push("release browser QA script is not registered");
 
 const landingBytes = fs.statSync(path.join(root, "src/app/landing.css")).size;
 const mapBytes = fs.statSync(path.join(root, "src/app/homes/map-workspace.css")).size;

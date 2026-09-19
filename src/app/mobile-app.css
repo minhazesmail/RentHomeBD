@@ -1,7 +1,6 @@
 /* Mobile app experience layer.
-   Intentionally unlayered and loaded last so phone-specific composition can
-   override route design layers without increasing selector specificity. */
-
+   Loaded in component-appearance for shared app composition; route-family
+   mobile-appearance layers may refine it without relying on unlayered CSS. */\n
 /* The concept artwork and compact launch signals are mobile-only. */
 .landing-mobile-home-visual,
 .landing-mobile-quick-signals {
@@ -13,7 +12,7 @@
     --mobile-app-gutter: 16px;
     --mobile-app-safe-left: max(var(--mobile-app-gutter), env(safe-area-inset-left));
     --mobile-app-safe-right: max(var(--mobile-app-gutter), env(safe-area-inset-right));
-    --mobile-app-topbar-height: 58px;
+    --mobile-app-topbar-height: calc(58px + env(safe-area-inset-top));
     --mobile-app-tabbar-height: calc(64px + env(safe-area-inset-bottom));
     --mobile-app-control-height: 48px;
     --mobile-app-hit-target: 44px;
@@ -146,8 +145,9 @@
   }
 
   .landing-nav [data-language-switcher],
+  .landing-nav [data-language-switcher] button,
   .landing-nav summary[aria-haspopup="menu"] {
-    min-height: 38px;
+    min-height: 44px !important;
     border-color: rgba(255,255,255,.15);
     background: rgba(255,255,255,.07);
   }
@@ -340,7 +340,7 @@
 
   .landing-search-console-field input,
   .landing-search-console-field select {
-    min-height: 28px;
+    min-height: 44px;
     color: #20362d;
     font-size: 16px;
     font-weight: 680;

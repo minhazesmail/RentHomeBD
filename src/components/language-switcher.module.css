@@ -68,9 +68,9 @@
   color: #fff;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1040px) {
   .switcher {
-    min-height: 34px;
+    min-height: 44px;
     padding: 2px 4px;
   }
 
@@ -79,8 +79,9 @@
     display: none;
   }
 
-  .choice {
-    min-height: 28px;
+  .choice,
+  .activeChoice {
+    min-height: 44px !important;
     padding-inline: 7px;
     font-size: .73rem;
   }

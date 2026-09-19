@@ -111,7 +111,7 @@
   }
 
   .sheetControls button {
-    min-height: 36px;
+    min-height: 44px;
     gap: 4px;
     padding-inline: 8px;
     border-radius: 11px;
@@ -332,8 +332,8 @@
 
 @media (max-width: 767px) {
   .mobileMapModel.mobileMapLayout {
-    --mobile-topbar-height: 58px;
-    --mobile-app-nav-height: calc(64px + env(safe-area-inset-bottom));
+    --mobile-topbar-height: var(--mobile-app-topbar-height, calc(58px + env(safe-area-inset-top)));
+    --mobile-app-nav-height: var(--mobile-app-tabbar-height, calc(64px + env(safe-area-inset-bottom)));
     --mobile-mode-nav-height: 62px;
     --mobile-sheet-height: 36svh;
     min-height: calc(100svh - var(--mobile-topbar-height));
@@ -366,7 +366,7 @@
   }
 
   .sheetControls button {
-    min-height: 34px;
+    min-height: 44px;
     padding-inline: 6px;
   }
 

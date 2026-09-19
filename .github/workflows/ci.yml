@@ -196,6 +196,8 @@ jobs:
           exit 1
       - name: Rendered theme QA
         run: npm run themebrowser
+      - name: Release hardening browser QA
+        run: npm run releasebrowserqa
       - name: Map workspace geometry QA
         run: npm run mapworkspacebrowser
       - name: Map discovery interaction QA
@@ -207,6 +209,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: theme-browser-${{ github.run_id }}
-          path: artifacts/theme-browser
+          path: |
+            artifacts/theme-browser
+            artifacts/release-hardening
           if-no-files-found: ignore
           retention-days: 14
