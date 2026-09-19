@@ -58,7 +58,7 @@ export default async function ReportReviewPage({ params, searchParams }: { param
           </section>
           <section className="listing-section moderation-inspection-card">
             <div className="section-heading"><span>2</span><div><h2>{copy.reportDetail.current}</h2><p>{copy.reportDetail.currentHint}</p></div></div>
-            <dl className="review-facts"><div><dt>{copy.reportDetail.status}</dt><dd>{label(property.status)}</dd></div><div><dt>{copy.reportDetail.type}</dt><dd>{property.property_type ? label(property.property_type) : "—"}</dd></div><div><dt>{copy.reportDetail.rent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : "—"}</dd></div><div><dt>{copy.reportDetail.address}</dt><dd>{property.address_text || copy.common.notProvided}</dd></div></dl>
+            <dl className="review-facts"><div><dt>{copy.reportDetail.status}</dt><dd>{label(property.status)}</dd></div><div><dt>{copy.reportDetail.type}</dt><dd>{property.property_type ? label(property.property_type) : copy.common.notProvided}</dd></div><div><dt>{copy.reportDetail.rent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.common.notProvided}</dd></div><div><dt>{copy.reportDetail.address}</dt><dd>{property.address_text || copy.common.notProvided}</dd></div></dl>
             <Link className="text-link" href={`/homes/${property.id}`}>{copy.reportDetail.openPublic}</Link>
           </section>
         </div>
