@@ -18,12 +18,16 @@ const packageJson = JSON.parse(read("package.json"));
 const ci = read(".github/workflows/ci.yml");
 const mobileWorkflow = read(".github/workflows/mobile-concept.yml");
 const releaseBrowser = read("scripts/check-mobile-release-browser.mjs");
+const mobileLanding = read("src/components/mobile-landing-experience.tsx");
 const homesMobileAlignment = read("src/app/homes/mobile-concept-alignment.css");
 const globalTheme = read("src/app/theme.css");
 
 expect(mobile, "--mobile-app-topbar-height: calc(58px + env(safe-area-inset-top));", "mobile topbar token must include top safe area");
 expect(mobile, "--mobile-app-tabbar-height: calc(64px + env(safe-area-inset-bottom));", "mobile tabbar token must include bottom safe area");
 expect(mobile, "--mobile-app-control-height: 48px;", "mobile primary control token");
+expect(mobileLanding, "data-mobile-explore-map", "mobile landing Explore this area must remain an actionable link");
+expect(mobileLanding, "<Link href={mapHref} data-mobile-explore-map>", "mobile landing map CTA must always render as a Link");
+reject(mobileLanding, "mapReady ?", "mobile landing map CTA must not be replaced by a disabled non-action");
 expect(mobile, "--mobile-app-hit-target: 44px;", "mobile hit-target token");
 expect(productNav, "min-height: var(--mobile-app-topbar-height", "authenticated mobile topbar must consume shared safe-area height");
 expect(productNav, "padding: calc(7px + env(safe-area-inset-top))", "authenticated mobile topbar must pad around the notch");
