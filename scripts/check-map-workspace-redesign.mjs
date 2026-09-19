@@ -10,7 +10,7 @@ function read(relativePath) {
     failures.push(`${relativePath}: file is missing`);
     return "";
   }
-  return fs.readFileSync(fullPath, "utf8");
+  return fs.readFileSync(fullPath, "utf8").replace(/\r\n/g, "\n");
 }
 
 function requireText(source, text, label) {
@@ -75,8 +75,8 @@ requireText(workspace, "resultsPaneRef.current.scrollTop", "result pane scroll r
 requireText(mobile, 'type SheetState = "collapsed" | "partial" | "expanded"', "three-position mobile result sheet state");
 requireText(mobile, "data-mobile-sheet={sheet}", "mobile sheet state DOM contract");
 requireText(mobile, 'const [view, setView] = useState<MobileView>("map")', "mobile map-first default");
-requireText(mobile, "aria-pressed={sheet === \"collapsed\"}", "accessible sheet-position controls");
-requireText(mobile, "aria-expanded={filtersOpen}", "accessible filter expansion state");
+requireText(mobile, 'disabled={sheet === "collapsed"}', "accessible lower sheet boundary");
+requireText(workspace, "aria-expanded={mobile.filtersOpen}", "accessible filter expansion state");
 requireText(mobileCss, 'data-mobile-sheet="collapsed"', "collapsed mobile sheet layout");
 requireText(mobileCss, 'data-mobile-sheet="expanded"', "expanded mobile sheet layout");
 requireText(mobileCss, 'height: 100svh', "full-height mobile filters");
