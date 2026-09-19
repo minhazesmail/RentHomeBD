@@ -35,7 +35,7 @@ export function ReportModerationActions({ reportId, reviewerId, nextReportId = n
   }
 
   return (
-    <div className="listing-section">
+    <div className="listing-section" data-mobile-moderation-actions="report">
       <div className="section-heading"><span>!</span><div><h2>{copy.title}</h2><p>{copy.hint}</p></div></div>
       <label className="field">{copy.notes}<textarea rows={5} maxLength={2000} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={copy.placeholder} /></label>
       {message && <div className="auth-message">{message}</div>}
