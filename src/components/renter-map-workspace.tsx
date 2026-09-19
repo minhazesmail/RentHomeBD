@@ -225,6 +225,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const [tileRetryVersion, setTileRetryVersion] = useState(0);
   const [customArea, setCustomArea] = useState<[number, number][]>([]);
   const [drawingCustomArea, setDrawingCustomArea] = useState(false);
+  const [pendingMapCenter, setPendingMapCenter] = useState<[number, number] | null>(null);
   const [mapDirty, setMapDirty] = useState(false);
   const [listScroll, setListScroll] = useState(initialScroll(initialSearch.listScroll));
   const [appliedQuery, setAppliedQuery] = useState<AppliedQuery>({
@@ -423,6 +424,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
         ? formatWorkflowText(copy.showingHomes, { visible: formatNumber(rows.length, locale), total: formatNumber(nextTotalMatches, locale) })
         : formatWorkflowText(rows.length === 1 ? copy.homeCountOne : copy.homeCountMany, { count: formatNumber(rows.length, locale) }));
     }
+    setPendingMapCenter(null);
     setMapDirty(false);
     searchAbortRef.current = null;
     setSlowSearch(false);
@@ -632,6 +634,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setCustomArea([]);
     setDrawingCustomArea(false);
     setCenter([preset.latitude, preset.longitude]);
+    setPendingMapCenter(null);
     setMapDirty(false);
   }
 
@@ -644,7 +647,9 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setLocationPreset("");
     setCenter(nextCenter);
     setMapSearchNotice(null);
-    setMapDirty(distanceMeters(nextCenter, appliedQuery.center) >= LIVE_CENTER_MIN_DISTANCE_METERS);
+    const centerChanged = distanceMeters(nextCenter, appliedQuery.center) >= LIVE_CENTER_MIN_DISTANCE_METERS;
+    setPendingMapCenter(centerChanged ? nextCenter : null);
+    setMapDirty(centerChanged);
   }
 
   function handleMapTileFailure() {
@@ -929,7 +934,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
           />
 
           <div className="renter-map-actions" aria-label={copy.title}>
-            {mapDirty && <button className="primary-button renter-search-this-area" type="button" onClick={() => void runSearch(center, sortOption, customAreaActive ? customArea : null, true)} disabled={busy || !tenantType}>{busy ? copy.searching : workspaceCopy.map.searchThisArea}</button>}
+            {mapDirty && <button className="primary-button renter-search-this-area" type="button" onClick={() => void runSearch(pendingMapCenter ?? center, sortOption, customAreaActive ? customArea : null, true)} disabled={busy || !tenantType}>{busy ? copy.searching : workspaceCopy.map.searchThisArea}</button>}
             {liveTracking ? (
               <button className="secondary-button" type="button" onClick={stopLiveLocation}>{workspaceCopy.map.stopLocation}</button>
             ) : (
