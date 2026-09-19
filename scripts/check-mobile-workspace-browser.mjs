@@ -49,6 +49,9 @@ try {
     const dialog = page.getByRole("dialog");
     await filters.click();
     await dialog.waitFor();
+    const footer = await dialog.locator(".mobile-filter-footer").boundingBox();
+    assert.ok(footer && footer.y >= 0 && footer.y + footer.height <= scenario.height + 2, "filter actions are outside the viewport");
+    await page.screenshot({ path: `${output}/filters-${scenario.width}-${scenario.locale}-${scenario.theme}.png`, fullPage: true });
     await dialog.locator(".renter-toolbar-budget input").fill("23000");
     await page.keyboard.press("Escape");
     await dialog.waitFor({ state: "hidden" });

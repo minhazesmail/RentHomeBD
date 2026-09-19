@@ -31,6 +31,11 @@
     padding: 0 8px; background: var(--surface-muted);
   }
   .mobileMapLayout :global(.renter-map-canvas) { height: 100%; min-height: 100%; border-radius: 16px; }
+  .mobileMapLayout[data-mobile-view="map"] :global(.leaflet-control-attribution) {
+    position: fixed; right: 12px; bottom: calc(var(--mobile-bottom-stack) + var(--mobile-sheet-height) + 4px);
+    max-width: calc(100vw - 24px);
+  }
+  .mobileMapLayout[data-mobile-sheet="expanded"] :global(.leaflet-control-attribution) { visibility: hidden; }
   .mobileMapLayout[data-mobile-view="list"] :global(.renter-map-panel) { visibility: hidden; }
   .mobileMapLayout :global(.renter-search-sidebar) {
     position: fixed; left: 8px; right: 8px; bottom: var(--mobile-bottom-stack); z-index: 1640;
