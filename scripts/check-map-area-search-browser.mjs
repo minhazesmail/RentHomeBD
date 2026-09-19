@@ -142,8 +142,8 @@ try {
 
       const secondBox = await map.boundingBox();
       if (secondBox) {
-        const sx = secondBox.x + secondBox.width * 0.58;
-        const sy = secondBox.y + secondBox.height * 0.5;
+        const sx = secondBox.x + secondBox.width * 0.64;
+        const sy = secondBox.y + secondBox.height * 0.28;
         await page.mouse.move(sx, sy);
         await page.mouse.down();
         await page.mouse.move(sx + 72, sy - 8, { steps: 8 });
