@@ -30,8 +30,8 @@
     "detailqa": "node scripts/check-property-detail-redesign.mjs && node scripts/check-mobile-property-detail.mjs",
     "workspaceqa": "node scripts/check-decision-owner-workspaces.mjs && node scripts/check-mobile-owner-portfolio.mjs",
     "accountworkspaceqa": "node scripts/check-messaging-dashboard-workspaces.mjs && node scripts/check-mobile-renter-workspaces.mjs",
-    "listingmoderationqa": "node scripts/check-listing-moderation-workspaces.mjs",
-    "uiqa": "node scripts/check-mobile-foundation.mjs && node scripts/check-mobile-cards-recovery.mjs && node scripts/check-landing-redesign.mjs && node scripts/check-map-workspace-redesign.mjs && node scripts/check-map-workspace-layout-contract.mjs && node scripts/check-property-detail-redesign.mjs && node scripts/check-mobile-property-detail.mjs && node scripts/check-decision-owner-workspaces.mjs && node scripts/check-mobile-owner-portfolio.mjs && node scripts/check-messaging-dashboard-workspaces.mjs && node scripts/check-mobile-renter-workspaces.mjs && node scripts/check-listing-moderation-workspaces.mjs && node scripts/check-mobile-listing-editor.mjs && node scripts/check-redesign-release.mjs && node scripts/check-ui-regressions.mjs && node scripts/check-theme.mjs",
+    "listingmoderationqa": "node scripts/check-listing-moderation-workspaces.mjs && node scripts/check-mobile-moderator.mjs",
+    "uiqa": "node scripts/check-mobile-foundation.mjs && node scripts/check-mobile-cards-recovery.mjs && node scripts/check-landing-redesign.mjs && node scripts/check-map-workspace-redesign.mjs && node scripts/check-map-workspace-layout-contract.mjs && node scripts/check-property-detail-redesign.mjs && node scripts/check-mobile-property-detail.mjs && node scripts/check-decision-owner-workspaces.mjs && node scripts/check-mobile-owner-portfolio.mjs && node scripts/check-messaging-dashboard-workspaces.mjs && node scripts/check-mobile-renter-workspaces.mjs && node scripts/check-listing-moderation-workspaces.mjs && node scripts/check-mobile-moderator.mjs && node scripts/check-mobile-listing-editor.mjs && node scripts/check-redesign-release.mjs && node scripts/check-ui-regressions.mjs && node scripts/check-theme.mjs",
     "themeqa": "node scripts/check-theme.mjs",
     "themebrowser": "node scripts/check-theme-browser.mjs",
     "mapworkspacebrowser": "node scripts/check-map-workspace-browser.mjs",
@@ -43,7 +43,8 @@
     "mobiledetailqa": "node scripts/check-mobile-property-detail.mjs",
     "mobileworkspacesqa": "node scripts/check-mobile-renter-workspaces.mjs",
     "mobileownerqa": "node scripts/check-mobile-owner-portfolio.mjs",
-    "mobilelistingqa": "node scripts/check-mobile-listing-editor.mjs"
+    "mobilelistingqa": "node scripts/check-mobile-listing-editor.mjs",
+    "mobilemoderatorqa": "node scripts/check-mobile-moderator.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.5",
