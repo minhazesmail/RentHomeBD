@@ -18,7 +18,7 @@ export async function ModerationWorkbenchNav({ current, counts }: { current: Mod
   ];
 
   return (
-    <nav className="moderation-workbench-nav" aria-label={copy.nav.aria}>
+    <nav className="moderation-workbench-nav" aria-label={copy.nav.aria} data-mobile-moderation-nav>
       <div className="moderation-workbench-nav-main">
         {items.map(({ key, href, label, icon: Icon }) => (
           <Link key={key} href={href} className={current === key ? "is-active" : undefined} aria-current={current === key ? "page" : undefined}>
