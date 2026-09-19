@@ -30,13 +30,14 @@ expect(listingDetail, 'data-mobile-moderation-review="listing"', "listing review
 expect(reportDetail, 'data-mobile-moderation-review="report"', "report review mobile marker");
 expect(nav, "data-mobile-moderation-nav", "moderator queue navigation mobile marker");
 expect(nav, "formatNumber(counts[key], locale)", "moderator queue counts must stay localized");
+expect(listingQueue, '.order("updated_at", { ascending: true })', "listing moderation queue must remain oldest-first");
+expect(reportQueue, '.order("created_at", { ascending: true })', "report moderation queue must remain oldest-first");
+expect(accountQueue, ".sort((a, b) =>", "account moderation queue must retain actionable ordering");
 
 expect(copy, 'notProvided: "Not provided"', "English missing-evidence copy");
 expect(copy, 'notProvided: "তথ্য দেওয়া নেই"', "Bangla missing-evidence copy");
-reject(listingDetail, '|| "—"', "listing review must not use ambiguous dash evidence");
-reject(listingDetail, '?? "—"', "listing review must not use ambiguous dash evidence");
-reject(reportDetail, '|| "—"', "report review must not use ambiguous dash evidence");
-reject(reportDetail, '?? "—"', "report review must not use ambiguous dash evidence");
+reject(listingDetail, '"—"', "listing review must not use ambiguous dash evidence");
+reject(reportDetail, '"—"', "report review must not use ambiguous dash evidence");
 expect(listingDetail, "copy.common.legalDisclaimer", "listing review must retain trust-signal disclaimer");
 expect(accountQueue, "copy.common.legalDisclaimer", "account review must retain trust-signal disclaimer");
 
