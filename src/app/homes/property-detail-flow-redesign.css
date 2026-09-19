@@ -289,7 +289,8 @@
     display: contents;
   }
 
-  .property-detail-page .property-contact-card > .contact-action-stack:has(> .contact-note) > .contact-action-stack {
+  .property-detail-page .property-contact-card > .contact-action-stack:has(> .contact-note) > .contact-action-stack,
+  .property-detail-page .property-contact-card > .contact-action-stack:has(> .phone-reveal-result) > .contact-action-stack {
     grid-column: 1 / -1;
   }
 
@@ -360,8 +361,7 @@
 @media (max-width: 430px) {
   .property-detail-page .property-contact-card > .contact-action-stack .property-contact-button,
   .property-detail-page .property-contact-card > .contact-action-stack .primary-button,
-  .property-detail-page .property-contact-card > .contact-action-stack .secondary-button,
-  .property-detail-page .property-contact-card > .save-home-wrap .save-home-button {
+  .property-detail-page .property-contact-card > .contact-action-stack .secondary-button {
     padding-inline: 5px;
     font-size: .68rem;
   }
