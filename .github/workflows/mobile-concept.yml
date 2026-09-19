@@ -17,6 +17,7 @@ on:
       - "src/components/**"
       - "src/i18n/**"
       - "scripts/check-mobile-concept-browser.mjs"
+      - "scripts/check-mobile-release-browser.mjs"
       - "package.json"
       - ".github/workflows/mobile-concept.yml"
 
