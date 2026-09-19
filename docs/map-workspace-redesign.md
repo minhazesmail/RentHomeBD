@@ -73,3 +73,16 @@ The `mapworkspaceqa` regression check verifies that the canonical shell selector
 ## Visual contract
 
 Phases 3–4 reuse the phases 1–2 palette and hierarchy: deep emerald `#0B4F3C`, warm ivory `#F7F5EF`, sand `#E8DFCF`, dark green-black `#172D25`, white/elevated cards, fine borders, restrained shadows, and 12–16px default corners. Selected map/result state uses emerald emphasis rather than decorative gradients. Tenant categories always pair color with text/icon semantics.
+
+## Task 3 — applied map search state
+
+The mobile map now distinguishes the map viewport the renter is exploring from the search state that has actually been applied.
+
+- Zooming without moving the search center does not create a false **Search this area** action.
+- Panning far enough to change the search center marks the map as pending and exposes **Search this area**.
+- Applying that action keeps the current renter criteria, runs the existing server-side radius search at the new center, and only clears the pending state after a successful response.
+- Success and recoverable search errors are acknowledged beside the map controls so a zero-result refresh cannot look like a dead tap.
+- Successful radius searches replace the `/homes` URL with the applied `lat`, `lng`, radius, renter type, rent, bedroom and sort state while clearing stale area/selection/scroll parameters.
+- The compact mobile summary and property-detail return URL serialize `appliedQuery`, not an uncommitted pan or draft filter state.
+
+The server RPC, renter-type requirement, radius validation, polygon search and result ordering are unchanged. The browser regression reproduces zoom → pan → Search this area → URL commit and also verifies that a failed area search remains visible and retryable.
