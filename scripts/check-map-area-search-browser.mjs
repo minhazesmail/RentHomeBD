@@ -118,11 +118,10 @@ try {
       const feedbackText = (await feedback.textContent())?.trim() ?? "";
       if (!feedbackText) fail("successful map-area search has no visible map-level acknowledgement");
 
-      if (rpcCount < 3) {
+      if (rpcCount < 3 || rpcBodies.length < 2) {
         fail("retrying Search this area did not issue a successful search RPC");
       } else {
-        const failedAttempt = rpcBodies[1] ?? {};
-        const applied = rpcBodies[2] ?? {};
+        const [failedAttempt = {}, applied = {}] = rpcBodies.slice(-2);
         const failedLat = Number(failedAttempt.center_lat);
         const failedLng = Number(failedAttempt.center_long);
         const movedLat = Number(applied.center_lat);
