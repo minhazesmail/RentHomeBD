@@ -1,4 +1,6 @@
-/* Mobile app experience layer.\n   Loaded in component-appearance for shared app composition; route-family\n   mobile-appearance layers may refine it without relying on unlayered CSS. */\n
+/* Mobile app experience layer.
+   Loaded in component-appearance for shared app composition; route-family
+   mobile-appearance layers may refine it without relying on unlayered CSS. */\n
 /* The concept artwork and compact launch signals are mobile-only. */
 .landing-mobile-home-visual,
 .landing-mobile-quick-signals {
