@@ -471,7 +471,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
   const relistLabel = property?.status === "rented" || property?.status === "expired" ? copy.relistAsDraft : copy.startEditing;
 
   return (
-    <form className="listing-form" onSubmit={(event) => { event.preventDefault(); void save(false); }}>
+    <form className="listing-form" data-mobile-listing-form onSubmit={(event) => { event.preventDefault(); void save(false); }}>
       {property?.moderation_notes && <div className="review-note"><strong>{copy.moderatorNote}</strong> {property.moderation_notes}</div>}
       {locked && property && <div className="review-note"><strong>{formatWorkflowText(copy.statusLocked, { status: listingStatusLabel(property.status, locale) })}</strong><p>{copy.lockedHint}</p><button className="secondary-button" type="button" disabled={busy} onClick={() => void beginEditing()}>{busy ? copy.preparing : relistLabel}</button></div>}
 
@@ -562,7 +562,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
       </section>
 
       {message && <div className="auth-message" role="status" aria-live="polite">{message}</div>}
-      {!locked && <div className="listing-actions"><button className="secondary-button" type="submit" disabled={busy}>{busy ? copy.saving : copy.saveDraft}</button><button className="primary-button" type="button" disabled={busy} onClick={() => void save(true)}>{busy ? copy.working : copy.submitReview}</button></div>}
+      {!locked && <div className="listing-actions"><button className="secondary-button listing-save-draft" type="submit" disabled={busy}>{busy ? copy.saving : copy.saveDraft}</button><button className="primary-button listing-submit-review" type="button" disabled={busy} onClick={() => void save(true)}>{busy ? copy.working : copy.submitReview}</button></div>}
     </form>
   );
 }
