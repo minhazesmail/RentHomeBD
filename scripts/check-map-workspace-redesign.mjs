@@ -55,7 +55,12 @@ requireText(workspace, 'busy && visibleListings.length > 0', "stale-result prese
 requireText(workspace, 'workspaceCopy.results.updatingHint', "non-destructive update feedback");
 requireText(workspace, 'mapDirty &&', "map dirty gate for search-this-area action");
 requireText(workspace, 'workspaceCopy.map.searchThisArea', "Search this area control");
-requirePattern(workspace, /function handleMapCenterChange[\s\S]*?setMapDirty\(true\)/, "map movement marks viewport dirty");
+requirePattern(workspace, /function handleMapCenterChange[\s\S]*?distanceMeters\(nextCenter, appliedQuery\.center\)[\s\S]*?LIVE_CENTER_MIN_DISTANCE_METERS/, "only meaningful map-center movement marks the viewport dirty");
+requireText(workspace, 'window.history.replaceState(window.history.state, "", `/homes?${params.toString()}`)', "successful radius search commits canonical URL state");
+requireText(workspace, "appliedQuery.center[0].toFixed(6)", "property return path serializes the applied map center");
+requireText(workspace, "appliedQuery.areaLabel", "mobile search summary reflects applied criteria rather than draft filters");
+requireText(workspace, "data-map-search-feedback", "map-level search feedback remains visible beside map actions");
+requireText(workspace, "announceMapResult", "Search this area can request explicit map feedback");
 
 // Selection, hover/focus, exact-pin and return-state synchronization.
 requireText(results, "onMouseEnter={() => onHighlight(listing.id)}", "result hover highlights marker");
