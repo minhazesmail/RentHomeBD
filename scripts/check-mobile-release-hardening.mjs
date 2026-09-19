@@ -15,6 +15,9 @@ const productNavTsx = read("src/components/product-navigation.tsx");
 const language = read("src/components/language-switcher.module.css");
 const theme = read("src/components/theme-switcher.module.css");
 const packageJson = JSON.parse(read("package.json"));
+const ci = read(".github/workflows/ci.yml");
+const mobileWorkflow = read(".github/workflows/mobile-concept.yml");
+const releaseBrowser = read("scripts/check-mobile-release-browser.mjs");
 
 expect(mobile, "--mobile-app-topbar-height: calc(58px + env(safe-area-inset-top));", "mobile topbar token must include top safe area");
 expect(mobile, "--mobile-app-tabbar-height: calc(64px + env(safe-area-inset-bottom));", "mobile tabbar token must include bottom safe area");
@@ -70,6 +73,15 @@ expect(read("src/app/saved/saved-workspace-redesign.css"), "--mobile-app-topbar-
 expect(read("src/app/messages/messages-workspace-redesign.css"), "--mobile-app-tabbar-height", "Messages inbox must reserve primary tabs");
 expect(read("src/app/moderation/moderation-mobile.css"), "min-height: 48px", "Moderator decisions must retain 48px actions");
 reject(mobile, "--mobile-app-topbar-height: 58px;", "hard-coded topbar height returned without safe area");
+for (const breakpoint of ["320x568", "360x800", "390x844", "430x932", "768x1024", "960x900"]) {
+  expect(releaseBrowser, breakpoint, `release browser matrix is missing ${breakpoint}`);
+}
+expect(releaseBrowser, 'reducedMotion: "reduce"', "release browser matrix must exercise reduced motion");
+expect(releaseBrowser, 'forcedColors: "active"', "release browser matrix must exercise forced colors");
+expect(ci, "Release hardening browser QA", "full CI must run release browser QA");
+expect(ci, "npm run releasebrowserqa", "full CI must invoke release browser script");
+expect(mobileWorkflow, "Validate release breakpoint and accessibility matrix", "mobile workflow must run final release matrix");
+expect(mobileWorkflow, "artifacts/release-hardening", "mobile workflow must preserve release screenshots");
 
 if (failures.length) {
   console.error("Task 10 release hardening QA failed:\n" + failures.map((failure) => `- ${failure}`).join("\n"));
