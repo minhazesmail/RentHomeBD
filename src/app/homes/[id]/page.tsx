@@ -184,7 +184,7 @@ export default async function PublicPropertyPage({
         <section className="property-detail-hero">
           <div className="property-detail-hero-main">
             <div className="property-detail-hero-kicker">
-              <p className="eyebrow">{displayValue(property.property_type, copy.values)}</p>
+              {property.property_type && <p className="eyebrow">{displayValue(property.property_type, copy.values)}</p>}
               <span className="property-detail-availability"><CircleCheck size={13} aria-hidden="true" />{availability}</span>
             </div>
             <h1>{property.title || copy.common.rentalProperty}</h1>
@@ -205,7 +205,8 @@ export default async function PublicPropertyPage({
                 {property.bedrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><BedDouble size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bedrooms, locale)}</strong><span>{copy.stats.bedrooms}</span></span></div>}
                 {property.bathrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><Bath size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bathrooms, locale)}</strong><span>{copy.stats.bathrooms}</span></span></div>}
                 {property.size_sqft != null && <div className="summary-stat"><span className="summary-stat-icon"><Ruler size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.size_sqft, locale)}</strong><span>{copy.stats.squareFeet}</span></span></div>}
-                {(property.floor_number != null || property.total_floors != null) && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.floor_number == null ? copy.common.notSpecified : formatNumber(property.floor_number, locale)}{property.total_floors != null ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>}
+                {property.floor_number != null && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.floor_number, locale)}{property.total_floors != null ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>}
+                {property.floor_number == null && property.total_floors != null && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.total_floors, locale)}</strong><span>{copy.stats.totalFloors}</span></span></div>}
               </section>
             )}
 
