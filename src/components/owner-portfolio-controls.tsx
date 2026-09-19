@@ -44,7 +44,7 @@ export function OwnerPortfolioControls({ query, status, sort, visibleCount, tota
   }
 
   return (
-    <div className={styles.workspaceControls}>
+    <div className={styles.workspaceControls} data-owner-portfolio-controls>
       <div className={styles.workspaceTopline}>
         <form className={styles.searchForm} onSubmit={submitSearch} role="search">
           <label className="sr-only" htmlFor="owner-portfolio-search">{copy.searchLabel}</label>
