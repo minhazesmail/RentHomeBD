@@ -59,3 +59,18 @@ The same predicate powers the summary count, priority queue, and `status=attenti
 - attention count/filter/queue use the same predicate,
 - owner controls and freshness actions are localized,
 - locale-aware rent/date/number formatting is used.
+
+
+## Current mobile plan — Task 7 owner portfolio
+
+The phone portfolio keeps the same owner lifecycle rules and shared 3-day attention predicate, but changes the operating hierarchy for one-handed use:
+
+- eligible owners keep the stable **Properties** primary tab;
+- portfolio summary cards stay two-up and status-driven;
+- the priority queue is horizontally swipeable and keeps the actionable freshness/moderation explanation attached to each listing;
+- search, sort and status filters remain URL-backed, with the active status automatically centered in the mobile chip rail;
+- listing cards keep status detail, moderator feedback, rent/update context and lifecycle actions without replacing missing rent with an ambiguous dash;
+- **Still available** is the primary mobile freshness action when applicable, while Mark rented and Edit/Relist remain secondary;
+- listing editor routes remain contextual and are not changed by this task.
+
+The mobile presentation does not change moderation states, RLS, lifecycle RPCs, freshness timing, or who may manage a listing.

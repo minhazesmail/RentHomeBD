@@ -175,3 +175,55 @@ html[data-resolved-theme="dark"] .owner-verification-badge.is-neutral {
   background: var(--surface-soft);
   color: var(--muted);
 }
+
+
+/* Task 7 mobile owner portfolio appearance */
+html[data-resolved-theme="dark"] :where(
+  [data-owner-mobile-portfolio] .owner-management-header,
+  [data-owner-mobile-portfolio] .owner-summary-card,
+  [data-owner-property-panel],
+  [data-owner-property-panel] .owner-property-card,
+  [data-owner-portfolio-controls]
+) {
+  border-color: var(--border);
+  background: var(--surface-solid);
+  color: var(--foreground);
+}
+
+html[data-resolved-theme="dark"] [data-owner-property-panel] .owner-property-panel-heading,
+html[data-resolved-theme="dark"] [data-owner-portfolio-controls] {
+  border-color: var(--border);
+  background: var(--surface-soft);
+}
+
+html[data-resolved-theme="dark"] [data-owner-attention-workbench] {
+  border-color: var(--warning-border);
+  background:
+    radial-gradient(circle at 96% -20%, color-mix(in srgb, var(--warning-bg) 34%, transparent), transparent 20rem),
+    color-mix(in srgb, var(--warning-bg) 46%, var(--surface-solid));
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-resolved-theme="dark"] [data-owner-attention-workbench] .owner-attention-workbench-heading,
+html[data-resolved-theme="dark"] [data-owner-attention-workbench] .owner-attention-item {
+  border-color: var(--warning-border);
+}
+
+html[data-resolved-theme="dark"] [data-owner-attention-workbench] .owner-attention-workbench-heading p:not(.eyebrow),
+html[data-resolved-theme="dark"] [data-owner-attention-workbench] .owner-attention-item-copy > span {
+  color: var(--muted);
+}
+
+html[data-resolved-theme="dark"] [data-owner-property-panel] .owner-property-card[data-owner-needs-attention="true"] {
+  background: color-mix(in srgb, var(--warning-bg) 34%, var(--surface-solid));
+}
+
+html[data-resolved-theme="dark"] [data-owner-property-panel] .owner-property-meta {
+  border-color: var(--border);
+}
+
+html[data-resolved-theme="dark"] [data-owner-property-panel] [data-owner-freshness-actions] .freshness-confirm {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--text-inverse);
+}

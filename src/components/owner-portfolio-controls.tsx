@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
+import { useEffect, useRef, type FormEvent } from "react";
 
 import { formatOwnerPortfolioText, getOwnerPortfolioCopy } from "@/i18n/owner-portfolio-copy";
 import { useLocale } from "@/i18n/use-locale";
@@ -24,6 +24,7 @@ export function OwnerPortfolioControls({ query, status, sort, visibleCount, tota
   const router = useRouter();
   const { locale, formatNumber } = useLocale();
   const copy = getOwnerPortfolioCopy(locale).controls;
+  const activeTabRef = useRef<HTMLAnchorElement>(null);
   const statusTabs = [
     { value: "all", label: copy.all },
     { value: "attention", label: copy.needsAction },
@@ -36,6 +37,11 @@ export function OwnerPortfolioControls({ query, status, sort, visibleCount, tota
     { value: "expired", label: copy.expired },
   ] as const;
 
+  useEffect(() => {
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    activeTabRef.current?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [status]);
+
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -44,7 +50,7 @@ export function OwnerPortfolioControls({ query, status, sort, visibleCount, tota
   }
 
   return (
-    <div className={styles.workspaceControls}>
+    <div className={styles.workspaceControls} data-owner-portfolio-controls>
       <div className={styles.workspaceTopline}>
         <form className={styles.searchForm} onSubmit={submitSearch} role="search">
           <label className="sr-only" htmlFor="owner-portfolio-search">{copy.searchLabel}</label>
@@ -70,7 +76,15 @@ export function OwnerPortfolioControls({ query, status, sort, visibleCount, tota
       <div className={styles.workspaceBottomline}>
         <nav className={styles.statusTabs} aria-label={copy.filtersAria}>
           {statusTabs.map((tab) => (
-            <Link key={tab.value} className={status === tab.value ? styles.statusActive : styles.statusTab} href={ownerHref({ query, status: tab.value, sort })} aria-current={status === tab.value ? "page" : undefined}>{tab.label}</Link>
+            <Link
+              key={tab.value}
+              ref={status === tab.value ? activeTabRef : undefined}
+              className={status === tab.value ? styles.statusActive : styles.statusTab}
+              href={ownerHref({ query, status: tab.value, sort })}
+              aria-current={status === tab.value ? "page" : undefined}
+            >
+              {tab.label}
+            </Link>
           ))}
         </nav>
         <div className={styles.resultSummary} aria-live="polite">

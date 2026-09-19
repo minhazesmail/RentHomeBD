@@ -50,14 +50,14 @@ export function ListingFreshnessActions({ propertyId, status }: { propertyId: st
   const editLabel = status === "rented" || status === "expired" ? copy.relist : copy.edit;
 
   return (
-    <div className="freshness-actions" onClick={(event) => event.preventDefault()} aria-live="polite">
+    <div className="freshness-actions" data-owner-freshness-actions data-listing-status={status} onClick={(event) => event.preventDefault()} aria-live="polite">
       {canConfirmAvailability && (
         <>
-          <ActionButton variant="secondary" className="freshness-button" type="button" disabled={busy !== null} aria-busy={busy === "confirm"} onClick={() => void reconfirm()}>{busy === "confirm" ? copy.confirming : copy.stillAvailable}</ActionButton>
-          <ActionButton variant="text" className="freshness-rented" type="button" disabled={busy !== null} aria-busy={busy === "rented"} onClick={() => void markRented()}>{busy === "rented" ? copy.updating : copy.markRented}</ActionButton>
+          <ActionButton variant="secondary" className="freshness-button freshness-confirm" type="button" disabled={busy !== null} aria-busy={busy === "confirm"} onClick={() => void reconfirm()}>{busy === "confirm" ? copy.confirming : copy.stillAvailable}</ActionButton>
+          <ActionButton variant="text" className="freshness-rented freshness-mark-rented" type="button" disabled={busy !== null} aria-busy={busy === "rented"} onClick={() => void markRented()}>{busy === "rented" ? copy.updating : copy.markRented}</ActionButton>
         </>
       )}
-      {canBeginEdit && <ActionButton variant={canConfirmAvailability ? "text" : "secondary"} className="freshness-button" type="button" disabled={busy !== null} aria-busy={busy === "edit"} onClick={() => void beginEdit()}>{busy === "edit" ? copy.preparing : editLabel}</ActionButton>}
+      {canBeginEdit && <ActionButton variant={canConfirmAvailability ? "text" : "secondary"} className="freshness-button freshness-edit" type="button" disabled={busy !== null} aria-busy={busy === "edit"} onClick={() => void beginEdit()}>{busy === "edit" ? copy.preparing : editLabel}</ActionButton>}
       {error && <span className="freshness-error" role="alert">{error}</span>}
     </div>
   );
