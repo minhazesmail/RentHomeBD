@@ -12,7 +12,6 @@ import { getWorkflowCopy } from "@/i18n/workflow-copy";
 import { requireOwnerOrAgent } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import "../listing-media-styles.css";
-import "../listing-mobile-editor.css";
 export const dynamic = "force-dynamic";
 
 const OWNER_MEDIA_PREVIEW_TTL_SECONDS = 300;
