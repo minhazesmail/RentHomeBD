@@ -129,7 +129,6 @@ export function MobileLandingExperience() {
     && customBudgetNumber <= MAX_CUSTOM_BUDGET
     && (customBudgetNumber - MIN_CUSTOM_BUDGET) % CUSTOM_BUDGET_STEP === 0
   );
-  const mapReady = Boolean(area && tenant && customBudgetReady);
   const mapHref = buildHomesHref({ area, tenant, maxRent: customBudgetReady ? maxRent : "", bedrooms, radius });
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -402,13 +401,9 @@ export function MobileLandingExperience() {
             <h2>{locale === "bn" ? "ম্যাপে পুরো এলাকা দেখুন" : "See the neighborhood, not just the listing."}</h2>
             <p>{copy.mapDescription}</p>
           </div>
-          {mapReady ? (
-            <Link href={mapHref}>{copy.exploreArea}<ArrowRight aria-hidden="true" /></Link>
-          ) : (
-            <span className={styles.mapCtaDisabled} aria-disabled="true" title={copy.exploreAreaUnavailable}>
-              {copy.exploreArea}<ArrowRight aria-hidden="true" />
-            </span>
-          )}
+          <Link href={mapHref} data-mobile-explore-map>
+            {copy.exploreArea}<ArrowRight aria-hidden="true" />
+          </Link>
         </section>
       </main>
 
