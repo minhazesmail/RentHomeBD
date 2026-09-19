@@ -59,7 +59,7 @@ export default async function NewPropertyPage({
   }
 
   return (
-    <main className="listing-shell listing-editor-page">
+    <main className="listing-shell listing-editor-page" data-mobile-listing-editor>
       <ProductNavigation authenticated canList current="properties" />
       <header className="listing-page-header listing-editor-header">
         <div>
