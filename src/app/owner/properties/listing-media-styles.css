@@ -1,4 +1,4 @@
 /* Layer listing-specific owner refinements after the owner route redesign. */
 @import "./listing-media-ux.css" layer(route-detail);
 
-@import "./listing-mobile-editor.css" layer(mobile-appearance);
+@import "./listing-mobile-editor.css" layer(editor-mobile);
