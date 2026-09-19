@@ -90,6 +90,22 @@ try {
   const entryContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
   const entryPage = await entryContext.newPage();
   await openSettled(entryPage, `${baseURL}/`);
+
+  const defaultMapCta = entryPage.locator("[data-mobile-explore-map]");
+  if (await defaultMapCta.count() !== 1) failures.push("entry-search: Explore this area is not rendered as one actionable link");
+  const defaultMapHrefValue = await defaultMapCta.getAttribute("href");
+  const defaultMapHref = new URL(defaultMapHrefValue ?? "/", baseURL);
+  if (defaultMapHref.pathname !== "/homes") failures.push("entry-search: default Explore this area does not target /homes");
+  if (defaultMapHref.searchParams.get("radius") !== "15") failures.push("entry-search: default Explore this area lost the default radius");
+
+  const defaultMapPage = await entryContext.newPage();
+  await openSettled(defaultMapPage, `${baseURL}/`);
+  await Promise.all([
+    defaultMapPage.waitForURL("**/homes?**"),
+    defaultMapPage.locator("[data-mobile-explore-map]").click(),
+  ]);
+  if (new URL(defaultMapPage.url()).pathname !== "/homes") failures.push("entry-search: tapping Explore this area did not navigate to /homes");
+  await defaultMapPage.close();
   await entryPage.locator('[data-mobile-search-field="area"] input[type="search"]').fill("Dhanmondi, Dhaka");
   await entryPage.locator('[data-mobile-search-field="tenant"] select').selectOption("family");
   await entryPage.locator('[data-mobile-search-field="budget"] select').selectOption("25000");
@@ -98,14 +114,14 @@ try {
   await entryPage.locator('[data-mobile-more-filters] select[name="radius"]').selectOption("10");
 
   await entryPage.locator('button[data-mobile-popular-area="Banani, Dhaka"]').click();
-  const popularHrefValue = await entryPage.locator('[data-mobile-concept-landing] a[href^="/homes?"]').first().getAttribute("href");
+  const popularHrefValue = await entryPage.locator("[data-mobile-explore-map]").getAttribute("href");
   const popularHref = new URL(popularHrefValue ?? "/homes", baseURL);
   for (const [key, expected] of [["area", "Banani, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "2"], ["radius", "10"]]) {
     if (popularHref.searchParams.get(key) !== expected) failures.push(`entry-search: popular area action lost ${key}=${expected}`);
   }
 
   await entryPage.locator('button[data-mobile-popular-area="Dhanmondi, Dhaka"]').click();
-  const mapHrefValue = await entryPage.locator('[data-mobile-concept-landing] a[href^="/homes?"]').first().getAttribute("href");
+  const mapHrefValue = await entryPage.locator("[data-mobile-explore-map]").getAttribute("href");
   const mapHref = new URL(mapHrefValue ?? "/homes", baseURL);
   for (const [key, expected] of [["area", "Dhanmondi, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "2"], ["radius", "10"]]) {
     if (mapHref.searchParams.get(key) !== expected) failures.push(`entry-search: map CTA lost ${key}=${expected}`);
