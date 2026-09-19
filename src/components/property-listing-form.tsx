@@ -209,6 +209,15 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
   const coverKey = orderedMedia.find((item) => item.kind === "existing" ? item.media.media_type === "photo" : item.file.type.startsWith("image/"))?.key ?? null;
 
   function toggle(value: string, values: string[], setter: (next: string[]) => void) { setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]); }
+
+  function toggleTenantType(value: string) {
+    setTenantTypes((current) => {
+      if (current.includes(value)) return current.filter((item) => item !== value);
+      if (value === "everyone") return ["everyone"];
+      return [...current.filter((item) => item !== "everyone"), value];
+    });
+  }
+
   function setMapLocation(lat: number, lng: number) {
     setLatitude(lat.toFixed(6));
     setLongitude(lng.toFixed(6));
@@ -506,7 +515,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
 
       <section className="listing-section">
         <div className="section-heading"><span>3</span><div><h2>{copy.renterTypesTitle}</h2><p>{copy.renterTypesHint}</p></div></div>
-        <fieldset className="choice-group" disabled={locked}><div className="choice-grid">{tenantOptions.map(([value, label]) => <label className="choice-chip" key={value}><input type="checkbox" checked={tenantTypes.includes(value)} onChange={() => toggle(value, tenantTypes, setTenantTypes)} />{label}</label>)}</div></fieldset>
+        <fieldset className="choice-group" disabled={locked}><div className="choice-grid">{tenantOptions.map(([value, label]) => <label className="choice-chip" key={value}><input type="checkbox" checked={tenantTypes.includes(value)} onChange={() => toggleTenantType(value)} />{label}</label>)}</div></fieldset>
       </section>
 
       <section className="listing-section listing-location-section">
