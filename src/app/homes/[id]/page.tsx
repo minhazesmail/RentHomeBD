@@ -145,6 +145,7 @@ export default async function PublicPropertyPage({
   const returnQuery = returnTo !== "/homes" ? `?returnTo=${encodeURIComponent(returnTo)}` : "";
   const detailPath = `/homes/${property.id}${returnQuery}`;
   const signInHref = `/login?next=${encodeURIComponent(`${detailPath}#contact`)}`;
+  const saveSignInHref = `/login?next=${encodeURIComponent(detailPath)}`;
   const reportSignInHref = `/login?next=${encodeURIComponent(`${detailPath}#trust`)}`;
   const roleVerified = Boolean(property.owner_role_verified_at && property.owner_role_verified_role === property.owner_role);
   const ownerPhoneVerified = Boolean(property.owner_phone_verified_at);
@@ -175,7 +176,7 @@ export default async function PublicPropertyPage({
               <span>{copy.nav.back}</span>
             </Link>
             <div className="property-mobile-gallery-actions-right">
-              <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} compact />
+              <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} signInHref={saveSignInHref} compact />
               <PropertyShareButton title={property.title || copy.common.rentalProperty} />
             </div>
           </div>
@@ -282,7 +283,7 @@ export default async function PublicPropertyPage({
           <aside className="property-contact-card" id="contact">
             <div className="contact-price-summary"><span>{copy.common.monthlyRent}</span><strong>{rentLabel}</strong><small>{depositLabel ? `${copy.common.deposit} ${depositLabel}` : copy.common.depositNotListed}</small></div>
             <div className="property-contact-secondary-actions">
-              <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} />
+              <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} signInHref={saveSignInHref} />
               <PropertyShareButton title={property.title || copy.common.rentalProperty} />
             </div>
             <div className="owner-identity-row"><div className="owner-badge">{property.owner_display_name?.slice(0, 1).toUpperCase() || "O"}</div><div className="owner-identity-copy"><p className="eyebrow">{formatPropertyDetailText(copy.contact.listedBy, { role: ownerRoleLabel })}</p><h2>{property.owner_display_name || copy.contact.propertyOwner}</h2></div></div>
