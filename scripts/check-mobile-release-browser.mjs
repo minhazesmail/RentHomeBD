@@ -69,6 +69,8 @@ async function inspect(page) {
     const appearanceSummary = Array.from(document.querySelectorAll('summary[aria-haspopup="menu"]')).find(visible);
     const appearanceRect = appearanceSummary?.getBoundingClientRect() ?? null;
 
+    const brandImage = document.querySelector("[data-product-navigation] .brand-logo img");
+    const brandStyle = brandImage ? getComputedStyle(brandImage) : null;
     const rootStyle = getComputedStyle(document.documentElement);
     return {
       overflow: Math.max(
@@ -92,6 +94,10 @@ async function inspect(page) {
       mobileTabLinks,
       languageButtons,
       appearanceHeight: appearanceRect?.height ?? 0,
+      brand: brandImage && brandStyle ? {
+        src: brandImage.getAttribute("src") ?? "",
+        content: brandStyle.content,
+      } : null,
       tokens: {
         topbar: rootStyle.getPropertyValue("--mobile-app-topbar-height").trim(),
         tabbar: rootStyle.getPropertyValue("--mobile-app-tabbar-height").trim(),
@@ -137,6 +143,10 @@ function validate(snapshot, route, viewport) {
     if (viewport.width <= 1040) {
       if (snapshot.languageButtons.some((height) => height < 43.5)) failures.push(`${label}: language utility target below 44px`);
       if (snapshot.appearanceHeight > 0 && snapshot.appearanceHeight < 43.5) failures.push(`${label}: appearance utility target below 44px`);
+    }
+
+    if (viewport.width <= 820 && snapshot.brand?.content?.includes("nearbasha-logo-on-dark.svg")) {
+      failures.push(`${label}: light mobile homes header is forcing the on-dark NearBasha logo`);
     }
   }
 }
