@@ -13,7 +13,7 @@
     --mobile-app-gutter: 16px;
     --mobile-app-safe-left: max(var(--mobile-app-gutter), env(safe-area-inset-left));
     --mobile-app-safe-right: max(var(--mobile-app-gutter), env(safe-area-inset-right));
-    --mobile-app-topbar-height: 58px;
+    --mobile-app-topbar-height: calc(58px + env(safe-area-inset-top));
     --mobile-app-tabbar-height: calc(64px + env(safe-area-inset-bottom));
     --mobile-app-control-height: 48px;
     --mobile-app-hit-target: 44px;
