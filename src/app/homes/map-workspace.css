@@ -614,6 +614,7 @@
 
   .nb-global-shell--renter .mobile-search-summary {
     position: fixed;
+    pointer-events: none;
     top: 82px;
     left: 50%;
     z-index: 1260;
