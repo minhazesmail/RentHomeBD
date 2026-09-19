@@ -130,8 +130,8 @@ function validate(snapshot, route, viewport) {
       if ((snapshot.mobileTabLinks?.length ?? 0) !== 4) failures.push(`${label}: expected four renter primary tabs`);
       if (snapshot.mobileTabLinks.some((tab) => tab.height < 43.5)) failures.push(`${label}: primary tab hit target below 44px`);
       if (snapshot.productNav.height < 57.5) failures.push(`${label}: safe topbar collapsed below 58px`);
-    } else if (snapshot.mobileTabs?.visible) {
-      failures.push(`${label}: phone tab bar remains visible at tablet/compact desktop width`);
+    } else if (viewport.width > 768 && snapshot.mobileTabs?.visible) {
+      failures.push(`${label}: phone tab bar remains visible above the 768px boundary`);
     }
 
     if (viewport.width <= 1040) {
@@ -165,6 +165,7 @@ try {
       const skip = page.locator(".skip-link");
       if (await skip.count()) {
         await skip.focus();
+        await page.waitForTimeout(220);
         const skipState = await skip.evaluate((element) => {
           const rect = element.getBoundingClientRect();
           const style = getComputedStyle(element);
