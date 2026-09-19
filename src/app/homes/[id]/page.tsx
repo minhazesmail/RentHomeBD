@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Bath, BedDouble, Building2, CircleAlert, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
+import { ArrowLeft, Bath, BedDouble, Building2, CircleAlert, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { BrandLogo } from "@/components/brand-logo";
@@ -145,14 +145,16 @@ export default async function PublicPropertyPage({
   const returnQuery = returnTo !== "/homes" ? `?returnTo=${encodeURIComponent(returnTo)}` : "";
   const detailPath = `/homes/${property.id}${returnQuery}`;
   const signInHref = `/login?next=${encodeURIComponent(`${detailPath}#contact`)}`;
+  const saveSignInHref = `/login?next=${encodeURIComponent(detailPath)}`;
   const reportSignInHref = `/login?next=${encodeURIComponent(`${detailPath}#trust`)}`;
   const roleVerified = Boolean(property.owner_role_verified_at && property.owner_role_verified_role === property.owner_role);
   const ownerPhoneVerified = Boolean(property.owner_phone_verified_at);
   const viewerPhoneVerified = Boolean(viewerProfile?.phone_verified_at);
   const ownerRoleLabel = displayValue(property.owner_role, copy.values);
   const rentLabel = property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.common.rentOnRequest;
-  const depositLabel = formatCurrency(property.deposit_bdt, locale);
+  const depositLabel = property.deposit_bdt > 0 ? formatCurrency(property.deposit_bdt, locale) : null;
   const showCompatibilityReturn = Boolean(searchTenantType && renterFit !== "match");
+  const hasSummaryFacts = property.bedrooms != null || property.bathrooms != null || property.size_sqft != null || property.floor_number != null || property.total_floors != null;
 
   return (
     <main className="property-detail-page">
@@ -166,10 +168,24 @@ export default async function PublicPropertyPage({
       </header>
 
       <div className="property-detail-shell">
+        <div className="property-detail-gallery-stage">
+          <PropertyMediaGallery media={galleryMedia} propertyTitle={property.title || copy.common.rentalProperty} />
+          <div className="property-mobile-gallery-actions" aria-label={copy.media.regionAria}>
+            <Link className="property-mobile-icon-action property-mobile-back" href={returnTo} aria-label={copy.nav.backToMap}>
+              <ArrowLeft size={20} aria-hidden="true" />
+              <span>{copy.nav.back}</span>
+            </Link>
+            <div className="property-mobile-gallery-actions-right">
+              <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} signInHref={saveSignInHref} compact />
+              <PropertyShareButton title={property.title || copy.common.rentalProperty} compact />
+            </div>
+          </div>
+        </div>
+
         <section className="property-detail-hero">
           <div className="property-detail-hero-main">
             <div className="property-detail-hero-kicker">
-              <p className="eyebrow">{displayValue(property.property_type, copy.values)}</p>
+              {property.property_type && <p className="eyebrow">{displayValue(property.property_type, copy.values)}</p>}
               <span className="property-detail-availability"><CircleCheck size={13} aria-hidden="true" />{availability}</span>
             </div>
             <h1>{property.title || copy.common.rentalProperty}</h1>
@@ -179,33 +195,12 @@ export default async function PublicPropertyPage({
             <span className="property-detail-price-label">{copy.common.monthlyRent}</span>
             <strong>{rentLabel}</strong>
             <span>{copy.common.perMonth}</span>
-            <small>{property.deposit_bdt > 0 ? `${copy.common.deposit} ${depositLabel}` : copy.common.noDepositListed}</small>
+            <small>{depositLabel ? `${copy.common.deposit} ${depositLabel}` : copy.common.noDepositListed}</small>
           </div>
         </section>
 
-        <PropertyMediaGallery media={galleryMedia} propertyTitle={property.title || copy.common.rentalProperty} />
-
         <div className="property-detail-layout">
           <div className="property-detail-main">
-            <section className="property-detail-section property-summary-grid">
-              <div className="summary-stat"><span className="summary-stat-icon"><BedDouble size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.bedrooms == null ? "—" : formatNumber(property.bedrooms, locale)}</strong><span>{copy.stats.bedrooms}</span></span></div>
-              <div className="summary-stat"><span className="summary-stat-icon"><Bath size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.bathrooms == null ? "—" : formatNumber(property.bathrooms, locale)}</strong><span>{copy.stats.bathrooms}</span></span></div>
-              <div className="summary-stat"><span className="summary-stat-icon"><Ruler size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.size_sqft ? formatNumber(property.size_sqft, locale) : "—"}</strong><span>{copy.stats.squareFeet}</span></span></div>
-              <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{property.floor_number == null ? "—" : formatNumber(property.floor_number, locale)}{property.total_floors ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>
-            </section>
-
-            <section className="property-detail-section">
-              <div className="property-section-heading"><div><h2>{copy.about.heading}</h2><p className="section-copy">{copy.about.description}</p></div><Sparkles size={20} aria-hidden="true" /></div>
-              <p className="property-description">{property.description || copy.about.noDescription}</p>
-              <dl className="property-facts">
-                <div><dt>{copy.about.propertyType}</dt><dd>{displayValue(property.property_type, copy.values)}</dd></div>
-                <div><dt>{copy.about.furnishing}</dt><dd>{displayValue(property.furnishing, copy.values)}</dd></div>
-                <div><dt>{copy.about.availableFrom}</dt><dd>{formatPropertyDate(property.available_from, locale)}</dd></div>
-                <div><dt>{copy.about.deposit}</dt><dd>{depositLabel}</dd></div>
-                <div><dt>{copy.about.genderPreference}</dt><dd>{displayValue(property.gender_preference, copy.values)}</dd></div>
-              </dl>
-            </section>
-
             <section className={`property-detail-section tenant-compatibility-card is-${renterFit}`}>
               <div className="tenant-compatibility-top">
                 <div className="tenant-compatibility-icon"><Users size={22} aria-hidden="true" /></div>
@@ -227,12 +222,41 @@ export default async function PublicPropertyPage({
               )}
             </section>
 
+            {hasSummaryFacts && (
+              <section className="property-detail-section property-summary-grid" aria-label={copy.about.heading}>
+                {property.bedrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><BedDouble size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bedrooms, locale)}</strong><span>{copy.stats.bedrooms}</span></span></div>}
+                {property.bathrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><Bath size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bathrooms, locale)}</strong><span>{copy.stats.bathrooms}</span></span></div>}
+                {property.size_sqft != null && <div className="summary-stat"><span className="summary-stat-icon"><Ruler size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.size_sqft, locale)}</strong><span>{copy.stats.squareFeet}</span></span></div>}
+                {property.floor_number != null && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.floor_number, locale)}{property.total_floors != null ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>}
+                {property.floor_number == null && property.total_floors != null && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.total_floors, locale)}</strong><span>{copy.stats.totalFloors}</span></span></div>}
+              </section>
+            )}
+
+            <section className="property-detail-section property-costs-section">
+              <div className="property-section-heading"><div><h2>{copy.costs.heading}</h2><p className="section-copy">{copy.costs.description}</p></div></div>
+              <dl className="property-costs">
+                <div><dt>{copy.costs.monthlyRent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.costs.notProvided}</dd></div>
+                <div><dt>{copy.costs.deposit}</dt><dd>{depositLabel || copy.costs.notProvided}</dd></div>
+              </dl>
+            </section>
+
             <section className="property-detail-section">
               <div className="property-section-heading"><div><h2>{copy.amenities.heading}</h2><p className="section-copy">{copy.amenities.description}</p></div></div>
               <div className="property-tag-groups">
                 <div><h3>{copy.amenities.amenities}</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} aria-hidden="true" />{amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} aria-hidden="true" />{copy.amenities.noneListed}</span>}</div></div>
                 <div><h3>{copy.amenities.utilities}</h3><div className="amenity-grid utility-grid">{property.utilities_included.length ? property.utilities_included.map((utility) => <span className="amenity-item" key={utility}><Zap size={15} aria-hidden="true" />{displayValue(utility, copy.values)}</span>) : <span className="amenity-item"><Zap size={15} aria-hidden="true" />{copy.amenities.noneListed}</span>}</div></div>
               </div>
+            </section>
+
+            <section className="property-detail-section">
+              <div className="property-section-heading"><div><h2>{copy.about.heading}</h2><p className="section-copy">{copy.about.description}</p></div><Sparkles size={20} aria-hidden="true" /></div>
+              <p className="property-description">{property.description || copy.about.noDescription}</p>
+              <dl className="property-facts">
+                {property.property_type && <div><dt>{copy.about.propertyType}</dt><dd>{displayValue(property.property_type, copy.values)}</dd></div>}
+                {property.furnishing && <div><dt>{copy.about.furnishing}</dt><dd>{displayValue(property.furnishing, copy.values)}</dd></div>}
+                {property.available_from && <div><dt>{copy.about.availableFrom}</dt><dd>{formatPropertyDate(property.available_from, locale)}</dd></div>}
+                {property.gender_preference && <div><dt>{copy.about.genderPreference}</dt><dd>{displayValue(property.gender_preference, copy.values)}</dd></div>}
+              </dl>
             </section>
 
             <section className="property-detail-section">
@@ -257,9 +281,11 @@ export default async function PublicPropertyPage({
           </div>
 
           <aside className="property-contact-card" id="contact">
-            <div className="contact-price-summary"><span>{copy.common.monthlyRent}</span><strong>{rentLabel}</strong><small>{property.deposit_bdt > 0 ? `${copy.common.deposit} ${depositLabel}` : copy.common.depositNotListed}</small></div>
-            <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} />
-            <PropertyShareButton title={property.title || copy.common.rentalProperty} />
+            <div className="contact-price-summary"><span>{copy.common.monthlyRent}</span><strong>{rentLabel}</strong><small>{depositLabel ? `${copy.common.deposit} ${depositLabel}` : copy.common.depositNotListed}</small></div>
+            <div className="property-contact-secondary-actions">
+              <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} signInHref={saveSignInHref} />
+              <PropertyShareButton title={property.title || copy.common.rentalProperty} />
+            </div>
             <div className="owner-identity-row"><div className="owner-badge">{property.owner_display_name?.slice(0, 1).toUpperCase() || "O"}</div><div className="owner-identity-copy"><p className="eyebrow">{formatPropertyDetailText(copy.contact.listedBy, { role: ownerRoleLabel })}</p><h2>{property.owner_display_name || copy.contact.propertyOwner}</h2></div></div>
             <div className="owner-verification-badges">
               <span className={`owner-verification-badge${ownerPhoneVerified ? "" : " is-neutral"}`}><Phone size={12} aria-hidden="true" />{ownerPhoneVerified ? copy.contact.phoneVerified : copy.contact.phoneUnverified}</span>

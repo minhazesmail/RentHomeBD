@@ -189,6 +189,7 @@ html[data-resolved-theme="dark"] .property-contact-card {
 
 html[data-resolved-theme="dark"] .property-summary-grid div,
 html[data-resolved-theme="dark"] .summary-stat,
+html[data-resolved-theme="dark"] .property-costs > div,
 html[data-resolved-theme="dark"] .trust-signal,
 html[data-resolved-theme="dark"] .amenity-item,
 html[data-resolved-theme="dark"] .contact-price-summary,
@@ -208,6 +209,7 @@ html[data-resolved-theme="dark"] .utility-grid .amenity-item {
 html[data-resolved-theme="dark"] :where(
   .property-summary-grid strong,
   .property-facts dd,
+  .property-costs dd,
   .contact-price-summary strong,
   .coordinate-readout strong
 ) {
@@ -218,6 +220,7 @@ html[data-resolved-theme="dark"] :where(
   .property-summary-grid span,
   .property-description,
   .property-facts dt,
+  .property-costs dt,
   .contact-price-summary span,
   .contact-price-summary small,
   .contact-safe-note,
@@ -267,4 +270,24 @@ html[data-resolved-theme="dark"] :where(.status-rented, .status-expired) {
   border-color: var(--border);
   background: var(--surface-muted);
   color: var(--muted);
+}
+
+
+@media (max-width: 760px) {
+  html[data-resolved-theme="dark"] .property-detail-page .property-detail-price {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  html[data-resolved-theme="dark"] .property-detail-page .property-contact-card::after {
+    border-top-color: var(--border);
+    background: color-mix(in srgb, var(--surface-elevated) 96%, transparent);
+  }
+
+  html[data-resolved-theme="dark"] .property-detail-page .property-contact-card > .contact-action-stack .contact-error,
+  html[data-resolved-theme="dark"] .property-detail-page .property-contact-card > .contact-action-stack .phone-reveal-result {
+    border-color: var(--border);
+    background: var(--surface-elevated);
+  }
 }
