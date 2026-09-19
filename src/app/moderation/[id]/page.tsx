@@ -92,14 +92,14 @@ export default async function ModerationDetailPage({ params, searchParams }: { p
           <section className="listing-section moderation-inspection-card">
             <div className="section-heading"><span>1</span><div><h2>{copy.listingDetail.details}</h2><p>{copy.listingDetail.detailsHint}</p></div></div>
             <dl className="review-facts">
-              <div><dt>{copy.listingDetail.type}</dt><dd>{property.property_type?.replaceAll("_", " ") || "—"}</dd></div>
+              <div><dt>{copy.listingDetail.type}</dt><dd>{property.property_type?.replaceAll("_", " ") || copy.common.notProvided}</dd></div>
               <div><dt>{copy.listingDetail.rent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : "—"}</dd></div>
               <div><dt>{copy.listingDetail.deposit}</dt><dd>{formatCurrency(property.deposit_bdt, locale)}</dd></div>
-              <div><dt>{copy.listingDetail.available}</dt><dd>{property.available_from || "—"}</dd></div>
-              <div><dt>{copy.listingDetail.bedrooms}</dt><dd>{property.bedrooms ?? "—"}</dd></div>
-              <div><dt>{copy.listingDetail.bathrooms}</dt><dd>{property.bathrooms ?? "—"}</dd></div>
+              <div><dt>{copy.listingDetail.available}</dt><dd>{property.available_from || copy.common.notProvided}</dd></div>
+              <div><dt>{copy.listingDetail.bedrooms}</dt><dd>{property.bedrooms ?? copy.common.notProvided}</dd></div>
+              <div><dt>{copy.listingDetail.bathrooms}</dt><dd>{property.bathrooms ?? copy.common.notProvided}</dd></div>
               <div><dt>{copy.listingDetail.size}</dt><dd>{property.size_sqft ? `${formatNumber(property.size_sqft, locale)} sq ft` : "—"}</dd></div>
-              <div><dt>{copy.listingDetail.floor}</dt><dd>{property.floor_number ?? "—"}{property.total_floors ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</dd></div>
+              <div><dt>{copy.listingDetail.floor}</dt><dd>{property.floor_number ?? copy.common.notProvided}{property.total_floors ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</dd></div>
               <div><dt>{copy.listingDetail.furnishing}</dt><dd>{property.furnishing.replaceAll("_", " ")}</dd></div>
               <div><dt>{copy.listingDetail.gender}</dt><dd>{property.gender_preference}</dd></div>
             </dl>
