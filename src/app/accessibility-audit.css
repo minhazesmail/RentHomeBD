@@ -1,4 +1,6 @@
-/* Cross-product accessibility and preference audit.\n   Loaded in the dedicated accessibility layer; critical focus/preference rules use\n   explicit importance where they must survive later route/component appearance. */\n
+/* Cross-product accessibility and preference audit.
+   Loaded in the dedicated accessibility layer; critical focus/preference rules use
+   explicit importance where they must survive later route/component appearance. */\n
 html {
   scroll-padding-top: 5rem;
   -webkit-text-size-adjust: 100%;
