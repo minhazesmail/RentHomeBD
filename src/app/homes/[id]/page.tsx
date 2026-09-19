@@ -201,16 +201,6 @@ export default async function PublicPropertyPage({
 
         <div className="property-detail-layout">
           <div className="property-detail-main">
-            {hasSummaryFacts && (
-              <section className="property-detail-section property-summary-grid" aria-label={copy.about.heading}>
-                {property.bedrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><BedDouble size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bedrooms, locale)}</strong><span>{copy.stats.bedrooms}</span></span></div>}
-                {property.bathrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><Bath size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bathrooms, locale)}</strong><span>{copy.stats.bathrooms}</span></span></div>}
-                {property.size_sqft != null && <div className="summary-stat"><span className="summary-stat-icon"><Ruler size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.size_sqft, locale)}</strong><span>{copy.stats.squareFeet}</span></span></div>}
-                {property.floor_number != null && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.floor_number, locale)}{property.total_floors != null ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>}
-                {property.floor_number == null && property.total_floors != null && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.total_floors, locale)}</strong><span>{copy.stats.totalFloors}</span></span></div>}
-              </section>
-            )}
-
             <section className={`property-detail-section tenant-compatibility-card is-${renterFit}`}>
               <div className="tenant-compatibility-top">
                 <div className="tenant-compatibility-icon"><Users size={22} aria-hidden="true" /></div>
@@ -232,16 +222,15 @@ export default async function PublicPropertyPage({
               )}
             </section>
 
-            <section className="property-detail-section">
-              <div className="property-section-heading"><div><h2>{copy.about.heading}</h2><p className="section-copy">{copy.about.description}</p></div><Sparkles size={20} aria-hidden="true" /></div>
-              <p className="property-description">{property.description || copy.about.noDescription}</p>
-              <dl className="property-facts">
-                {property.property_type && <div><dt>{copy.about.propertyType}</dt><dd>{displayValue(property.property_type, copy.values)}</dd></div>}
-                {property.furnishing && <div><dt>{copy.about.furnishing}</dt><dd>{displayValue(property.furnishing, copy.values)}</dd></div>}
-                {property.available_from && <div><dt>{copy.about.availableFrom}</dt><dd>{formatPropertyDate(property.available_from, locale)}</dd></div>}
-                {property.gender_preference && <div><dt>{copy.about.genderPreference}</dt><dd>{displayValue(property.gender_preference, copy.values)}</dd></div>}
-              </dl>
-            </section>
+            {hasSummaryFacts && (
+              <section className="property-detail-section property-summary-grid" aria-label={copy.about.heading}>
+                {property.bedrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><BedDouble size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bedrooms, locale)}</strong><span>{copy.stats.bedrooms}</span></span></div>}
+                {property.bathrooms != null && <div className="summary-stat"><span className="summary-stat-icon"><Bath size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.bathrooms, locale)}</strong><span>{copy.stats.bathrooms}</span></span></div>}
+                {property.size_sqft != null && <div className="summary-stat"><span className="summary-stat-icon"><Ruler size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.size_sqft, locale)}</strong><span>{copy.stats.squareFeet}</span></span></div>}
+                {property.floor_number != null && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.floor_number, locale)}{property.total_floors != null ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</strong><span>{copy.stats.floor}</span></span></div>}
+                {property.floor_number == null && property.total_floors != null && <div className="summary-stat"><span className="summary-stat-icon"><Building2 size={18} aria-hidden="true" /></span><span className="summary-stat-copy"><strong>{formatNumber(property.total_floors, locale)}</strong><span>{copy.stats.totalFloors}</span></span></div>}
+              </section>
+            )}
 
             <section className="property-detail-section property-costs-section">
               <div className="property-section-heading"><div><h2>{copy.costs.heading}</h2><p className="section-copy">{copy.costs.description}</p></div></div>
@@ -257,6 +246,17 @@ export default async function PublicPropertyPage({
                 <div><h3>{copy.amenities.amenities}</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} aria-hidden="true" />{amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} aria-hidden="true" />{copy.amenities.noneListed}</span>}</div></div>
                 <div><h3>{copy.amenities.utilities}</h3><div className="amenity-grid utility-grid">{property.utilities_included.length ? property.utilities_included.map((utility) => <span className="amenity-item" key={utility}><Zap size={15} aria-hidden="true" />{displayValue(utility, copy.values)}</span>) : <span className="amenity-item"><Zap size={15} aria-hidden="true" />{copy.amenities.noneListed}</span>}</div></div>
               </div>
+            </section>
+
+            <section className="property-detail-section">
+              <div className="property-section-heading"><div><h2>{copy.about.heading}</h2><p className="section-copy">{copy.about.description}</p></div><Sparkles size={20} aria-hidden="true" /></div>
+              <p className="property-description">{property.description || copy.about.noDescription}</p>
+              <dl className="property-facts">
+                {property.property_type && <div><dt>{copy.about.propertyType}</dt><dd>{displayValue(property.property_type, copy.values)}</dd></div>}
+                {property.furnishing && <div><dt>{copy.about.furnishing}</dt><dd>{displayValue(property.furnishing, copy.values)}</dd></div>}
+                {property.available_from && <div><dt>{copy.about.availableFrom}</dt><dd>{formatPropertyDate(property.available_from, locale)}</dd></div>}
+                {property.gender_preference && <div><dt>{copy.about.genderPreference}</dt><dd>{displayValue(property.gender_preference, copy.values)}</dd></div>}
+              </dl>
             </section>
 
             <section className="property-detail-section">
