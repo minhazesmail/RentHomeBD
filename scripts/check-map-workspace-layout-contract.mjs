@@ -28,6 +28,7 @@ const fixesCss = read("src/app/homes/map-workspace-layout-fixes.css");
 const packageJson = read("package.json");
 const ci = read(".github/workflows/ci.yml");
 const browserQa = read("scripts/check-map-workspace-browser.mjs");
+const areaSearchBrowserQa = read("scripts/check-map-area-search-browser.mjs");
 
 // This guard exists because the route-base stylesheet still contains the old
 // side-by-side search shell. The redesigned workspace must explicitly collapse
@@ -98,6 +99,12 @@ requireText(
 );
 requireText(ci, "- name: Map workspace geometry QA", "dedicated rendered map workspace CI step");
 requireText(ci, "run: npm run mapworkspacebrowser", "rendered map workspace CI command");
+requireText(packageJson, '"mapareasearchbrowser": "node scripts/check-map-area-search-browser.mjs"', "map area search browser QA package script");
+requireText(ci, "- name: Map area search state QA", "dedicated map area search CI step");
+requireText(ci, "run: npm run mapareasearchbrowser", "map area search browser CI command");
+requireText(areaSearchBrowserQa, "zoom-only interaction incorrectly exposes Search this area", "zoom no-op regression coverage");
+requireText(areaSearchBrowserQa, "successful map-area search URL did not change after panning", "applied URL regression coverage");
+requireText(areaSearchBrowserQa, "failed map-area search should remain retryable", "map error recovery regression coverage");
 requireText(browserQa, 'name: "reported-desktop", width: 1272, height: 638', "reported desktop viewport coverage");
 requireText(browserQa, 'const scenarios = ["light", "dark"]', "light/dark geometry coverage");
 requireText(browserQa, "toolbar does not span the full renter search shell", "toolbar full-span rendered assertion");

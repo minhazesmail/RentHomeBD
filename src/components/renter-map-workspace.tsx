@@ -213,6 +213,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const [busy, setBusy] = useState(Boolean(initialTenantType));
   const [slowSearch, setSlowSearch] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [mapSearchNotice, setMapSearchNotice] = useState<string | null>(null);
   const [savingSearch, setSavingSearch] = useState(false);
   const [locating, setLocating] = useState(false);
   const [liveTracking, setLiveTracking] = useState(false);
@@ -224,6 +225,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const [tileRetryVersion, setTileRetryVersion] = useState(0);
   const [customArea, setCustomArea] = useState<[number, number][]>([]);
   const [drawingCustomArea, setDrawingCustomArea] = useState(false);
+  const [pendingMapCenter, setPendingMapCenter] = useState<[number, number] | null>(null);
   const [mapDirty, setMapDirty] = useState(false);
   const [listScroll, setListScroll] = useState(initialScroll(initialSearch.listScroll));
   const [appliedQuery, setAppliedQuery] = useState<AppliedQuery>({
@@ -265,9 +267,9 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const resultCountText = busy && visibleListings.length === 0 ? copy.searching : stableResultCountText;
   const currentAreaLabel = locationPreset ? localizeLocationLabel(locationPreset, dictionary) : customAreaActive ? workspaceCopy.results.customArea : workspaceCopy.results.currentArea;
   const searchSummary = [
-    currentAreaLabel,
-    tenantType ? tenantLabels[tenantType] : workspaceCopy.toolbar.tenantRequired,
-    maxRent ? formatCurrency(Number(maxRent), locale) : workspaceCopy.toolbar.budgetPlaceholder,
+    appliedQuery.areaLabel,
+    appliedQuery.tenantType ? tenantLabels[appliedQuery.tenantType] : workspaceCopy.toolbar.tenantRequired,
+    appliedQuery.maxRent ? formatCurrency(Number(appliedQuery.maxRent), locale) : workspaceCopy.toolbar.budgetPlaceholder,
   ].join(" · ");
 
   const cancelActiveSearch = useCallback(() => {
@@ -292,7 +294,28 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     return null;
   }, [copy, maxRent, minRent, radiusKm, tenantType, workspaceCopy.toolbar.tenantRequired]);
 
-  const runSearch = useCallback(async (searchCenter = center, requestedSort = sortOption, requestedArea?: [number, number][] | null) => {
+  const syncAppliedSearchUrl = useCallback((searchCenter: [number, number], requestedSort: SortOption) => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete("area");
+    params.delete("selected");
+    params.delete("listScroll");
+    params.set("lat", searchCenter[0].toFixed(6));
+    params.set("lng", searchCenter[1].toFixed(6));
+    params.set("radius", radiusKm);
+    params.set("sort", requestedSort);
+    if (tenantType) params.set("tenant", tenantType); else params.delete("tenant");
+    if (minRent) params.set("minRent", minRent); else params.delete("minRent");
+    if (maxRent) params.set("maxRent", maxRent); else params.delete("maxRent");
+    if (bedrooms) params.set("bedrooms", bedrooms); else params.delete("bedrooms");
+    window.history.replaceState(window.history.state, "", `/homes?${params.toString()}`);
+  }, [bedrooms, maxRent, minRent, radiusKm, tenantType]);
+
+  const runSearch = useCallback(async (
+    searchCenter = center,
+    requestedSort = sortOption,
+    requestedArea?: [number, number][] | null,
+    announceMapResult = false,
+  ) => {
     const requestId = ++searchRequestIdRef.current;
     searchAbortRef.current?.abort();
     const searchController = new AbortController();
@@ -306,6 +329,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       if (isCurrentSearch()) {
         searchAbortRef.current = null;
         setSearchError(validationMessage);
+        if (announceMapResult) setMapSearchNotice(null);
         setMessage(null);
         setSlowSearch(false);
         setBusy(false);
@@ -316,6 +340,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setBusy(true);
     setSlowSearch(false);
     setSearchError(null);
+    if (announceMapResult) setMapSearchNotice(null);
     setMessage(null);
 
     const { data, error } = await supabase.rpc("search_available_properties", {
@@ -335,6 +360,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (error) {
       searchAbortRef.current = null;
       setSearchError(friendlySearchError(error, copy));
+      if (announceMapResult) setMapSearchNotice(null);
       setSlowSearch(false);
       setBusy(false);
       return;
@@ -390,6 +416,15 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       sort: requestedSort,
       areaLabel: areaPoints && areaPoints.length >= 3 ? workspaceCopy.results.customArea : currentAreaLabel,
     });
+    if (!areaPoints) syncAppliedSearchUrl(searchCenter, requestedSort);
+    if (announceMapResult) {
+      const nextTotalMatches = rows[0]?.total_matches ?? rows.length;
+      const nextResultsTruncated = Boolean(rows[0]?.results_truncated);
+      setMapSearchNotice(nextResultsTruncated
+        ? formatWorkflowText(copy.showingHomes, { visible: formatNumber(rows.length, locale), total: formatNumber(nextTotalMatches, locale) })
+        : formatWorkflowText(rows.length === 1 ? copy.homeCountOne : copy.homeCountMany, { count: formatNumber(rows.length, locale) }));
+    }
+    setPendingMapCenter(null);
     setMapDirty(false);
     searchAbortRef.current = null;
     setSlowSearch(false);
@@ -408,12 +443,14 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setBusy,
     setListings,
     setMapDirty,
+    setMapSearchNotice,
     setMessage,
     setSearchError,
     setSelectedId,
     setSlowSearch,
     sortOption,
     supabase,
+    syncAppliedSearchUrl,
     tenantType,
     validateFilters,
     workspaceCopy.results.customArea,
@@ -461,8 +498,8 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
 
   const searchReturnPath = useCallback((selectionId: string) => {
     const params = new URLSearchParams({
-      lat: center[0].toFixed(6),
-      lng: center[1].toFixed(6),
+      lat: appliedQuery.center[0].toFixed(6),
+      lng: appliedQuery.center[1].toFixed(6),
       radius: appliedQuery.radiusKm,
       selected: selectionId,
       sort: appliedQuery.sort,
@@ -473,7 +510,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (appliedQuery.tenantType) params.set("tenant", appliedQuery.tenantType);
     if (appliedQuery.bedrooms) params.set("bedrooms", appliedQuery.bedrooms);
     return `/homes?${params.toString()}`;
-  }, [appliedQuery, center, listScroll]);
+  }, [appliedQuery, listScroll]);
 
   const propertyHref = useCallback((propertyId: string) => `/homes/${propertyId}?returnTo=${encodeURIComponent(searchReturnPath(propertyId))}`, [searchReturnPath]);
 
@@ -597,6 +634,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setCustomArea([]);
     setDrawingCustomArea(false);
     setCenter([preset.latitude, preset.longitude]);
+    setPendingMapCenter(null);
     setMapDirty(false);
   }
 
@@ -608,7 +646,10 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setLocationRecovery(null);
     setLocationPreset("");
     setCenter(nextCenter);
-    setMapDirty(true);
+    setMapSearchNotice(null);
+    const centerChanged = distanceMeters(nextCenter, appliedQuery.center) >= LIVE_CENTER_MIN_DISTANCE_METERS;
+    setPendingMapCenter(centerChanged ? nextCenter : null);
+    setMapDirty(centerChanged);
   }
 
   function handleMapTileFailure() {
@@ -893,7 +934,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
           />
 
           <div className="renter-map-actions" aria-label={copy.title}>
-            {mapDirty && <button className="primary-button renter-search-this-area" type="button" onClick={() => void runSearch(center, sortOption, customAreaActive ? customArea : null)} disabled={busy || !tenantType}>{workspaceCopy.map.searchThisArea}</button>}
+            {mapDirty && <button className="primary-button renter-search-this-area" type="button" onClick={() => void runSearch(pendingMapCenter ?? center, sortOption, customAreaActive ? customArea : null, true)} disabled={busy || !tenantType}>{busy ? copy.searching : workspaceCopy.map.searchThisArea}</button>}
             {liveTracking ? (
               <button className="secondary-button" type="button" onClick={stopLiveLocation}>{workspaceCopy.map.stopLocation}</button>
             ) : (
@@ -902,6 +943,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
             {!drawingCustomArea && !customAreaActive && <button className="secondary-button" type="button" onClick={startCustomArea}>{workspaceCopy.map.drawArea}</button>}
             {drawingCustomArea && <button className="primary-button" type="button" onClick={finishCustomArea}>{workspaceCopy.map.finishArea} · {formatNumber(customArea.length, locale)}</button>}
             {(drawingCustomArea || customAreaActive) && <button className="secondary-button" type="button" onClick={clearCustomArea}>{workspaceCopy.map.clearArea}</button>}
+            {(searchError || mapSearchNotice) && <span className={`renter-map-search-feedback${searchError ? " is-error" : ""}`} role="status" aria-live="polite" data-map-search-feedback>{searchError || mapSearchNotice}</span>}
           </div>
 
           {drawingCustomArea && <div className="custom-area-map-hint" role="status"><strong>{copy.drawSearchArea}</strong><span>{formatWorkflowText(copy.drawSearchAreaHint, { count: formatNumber(customArea.length, locale) })}</span></div>}

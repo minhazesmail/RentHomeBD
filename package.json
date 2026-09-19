@@ -46,7 +46,8 @@
     "mobilelistingqa": "node scripts/check-mobile-listing-editor.mjs",
     "mobilemoderatorqa": "node scripts/check-mobile-moderator.mjs",
     "mobilefinalqa": "node scripts/check-mobile-release-hardening.mjs",
-    "releasebrowserqa": "node scripts/check-mobile-release-browser.mjs"
+    "releasebrowserqa": "node scripts/check-mobile-release-browser.mjs",
+    "mapareasearchbrowser": "node scripts/check-map-area-search-browser.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.5",

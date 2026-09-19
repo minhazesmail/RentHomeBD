@@ -55,7 +55,15 @@ requireText(workspace, 'busy && visibleListings.length > 0', "stale-result prese
 requireText(workspace, 'workspaceCopy.results.updatingHint', "non-destructive update feedback");
 requireText(workspace, 'mapDirty &&', "map dirty gate for search-this-area action");
 requireText(workspace, 'workspaceCopy.map.searchThisArea', "Search this area control");
-requirePattern(workspace, /function handleMapCenterChange[\s\S]*?setMapDirty\(true\)/, "map movement marks viewport dirty");
+requirePattern(workspace, /function handleMapCenterChange[\s\S]*?distanceMeters\(nextCenter, appliedQuery\.center\)[\s\S]*?LIVE_CENTER_MIN_DISTANCE_METERS/, "only meaningful map-center movement marks the viewport dirty");
+requireText(workspace, 'window.history.replaceState(window.history.state, "", `/homes?${params.toString()}`)', "successful radius search commits canonical URL state");
+requireText(workspace, "appliedQuery.center[0].toFixed(6)", "property return path serializes the applied map center");
+requireText(workspace, "appliedQuery.areaLabel", "mobile search summary reflects applied criteria rather than draft filters");
+requireText(workspace, "data-map-search-feedback", "map-level search feedback remains visible beside map actions");
+requireText(workspace, "announceMapResult", "Search this area can request explicit map feedback");
+requireText(workspace, "pendingMapCenter ?? center", "Search this area retries the explicit pending map center");
+requirePattern(workspace, /setPendingMapCenter\(centerChanged \? nextCenter : null\)/, "map movement stores a retry-safe pending center");
+requireText(workspace, "setPendingMapCenter(null);\n    setMapDirty(false);", "successful search clears pending map state");
 
 // Selection, hover/focus, exact-pin and return-state synchronization.
 requireText(results, "onMouseEnter={() => onHighlight(listing.id)}", "result hover highlights marker");
@@ -82,6 +90,7 @@ requireText(mobileCss, 'data-mobile-sheet="expanded"', "expanded mobile sheet la
 requireText(mobileCss, 'height: 100svh', "full-height mobile filters");
 requireText(mobileCss, "env(safe-area-inset-bottom)", "mobile safe-area support");
 requireText(workspace, 'className="mobile-search-summary"', "compact mobile search summary");
+requirePattern(css, /\.mobile-search-summary\s*\{[\s\S]*?pointer-events:\s*none;/, "informational mobile search summary must not block Leaflet controls or gestures");
 requireText(workspace, 'className="mobile-filter-footer"', "persistent mobile filter actions");
 requireText(map, "function ResponsiveMapSize", "Leaflet resize synchronization");
 requireText(map, 'attributeFilter: ["data-mobile-sheet", "data-mobile-view", "data-mobile-filters"]', "sheet/view resize observation");
