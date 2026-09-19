@@ -98,6 +98,14 @@ try {
       const beforeLat = Number(before.searchParams.get("lat"));
       const beforeLng = Number(before.searchParams.get("lng"));
 
+      forceNextFailure = true;
+      await searchArea.click();
+
+      const errorFeedback = page.locator("[data-map-search-feedback].is-error");
+      await errorFeedback.waitFor({ state: "visible", timeout: 5_000 });
+      if (!(await searchArea.isVisible())) fail("failed map-area search should remain retryable");
+      if (page.url() !== before.toString()) fail("failed map-area search should not commit URL state");
+
       await searchArea.click();
       await page.waitForFunction(() => {
         const button = document.querySelector(".renter-search-this-area");
@@ -110,10 +118,13 @@ try {
       const feedbackText = (await feedback.textContent())?.trim() ?? "";
       if (!feedbackText) fail("successful map-area search has no visible map-level acknowledgement");
 
-      if (rpcCount < 2) {
-        fail("Search this area did not issue a new search RPC");
+      if (rpcCount < 3) {
+        fail("retrying Search this area did not issue a successful search RPC");
       } else {
-        const applied = rpcBodies[1] ?? {};
+        const failedAttempt = rpcBodies[1] ?? {};
+        const applied = rpcBodies[2] ?? {};
+        const failedLat = Number(failedAttempt.center_lat);
+        const failedLng = Number(failedAttempt.center_long);
         const movedLat = Number(applied.center_lat);
         const movedLng = Number(applied.center_long);
         if (!Number.isFinite(movedLat) || !Number.isFinite(movedLng)) {
@@ -121,6 +132,9 @@ try {
         }
         if (Math.abs(movedLat - initialLat) < 0.0001 && Math.abs(movedLng - initialLng) < 0.0001) {
           fail("map-area RPC reused the old search center after a pan");
+        }
+        if (Math.abs(movedLat - failedLat) > 0.000001 || Math.abs(movedLng - failedLng) > 0.000001) {
+          fail("map-area retry did not preserve the pending center after a recoverable failure");
         }
       }
 
@@ -138,24 +152,6 @@ try {
       }
       if (after.searchParams.get("tenant") !== "bachelor" || after.searchParams.get("radius") !== "15") {
         fail("canonical map-area URL lost applied renter criteria");
-      }
-
-      const secondBox = await map.boundingBox();
-      if (secondBox) {
-        const sx = secondBox.x + secondBox.width * 0.64;
-        const sy = secondBox.y + secondBox.height * 0.28;
-        await page.mouse.move(sx, sy);
-        await page.mouse.down();
-        await page.mouse.move(sx + 72, sy - 8, { steps: 8 });
-        await page.mouse.up();
-
-        const retryArea = page.locator(".renter-search-this-area");
-        await retryArea.waitFor({ state: "visible", timeout: 5_000 });
-        forceNextFailure = true;
-        await retryArea.click();
-        const errorFeedback = page.locator("[data-map-search-feedback].is-error");
-        await errorFeedback.waitFor({ state: "visible", timeout: 5_000 });
-        if (!(await retryArea.isVisible())) fail("failed map-area search should remain retryable");
       }
     }
   }
