@@ -4,3 +4,5 @@
 @import "./owner-spacing-fixes.css" layer(route-fixes);
 @import "./owner-attention-workspace.css" layer(route-atmosphere);
 @import "./owner-theme.css" layer(theme);
+
+@import "./owner-mobile-portfolio.css" layer(mobile-appearance);
