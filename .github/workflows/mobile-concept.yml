@@ -19,6 +19,7 @@ on:
       - "src/i18n/**"
       - "scripts/check-mobile-concept-browser.mjs"
       - "scripts/check-mobile-release-browser.mjs"
+      - "scripts/check-map-area-search-browser.mjs"
       - "package.json"
       - ".github/workflows/mobile-concept.yml"
 
