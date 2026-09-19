@@ -9,9 +9,11 @@ import { getWorkflowCopy } from "@/i18n/workflow-copy";
 function ContextualSaveHomeButton({
   propertyId,
   compact,
+  signInHref,
 }: {
   propertyId: string;
   compact: boolean;
+  signInHref?: string;
 }) {
   const router = useRouter();
   const { locale } = useLocale();
@@ -28,7 +30,7 @@ function ContextualSaveHomeButton({
   function toggle() {
     if (!store.ready) return;
     if (!store.userId) {
-      router.push(`/login?next=${encodeURIComponent(`/homes/${propertyId}`)}`);
+      router.push(signInHref ?? `/login?next=${encodeURIComponent(`/homes/${propertyId}`)}`);
       return;
     }
     void store.toggleSaved(propertyId);
@@ -58,16 +60,18 @@ export function SaveHomeButton({
   userId,
   initialSaved = false,
   compact = false,
+  signInHref,
 }: {
   propertyId: string;
   userId: string | null;
   initialSaved?: boolean;
   compact?: boolean;
+  signInHref?: string;
 }) {
   const sharedSavedHomes = useSavedHomesState();
 
   if (sharedSavedHomes) {
-    return <ContextualSaveHomeButton propertyId={propertyId} compact={compact} />;
+    return <ContextualSaveHomeButton propertyId={propertyId} compact={compact} signInHref={signInHref} />;
   }
 
   return (
@@ -75,7 +79,7 @@ export function SaveHomeButton({
       userId={userId}
       initialSavedPropertyIds={initialSaved ? [propertyId] : []}
     >
-      <ContextualSaveHomeButton propertyId={propertyId} compact={compact} />
+      <ContextualSaveHomeButton propertyId={propertyId} compact={compact} signInHref={signInHref} />
     </SavedHomesProvider>
   );
 }
