@@ -145,7 +145,7 @@ function sortedResults(listings: MapListing[]) { return listings; }
 function tenantSummary(types: TenantType[], labels: TenantLabels) {
   if (!types.length) return labels.unspecified;
   if (types.includes("everyone")) return labels.everyone;
-  return types.map((type) => labels[type]).join(" · ");
+  return types.map((type) => labels[type]).join(" Â· ");
 }
 
 function TenantBadge({ types, preference, labels }: { types: TenantType[]; preference?: TenantType; labels: TenantLabels }) {
@@ -182,7 +182,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     everyone: dictionary.common.tenant.everyone,
     unspecified: dictionary.common.tenant.unspecified,
   }), [dictionary]);
-  const distanceUnit = locale === "bn" ? "কিমি" : "km";
+  const distanceUnit = locale === "bn" ? "à¦•à¦¿à¦®à¦¿" : "km";
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const initialCenter: [number, number] = [initialSearch.centerLat ?? DHAKA_CENTER[0], initialSearch.centerLong ?? DHAKA_CENTER[1]];
   const initialLocationPreset = LOCATION_PRESETS.find((preset) => Math.abs(preset.latitude - initialCenter[0]) < 0.0001 && Math.abs(preset.longitude - initialCenter[1]) < 0.0001)?.label ?? "";
@@ -262,7 +262,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     appliedQuery.areaLabel,
     appliedQuery.tenantType ? tenantLabels[appliedQuery.tenantType] : workspaceCopy.toolbar.tenantRequired,
     appliedQuery.maxRent ? formatCurrency(Number(appliedQuery.maxRent), locale) : workspaceCopy.toolbar.budgetPlaceholder,
-  ].join(" · ");
+  ].join(" Â· ");
 
   const cancelActiveSearch = useCallback(() => {
     searchRequestIdRef.current += 1;
@@ -467,14 +467,14 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     resultsPaneRef.current.scrollTop = restoreScrollRef.current ?? initialScroll(initialSearch.listScroll);
   }, [busy, initialSearch.listScroll, visibleListings.length]);
 
-  const searchReturnPath = useCallback((selectionId: string) => {
+  const searchReturnPath = useCallback((selectionId: string, scroll = listScroll) => {
     const params = new URLSearchParams({
       lat: appliedQuery.center[0].toFixed(6),
       lng: appliedQuery.center[1].toFixed(6),
       radius: appliedQuery.radiusKm,
       selected: selectionId,
       sort: appliedQuery.sort,
-      listScroll: String(listScroll),
+      listScroll: String(scroll),
     });
     if (appliedQuery.minRent) params.set("minRent", appliedQuery.minRent);
     if (appliedQuery.maxRent) params.set("maxRent", appliedQuery.maxRent);
@@ -731,7 +731,8 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   }
 
   function persistReturnState() {
-    const path = searchReturnPath(effectiveSelectedId ?? "");
+    const scroll = Math.round(resultsPaneRef.current?.scrollTop ?? listScroll);
+    const path = searchReturnPath(effectiveSelectedId ?? "", scroll);
     writeMapSession(path, {
       view: mobile.view, sheet: mobile.sheet, selectedId: effectiveSelectedId,
       listScroll: resultsPaneRef.current?.scrollTop ?? listScroll,
@@ -963,7 +964,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
               <button className="secondary-button" type="button" onClick={startLiveLocation} disabled={locating}><LocateFixed size={16} aria-hidden="true" />{locating ? copy.findingYou : workspaceCopy.map.myLocation}</button>
             )}
             {!drawingCustomArea && !customAreaActive && <button className="secondary-button" type="button" onClick={startCustomArea}>{workspaceCopy.map.drawArea}</button>}
-            {drawingCustomArea && <button className="primary-button" type="button" onClick={finishCustomArea}>{workspaceCopy.map.finishArea} · {formatNumber(customArea.length, locale)}</button>}
+            {drawingCustomArea && <button className="primary-button" type="button" onClick={finishCustomArea}>{workspaceCopy.map.finishArea} Â· {formatNumber(customArea.length, locale)}</button>}
             {(drawingCustomArea || customAreaActive) && <button className="secondary-button" type="button" onClick={clearCustomArea}>{workspaceCopy.map.clearArea}</button>}
           </div>
 
@@ -971,10 +972,10 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
 
           {selectedListing && (
             <article className={`mobile-map-sheet tenant-compatibility-${tenantCompatibility(selectedListing.tenant_types ?? [], activePreference)}`} aria-live="polite">
-              <button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label={copy.closePropertyPreview}>×</button>
+              <button className="mobile-map-sheet-close" type="button" onClick={() => setSelectedId(null)} aria-label={copy.closePropertyPreview}>Ã—</button>
               <div className="mobile-map-sheet-handle" aria-hidden="true" />
               <div className="mobile-map-sheet-content">
-                <div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div>
+                <div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">âŒ‚</span>}</div>
                 <div className="mobile-map-sheet-copy">
                   <TenantBadge types={selectedListing.tenant_types ?? []} preference={activePreference} labels={tenantLabels} />
                   <h2>{selectedListing.title || copy.rentalProperty}</h2>
@@ -987,7 +988,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
                         {[
                           selectedListing.bedrooms == null ? null : `${formatNumber(selectedListing.bedrooms, locale)} ${copy.bed}`,
                           selectedListing.bathrooms == null ? null : `${formatNumber(selectedListing.bathrooms, locale)} ${copy.bath}`,
-                        ].filter(Boolean).join(" · ")}
+                        ].filter(Boolean).join(" Â· ")}
                       </span>
                     )}
                   </div>

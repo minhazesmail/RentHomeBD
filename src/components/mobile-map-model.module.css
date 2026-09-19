@@ -62,7 +62,7 @@
   .mobileMapLayout :global(.renter-results-sort) { display: block; max-width: 48%; }
   .mobileMapLayout :global(.renter-results-sort > span) { display: none; }
   .mobileMapLayout :global(.renter-results-sort select) { min-height: 44px; width: 100%; }
-  .mobileMapLayout :global(.renter-results-pane) { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 8px; }
+  .mobileMapLayout :global(.renter-results-pane) { min-height: 0; overflow-y: auto; overscroll-behavior: contain; overflow-anchor: none; padding: 8px; }
   .mobileMapLayout[data-mobile-view="map"][data-mobile-sheet="collapsed"] :global(.renter-results-pane) { visibility: hidden; }
   .mobileMapLayout :global(.mobile-map-sheet) { display: none; }
   .filterDialog {

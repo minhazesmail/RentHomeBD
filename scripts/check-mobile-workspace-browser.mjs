@@ -96,16 +96,18 @@ try {
     assert.equal(await cards.first().locator(".renter-result-map-button").getAttribute("aria-pressed"), "true");
     await controls.locator("nav button").last().click();
     await cards.nth(5).scrollIntoViewIfNeeded();
-    const scroll = await page.locator(".renter-results-pane").evaluate(element => element.scrollTop);
     const link = cards.nth(5).locator("a.renter-result-card");
     // Exercise the real capture handler, then force a full navigation to prove remount restoration.
     await link.evaluate(element => element.addEventListener("click", event => event.preventDefault(), { once: true }));
     await link.click();
+    const scroll = await page.locator(".renter-results-pane").evaluate(element => element.scrollTop);
     const returned = page.url();
+    assert.equal(Number(new URL(returned).searchParams.get("listScroll")), Math.round(scroll), "navigation saved a stale scroll offset");
     assert.equal(new URL(returned).searchParams.get("maxRent"), "24000");
     await page.goto(`${baseURL}/about`, { waitUntil: "domcontentloaded" });
     await page.goBack({ waitUntil: "domcontentloaded" });
     await cards.first().waitFor();
+    await page.locator('[data-search-recovery="map"]').waitFor();
     assert.equal(await host.getAttribute("data-mobile-view"), "list", "Back lost view");
     const restoredScroll = await page.locator(".renter-results-pane").evaluate(element => element.scrollTop);
     assert.ok(Math.abs(scroll - restoredScroll) < 10, `Back lost scroll: ${scroll} vs ${restoredScroll}`);
