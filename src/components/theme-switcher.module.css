@@ -130,7 +130,7 @@
   color: #fff;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 767px) {
   .triggerLabel {
     position: absolute;
     width: 1px;
@@ -144,9 +144,14 @@
   }
 
   .trigger {
-    width: 36px;
-    min-width: 36px;
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
     padding: 0;
+  }
+
+  .option {
+    min-height: 44px;
   }
 
   .menu {
