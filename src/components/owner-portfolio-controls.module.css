@@ -174,3 +174,96 @@
     padding-inline: 12px;
   }
 }
+
+
+@media (max-width: 767px) {
+  .workspaceControls {
+    gap: 9px;
+    padding: 10px 12px 11px;
+    background: var(--surface-solid);
+  }
+
+  .workspaceTopline,
+  .workspaceBottomline {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .searchForm {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px;
+    flex-basis: auto;
+  }
+
+  .searchShell {
+    min-height: 48px;
+    border-radius: 13px;
+  }
+
+  .searchShell input {
+    font-size: 16px;
+  }
+
+  .searchButton {
+    min-height: 48px;
+    padding-inline: 13px;
+  }
+
+  .sortControl {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .sortControl select {
+    min-width: 0;
+    min-height: 44px;
+    flex: 1 1 auto;
+  }
+
+  .statusTabs {
+    width: calc(100% + 24px);
+    margin-inline: -12px;
+    padding: 1px 12px 3px;
+    gap: 6px;
+    scroll-snap-type: inline proximity;
+    overscroll-behavior-inline: contain;
+  }
+
+  .statusTab,
+  .statusActive {
+    min-height: 40px;
+    padding-inline: 12px;
+    scroll-snap-align: center;
+  }
+
+  .resultSummary {
+    min-height: 32px;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: .68rem;
+  }
+
+  .resultSummary a {
+    min-height: 32px;
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .searchForm {
+    grid-template-columns: 1fr;
+  }
+
+  .searchButton {
+    width: 100%;
+  }
+
+  .sortControl {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 5px;
+  }
+}
