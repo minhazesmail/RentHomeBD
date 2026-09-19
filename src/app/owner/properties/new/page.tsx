@@ -71,7 +71,7 @@ export default async function NewPropertyPage({
         <Link className="text-link" href="/owner">{copy.backToProperties}</Link>
       </header>
 
-      <div className={editorStyles.editorShell}>
+      <div className={editorStyles.editorShell} data-mobile-listing-shell>
         <ListingWorkflowNav mode="creation" />
         <div>
           <ListingDraftGuard userId={auth.userId} propertyId={draftId} />
