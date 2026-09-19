@@ -318,3 +318,168 @@
     transform: none;
   }
 }
+
+
+@media (max-width: 767px) {
+  [data-account-mobile-workspace] {
+    width: 100%;
+    min-height: 100dvh;
+    place-items: start stretch;
+    padding: 12px var(--mobile-app-safe-right, 12px) 24px var(--mobile-app-safe-left, 12px);
+    background: var(--background);
+  }
+
+  [data-account-mobile-workspace] .dashboard-card {
+    width: 100%;
+    padding: 16px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-xs);
+  }
+
+  [data-account-mobile-workspace] .dashboard-header {
+    padding: 2px 2px 16px;
+    border-bottom: 0;
+  }
+
+  [data-account-mobile-workspace] .dashboard-header .eyebrow {
+    font-size: .65rem;
+  }
+
+  [data-account-mobile-workspace] .dashboard-title,
+  [data-account-mobile-workspace] .owner-dashboard-header .dashboard-title,
+  [data-account-mobile-workspace] .renter-dashboard-header .dashboard-title {
+    max-width: 100%;
+    margin: 5px 0 7px;
+    font-size: clamp(2rem, 10vw, 2.8rem);
+    line-height: 1;
+    letter-spacing: -.045em;
+  }
+
+  [data-account-mobile-workspace] .dashboard-header .intro {
+    max-width: 38ch;
+    font-size: .82rem;
+    line-height: 1.5;
+  }
+
+  [data-account-mobile-workspace] .dashboard-next-action {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 11px;
+    margin-top: 6px;
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  [data-account-mobile-workspace] .dashboard-next-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+  }
+
+  [data-account-mobile-workspace] .dashboard-next-copy h2 {
+    margin: 5px 0 4px;
+    font-size: 1.22rem;
+    line-height: 1.08;
+  }
+
+  [data-account-mobile-workspace] .dashboard-next-copy p {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: .76rem;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  [data-account-mobile-workspace] .dashboard-next-action > .primary-button {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 2px;
+  }
+
+  [data-account-mobile-workspace] .dashboard-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  [data-account-mobile-workspace] .dashboard-metric-card {
+    min-height: 112px;
+    padding: 13px;
+    border-radius: 16px;
+  }
+
+  [data-account-mobile-workspace] .dashboard-metric-card > span {
+    font-size: .61rem;
+    letter-spacing: .055em;
+  }
+
+  [data-account-mobile-workspace] .dashboard-metric-card > strong {
+    margin-top: 6px;
+    font-size: 1.05rem;
+    line-height: 1.15;
+  }
+
+  [data-account-mobile-workspace] .dashboard-metric-card > p {
+    margin-top: 4px;
+    font-size: .69rem;
+    line-height: 1.35;
+  }
+
+  [data-account-mobile-workspace] .dashboard-secondary-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  [data-account-mobile-workspace] .renter-journey-card,
+  [data-account-mobile-workspace] .dashboard-trust-section {
+    min-height: 0;
+    padding: 17px;
+    border-radius: 18px;
+  }
+
+  [data-account-mobile-workspace] .section-heading {
+    align-items: flex-start;
+  }
+
+  [data-account-mobile-workspace] .renter-preference-compact {
+    gap: 10px;
+  }
+
+  [data-account-mobile-workspace] .renter-preference-compact > div {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  [data-account-mobile-workspace] .renter-preference-control {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  [data-account-mobile-workspace] .renter-preference-control select,
+  [data-account-mobile-workspace] .renter-preference-control button {
+    min-height: 48px;
+  }
+
+  [data-account-mobile-workspace] .dashboard-account-tools {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+
+  [data-account-mobile-workspace] .dashboard-account-links {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
+  [data-account-mobile-workspace] .dashboard-account-links > *,
+  [data-account-mobile-workspace] .dashboard-account-tools form,
+  [data-account-mobile-workspace] .dashboard-account-tools form button {
+    width: 100%;
+    min-height: 46px;
+  }
+}
