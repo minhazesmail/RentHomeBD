@@ -35,7 +35,7 @@ export function ModerationDecisionForm({ propertyId, reviewerId, nextPropertyId 
       {message && <div className="auth-message">{message}</div>}
       <div className="mt-5 grid gap-2">
         <button className="secondary-button moderation-action-reject" type="button" disabled={busy !== null} onClick={() => void submit("reject")}>{busy === "reject" ? copy.rejecting : copy.reject}</button>
-        <button className="primary-button" type="button" disabled={busy !== null} onClick={() => void submit("approve")}>{busy === "approve" ? copy.approving : nextPropertyId ? copy.approveNext : copy.approve}</button>
+        <button className="primary-button moderation-action-approve" type="button" disabled={busy !== null} onClick={() => void submit("approve")}>{busy === "approve" ? copy.approving : nextPropertyId ? copy.approveNext : copy.approve}</button>
       </div>
     </section>
   );
