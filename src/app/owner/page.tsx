@@ -176,12 +176,12 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
               return (
                 <article className={`property-row property-row-with-actions owner-property-card status-card-${property.status}`} key={property.id} data-owner-listing-status={property.status} data-owner-needs-attention={listingNeedsAttention(property, now) ? "true" : "false"}>
                   <Link className="property-row-link owner-property-card-link" href={`/owner/properties/${property.id}`}>
-                    <div className={styles.ownerPortfolioListingBody}>
-                      <div className={styles.ownerPortfolioThumbnail} aria-hidden="true">{coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <Home size={22} aria-hidden="true" />}</div>
+                    <div className={styles.ownerPortfolioListingBody} data-owner-listing-body>
+                      <div className={styles.ownerPortfolioThumbnail} data-owner-listing-thumbnail aria-hidden="true">{coverUrl ? <img src={coverUrl} alt="" loading="lazy" /> : <Home size={22} aria-hidden="true" />}</div>
                       <div className="property-row-main owner-property-main">
                         <div className="owner-property-title-row"><strong>{property.title || copy.page.untitled}</strong></div>
                         <span className="owner-property-address">{property.address_text || copy.page.noLocation}</span>
-                        <div className={`${styles.ownerPortfolioStatusSummary} ${styles[`ownerPortfolioStatus_${statusPresentation.tone}`]}`}><StatusIcon size={15} aria-hidden="true" /><div><strong>{statusPresentation.label}</strong><span>{statusPresentation.detail}</span></div></div>
+                        <div className={`${styles.ownerPortfolioStatusSummary} ${styles[`ownerPortfolioStatus_${statusPresentation.tone}`]}`} data-owner-status-summary><StatusIcon size={15} aria-hidden="true" /><div><strong>{statusPresentation.label}</strong><span>{statusPresentation.detail}</span></div></div>
                         {hasFeedback && <div className="owner-moderation-feedback"><MessageSquareText size={15} aria-hidden="true" /><div><strong>{copy.page.moderatorFeedback}</strong><span>{property.moderation_notes}</span></div></div>}
                       </div>
                     </div>
