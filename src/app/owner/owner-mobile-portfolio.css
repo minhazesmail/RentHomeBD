@@ -210,9 +210,16 @@
     padding: 13px 12px 9px 14px;
   }
 
-  [data-owner-property-panel] .ownerPortfolioListingBody {
+  [data-owner-property-panel] [data-owner-listing-body] {
     flex-direction: row;
     gap: 10px;
+  }
+
+  [data-owner-property-panel] [data-owner-listing-thumbnail] {
+    width: 88px;
+    height: 70px;
+    flex: 0 0 88px;
+    border-radius: 11px;
   }
 
   [data-owner-property-panel] .owner-property-main {
@@ -231,6 +238,21 @@
     overflow: hidden;
     margin-top: 3px;
     font-size: .72rem;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  [data-owner-property-panel] [data-owner-status-summary] {
+    margin-top: 7px;
+    padding: 8px 9px;
+    border-radius: 11px;
+  }
+
+  [data-owner-property-panel] [data-owner-status-summary] span {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: .69rem;
     line-height: 1.35;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
