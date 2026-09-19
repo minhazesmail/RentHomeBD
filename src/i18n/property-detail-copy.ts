@@ -2,7 +2,7 @@ import type { Locale } from "./config";
 
 const propertyDetailCopy = {
   en: {
-    nav: { backToMap: "Back to map", saved: "Saved", messages: "Messages", signIn: "Sign in" },
+    nav: { back: "Back", backToMap: "Back to map", saved: "Saved", messages: "Messages", signIn: "Sign in" },
     common: {
       rentalProperty: "Rental property",
       exactLocationFallback: "Exact location shown below",
@@ -30,6 +30,13 @@ const propertyDetailCopy = {
       availableFrom: "Available from",
       deposit: "Deposit",
       genderPreference: "Gender preference",
+    },
+    costs: {
+      heading: "Costs",
+      description: "Only costs supplied with this listing are shown here.",
+      monthlyRent: "Monthly rent",
+      deposit: "Deposit",
+      notProvided: "Not provided",
     },
     renter: {
       heading: "Renter fit",
@@ -187,7 +194,7 @@ const propertyDetailCopy = {
     } as Record<string, string>,
   },
   bn: {
-    nav: { backToMap: "ম্যাপে ফিরে যান", saved: "সেভ করা", messages: "মেসেজ", signIn: "সাইন ইন" },
+    nav: { back: "ফিরুন", backToMap: "ম্যাপে ফিরে যান", saved: "সেভ করা", messages: "মেসেজ", signIn: "সাইন ইন" },
     common: {
       rentalProperty: "ভাড়ার বাসা",
       exactLocationFallback: "নিচে সঠিক লোকেশন দেখানো হয়েছে",
@@ -215,6 +222,13 @@ const propertyDetailCopy = {
       availableFrom: "পাওয়া যাবে",
       deposit: "জামানত",
       genderPreference: "লিঙ্গ পছন্দ",
+    },
+    costs: {
+      heading: "খরচ",
+      description: "এই লিস্টিংয়ে দেওয়া খরচের তথ্যই শুধু এখানে দেখানো হয়েছে।",
+      monthlyRent: "মাসিক ভাড়া",
+      deposit: "জামানত",
+      notProvided: "তথ্য দেওয়া নেই",
     },
     renter: {
       heading: "ভাড়াটিয়া উপযোগিতা",
