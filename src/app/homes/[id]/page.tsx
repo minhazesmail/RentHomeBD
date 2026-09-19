@@ -177,7 +177,7 @@ export default async function PublicPropertyPage({
             </Link>
             <div className="property-mobile-gallery-actions-right">
               <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} signInHref={saveSignInHref} compact />
-              <PropertyShareButton title={property.title || copy.common.rentalProperty} />
+              <PropertyShareButton title={property.title || copy.common.rentalProperty} compact />
             </div>
           </div>
         </div>
