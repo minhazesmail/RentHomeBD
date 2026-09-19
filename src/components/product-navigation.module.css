@@ -136,6 +136,11 @@
     gap: 6px;
   }
 
+  .productNavAccountLink,
+  .productNavAccountActive {
+    min-height: 44px;
+  }
+
   .productNavLinks {
     grid-column: 1 / -1;
     grid-row: 2;
@@ -154,7 +159,7 @@
   .productNavLink,
   .productNavLinkActive {
     flex: 0 0 auto;
-    min-height: 38px;
+    min-height: 44px;
     scroll-snap-align: start;
     border-radius: 11px;
   }
