@@ -67,7 +67,7 @@ export default async function ModerationDetailPage({ params, searchParams }: { p
   const mapUrl = hasExactPin ? `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude! - 0.008}%2C${property.latitude! - 0.005}%2C${property.longitude! + 0.008}%2C${property.latitude! + 0.005}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}` : null;
 
   return (
-    <main className="listing-shell moderation-shell moderation-detail-shell">
+    <main className="listing-shell moderation-shell moderation-detail-shell" data-mobile-moderation-review="listing">
       <header className="listing-page-header moderation-header">
         <div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.listingDetail.eyebrow}</p><h1 className="listing-page-title">{property.title || copy.common.untitled}</h1><p className="intro">{formatModerationText(copy.listingDetail.submittedBy, { name: owner?.display_name || copy.common.unnamedOwner, role: ownerRole })}</p></div>
         <Link className="text-link" href="/moderation">{copy.listingDetail.back}</Link>
