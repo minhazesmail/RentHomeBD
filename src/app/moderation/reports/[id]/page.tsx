@@ -41,7 +41,7 @@ export default async function ReportReviewPage({ params, searchParams }: { param
   const reportDate = formatDate(new Date(report.created_at), locale, { timeZone: "Asia/Dhaka", day: "numeric", month: "short", year: "numeric" });
 
   return (
-    <main className="listing-shell moderation-shell moderation-report-detail-shell">
+    <main className="listing-shell moderation-shell moderation-report-detail-shell" data-mobile-moderation-review="report">
       <header className="listing-page-header moderation-header">
         <div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.reportDetail.eyebrow}</p><h1 className="listing-page-title">{property.title || copy.common.reportedListing}</h1><p className="intro">{formatModerationText(copy.reportDetail.reportFrom, { name: reporter?.display_name || copy.common.nearbashaUser, date: reportDate })}</p></div>
         <Link className="text-link" href="/moderation/reports">{copy.reportDetail.back}</Link>
