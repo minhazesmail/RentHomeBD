@@ -41,7 +41,7 @@ export default async function ReportReviewPage({ params, searchParams }: { param
   const reportDate = formatDate(new Date(report.created_at), locale, { timeZone: "Asia/Dhaka", day: "numeric", month: "short", year: "numeric" });
 
   return (
-    <main className="listing-shell moderation-shell moderation-report-detail-shell">
+    <main className="listing-shell moderation-shell moderation-report-detail-shell" data-mobile-moderation-review="report">
       <header className="listing-page-header moderation-header">
         <div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.reportDetail.eyebrow}</p><h1 className="listing-page-title">{property.title || copy.common.reportedListing}</h1><p className="intro">{formatModerationText(copy.reportDetail.reportFrom, { name: reporter?.display_name || copy.common.nearbashaUser, date: reportDate })}</p></div>
         <Link className="text-link" href="/moderation/reports">{copy.reportDetail.back}</Link>
@@ -58,7 +58,7 @@ export default async function ReportReviewPage({ params, searchParams }: { param
           </section>
           <section className="listing-section moderation-inspection-card">
             <div className="section-heading"><span>2</span><div><h2>{copy.reportDetail.current}</h2><p>{copy.reportDetail.currentHint}</p></div></div>
-            <dl className="review-facts"><div><dt>{copy.reportDetail.status}</dt><dd>{label(property.status)}</dd></div><div><dt>{copy.reportDetail.type}</dt><dd>{property.property_type ? label(property.property_type) : "—"}</dd></div><div><dt>{copy.reportDetail.rent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : "—"}</dd></div><div><dt>{copy.reportDetail.address}</dt><dd>{property.address_text || "—"}</dd></div></dl>
+            <dl className="review-facts"><div><dt>{copy.reportDetail.status}</dt><dd>{label(property.status)}</dd></div><div><dt>{copy.reportDetail.type}</dt><dd>{property.property_type ? label(property.property_type) : copy.common.notProvided}</dd></div><div><dt>{copy.reportDetail.rent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.common.notProvided}</dd></div><div><dt>{copy.reportDetail.address}</dt><dd>{property.address_text || copy.common.notProvided}</dd></div></dl>
             <Link className="text-link" href={`/homes/${property.id}`}>{copy.reportDetail.openPublic}</Link>
           </section>
         </div>

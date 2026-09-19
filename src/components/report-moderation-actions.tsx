@@ -35,14 +35,14 @@ export function ReportModerationActions({ reportId, reviewerId, nextReportId = n
   }
 
   return (
-    <div className="listing-section">
+    <div className="listing-section" data-mobile-moderation-actions="report">
       <div className="section-heading"><span>!</span><div><h2>{copy.title}</h2><p>{copy.hint}</p></div></div>
       <label className="field">{copy.notes}<textarea rows={5} maxLength={2000} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={copy.placeholder} /></label>
       {message && <div className="auth-message">{message}</div>}
       <div className="dashboard-actions">
-        <button className="secondary-button" type="button" disabled={busy} onClick={() => void decide("dismiss")}>{copy.dismiss}</button>
-        <button className="secondary-button" type="button" disabled={busy} onClick={() => void decide("resolve")}>{nextReportId ? copy.resolveNext : copy.resolve}</button>
-        <button className="primary-button" type="button" disabled={busy} onClick={() => void decide("hide_listing")}>{nextReportId ? copy.hideNext : copy.hide}</button>
+        <button className="secondary-button moderation-action-dismiss" type="button" disabled={busy} onClick={() => void decide("dismiss")}>{copy.dismiss}</button>
+        <button className="secondary-button moderation-action-resolve" type="button" disabled={busy} onClick={() => void decide("resolve")}>{nextReportId ? copy.resolveNext : copy.resolve}</button>
+        <button className="primary-button moderation-action-hide" type="button" disabled={busy} onClick={() => void decide("hide_listing")}>{nextReportId ? copy.hideNext : copy.hide}</button>
       </div>
     </div>
   );

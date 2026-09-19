@@ -3,3 +3,5 @@
 @import "./moderation-workbench.css" layer(route-detail);
 @import "./moderation-spacing-fixes.css" layer(route-fixes);
 @import "./moderation-theme.css" layer(theme);
+
+@import "./moderation-mobile.css" layer(mobile-appearance);

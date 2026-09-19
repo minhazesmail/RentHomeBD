@@ -29,13 +29,13 @@ export function ModerationDecisionForm({ propertyId, reviewerId, nextPropertyId 
   }
 
   return (
-    <section className="listing-section sticky top-4">
+    <section className="listing-section sticky top-4" data-mobile-moderation-actions="listing">
       <div className="section-heading"><span>✓</span><div><h2>{copy.title}</h2><p>{copy.hint}</p></div></div>
       <label className="field">{copy.notes}<textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={5} maxLength={2000} placeholder={copy.placeholder} /></label>
       {message && <div className="auth-message">{message}</div>}
       <div className="mt-5 grid gap-2">
-        <button className="secondary-button" type="button" disabled={busy !== null} onClick={() => void submit("reject")}>{busy === "reject" ? copy.rejecting : copy.reject}</button>
-        <button className="primary-button" type="button" disabled={busy !== null} onClick={() => void submit("approve")}>{busy === "approve" ? copy.approving : nextPropertyId ? copy.approveNext : copy.approve}</button>
+        <button className="secondary-button moderation-action-reject" type="button" disabled={busy !== null} onClick={() => void submit("reject")}>{busy === "reject" ? copy.rejecting : copy.reject}</button>
+        <button className="primary-button moderation-action-approve" type="button" disabled={busy !== null} onClick={() => void submit("approve")}>{busy === "approve" ? copy.approving : nextPropertyId ? copy.approveNext : copy.approve}</button>
       </div>
     </section>
   );

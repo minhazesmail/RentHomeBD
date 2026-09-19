@@ -67,7 +67,7 @@ export default async function ModerationDetailPage({ params, searchParams }: { p
   const mapUrl = hasExactPin ? `https://www.openstreetmap.org/export/embed.html?bbox=${property.longitude! - 0.008}%2C${property.latitude! - 0.005}%2C${property.longitude! + 0.008}%2C${property.latitude! + 0.005}&layer=mapnik&marker=${property.latitude}%2C${property.longitude}` : null;
 
   return (
-    <main className="listing-shell moderation-shell moderation-detail-shell">
+    <main className="listing-shell moderation-shell moderation-detail-shell" data-mobile-moderation-review="listing">
       <header className="listing-page-header moderation-header">
         <div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.listingDetail.eyebrow}</p><h1 className="listing-page-title">{property.title || copy.common.untitled}</h1><p className="intro">{formatModerationText(copy.listingDetail.submittedBy, { name: owner?.display_name || copy.common.unnamedOwner, role: ownerRole })}</p></div>
         <Link className="text-link" href="/moderation">{copy.listingDetail.back}</Link>
@@ -92,14 +92,14 @@ export default async function ModerationDetailPage({ params, searchParams }: { p
           <section className="listing-section moderation-inspection-card">
             <div className="section-heading"><span>1</span><div><h2>{copy.listingDetail.details}</h2><p>{copy.listingDetail.detailsHint}</p></div></div>
             <dl className="review-facts">
-              <div><dt>{copy.listingDetail.type}</dt><dd>{property.property_type?.replaceAll("_", " ") || "—"}</dd></div>
-              <div><dt>{copy.listingDetail.rent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : "—"}</dd></div>
+              <div><dt>{copy.listingDetail.type}</dt><dd>{property.property_type?.replaceAll("_", " ") || copy.common.notProvided}</dd></div>
+              <div><dt>{copy.listingDetail.rent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.common.notProvided}</dd></div>
               <div><dt>{copy.listingDetail.deposit}</dt><dd>{formatCurrency(property.deposit_bdt, locale)}</dd></div>
-              <div><dt>{copy.listingDetail.available}</dt><dd>{property.available_from || "—"}</dd></div>
-              <div><dt>{copy.listingDetail.bedrooms}</dt><dd>{property.bedrooms ?? "—"}</dd></div>
-              <div><dt>{copy.listingDetail.bathrooms}</dt><dd>{property.bathrooms ?? "—"}</dd></div>
-              <div><dt>{copy.listingDetail.size}</dt><dd>{property.size_sqft ? `${formatNumber(property.size_sqft, locale)} sq ft` : "—"}</dd></div>
-              <div><dt>{copy.listingDetail.floor}</dt><dd>{property.floor_number ?? "—"}{property.total_floors ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</dd></div>
+              <div><dt>{copy.listingDetail.available}</dt><dd>{property.available_from || copy.common.notProvided}</dd></div>
+              <div><dt>{copy.listingDetail.bedrooms}</dt><dd>{property.bedrooms ?? copy.common.notProvided}</dd></div>
+              <div><dt>{copy.listingDetail.bathrooms}</dt><dd>{property.bathrooms ?? copy.common.notProvided}</dd></div>
+              <div><dt>{copy.listingDetail.size}</dt><dd>{property.size_sqft ? `${formatNumber(property.size_sqft, locale)} sq ft` : copy.common.notProvided}</dd></div>
+              <div><dt>{copy.listingDetail.floor}</dt><dd>{property.floor_number ?? copy.common.notProvided}{property.total_floors ? ` / ${formatNumber(property.total_floors, locale)}` : ""}</dd></div>
               <div><dt>{copy.listingDetail.furnishing}</dt><dd>{property.furnishing.replaceAll("_", " ")}</dd></div>
               <div><dt>{copy.listingDetail.gender}</dt><dd>{property.gender_preference}</dd></div>
             </dl>
@@ -108,12 +108,12 @@ export default async function ModerationDetailPage({ params, searchParams }: { p
 
           <section className="listing-section moderation-inspection-card">
             <div className="section-heading"><span>2</span><div><h2>{copy.listingDetail.tenantAmenities}</h2><p>{copy.listingDetail.tenantHint}</p></div></div>
-            <div className="review-tags"><strong>{copy.listingDetail.tenantTypes}</strong><div>{(tenants ?? []).map((row) => { const type = normalizeTenantType(row.tenant_type); return <span key={row.tenant_type}>{type ? tenantLabels[type] : row.tenant_type.replaceAll("_", " ")}</span>; })}</div></div>
-            <div className="review-tags"><strong>{copy.listingDetail.amenities}</strong><div>{(amenities ?? []).map((amenity) => <span key={amenity.slug}>{amenity.name}</span>)}</div></div>
-            <div className="review-tags"><strong>{copy.listingDetail.utilities}</strong><div>{property.utilities_included.map((item) => <span key={item}>{item.replaceAll("_", " ")}</span>)}</div></div>
+            <div className="review-tags"><strong>{copy.listingDetail.tenantTypes}</strong><div>{(tenants ?? []).length ? (tenants ?? []).map((row) => { const type = normalizeTenantType(row.tenant_type); return <span key={row.tenant_type}>{type ? tenantLabels[type] : row.tenant_type.replaceAll("_", " ")}</span>; }) : <span>{copy.common.notProvided}</span>}</div></div>
+            <div className="review-tags"><strong>{copy.listingDetail.amenities}</strong><div>{(amenities ?? []).length ? (amenities ?? []).map((amenity) => <span key={amenity.slug}>{amenity.name}</span>) : <span>{copy.common.notProvided}</span>}</div></div>
+            <div className="review-tags"><strong>{copy.listingDetail.utilities}</strong><div>{property.utilities_included.length ? property.utilities_included.map((item) => <span key={item}>{item.replaceAll("_", " ")}</span>) : <span>{copy.common.notProvided}</span>}</div></div>
           </section>
 
-          <section className="listing-section moderation-inspection-card"><div className="section-heading"><span>3</span><div><h2>{copy.listingDetail.locationTitle}</h2><p>{copy.listingDetail.locationHint}</p></div></div><p className="review-address">{property.address_text}</p>{mapUrl && <div className="map-preview moderation-map-preview"><iframe title={copy.listingDetail.iframe} src={mapUrl} loading="lazy" /></div>}</section>
+          <section className="listing-section moderation-inspection-card"><div className="section-heading"><span>3</span><div><h2>{copy.listingDetail.locationTitle}</h2><p>{copy.listingDetail.locationHint}</p></div></div><p className="review-address">{property.address_text || copy.common.notProvided}</p>{mapUrl && <div className="map-preview moderation-map-preview"><iframe title={copy.listingDetail.iframe} src={mapUrl} loading="lazy" /></div>}</section>
           <section className="listing-section moderation-inspection-card moderation-media-section"><div className="section-heading"><span>4</span><div><h2>{copy.listingDetail.mediaTitle}</h2><p>{copy.listingDetail.mediaHint}</p></div></div><div className="moderation-media-grid">{media.map((item) => item.signedUrl ? (item.media_type === "photo" ? <Image key={item.id} src={item.signedUrl} alt={copy.listingDetail.mediaAlt} width={960} height={720} sizes="(max-width: 900px) 100vw, 50vw" /> : <video key={item.id} controls src={item.signedUrl} />) : <div className="media-placeholder" key={item.id}>{copy.listingDetail.mediaUnavailable}</div>)}</div></section>
         </div>
         <aside className="moderation-sidebar moderation-decision-rail">

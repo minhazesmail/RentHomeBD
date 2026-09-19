@@ -39,12 +39,12 @@ export function ProfileVerificationActions({ targetUserId, reviewerId, verified 
   }
 
   return (
-    <div className="profile-verification-actions">
+    <div className="profile-verification-actions" data-mobile-moderation-actions="account">
       <label className="field">{copy.note}<textarea rows={3} maxLength={1000} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={verified ? copy.revokePlaceholder : copy.verifyPlaceholder} disabled={isSelf} /></label>
       {isSelf && <div className="auth-message">{copy.self}</div>}
       {message && <div className="auth-message">{message}</div>}
       <div className="dashboard-actions">
-        {verified ? <button className="secondary-button" type="button" disabled={busy || isSelf} onClick={() => void decide("revoke")}>{copy.revoke}</button> : <button className="primary-button" type="button" disabled={busy || isSelf} onClick={() => void decide("verify")}>{copy.issue}</button>}
+        {verified ? <button className="secondary-button moderation-action-revoke" type="button" disabled={busy || isSelf} onClick={() => void decide("revoke")}>{copy.revoke}</button> : <button className="primary-button moderation-action-verify" type="button" disabled={busy || isSelf} onClick={() => void decide("verify")}>{copy.issue}</button>}
       </div>
     </div>
   );

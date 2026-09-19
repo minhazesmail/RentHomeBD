@@ -26,7 +26,7 @@ export default async function ModerationQueuePage({ searchParams }: { searchPara
   const waiting = formatModerationText(counts.listings === 1 ? copy.listings.waitingOne : copy.listings.waitingMany, { count: formatNumber(counts.listings, locale) });
 
   return (
-    <main className="owner-shell moderation-shell moderation-queue-shell">
+    <main className="owner-shell moderation-shell moderation-queue-shell" data-mobile-moderation-queue="listings">
       <header className="owner-header moderation-header"><div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.common.moderation}</p><h1 className="owner-title">{copy.listings.title}</h1><p className="intro">{copy.listings.intro}</p></div></header>
       <ModerationWorkbenchNav current="listings" counts={counts} />
       {params.notice === "approved" && <div className="success-message">{copy.listings.approved}</div>}

@@ -27,7 +27,7 @@ export default async function ReportQueuePage({ searchParams }: { searchParams: 
   const openLabel = formatModerationText(counts.reports === 1 ? copy.reports.openOne : copy.reports.openMany, { count: formatNumber(counts.reports, locale) });
 
   return (
-    <main className="owner-shell moderation-shell moderation-reports-shell">
+    <main className="owner-shell moderation-shell moderation-reports-shell" data-mobile-moderation-queue="reports">
       <header className="owner-header moderation-header"><div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.common.trustSafety}</p><h1 className="owner-title">{copy.reports.title}</h1><p className="intro">{copy.reports.intro}</p></div></header>
       <ModerationWorkbenchNav current="reports" counts={counts} />
       {params.notice === "hide_listing" && <div className="success-message">{copy.reports.hidden}</div>}
