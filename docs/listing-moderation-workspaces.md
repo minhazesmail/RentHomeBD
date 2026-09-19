@@ -23,3 +23,21 @@ The account queue keeps all owner/agent accounts visible but prioritizes account
 ## Regression boundary
 
 `npm run listingmoderationqa` guards the tenant-policy exclusivity contract, readiness parity, EN/BN moderation copy, evidence wording, localized queue formatting, and actionable account ordering. CI also runs `supabase/tests/f27_listing_tenant_policy.sql` against a fresh/reset database to prove the exclusivity trigger accepts multiple specific renter types and rejects `everyone` mixed with specifics in either insertion order.
+
+## Current mobile plan — Task 8 five-step listing editor
+
+The phone editor keeps the existing retry-safe listing lifecycle and presents it as five explicit steps:
+
+1. Basics & pricing
+2. Home details
+3. Renter fit
+4. Exact map pin
+5. Photos & video
+
+The active step stays centered in the mobile step rail and Back/Continue remain visible beneath it. The bottom action surface is singular: steps 1–4 expose **Save draft**, while step 5 exposes **Save draft** plus **Submit for review**. Submission validation and the atomic `ensure_property_draft` → `save_property_draft` → `submit_property_for_review` sequence are unchanged.
+
+Mobile fields retain at least 48px primary controls and 16px input text, exact-location controls stay within the dynamic viewport, and media editing becomes horizontally swipeable with touch-sized reorder/cover/remove actions. Browser draft recovery and leave protection remain enabled.
+
+The renter-policy picker now mirrors the database invariant directly: selecting **Everyone** clears specific renter types, while selecting a specific renter type clears **Everyone**. The canonical database/readiness validation remains the final enforcement boundary.
+
+Listing editor routes remain contextual, so the global mobile tab bar stays suppressed while owners are creating or editing a property.

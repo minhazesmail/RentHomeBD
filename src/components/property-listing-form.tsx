@@ -209,6 +209,15 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
   const coverKey = orderedMedia.find((item) => item.kind === "existing" ? item.media.media_type === "photo" : item.file.type.startsWith("image/"))?.key ?? null;
 
   function toggle(value: string, values: string[], setter: (next: string[]) => void) { setter(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]); }
+
+  function toggleTenantType(value: string) {
+    setTenantTypes((current) => {
+      if (current.includes(value)) return current.filter((item) => item !== value);
+      if (value === "everyone") return ["everyone"];
+      return [...current.filter((item) => item !== "everyone"), value];
+    });
+  }
+
   function setMapLocation(lat: number, lng: number) {
     setLatitude(lat.toFixed(6));
     setLongitude(lng.toFixed(6));
@@ -471,7 +480,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
   const relistLabel = property?.status === "rented" || property?.status === "expired" ? copy.relistAsDraft : copy.startEditing;
 
   return (
-    <form className="listing-form" onSubmit={(event) => { event.preventDefault(); void save(false); }}>
+    <form className="listing-form" data-mobile-listing-form onSubmit={(event) => { event.preventDefault(); void save(false); }}>
       {property?.moderation_notes && <div className="review-note"><strong>{copy.moderatorNote}</strong> {property.moderation_notes}</div>}
       {locked && property && <div className="review-note"><strong>{formatWorkflowText(copy.statusLocked, { status: listingStatusLabel(property.status, locale) })}</strong><p>{copy.lockedHint}</p><button className="secondary-button" type="button" disabled={busy} onClick={() => void beginEditing()}>{busy ? copy.preparing : relistLabel}</button></div>}
 
@@ -506,7 +515,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
 
       <section className="listing-section">
         <div className="section-heading"><span>3</span><div><h2>{copy.renterTypesTitle}</h2><p>{copy.renterTypesHint}</p></div></div>
-        <fieldset className="choice-group" disabled={locked}><div className="choice-grid">{tenantOptions.map(([value, label]) => <label className="choice-chip" key={value}><input type="checkbox" checked={tenantTypes.includes(value)} onChange={() => toggle(value, tenantTypes, setTenantTypes)} />{label}</label>)}</div></fieldset>
+        <fieldset className="choice-group" disabled={locked}><div className="choice-grid">{tenantOptions.map(([value, label]) => <label className="choice-chip" key={value}><input type="checkbox" checked={tenantTypes.includes(value)} onChange={() => toggleTenantType(value)} />{label}</label>)}</div></fieldset>
       </section>
 
       <section className="listing-section listing-location-section">
@@ -562,7 +571,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
       </section>
 
       {message && <div className="auth-message" role="status" aria-live="polite">{message}</div>}
-      {!locked && <div className="listing-actions"><button className="secondary-button" type="submit" disabled={busy}>{busy ? copy.saving : copy.saveDraft}</button><button className="primary-button" type="button" disabled={busy} onClick={() => void save(true)}>{busy ? copy.working : copy.submitReview}</button></div>}
+      {!locked && <div className="listing-actions"><button className="secondary-button listing-save-draft" type="submit" disabled={busy}>{busy ? copy.saving : copy.saveDraft}</button><button className="primary-button listing-submit-review" type="button" disabled={busy} onClick={() => void save(true)}>{busy ? copy.working : copy.submitReview}</button></div>}
     </form>
   );
 }

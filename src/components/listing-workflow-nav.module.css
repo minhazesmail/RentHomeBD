@@ -245,3 +245,34 @@
     transform: none;
   }
 }
+
+
+@media (max-width: 767px) {
+  .workflow {
+    top: calc(var(--mobile-app-topbar-height, 58px) + 5px);
+    gap: 8px;
+    padding: 7px;
+    border-radius: 15px;
+  }
+
+  .rail {
+    grid-template-columns: repeat(5, minmax(92px, 1fr));
+    gap: 5px;
+    scroll-snap-type: inline mandatory;
+  }
+
+  .step {
+    min-width: 92px;
+    min-height: 44px;
+    padding: 6px 7px;
+    scroll-snap-align: center;
+  }
+
+  .stepActions {
+    display: grid;
+  }
+
+  .stepActions button {
+    min-height: 42px;
+  }
+}

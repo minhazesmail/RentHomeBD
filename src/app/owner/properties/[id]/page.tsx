@@ -47,7 +47,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
   const editable = ["draft", "pending_review", "rejected"].includes(property.status);
 
   return (
-    <main className="listing-shell listing-editor-page">
+    <main className="listing-shell listing-editor-page" data-mobile-listing-editor>
       <ProductNavigation authenticated canList current="properties" />
       <header className="listing-page-header listing-editor-header">
         <div>
@@ -58,7 +58,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         <Link className="text-link" href="/owner">{commonOwnerCopy.backToProperties}</Link>
       </header>
 
-      <div className={editorStyles.editorShell}>
+      <div className={editorStyles.editorShell} data-mobile-listing-shell>
         <ListingWorkflowNav mode="editing" />
         <div>
           {editable && <ListingDraftGuard userId={auth.userId} propertyId={id} />}

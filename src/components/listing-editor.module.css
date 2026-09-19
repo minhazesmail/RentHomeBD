@@ -146,3 +146,28 @@
     bottom: 7px;
   }
 }
+
+
+@media (max-width: 767px) {
+  .editorShell :global(.listing-form:not([data-active-step="4"]) > .listing-actions .listing-submit-review) {
+    display: none;
+  }
+
+  .editorShell :global(.listing-form > .listing-actions) {
+    grid-template-columns: 1fr;
+  }
+
+  .editorShell :global(.listing-form[data-active-step="4"] > .listing-actions) {
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+  }
+
+  .editorShell :global(.listing-form > .listing-actions button) {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 360px) {
+  .editorShell :global(.listing-form[data-active-step="4"] > .listing-actions) {
+    grid-template-columns: 1fr;
+  }
+}
