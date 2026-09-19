@@ -81,7 +81,7 @@
 
   .choice,
   .activeChoice {
-    min-height: 44px;
+    min-height: 44px !important;
     padding-inline: 7px;
     font-size: .73rem;
   }
