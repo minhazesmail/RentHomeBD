@@ -61,6 +61,9 @@ requireText(workspace, "appliedQuery.center[0].toFixed(6)", "property return pat
 requireText(workspace, "appliedQuery.areaLabel", "mobile search summary reflects applied criteria rather than draft filters");
 requireText(workspace, "data-map-search-feedback", "map-level search feedback remains visible beside map actions");
 requireText(workspace, "announceMapResult", "Search this area can request explicit map feedback");
+requireText(workspace, "pendingMapCenter ?? center", "Search this area retries the explicit pending map center");
+requirePattern(workspace, /setPendingMapCenter\(centerChanged \? nextCenter : null\)/, "map movement stores a retry-safe pending center");
+requireText(workspace, "setPendingMapCenter(null);\n    setMapDirty(false);", "successful search clears pending map state");
 
 // Selection, hover/focus, exact-pin and return-state synchronization.
 requireText(results, "onMouseEnter={() => onHighlight(listing.id)}", "result hover highlights marker");
