@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { divIcon } from "leaflet";
 import type { LatLngBoundsExpression } from "leaflet";
 
+import type { MapViewport } from "@/lib/map-session";
 import styles from "./leaflet-map.module.css";
 import chrome from "./map-chrome.module.css";
 import { LIGHT_BASEMAP, DARK_BASEMAP } from "@/lib/map-basemaps";
@@ -75,9 +76,10 @@ const DARK_MAP: MapAppearance = {
   userRing: "#07130f",
 };
 
-function FitToResults({ listings, center, liveTracking }: { listings: MapListing[]; center: [number, number]; liveTracking: boolean }) {
+function FitToResults({ listings, center, liveTracking, restoredViewport }: { listings: MapListing[]; center: [number, number]; liveTracking: boolean; restoredViewport?: MapViewport }) {
   const map = useMap();
   const centerRef = useRef(center);
+  const restoredRef = useRef(false);
 
   useEffect(() => {
     centerRef.current = center;
@@ -90,6 +92,11 @@ function FitToResults({ listings, center, liveTracking }: { listings: MapListing
 
   useEffect(() => {
     if (liveTracking) return;
+    if (restoredViewport && !restoredRef.current) {
+      map.setView(restoredViewport.center, restoredViewport.zoom, { animate: false });
+      if (listings.length) restoredRef.current = true;
+      return;
+    }
     const searchCenter = centerRef.current;
     if (listings.length === 0) {
       map.setView(searchCenter, 12);
@@ -101,8 +108,16 @@ function FitToResults({ listings, center, liveTracking }: { listings: MapListing
     }
     const bounds = listings.map((listing) => [listing.latitude, listing.longitude] as [number, number]) as LatLngBoundsExpression;
     map.fitBounds(bounds, { padding: [36, 36], maxZoom: 15 });
-  }, [listings, liveTracking, map]);
+  }, [listings, liveTracking, map, restoredViewport]);
 
+  return null;
+}
+
+function ViewportObserver({ onChange }: { onChange?: (viewport: MapViewport) => void }) {
+  const map = useMapEvents({ moveend: () => {
+    const center = map.getCenter();
+    onChange?.({ center: [center.lat, center.lng], zoom: map.getZoom() });
+  } });
   return null;
 }
 
@@ -422,11 +437,13 @@ function ClusteredListings({ listings, selectedId, onSelect, copy }: { listings:
   );
 }
 
-export default function LeafletMap({ listings, center, radiusKm, selectedId, focusId, focusVersion = 0, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange, tileRetryVersion = 0, onTileFailure }: {
+export default function LeafletMap({ restoredViewport, onViewportChange, listings, center, radiusKm, selectedId, focusId, focusVersion = 0, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange, tileRetryVersion = 0, onTileFailure }: {
   listings: MapListing[];
   center: [number, number];
   radiusKm: number | null;
   selectedId: string | null;
+  restoredViewport?: MapViewport;
+  onViewportChange?: (viewport: MapViewport) => void;
   activeSelectedId?: string | null;
   focusId?: string | null;
   focusVersion?: number;
@@ -468,7 +485,8 @@ export default function LeafletMap({ listings, center, radiusKm, selectedId, foc
       />
       <ZoomControl position="topright" />
       <ResponsiveMapSize />
-      <FitToResults listings={listings} center={center} liveTracking={liveTracking} />
+      <FitToResults listings={listings} center={center} liveTracking={liveTracking} restoredViewport={restoredViewport} />
+      <ViewportObserver onChange={onViewportChange} />
       <FocusListing listings={listings} focusId={focusId} focusVersion={focusVersion} />
       <ManualMapCenter disabled={drawingCustomArea || editingCustomArea} onChange={onCenterChange} />
       <CustomAreaDrawing active={drawingCustomArea} points={customArea} onChange={onCustomAreaChange ?? (() => {})} />

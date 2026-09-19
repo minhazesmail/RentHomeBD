@@ -56,8 +56,8 @@ const enMapWorkspaceRedesignCopy = {
     collapseResults: "Collapse results sheet",
     partialResults: "Show partial results sheet",
     expandResults: "Expand results sheet",
-    applyFilters: "Apply filters",
-    resetFilters: "Reset",
+    applyFilters: "Show homes",
+    resetFilters: "Clear",
     summaryFallback: "Dhaka map search",
   },
 } as const;
@@ -118,8 +118,8 @@ const bnMapWorkspaceRedesignCopy = {
     collapseResults: "ফলাফলের শিট ছোট করুন",
     partialResults: "ফলাফলের শিট আংশিক দেখান",
     expandResults: "ফলাফলের শিট বড় করুন",
-    applyFilters: "ফিল্টার প্রয়োগ করুন",
-    resetFilters: "রিসেট",
+    applyFilters: "বাসা দেখুন",
+    resetFilters: "মুছুন",
     summaryFallback: "ঢাকা ম্যাপ সার্চ",
   },
 } as const;

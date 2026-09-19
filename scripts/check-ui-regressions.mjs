@@ -106,8 +106,8 @@ forbidRegex("src/app/landing-redesign.css", /\.landing-nav-center a,\s*\.landing
 // Core mobile interaction models from the redesign program.
 requireText("src/components/mobile-map-model.tsx", "data-mobile-view", "explicit mobile map/list state");
 requireText("src/components/mobile-map-model.tsx", "aria-pressed", "map/list pressed-state semantics");
-requireText("src/components/mobile-map-model.tsx", "aria-expanded", "filter-sheet expanded semantics");
-requireText("src/components/mobile-map-model.tsx", "focusSelector", "focus transfer between map and list views");
+requireText("src/components/renter-map-workspace.tsx", "aria-expanded={mobile.filtersOpen}", "filter-sheet expanded semantics");
+requireText("src/components/mobile-map-model.tsx", "target?.focus({ preventScroll: true })", "focus transfer between map and list views");
 
 requireText("src/components/listing-editor.module.css", "@media (max-width: 1120px)", "listing editor tablet collapse");
 requireText("src/components/listing-editor.module.css", "@media (max-width: 700px)", "listing editor phone collapse");
