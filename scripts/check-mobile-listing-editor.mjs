@@ -14,6 +14,7 @@ const workflow = read("src/components/listing-workflow-nav.tsx");
 const workflowCss = read("src/components/listing-workflow-nav.module.css");
 const editorCss = read("src/components/listing-editor.module.css");
 const mobileCss = read("src/app/owner/properties/listing-mobile-editor.css");
+const listingStyleManifest = read("src/app/owner/properties/listing-media-styles.css");
 const draftGuard = read("src/components/listing-draft-guard.tsx");
 const readiness = read("src/components/listing-readiness.tsx");
 const policy = read("src/lib/listing-tenant-policy.ts");
@@ -22,7 +23,7 @@ const nav = read("src/components/product-navigation.tsx");
 for (const page of [newPage, editPage]) {
   expect(page, "data-mobile-listing-editor", "listing editor route mobile marker");
   expect(page, "data-mobile-listing-shell", "stable mobile listing shell marker");
-  expect(page, 'import "../listing-mobile-editor.css";', "listing editor mobile stylesheet import");
+  expect(page, 'import "../listing-media-styles.css";', "listing editor layered stylesheet manifest import");
 }
 
 const listingSections = form.match(/<section className="listing-section(?:\s[^"]*)?"/g) ?? [];
@@ -49,6 +50,7 @@ expect(form, 'current.filter((item) => item !== "everyone")', "specific renter t
 expect(policy, 'return !unique.includes("everyone") || unique.length === 1;', "canonical tenant-policy invariant must remain unchanged");
 expect(readiness, "isValidListingTenantPolicy(tenantTypes)", "readiness must continue using canonical tenant-policy validation");
 
+expect(listingStyleManifest, '@import "./listing-mobile-editor.css" layer(mobile-appearance);', "mobile editor stylesheet must stay inside the layered CSS manifest");
 expect(mobileCss, "font-size: 16px", "mobile editor inputs must avoid iOS zoom");
 expect(mobileCss, "min-height: 48px", "mobile primary editor controls must meet 48px target");
 expect(mobileCss, "min-height: min(56dvh, 360px)", "mobile map must stay viewport-safe");
