@@ -39,7 +39,7 @@ export function SavedHomesWorkspace({ userId, homes, unavailablePropertyIds }: P
   const [comparisonOpen, setComparisonOpen] = useState(false);
 
   const rentLabel = (value: number | null) => value == null ? copy.rentOnRequest : `${formatCurrency(value)}${copy.perMonth}`;
-  const valueLabel = (value: number | null, suffix = "") => value == null ? "—" : `${formatNumber(value)}${suffix}`;
+  const valueLabel = (value: number | null, suffix = "") => value == null ? copy.notSpecified : `${formatNumber(value)}${suffix}`;
 
   const selectedHomes = useMemo(
     () => selectedIds.map((id) => homes.find((home) => home.id === id)).filter((home): home is SavedHome => Boolean(home)),
@@ -64,7 +64,7 @@ export function SavedHomesWorkspace({ userId, homes, unavailablePropertyIds }: P
   }
 
   return (
-    <div className={`${styles.workspace}${selectedIds.length ? ` ${styles.hasSelection}` : ""}`}>
+    <div className={`${styles.workspace}${selectedIds.length ? ` ${styles.hasSelection}` : ""}`} data-saved-mobile-workspace>
       {homes.length ? (
         <>
           <div className={styles.toolbar}>
