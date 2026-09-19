@@ -143,7 +143,8 @@
     border: 0;
   }
 
-  .trigger {
+  .trigger,
+  .compact .trigger {
     width: 44px;
     min-width: 44px;
     min-height: 44px;
