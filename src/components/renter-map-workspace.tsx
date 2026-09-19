@@ -8,14 +8,16 @@ import { Briefcase, CircleCheck, GraduationCap, LocateFixed, MapPinned, Search, 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { MobileFilterPanel, MobileResultsHeader, useMobileMap } from "@/components/mobile-map-model";
+import { MobileFilterPanel, MobileResultsHeader, useMobileMapModel, useMobileMap } from "@/components/mobile-map-model";
 import { readMapSession, writeMapSession, type MapViewport } from "@/lib/map-session";
 import { SaveHomeButton } from "@/components/save-home-button";
+import { SearchRecoveryState } from "@/components/search-recovery-state";
 import type { MapListing, UserMapLocation } from "@/components/leaflet-map";
 import { RenterResultsList } from "@/components/renter-results-list";
 import { formatCurrency, formatNumber } from "@/i18n/format";
 import { getMapExperienceCopy } from "@/i18n/map-experience-copy";
 import { getMapWorkspaceRedesignCopy } from "@/i18n/map-workspace-redesign-copy";
+import { getRenterResultsCopy } from "@/i18n/renter-results-copy";
 import { localizeLocationLabel } from "@/i18n/presentation";
 import { useLocale } from "@/i18n/use-locale";
 import { formatWorkflowText, getWorkflowCopy, type WorkflowCopy } from "@/i18n/workflow-copy";
@@ -39,6 +41,7 @@ type SortOption = "recommended" | "distance" | "rent-asc" | "rent-desc";
 type SearchCopy = WorkflowCopy["homes"]["search"];
 type SearchTenantType = Exclude<TenantType, "everyone">;
 type TenantLabels = Record<TenantType, string> & { unspecified: string };
+type LocationRecovery = { message: string; retryable: boolean };
 
 type InitialSearch = {
   centerLat?: number;
@@ -169,6 +172,8 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const copy = getWorkflowCopy(locale).homes.search;
   const experienceCopy = getMapExperienceCopy(locale);
   const workspaceCopy = getMapWorkspaceRedesignCopy(locale);
+  const resultsCopy = getRenterResultsCopy(locale);
+  const mobileMapModel = useMobileMapModel();
   const tenantLabels = useMemo<TenantLabels>(() => ({
     family: dictionary.common.tenant.family,
     bachelor: dictionary.common.tenant.bachelor,
@@ -199,12 +204,17 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const [sortOption, setSortOption] = useState<SortOption>(initialSort(initialSearch.sort));
   const [searchName, setSearchName] = useState("");
   const [busy, setBusy] = useState(Boolean(initialTenantType));
+  const [slowSearch, setSlowSearch] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [savingSearch, setSavingSearch] = useState(false);
   const [locating, setLocating] = useState(false);
   const [liveTracking, setLiveTracking] = useState(false);
   const [userLocation, setUserLocation] = useState<UserMapLocation | null>(null);
   const [locationStatus, setLocationStatus] = useState<string | null>(null);
+  const [locationRecovery, setLocationRecovery] = useState<LocationRecovery | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [mapTileFailed, setMapTileFailed] = useState(false);
+  const [tileRetryVersion, setTileRetryVersion] = useState(0);
   const [customArea, setCustomArea] = useState<[number, number][]>([]);
   const [drawingCustomArea, setDrawingCustomArea] = useState(false);
   const [mapDirty, setMapDirty] = useState(false);
@@ -259,8 +269,10 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     searchAbortRef.current?.abort();
     searchAbortRef.current = null;
     setBusy(false);
+    setSlowSearch(false);
+    setSearchError(null);
     setMessage(null);
-  }, [setBusy, setMessage]);
+  }, [setBusy, setMessage, setSearchError, setSlowSearch]);
 
   const validateFilters = useCallback(() => {
     if (!tenantType) return workspaceCopy.toolbar.tenantRequired;
@@ -287,13 +299,17 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (validationMessage) {
       if (isCurrentSearch()) {
         searchAbortRef.current = null;
-        setMessage(validationMessage);
+        setSearchError(validationMessage);
+        setMessage(null);
+        setSlowSearch(false);
         setBusy(false);
       }
       return;
     }
 
     setBusy(true);
+    setSlowSearch(false);
+    setSearchError(null);
     setMessage(null);
 
     const { data, error } = await supabase.rpc("search_available_properties", {
@@ -312,7 +328,8 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (!isCurrentSearch()) return;
     if (error) {
       searchAbortRef.current = null;
-      setMessage(friendlySearchError(error, copy));
+      setSearchError(friendlySearchError(error, copy));
+      setSlowSearch(false);
       setBusy(false);
       return;
     }
@@ -354,6 +371,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     }));
 
     if (!isCurrentSearch()) return;
+    setSearchError(null);
     setListings(hydrated);
     setSelectedId((current) => current && hydrated.some((listing) => listing.id === current) ? current : null);
     setAppliedQuery({
@@ -371,6 +389,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setFiltersOpen(false);
     requestAnimationFrame(() => filterTriggerRef.current?.focus());
     searchAbortRef.current = null;
+    setSlowSearch(false);
     setBusy(false);
   }, [
     bedrooms,
@@ -387,7 +406,9 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setListings,
     setMapDirty,
     setMessage,
+    setSearchError,
     setSelectedId,
+    setSlowSearch,
     sortOption,
     setFiltersOpen,
     supabase,
@@ -406,6 +427,11 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   }, [copy, drawingCustomArea, setCustomArea, setMapDirty, setMessage]);
 
   useEffect(() => { runSearchRef.current = runSearch; }, [runSearch]);
+  useEffect(() => {
+    if (!busy) return;
+    const timer = window.setTimeout(() => setSlowSearch(true), 4000);
+    return () => window.clearTimeout(timer);
+  }, [busy]);
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const saved = readMapSession(window.location.pathname + window.location.search);
@@ -487,7 +513,11 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   }
 
   function startLiveLocation() {
-    if (!navigator.geolocation) { setMessage(copy.locationUnsupported); return; }
+    if (!navigator.geolocation) {
+      setLocationRecovery({ message: copy.locationUnsupported, retryable: false });
+      setMessage(null);
+      return;
+    }
     cancelActiveSearch();
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
@@ -499,6 +529,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       setSelectedId(null);
     }
     setLocating(true);
+    setLocationRecovery(null);
     setMessage(null);
     setLocationStatus(copy.requestingLocation);
     lastLiveCenterRef.current = null;
@@ -528,6 +559,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
         setLocationPreset("");
         setLocating(false);
         setLiveTracking(true);
+        setLocationRecovery(null);
       }
       if (shouldUpdateDisplay) {
         const nextDisplayLocation = { latitude: coords.latitude, longitude: coords.longitude, accuracy };
@@ -554,13 +586,18 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
       }
-      setMessage(error.code === error.PERMISSION_DENIED ? copy.permissionDenied : copy.locationTrackingError);
+      setLocationRecovery({
+        message: error.code === error.PERMISSION_DENIED ? copy.permissionDenied : copy.locationTrackingError,
+        retryable: true,
+      });
+      setMessage(null);
       setLocationStatus(null);
     }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
   }
 
   function choosePresetLocation(label: string) {
     cancelActiveSearch();
+    setLocationRecovery(null);
     setLocationPreset(label);
     const preset = LOCATION_PRESETS.find((location) => location.label === label);
     if (!preset) return;
@@ -579,9 +616,21 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       stopLiveLocation();
       setLocationStatus(copy.pausedForMapMove);
     }
+    setLocationRecovery(null);
     setLocationPreset("");
     setCenter(nextCenter);
     setMapDirty(true);
+  }
+
+  function handleMapTileFailure() {
+    setMapTileFailed(true);
+    mobileMapModel.showList();
+  }
+
+  function retryMapTiles() {
+    setMapTileFailed(false);
+    setTileRetryVersion((version) => version + 1);
+    mobileMapModel.showMap();
   }
 
   function clearFilters() {
@@ -666,7 +715,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setLocationPreset(LOCATION_PRESETS.find((preset) => Math.abs(preset.latitude - appliedQuery.center[0]) < .0001 && Math.abs(preset.longitude - appliedQuery.center[1]) < .0001)?.label ?? "");
   }
 
-  function openFilters(trigger: HTMLElement) {
+  function openFilters(trigger: HTMLElement | null) {
     if (liveTracking) stopLiveLocation();
     filterTriggerRef.current = trigger;
     restoreAppliedFilters();
@@ -779,6 +828,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
             <span className="tenant-legend-chip tenant-everyone"><CircleCheck size={12} aria-hidden="true" />{tenantLabels.everyone}</span>
           </div>
           {locationStatus && <div className="renter-toolbar-status" role="status" aria-live="polite">{locationStatus}</div>}
+          {searchError && <div className="auth-message compact-message" role="alert">{searchError}</div>}
           {message && <div className={message === copy.searchSaved ? "success-message compact-message" : "auth-message compact-message"} role="status" aria-live="polite">{message}</div>}
         </div>
 
@@ -831,6 +881,34 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
                 <span>{workspaceCopy.results.updatingHint}</span>
               </div>
             )}
+
+            {mapTileFailed && (
+              <SearchRecoveryState
+                variant="map"
+                title={resultsCopy.mapUnavailableTitle}
+                description={resultsCopy.mapUnavailableHint}
+                compact={visibleListings.length > 0}
+                primaryAction={{ label: resultsCopy.retryMap, onClick: retryMapTiles }}
+              />
+            )}
+
+            {locationRecovery && (
+              <SearchRecoveryState
+                variant="location"
+                title={resultsCopy.locationUnavailableTitle}
+                description={locationRecovery.message}
+                compact={visibleListings.length > 0 || mapTileFailed}
+                primaryAction={locationRecovery.retryable ? { label: resultsCopy.tryLocationAgain, onClick: startLiveLocation } : undefined}
+                secondaryAction={{
+                  label: resultsCopy.useMapInstead,
+                  onClick: () => {
+                    setLocationRecovery(null);
+                    mobileMapModel.showMap();
+                  },
+                }}
+              />
+            )}
+
             {!appliedQuery.tenantType ? (
               <div className="renter-map-intro">
                 <MapPinned size={28} aria-hidden="true" />
@@ -840,12 +918,16 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
             ) : <RenterResultsList
               listings={visibleListings}
               busy={busy}
+              slow={slowSearch}
+              searchError={searchError}
               customAreaActive={customAreaActive}
               selectedId={effectiveSelectedId}
               preference={activePreference}
               userId={userId}
               propertyHref={propertyHref}
               onSelect={handleShowOnMap}
+              onRetry={() => void runSearch()}
+              onClearFilters={() => { openFilters(document.activeElement instanceof HTMLElement ? document.activeElement : null); clearFilters(); }}
               onHighlight={setHighlightedId}
             />}
           </div>
@@ -869,6 +951,8 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
             customArea={customArea}
             drawingCustomArea={drawingCustomArea}
             onCustomAreaChange={handleCustomAreaChange}
+            tileRetryVersion={tileRetryVersion}
+            onTileFailure={handleMapTileFailure}
           />
 
           <div className="renter-map-actions" aria-label={copy.title}>
@@ -896,7 +980,17 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
                   <h2>{selectedListing.title || copy.rentalProperty}</h2>
                   <p>{selectedListing.address_text || copy.locationOnMap}</p>
                   {tenantCompatibility(selectedListing.tenant_types ?? [], activePreference) === "mismatch" && <small className="tenant-preference-note is-mismatch">{copy.differentRenterPreference}</small>}
-                  <div className="mobile-map-sheet-meta"><strong>{selectedListing.rent_bdt ? formatCurrency(selectedListing.rent_bdt, locale) : copy.rentOnRequest}</strong><span>{selectedListing.bedrooms == null ? "—" : formatNumber(selectedListing.bedrooms, locale)} {copy.bed} · {selectedListing.bathrooms == null ? "—" : formatNumber(selectedListing.bathrooms, locale)} {copy.bath}</span></div>
+                  <div className="mobile-map-sheet-meta">
+                    <strong>{selectedListing.rent_bdt ? formatCurrency(selectedListing.rent_bdt, locale) : copy.rentOnRequest}</strong>
+                    {(selectedListing.bedrooms != null || selectedListing.bathrooms != null) && (
+                      <span>
+                        {[
+                          selectedListing.bedrooms == null ? null : `${formatNumber(selectedListing.bedrooms, locale)} ${copy.bed}`,
+                          selectedListing.bathrooms == null ? null : `${formatNumber(selectedListing.bathrooms, locale)} ${copy.bath}`,
+                        ].filter(Boolean).join(" · ")}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="mobile-map-sheet-actions"><SaveHomeButton propertyId={selectedListing.id} userId={userId} compact /><Link className="primary-button link-button" href={propertyHref(selectedListing.id)}>{copy.viewFullListing}</Link></div>

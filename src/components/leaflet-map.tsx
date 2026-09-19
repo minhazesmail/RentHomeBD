@@ -437,7 +437,7 @@ function ClusteredListings({ listings, selectedId, onSelect, copy }: { listings:
   );
 }
 
-export default function LeafletMap({ restoredViewport, onViewportChange, listings, center, radiusKm, selectedId, focusId, focusVersion = 0, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange }: {
+export default function LeafletMap({ restoredViewport, onViewportChange, listings, center, radiusKm, selectedId, focusId, focusVersion = 0, onSelect, onCenterChange, userLocation, liveTracking = false, customArea = [], drawingCustomArea = false, onCustomAreaChange, tileRetryVersion = 0, onTileFailure }: {
   listings: MapListing[];
   center: [number, number];
   radiusKm: number | null;
@@ -454,6 +454,8 @@ export default function LeafletMap({ restoredViewport, onViewportChange, listing
   customArea?: [number, number][];
   drawingCustomArea?: boolean;
   onCustomAreaChange?: (points: [number, number][]) => void;
+  tileRetryVersion?: number;
+  onTileFailure?: () => void;
 }) {
   const { resolvedTheme } = useTheme();
   const { locale } = useLocale();
@@ -462,10 +464,25 @@ export default function LeafletMap({ restoredViewport, onViewportChange, listing
   const editingCustomArea = !drawingCustomArea && customArea.length >= 3;
   const basemap = resolvedTheme === "dark" ? DARK_BASEMAP : LIGHT_BASEMAP;
   const appearance = resolvedTheme === "dark" ? DARK_MAP : LIGHT_MAP;
+  const tileErrorCountRef = useRef(0);
+
+  useEffect(() => {
+    tileErrorCountRef.current = 0;
+  }, [basemap.url, tileRetryVersion]);
 
   return (
     <MapContainer center={center} zoom={12} scrollWheelZoom zoomControl={false} className={`${chrome.surface} renter-map-canvas basemap-${resolvedTheme}${drawingCustomArea ? " drawing-custom-area" : ""}`}>
-      <TileLayer key={resolvedTheme} attribution={basemap.attribution} url={basemap.url} />
+      <TileLayer
+        key={`${resolvedTheme}:${tileRetryVersion}`}
+        attribution={basemap.attribution}
+        url={basemap.url}
+        eventHandlers={{
+          tileerror: () => {
+            tileErrorCountRef.current += 1;
+            if (tileErrorCountRef.current === 3) onTileFailure?.();
+          },
+        }}
+      />
       <ZoomControl position="topright" />
       <ResponsiveMapSize />
       <FitToResults listings={listings} center={center} liveTracking={liveTracking} restoredViewport={restoredViewport} />

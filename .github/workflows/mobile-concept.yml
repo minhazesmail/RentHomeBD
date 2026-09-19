@@ -7,6 +7,8 @@ on:
       - "src/components/**"
       - "src/i18n/**"
       - "scripts/check-mobile-concept-browser.mjs"
+      - "scripts/check-mobile-workspace-browser.mjs"
+      - "src/lib/map-session.ts"
       - "package.json"
       - ".github/workflows/mobile-concept.yml"
   push:
@@ -16,6 +18,8 @@ on:
       - "src/components/**"
       - "src/i18n/**"
       - "scripts/check-mobile-concept-browser.mjs"
+      - "scripts/check-mobile-workspace-browser.mjs"
+      - "src/lib/map-session.ts"
       - "package.json"
       - ".github/workflows/mobile-concept.yml"
 

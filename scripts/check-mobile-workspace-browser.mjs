@@ -28,6 +28,7 @@ try {
     page.on("pageerror", error => errors.push(error.message));
     const requests = [];
     let failNext = false;
+    try {
     await page.route("**/rest/v1/rpc/search_available_properties", async route => {
       requests.push(route.request().postDataJSON());
       if (failNext) {
@@ -72,6 +73,7 @@ try {
     assert.equal(await dialog.isVisible(), true, "failed search closed dialog");
     await page.keyboard.press("Escape");
     const controls = page.locator("[data-mobile-results-controls]");
+    await controls.locator("nav button").first().click();
     const expand = controls.locator("button").last();
     await expand.click();
     assert.equal(await host.getAttribute("data-mobile-sheet"), "expanded");
@@ -80,6 +82,13 @@ try {
     assert.equal(await host.getAttribute("data-mobile-sheet"), "collapsed");
     await expand.click();
     assert.equal(await host.getAttribute("data-mobile-sheet"), "partial");
+    const grip = await controls.locator(":scope > div").first().boundingBox();
+    assert.ok(grip);
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(grip.x + grip.width / 2, grip.y - 70, { steps: 8 });
+    await page.mouse.up();
+    assert.equal(await host.getAttribute("data-mobile-sheet"), "expanded", "drag did not expand sheet");
     await controls.locator("nav button").last().click();
     assert.equal(await host.getAttribute("data-mobile-view"), "list");
     await cards.first().locator(".renter-result-map-button").click();
@@ -104,7 +113,10 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2), "horizontal overflow");
     assert.deepEqual(errors, []);
     await page.screenshot({ path: `${output}/${scenario.width}-${scenario.locale}-${scenario.theme}.png`, fullPage: true });
-    await context.close();
+    } catch (error) {
+      await page.screenshot({ path: `${output}/failure-${scenario.width}-${scenario.locale}.png`, fullPage: true });
+      throw error;
+    } finally { await context.close(); }
   }
 } finally { await browser.close(); }
 console.log("Mobile workspace browser QA passed: draft/apply, failure, sheet, selection, server order and Back restoration.");

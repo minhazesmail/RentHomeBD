@@ -102,3 +102,9 @@ export function MobileFilterPanel({ children, onDismiss }: { children: ReactNode
     {children}
   </dialog>;
 }
+
+export function useMobileMapModel() {
+  const { setView } = useMobileMap();
+  function showView(view: MobileView) { setView(view); }
+  return { showList: () => showView("list"), showMap: () => showView("map") };
+}
