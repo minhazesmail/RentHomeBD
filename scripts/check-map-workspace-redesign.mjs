@@ -87,6 +87,7 @@ requireText(mobileCss, 'data-mobile-sheet="expanded"', "expanded mobile sheet la
 requireText(mobileCss, 'height: 100svh', "full-height mobile filters");
 requireText(mobileCss, "env(safe-area-inset-bottom)", "mobile safe-area support");
 requireText(workspace, 'className="mobile-search-summary"', "compact mobile search summary");
+requirePattern(css, /\.mobile-search-summary\s*\{[\s\S]*?pointer-events:\s*none;/, "informational mobile search summary must not block Leaflet controls or gestures");
 requireText(workspace, 'className="mobile-filter-footer"', "persistent mobile filter actions");
 requireText(map, "function ResponsiveMapSize", "Leaflet resize synchronization");
 requireText(map, 'attributeFilter: ["data-mobile-sheet", "data-mobile-view", "data-mobile-filters"]', "sheet/view resize observation");
