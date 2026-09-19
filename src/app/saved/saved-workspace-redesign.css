@@ -358,3 +358,136 @@
     flex: 1;
   }
 }
+
+
+@media (max-width: 767px) {
+  .saved-page {
+    background: var(--background);
+  }
+
+  .saved-shell {
+    width: 100%;
+    padding: 14px var(--mobile-app-safe-right, 16px) 24px var(--mobile-app-safe-left, 16px);
+  }
+
+  .saved-hero {
+    margin-bottom: 10px;
+    padding: 18px 16px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .saved-hero h1 {
+    margin: 6px 0 8px;
+    font-size: clamp(2rem, 10vw, 2.8rem);
+    line-height: 1;
+  }
+
+  .saved-hero .intro {
+    font-size: .86rem;
+    line-height: 1.5;
+  }
+
+  .saved-hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin-top: 16px;
+  }
+
+  .saved-hero-metrics > div {
+    min-width: 0;
+    min-height: 58px;
+    display: grid;
+    align-content: center;
+    gap: 2px;
+    padding: 8px 9px;
+    border-radius: 14px;
+  }
+
+  .saved-hero-metrics strong {
+    font-size: 1rem;
+  }
+
+  .saved-hero-metrics span {
+    overflow: hidden;
+    font-size: .64rem;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+  }
+
+  .saved-workspace-nav {
+    top: calc(var(--mobile-app-topbar-height, 58px) + 6px);
+    z-index: 1200;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    padding: 5px;
+    border-radius: 15px;
+  }
+
+  .saved-workspace-nav a {
+    min-width: 0;
+    min-height: 44px;
+    justify-content: center;
+    padding: 0 8px;
+    border-radius: 11px;
+    font-size: .72rem;
+  }
+
+  .saved-workspace-nav a span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .saved-section {
+    scroll-margin-top: calc(var(--mobile-app-topbar-height, 58px) + 70px);
+    margin-top: 10px;
+    padding: 18px 14px;
+    border-radius: 19px;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .saved-section-heading {
+    align-items: flex-start;
+    margin-bottom: 14px;
+    padding-bottom: 13px;
+  }
+
+  .saved-section-heading h2 {
+    font-size: 1.35rem;
+  }
+
+  .saved-section-heading p {
+    max-width: 34ch;
+    font-size: .76rem;
+  }
+
+  .saved-section-counts > span {
+    min-width: 36px;
+    height: 36px;
+  }
+
+  .saved-search-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px 14px 14px 20px;
+  }
+
+  .saved-search-controls,
+  .saved-search-actions {
+    width: 100%;
+  }
+
+  .saved-search-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .saved-search-actions .primary-button,
+  .saved-search-actions .secondary-button {
+    min-height: 44px;
+  }
+}
