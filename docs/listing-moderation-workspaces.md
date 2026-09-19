@@ -41,3 +41,17 @@ Mobile fields retain at least 48px primary controls and 16px input text, exact-l
 The renter-policy picker now mirrors the database invariant directly: selecting **Everyone** clears specific renter types, while selecting a specific renter type clears **Everyone**. The canonical database/readiness validation remains the final enforcement boundary.
 
 Listing editor routes remain contextual, so the global mobile tab bar stays suppressed while owners are creating or editing a property.
+
+## Current mobile plan — Task 9 moderator workspace
+
+Mobile moderation keeps the existing moderator-only authorization and audit behavior, but compresses the workbench into a queue-first phone flow:
+
+- listing reviews, reports and accounts remain directly switchable from a sticky three-queue navigator with localized counts;
+- queue rows become compact evidence summaries that keep the oldest-first ordering and existing route destinations;
+- listing/report review screens keep evidence before actions in DOM order, with horizontally scannable attention/media rails and a single-column inspection stack;
+- missing review evidence uses explicit localized **Not provided** copy rather than an ambiguous dash;
+- approve/return, resolve/hide and issue/revoke controls retain their existing database inserts and redirects, but use distinct mobile action roles with 48px touch targets and 16px note inputs;
+- destructive actions remain visually distinct without changing their authorization, note requirements, or audit-table semantics;
+- account trust review retains the legal-ownership/government-identity disclaimer and the existing self-verification prohibition.
+
+No moderation RLS, publication/rejection behavior, report resolution semantics, role-badge rules, or audit integrity constraints are changed by Task 9.
