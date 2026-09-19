@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useLocale } from "@/i18n/use-locale";
 import { getOwnerEditorCopy } from "@/i18n/owner-editor-copy";
@@ -38,6 +38,7 @@ export function ListingWorkflowNav({ mode }: { mode: "creation" | "editing" }) {
   const [activeStep, setActiveStep] = useState(0);
   const [visited, setVisited] = useState<Set<number>>(() => new Set([0]));
   const [completion, setCompletion] = useState<boolean[]>(() => steps.map(() => false));
+  const activeStepRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const form = document.querySelector<HTMLFormElement>(".listing-form");
@@ -46,6 +47,7 @@ export function ListingWorkflowNav({ mode }: { mode: "creation" | "editing" }) {
     if (!sections.length) return;
 
     form.dataset.guidedEditor = "true";
+    form.dataset.activeStep = String(activeStep);
 
     const syncVisibility = () => {
       sections.forEach((section, index) => {
@@ -71,12 +73,22 @@ export function ListingWorkflowNav({ mode }: { mode: "creation" | "editing" }) {
       form.removeEventListener("change", syncCompletion);
       observer.disconnect();
       delete form.dataset.guidedEditor;
+      delete form.dataset.activeStep;
       sections.forEach((section) => {
         section.hidden = false;
         section.removeAttribute("aria-hidden");
       });
     };
   }, [activeStep, visited]);
+
+  useEffect(() => {
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+    activeStepRef.current?.scrollIntoView({
+      block: "nearest",
+      inline: "center",
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
+  }, [activeStep]);
 
   const completedCount = useMemo(() => completion.filter(Boolean).length, [completion]);
 
@@ -97,7 +109,7 @@ export function ListingWorkflowNav({ mode }: { mode: "creation" | "editing" }) {
   const stepsAria = mode === "creation" ? copy.createStepsAria : copy.editStepsAria;
 
   return (
-    <aside className={styles.workflow} aria-label={workflowAria}>
+    <aside className={styles.workflow} aria-label={workflowAria} data-mobile-listing-workflow data-active-step={activeStep}>
       <div className={styles.workflowHead}>
         <div>
           <span>{mode === "creation" ? copy.createListing : copy.editListing}</span>
@@ -114,6 +126,7 @@ export function ListingWorkflowNav({ mode }: { mode: "creation" | "editing" }) {
               className={styles.step}
               type="button"
               key={step.label}
+              ref={activeStep === index ? activeStepRef : undefined}
               aria-current={activeStep === index ? "step" : undefined}
               data-complete={done ? "true" : "false"}
               onClick={() => goToStep(index)}
