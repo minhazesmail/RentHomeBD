@@ -186,8 +186,8 @@ export default async function OwnerPage({ searchParams }: { searchParams: Promis
                       </div>
                     </div>
                     <div className="property-row-meta owner-property-meta">
-                      <strong>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : "—"}</strong>
-                      <span>{property.rent_bdt ? copy.page.perMonth : copy.page.rentNotSet}</span>
+                      <strong>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.page.rentNotSet}</strong>
+                      {property.rent_bdt ? <span>{copy.page.perMonth}</span> : null}
                       <small>{formatOwnerPortfolioText(copy.page.updated, { date: formatDate(new Date(property.updated_at), locale, { timeZone: "Asia/Dhaka", day: "numeric", month: "short", year: "numeric" }) })}</small>
                     </div>
                   </Link>
