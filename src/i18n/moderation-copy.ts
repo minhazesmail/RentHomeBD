@@ -6,7 +6,7 @@ const moderationCopy = {
     common: {
       moderation: "Moderation", trustSafety: "Trust & safety", trustModeration: "Trust moderation",
       untitled: "Untitled listing", reportedListing: "Reported listing", noAddress: "No address", typeMissing: "Type missing",
-      owner: "owner", agent: "agent", user: "user", unnamedOwner: "Unnamed owner", unnamedAccount: "Unnamed account", nearbashaUser: "a NearBasha user",
+      owner: "owner", agent: "agent", user: "user", unnamedOwner: "Unnamed owner", unnamedAccount: "Unnamed account", nearbashaUser: "a NearBasha user", notProvided: "Not provided",
       previous: "Previous", next: "Next", of: "{current} of {total}", phoneVerified: "Phone verified", phoneNotVerified: "Phone not verified",
       roleVerified: "Verified {role} role", roleNotVerified: "{role} role not verified", legalDisclaimer: "NearBasha trust badges are platform moderation signals, not proof of government identity, legal property ownership, or authority to rent the property.",
     },
@@ -53,7 +53,7 @@ const moderationCopy = {
     common: {
       moderation: "মডারেশন", trustSafety: "আস্থা ও নিরাপত্তা", trustModeration: "আস্থা মডারেশন",
       untitled: "শিরোনামহীন লিস্টিং", reportedListing: "রিপোর্ট করা লিস্টিং", noAddress: "ঠিকানা নেই", typeMissing: "ধরন নেই",
-      owner: "মালিক", agent: "এজেন্ট", user: "ব্যবহারকারী", unnamedOwner: "নামহীন মালিক", unnamedAccount: "নামহীন অ্যাকাউন্ট", nearbashaUser: "একজন NearBasha ব্যবহারকারী",
+      owner: "মালিক", agent: "এজেন্ট", user: "ব্যবহারকারী", unnamedOwner: "নামহীন মালিক", unnamedAccount: "নামহীন অ্যাকাউন্ট", nearbashaUser: "একজন NearBasha ব্যবহারকারী", notProvided: "তথ্য দেওয়া নেই",
       previous: "আগেরটি", next: "পরেরটি", of: "{total}-এর মধ্যে {current}", phoneVerified: "ফোন যাচাইকৃত", phoneNotVerified: "ফোন যাচাই হয়নি",
       roleVerified: "যাচাইকৃত {role} ভূমিকা", roleNotVerified: "{role} ভূমিকা যাচাই হয়নি", legalDisclaimer: "NearBasha আস্থা ব্যাজ প্ল্যাটফর্ম মডারেশন সংকেত; এটি সরকারি পরিচয়, আইনি সম্পত্তির মালিকানা বা ভাড়া দেওয়ার অধিকার প্রমাণ করে না।",
     },
