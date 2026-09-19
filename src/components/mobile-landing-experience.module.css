@@ -71,10 +71,10 @@
 
   .languageButton,
   .themeControl :global(summary) {
-    width: 42px;
-    min-width: 42px;
-    height: 42px;
-    min-height: 42px;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
     border: 1px solid var(--app-line);
     border-radius: 14px;
     color: var(--app-ink);
@@ -110,7 +110,7 @@
   }
 
   .listTopButton {
-    min-height: 42px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -362,7 +362,7 @@
 
   .areaField input {
     width: 100%;
-    min-height: 27px;
+    min-height: 44px;
     padding: 0;
     border: 0;
     outline: 0;
@@ -443,7 +443,7 @@
 
   .fieldBody select {
     width: 100%;
-    min-height: 30px;
+    min-height: 44px;
     padding: 0 28px 0 0;
     border: 0;
     outline: 0;
@@ -568,7 +568,7 @@
 
   .morePanel select {
     width: 100%;
-    min-height: 28px;
+    min-height: 44px;
     padding: 0 24px 0 0;
     border: 0;
     outline: 0;
