@@ -58,7 +58,7 @@
     align-self: flex-start;
   }
 
-  [data-mobile-listing-editor] [class*="editorShell"] {
+  [data-mobile-listing-shell] {
     display: grid;
     grid-template-columns: 1fr;
     gap: 9px;
