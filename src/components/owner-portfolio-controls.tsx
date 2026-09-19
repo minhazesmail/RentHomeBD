@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
-import type { FormEvent } from "react";
+import { useEffect, useRef, type FormEvent } from "react";
 
 import { formatOwnerPortfolioText, getOwnerPortfolioCopy } from "@/i18n/owner-portfolio-copy";
 import { useLocale } from "@/i18n/use-locale";
