@@ -59,7 +59,7 @@ export default async function EditPropertyPage({ params }: { params: Promise<{ i
         <Link className="text-link" href="/owner">{commonOwnerCopy.backToProperties}</Link>
       </header>
 
-      <div className={editorStyles.editorShell}>
+      <div className={editorStyles.editorShell} data-mobile-listing-shell>
         <ListingWorkflowNav mode="editing" />
         <div>
           {editable && <ListingDraftGuard userId={auth.userId} propertyId={id} />}
