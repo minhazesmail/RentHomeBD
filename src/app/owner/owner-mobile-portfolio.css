@@ -1,0 +1,340 @@
+/* Task 7 — mobile Owner portfolio.
+   Keeps lifecycle semantics unchanged while making attention, status, and actions
+   one-handed and compatible with the persistent Properties tab. */
+
+@media (max-width: 767px) {
+  [data-owner-mobile-portfolio] {
+    width: 100%;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 12px var(--mobile-app-safe-right, 12px) 26px var(--mobile-app-safe-left, 12px);
+    background: var(--background);
+  }
+
+  [data-owner-mobile-portfolio]::before,
+  [data-owner-mobile-portfolio]::after {
+    display: none;
+  }
+
+  [data-owner-mobile-portfolio] .owner-management-header {
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 10px;
+    padding: 17px 16px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface-solid);
+    box-shadow: var(--shadow-xs);
+  }
+
+  [data-owner-mobile-portfolio] .owner-management-header::after {
+    display: none;
+  }
+
+  [data-owner-mobile-portfolio] .owner-management-header .owner-title {
+    max-width: 100%;
+    margin: 0 0 7px;
+    font-size: clamp(2rem, 10vw, 2.8rem);
+    line-height: 1;
+    letter-spacing: -.045em;
+  }
+
+  [data-owner-mobile-portfolio] .owner-management-header .intro {
+    max-width: 38ch;
+    margin: 0;
+    font-size: .82rem;
+    line-height: 1.5;
+  }
+
+  [data-owner-header-actions] {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    overflow: visible;
+    padding: 0;
+  }
+
+  [data-owner-header-actions] > * {
+    width: 100%;
+    min-height: 48px;
+    justify-content: center;
+  }
+
+  [data-owner-portfolio-summary] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 10px 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  [data-owner-portfolio-summary] .owner-summary-card {
+    min-height: 82px;
+    gap: 9px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface-solid);
+    box-shadow: var(--shadow-xs);
+  }
+
+  [data-owner-portfolio-summary] .owner-summary-card > span {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+    border-radius: 11px;
+  }
+
+  [data-owner-portfolio-summary] .owner-summary-card strong {
+    font-size: 1.22rem;
+  }
+
+  [data-owner-portfolio-summary] .owner-summary-card small {
+    margin-top: 4px;
+    overflow: hidden;
+    font-size: .62rem;
+    letter-spacing: .04em;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+  }
+
+  [data-owner-portfolio-summary] .owner-summary-arrow {
+    display: none;
+  }
+
+  [data-owner-attention-workbench] {
+    margin: 10px 0;
+    border-radius: 18px;
+    box-shadow: var(--shadow-xs);
+  }
+
+  [data-owner-attention-workbench] .owner-attention-workbench-heading {
+    align-items: flex-start;
+    gap: 8px;
+    padding: 15px 14px 13px;
+  }
+
+  [data-owner-attention-workbench] .owner-attention-workbench-heading .eyebrow {
+    margin-bottom: 4px;
+    font-size: .62rem;
+  }
+
+  [data-owner-attention-workbench] .owner-attention-workbench-heading h2 {
+    font-size: 1.2rem;
+  }
+
+  [data-owner-attention-workbench] .owner-attention-workbench-heading p:not(.eyebrow) {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-top: 5px;
+    font-size: .73rem;
+    line-height: 1.42;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  [data-owner-attention-workbench] .owner-attention-workbench-heading .text-link {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  [data-owner-attention-workbench] .owner-attention-items {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(248px, 82vw);
+    grid-template-columns: none;
+    gap: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline mandatory;
+    scrollbar-width: none;
+  }
+
+  [data-owner-attention-workbench] .owner-attention-items::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-owner-attention-workbench] .owner-attention-item {
+    min-height: 132px;
+    padding: 14px;
+    border-right: 1px solid var(--warning-border);
+    border-bottom: 0;
+    scroll-snap-align: start;
+  }
+
+  [data-owner-attention-workbench] .owner-attention-item-copy > span {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  [data-owner-property-panel] {
+    margin-top: 10px;
+    overflow: hidden;
+    border-radius: 18px;
+    box-shadow: var(--shadow-xs);
+  }
+
+  [data-owner-property-panel] .owner-property-panel-heading {
+    min-height: 0;
+    padding: 16px 14px 13px;
+  }
+
+  [data-owner-property-panel] .owner-property-panel-heading h2 {
+    font-size: 1.2rem;
+  }
+
+  [data-owner-property-panel] .owner-property-panel-heading p {
+    max-width: 36ch;
+    margin-top: 5px;
+    font-size: .7rem;
+    line-height: 1.4;
+  }
+
+  [data-owner-property-panel] .owner-property-card {
+    background: var(--surface-solid);
+  }
+
+  [data-owner-property-panel] .owner-property-card[data-owner-needs-attention="true"] {
+    background: color-mix(in srgb, var(--warning-bg) 42%, var(--surface-solid));
+  }
+
+  [data-owner-property-panel] .owner-property-card-link {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding: 13px 12px 9px 14px;
+  }
+
+  [data-owner-property-panel] .ownerPortfolioListingBody {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  [data-owner-property-panel] .owner-property-main {
+    min-width: 0;
+  }
+
+  [data-owner-property-panel] .owner-property-title-row > strong {
+    overflow: hidden;
+    font-size: .96rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-owner-property-panel] .owner-property-address {
+    display: -webkit-box;
+    overflow: hidden;
+    margin-top: 3px;
+    font-size: .72rem;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  [data-owner-property-panel] .owner-property-meta {
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-soft);
+    text-align: left;
+  }
+
+  [data-owner-property-panel] .owner-property-meta > strong {
+    font-size: .94rem;
+  }
+
+  [data-owner-property-panel] .owner-property-meta > span {
+    margin-right: auto;
+  }
+
+  [data-owner-property-panel] .owner-property-meta > small {
+    flex: 0 0 auto;
+    text-align: right;
+  }
+
+  [data-owner-property-panel] .owner-moderation-feedback {
+    margin-top: 8px;
+    padding: 8px 9px;
+  }
+
+  [data-owner-property-panel] .owner-moderation-feedback span {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  [data-owner-property-panel] [data-owner-freshness-actions] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    padding: 0 12px 12px 14px;
+  }
+
+  [data-owner-property-panel] [data-owner-freshness-actions] button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    margin: 0;
+    padding-inline: 9px;
+    border-radius: 12px;
+    font-size: .7rem;
+    line-height: 1.15;
+  }
+
+  [data-owner-property-panel] [data-owner-freshness-actions] .freshness-confirm {
+    grid-column: 1 / -1;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--text-inverse);
+  }
+
+  [data-owner-property-panel] [data-owner-freshness-actions][data-listing-status="rented"] .freshness-edit,
+  [data-owner-property-panel] [data-owner-freshness-actions][data-listing-status="expired"] .freshness-edit {
+    grid-column: 1 / -1;
+  }
+
+  [data-owner-property-panel] [data-owner-freshness-actions] .freshness-error {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: .7rem;
+  }
+
+  [data-owner-property-panel] .owner-empty-state {
+    min-height: 260px;
+    padding: 34px 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  [data-owner-portfolio-summary] .owner-summary-card {
+    min-height: 78px;
+    padding: 10px;
+  }
+
+  [data-owner-portfolio-summary] .owner-summary-card > span {
+    display: none;
+  }
+
+  [data-owner-attention-workbench] .owner-attention-items {
+    grid-auto-columns: minmax(238px, 86vw);
+  }
+
+  [data-owner-property-panel] .owner-property-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  [data-owner-property-panel] .owner-property-meta > small {
+    text-align: left;
+  }
+}
