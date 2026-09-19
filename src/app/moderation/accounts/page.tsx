@@ -33,7 +33,7 @@ export default async function AccountVerificationPage({ searchParams }: { search
   const totalLabel = formatModerationText(profiles.length === 1 ? copy.accounts.totalOne : copy.accounts.totalMany, { count: formatNumber(profiles.length, locale) });
 
   return (
-    <main className="owner-shell moderation-shell moderation-accounts-shell">
+    <main className="owner-shell moderation-shell moderation-accounts-shell" data-mobile-moderation-queue="accounts">
       <header className="owner-header moderation-header"><div><BrandLogo className="workspace-brand-logo" /><p className="eyebrow">{copy.common.trustModeration}</p><h1 className="owner-title">{copy.accounts.title}</h1><p className="intro">{copy.accounts.intro}</p></div></header>
       <ModerationWorkbenchNav current="accounts" counts={counts} />
       {params.notice === "verified" && <div className="success-message">{copy.accounts.verifiedNotice}</div>}
