@@ -168,16 +168,16 @@
 @media (max-width: 767px) {
   .productNavShell {
     z-index: 1650;
-    min-height: 58px;
+    min-height: var(--mobile-app-topbar-height, calc(58px + env(safe-area-inset-top)));
     box-shadow: 0 1px 0 var(--nav-border);
   }
 
   .productNav {
     width: 100%;
-    min-height: 58px;
+    min-height: var(--mobile-app-topbar-height, calc(58px + env(safe-area-inset-top)));
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
-    padding: 7px var(--mobile-app-safe-right, max(16px, env(safe-area-inset-right))) 7px var(--mobile-app-safe-left, max(16px, env(safe-area-inset-left)));
+    padding: calc(7px + env(safe-area-inset-top)) var(--mobile-app-safe-right, max(16px, env(safe-area-inset-right))) 7px var(--mobile-app-safe-left, max(16px, env(safe-area-inset-left)));
   }
 
   .productNavBrand img {
