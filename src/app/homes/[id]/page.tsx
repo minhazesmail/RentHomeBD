@@ -280,8 +280,10 @@ export default async function PublicPropertyPage({
 
           <aside className="property-contact-card" id="contact">
             <div className="contact-price-summary"><span>{copy.common.monthlyRent}</span><strong>{rentLabel}</strong><small>{depositLabel ? `${copy.common.deposit} ${depositLabel}` : copy.common.depositNotListed}</small></div>
-            <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} />
-            <PropertyShareButton title={property.title || copy.common.rentalProperty} />
+            <div className="property-contact-secondary-actions">
+              <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} />
+              <PropertyShareButton title={property.title || copy.common.rentalProperty} />
+            </div>
             <div className="owner-identity-row"><div className="owner-badge">{property.owner_display_name?.slice(0, 1).toUpperCase() || "O"}</div><div className="owner-identity-copy"><p className="eyebrow">{formatPropertyDetailText(copy.contact.listedBy, { role: ownerRoleLabel })}</p><h2>{property.owner_display_name || copy.contact.propertyOwner}</h2></div></div>
             <div className="owner-verification-badges">
               <span className={`owner-verification-badge${ownerPhoneVerified ? "" : " is-neutral"}`}><Phone size={12} aria-hidden="true" />{ownerPhoneVerified ? copy.contact.phoneVerified : copy.contact.phoneUnverified}</span>
