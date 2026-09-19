@@ -835,8 +835,7 @@
     line-height: 1.4;
   }
 
-  .mapCta > a,
-  .mapCtaDisabled {
+  .mapCta > a {
     grid-column: 1 / -1;
     min-height: 46px;
     display: inline-flex;
@@ -852,17 +851,11 @@
     font-weight: 820;
   }
 
-  .mapCta > a svg,
-  .mapCtaDisabled svg {
+  .mapCta > a svg {
     width: 16px;
     height: 16px;
   }
 
-  .mapCtaDisabled {
-    color: rgba(255,255,255,.68);
-    background: rgba(255,255,255,.09);
-    cursor: not-allowed;
-  }
 
   .bottomNav {
     position: fixed;
