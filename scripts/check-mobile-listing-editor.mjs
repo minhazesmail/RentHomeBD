@@ -50,7 +50,7 @@ expect(form, 'current.filter((item) => item !== "everyone")', "specific renter t
 expect(policy, 'return !unique.includes("everyone") || unique.length === 1;', "canonical tenant-policy invariant must remain unchanged");
 expect(readiness, "isValidListingTenantPolicy(tenantTypes)", "readiness must continue using canonical tenant-policy validation");
 
-expect(listingStyleManifest, '@import "./listing-mobile-editor.css" layer(editor-mobile);', "mobile editor stylesheet must stay inside the layered CSS manifest");
+expect(listingStyleManifest, '@import "./listing-mobile-editor.css" layer(component-appearance);', "mobile editor stylesheet must stay inside the layered CSS manifest");
 expect(mobileCss, "font-size: 16px", "mobile editor inputs must avoid iOS zoom");
 expect(mobileCss, "min-height: 48px", "mobile primary editor controls must meet 48px target");
 expect(mobileCss, "min-height: min(56dvh, 360px)", "mobile map must stay viewport-safe");
