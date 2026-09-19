@@ -42,7 +42,7 @@ export function ReportModerationActions({ reportId, reviewerId, nextReportId = n
       <div className="dashboard-actions">
         <button className="secondary-button moderation-action-dismiss" type="button" disabled={busy} onClick={() => void decide("dismiss")}>{copy.dismiss}</button>
         <button className="secondary-button moderation-action-resolve" type="button" disabled={busy} onClick={() => void decide("resolve")}>{nextReportId ? copy.resolveNext : copy.resolve}</button>
-        <button className="primary-button" type="button" disabled={busy} onClick={() => void decide("hide_listing")}>{nextReportId ? copy.hideNext : copy.hide}</button>
+        <button className="primary-button moderation-action-hide" type="button" disabled={busy} onClick={() => void decide("hide_listing")}>{nextReportId ? copy.hideNext : copy.hide}</button>
       </div>
     </div>
   );
