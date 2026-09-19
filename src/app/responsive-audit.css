@@ -509,7 +509,7 @@
 
   .landing-nav-actions .primary-button,
   .information-nav .primary-button {
-    min-height: 40px;
+    min-height: 44px;
     padding-inline: 12px;
     font-size: .76rem;
   }
