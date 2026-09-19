@@ -45,6 +45,10 @@ expect(accessibility, "@media (forced-colors: active)", "forced-colors contract 
 expect(accessibility, "@media (prefers-reduced-motion: reduce)", "reduced-motion contract must remain");
 expect(accessibility, "@media (prefers-reduced-transparency: reduce)", "reduced-transparency contract must remain");
 expect(responsive, ".information-nav .primary-button {\n    min-height: 44px;", "small-phone navigation CTAs must stay 44px");
+expect(read("src/components/mobile-landing-experience.module.css"), ".areaField input {\n    width: 100%;\n    min-height: 44px;", "mobile landing area input must remain 44px");
+expect(read("src/components/mobile-landing-experience.module.css"), ".fieldBody select {\n    width: 100%;\n    min-height: 44px;", "mobile landing direct selects must remain 44px");
+expect(read("src/app/homes/map-workspace.css"), "min-height: 44px;", "mobile map quick actions must retain 44px targets");
+expect(read("src/app/auth-verification-redesign.css"), ".auth-tabs button {\n  min-height: 44px;", "final auth method tabs must remain 44px");
 
 const taskContracts = [
   ["scripts/check-mobile-foundation.mjs", "Task 1"],
