@@ -102,7 +102,7 @@ function sortDescription(sort: SortOption, copy: SearchCopy) {
   if (sort === "distance") return copy.nearestFirst;
   if (sort === "rent-asc") return copy.lowestRentFirst;
   if (sort === "rent-desc") return copy.highestRentFirst;
-  return copy.closestFirst;
+  return copy.recommendationExplanation;
 }
 
 function friendlySearchError(error: unknown, copy: SearchCopy) {
@@ -152,7 +152,9 @@ function sortedResults(listings: MapListing[], sort: SortOption) {
       return b.rent_bdt - a.rent_bdt || distance(a) - distance(b);
     });
   }
-  return next.sort((a, b) => distance(a) - distance(b));
+  // Recommended order is computed across all matches before the server cap.
+  // Re-sorting this bounded subset by distance would discard that ranking.
+  return next;
 }
 
 function tenantSummary(types: TenantType[], labels: TenantLabels) {
