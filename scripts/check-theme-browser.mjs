@@ -289,8 +289,11 @@ function validateLandingSurfaceRoles(snapshot, label, failures) {
 
 function validateHomesSurfaceRoles(snapshot, label, failures, viewport) {
   if (snapshot.resolved === "dark") {
-    if (snapshot.mapTileSrc && !snapshot.mapTileSrc.includes("cartocdn.com/dark_all")) {
-      failures.push(`${label}: Dark homes map is not using the dark CARTO basemap`);
+    const expectedProvider = process.env.NEXT_PUBLIC_CARTO_BASEMAP_KEY?.trim()
+      ? "basemaps.cartocdn.com/rastertiles/dark_all/"
+      : "tile.openstreetmap.org/";
+    if (snapshot.mapTileSrc && !snapshot.mapTileSrc.includes(expectedProvider)) {
+      failures.push(`${label}: Dark homes map is not using the configured basemap (${expectedProvider})`);
     }
     const sidebarLum = luminanceFromCss(snapshot.surfaces.homesSidebar?.backgroundColor);
     if (sidebarLum != null && sidebarLum > 0.22) failures.push(`${label}: renter sidebar is still a light surface in Dark mode`);

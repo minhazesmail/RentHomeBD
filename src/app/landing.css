@@ -699,6 +699,7 @@
 
 @media (min-width: 1024px) {
   main.landing-shell { --landing-content-background: transparent; --landing-trust-background: var(--background); --landing-faq-background: var(--surface-solid); }
+  html[data-resolved-theme="light"] main.landing-shell { --muted: #596d63; }
   main.landing-shell .landing-hero { background: transparent; }
   main.landing-shell .landing-hero::before,
   main.landing-shell .landing-hero::after,
