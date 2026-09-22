@@ -158,3 +158,20 @@
     transition: none;
   }
 }
+
+@media (min-width: 1024px) {
+  .nav { min-height: 88px; gap: 24px; }
+  .center { gap: 28px; }
+  .landing .center a,
+  .landing .actions :global(.text-link) { color: var(--ink-soft); font-size: .82rem; font-weight: 550; }
+  .landing .center a:hover,
+  .landing .center a:focus-visible,
+  .landing .actions :global(.text-link:hover) { color: var(--accent-contrast); }
+  .landing .center a::after { background: var(--accent); }
+  .actions :global(.primary-button) { min-height: 42px; padding: 11px 18px; border-radius: 7px; box-shadow: none; }
+}
+
+@media (min-width: 1024px) {
+  .landing .actions :global(.primary-button) { background: var(--accent-contrast); border-color: var(--accent-contrast); color: var(--text-inverse); }
+  .landing .actions :global(.primary-button):hover { background: var(--accent-hover); }
+}

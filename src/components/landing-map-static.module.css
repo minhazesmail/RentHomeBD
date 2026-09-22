@@ -104,3 +104,14 @@
   .rail:global(.landing-map-rail) { padding: 14px; }
   .areaButtons button { font-size: .68rem; }
 }
+
+@media (min-width: 1024px) {
+  .preview:global(.landing-map-preview) { grid-template-rows: auto 220px auto; border-radius: 12px; box-shadow: none; }
+  .heading { padding: 16px 18px; }
+  .heading strong { font-size: 1rem; }
+  .rail:global(.landing-map-rail) { padding: 12px; gap: 10px; }
+  .areaButtons button { border-radius: 6px; min-height: 36px; }
+  .action { min-height: 40px; padding: 10px 14px; border-radius: 6px; }
+  .areaCaption { border-radius: 7px; padding: 9px 12px; box-shadow: var(--shadow-sm); }
+  .inventory { max-height: 156px; overflow-y: auto; }
+}

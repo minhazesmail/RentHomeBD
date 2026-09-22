@@ -10,7 +10,7 @@ function read(relativePath) {
     failures.push(`${relativePath}: file is missing`);
     return "";
   }
-  return fs.readFileSync(fullPath, "utf8");
+  return fs.readFileSync(fullPath, "utf8").replaceAll("\r\n", "\n");
 }
 
 function requireText(source, text, label) {

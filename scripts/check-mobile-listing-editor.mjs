@@ -3,7 +3,7 @@ import path from "node:path";
 
 const root = process.cwd();
 const failures = [];
-const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
+const read = (file) => fs.readFileSync(path.join(root, file), "utf8").replace(/\r\n/g, "\n");
 const expect = (source, text, message) => { if (!source.includes(text)) failures.push(message); };
 const reject = (source, text, message) => { if (source.includes(text)) failures.push(message); };
 

@@ -295,3 +295,8 @@
     transition: none;
   }
 }
+
+@media (min-width: 1024px) {
+  .grid { gap: 6px; min-height: 460px; border-radius: 12px; overflow: hidden; }
+  .tile { border-radius: 0; }
+}
