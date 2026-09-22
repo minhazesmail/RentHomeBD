@@ -360,7 +360,7 @@ async function main() {
               await page.waitForSelector(".renter-map-canvas", { timeout: 8_000 });
               await page.waitForSelector(".renter-map-canvas .leaflet-tile", { timeout: 8_000 }).catch(() => {});
             }
-            if (route.name === "landing") {
+            if (route.name === "landing" && !mobileReplacesCritical) {
               await page.locator(".landing-faq-editorial").scrollIntoViewIfNeeded().catch(() => {});
             }
             await page.waitForTimeout(180);
