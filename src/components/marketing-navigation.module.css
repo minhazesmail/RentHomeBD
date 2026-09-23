@@ -161,6 +161,7 @@
 
 @media (min-width: 1024px) {
   .nav { min-height: 88px; gap: 24px; }
+  .landing { position: relative; top: auto; }
   .center { gap: 28px; }
   .landing .center a,
   .landing .actions :global(.text-link) { color: var(--ink-soft); font-size: .82rem; font-weight: 550; }
