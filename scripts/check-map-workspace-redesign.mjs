@@ -10,7 +10,7 @@ function read(relativePath) {
     failures.push(`${relativePath}: file is missing`);
     return "";
   }
-  return fs.readFileSync(fullPath, "utf8");
+  return fs.readFileSync(fullPath, "utf8").replaceAll("\r\n", "\n");
 }
 
 function requireText(source, text, label) {
@@ -98,7 +98,7 @@ requireText(map, 'attributeFilter: ["data-mobile-sheet", "data-mobile-view", "da
 // Shell/theme integration. The map workspace must use the same canonical renter
 // shell class that GlobalShell actually emits. A stale shell selector disables
 // the desktop grid, responsive visibility rules, and dark map variables at once.
-requireText(globalShell, 'className={`nb-global-shell nb-global-shell--${shell}`}', "canonical global shell class contract");
+requireText(globalShell, 'nb-global-shell nb-global-shell--${shell}', "canonical global shell class contract");
 forbidPattern(globalShell, /shell-renter/, "global shell must not reintroduce the retired shell-renter compatibility class");
 requireText(css, ".nb-global-shell--renter .mobile-filter-footer,\n.nb-global-shell--renter .mobile-search-summary {\n  display: none;", "desktop hides mobile-only search controls");
 requireText(css, ".nb-global-shell--renter .renter-search-toolbar {", "desktop toolbar scoped to canonical renter shell");

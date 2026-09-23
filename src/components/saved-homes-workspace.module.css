@@ -634,3 +634,12 @@
     transform: none;
   }
 }
+
+@media (min-width: 1024px) {
+  .toolbar { padding: 16px 20px; border-radius: 8px; background: var(--surface-solid); }
+  .grid { gap: 20px; }
+  .card { border-radius: 10px; box-shadow: none; }
+  .card:hover { transform: none; }
+  .media { background: var(--surface-muted); }
+  .cardLink { grid-template-columns: minmax(150px, 38%) minmax(0, 1fr); }
+}

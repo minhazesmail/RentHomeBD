@@ -1,0 +1,158 @@
+/* Desktop composition. Mobile continues to use the existing route contracts.
+   Semantic colors inherit the selected appearance; no route behavior lives here. */
+@media (min-width: 1024px) {
+  .desktop {
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-sm: 0 2px 6px color-mix(in srgb, var(--foreground) 4%, transparent);
+    --shadow-md: 0 8px 24px color-mix(in srgb, var(--foreground) 6%, transparent);
+    background: var(--background);
+  }
+
+  .desktop :global(.nb-shell-atmosphere),
+  .desktop :global(.nb-shell-grid) { display: none; }
+
+  .desktop :global(.primary-button),
+  .desktop :global(.secondary-button) {
+    min-height: 44px;
+    border-radius: 8px;
+    box-shadow: none;
+    font-weight: 650;
+  }
+
+  .desktop :global(.eyebrow) { font-size: .7rem; letter-spacing: .12em; }
+  .desktop :global(.field) :is(input, select, textarea) { border-radius: 8px; }
+
+  /* Shared account / management frame, with room for long translated labels. */
+  .desktop :global(.dashboard-shell),
+  .desktop :global(.owner-shell),
+  .desktop :global(.saved-shell) {
+    width: min(1320px, calc(100% - 80px));
+    margin-inline: auto;
+    padding-block: 40px 72px;
+  }
+
+  .desktop :global(.dashboard-header),
+  .desktop :global(.owner-header) {
+    padding: 0 0 28px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .desktop :global(.dashboard-title),
+  .desktop :global(.owner-title) {
+    max-width: 24ch;
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.12;
+    letter-spacing: -.045em;
+  }
+
+  .desktop :global(.property-list-panel),
+  .desktop :global(.owner-attention-workbench),
+  .desktop :global(.listing-section) {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-solid);
+    box-shadow: none;
+  }
+
+  .desktop :global(.owner-portfolio-summary) { gap: 0; border-block: 1px solid var(--border); }
+  .desktop :global(.owner-summary-card) {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 24px;
+  }
+  .desktop :global(.owner-summary-card) + :global(.owner-summary-card) { border-left: 1px solid var(--border); }
+  .desktop :global(.owner-summary-card):hover { background: var(--surface-hover); }
+  .desktop :global(.owner-property-card) { border-radius: 10px; box-shadow: none; }
+  .desktop :global(.owner-property-card-link) { padding: 20px; }
+
+  /* Search is a working canvas: restrained chrome, readable results, large map. */
+  .desktop :global(.homes-page) { background: var(--background); }
+  .desktop :global(.renter-search-shell) { width: 100%; max-width: 1800px; padding: 20px 28px 28px; margin-inline: auto; }
+  .desktop :global(.renter-search-toolbar) {
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px 12px 0 0;
+    background: var(--surface-solid);
+    box-shadow: none;
+  }
+  .desktop :global(.renter-workspace) {
+    grid-template-columns: minmax(340px, 390px) minmax(0, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-top: 0;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+  }
+  .desktop :global(.renter-search-sidebar) { border: 0; border-right: 1px solid var(--border); border-radius: 0; box-shadow: none; }
+  .desktop :global(.renter-results-header) { padding: 20px; background: var(--surface-solid); }
+  .desktop :global(.renter-map-panel) { border: 0; border-radius: 0; box-shadow: none; }
+  .desktop :global(.renter-map-intro) { margin: 20px; border-radius: 10px; box-shadow: none; }
+
+  /* Property facts and contact action retain their original responsive order. */
+  .desktop :global(.property-detail-shell) { width: min(1280px, calc(100% - 80px)); margin-inline: auto; }
+  .desktop :global(.property-detail-hero) { padding-block: 32px; border-bottom: 1px solid var(--border); background: transparent; box-shadow: none; }
+  .desktop :global(.property-detail-hero) h1 { font-size: clamp(2rem, 3vw, 3rem); line-height: 1.15; }
+  .desktop :global(.property-detail-layout) { grid-template-columns: minmax(0, 1fr) 340px; gap: 48px; }
+  .desktop :global(.property-detail-section) { border-radius: 10px; box-shadow: none; }
+  .desktop :global(.property-contact-card) { border-radius: 12px; border: 1px solid var(--border-strong); box-shadow: var(--shadow-sm); }
+
+  .desktop :global(.messages-workspace-shell) { width: min(1440px, calc(100% - 64px)); margin: 28px auto; border-radius: 12px; box-shadow: none; }
+  .desktop :global(.messages-workspace-empty) { background: var(--surface-solid); }
+  .desktop :global(.moderation-queue-context) { border-radius: 8px; box-shadow: none; }
+
+  /* Auth becomes a balanced editorial split rather than a floating card. */
+  .desktop :global(.auth-shell) { padding: 64px 40px; }
+  .desktop :global(.auth-layout) { width: min(1100px, 100%); gap: 80px; align-items: center; }
+  .desktop :global(.auth-intro-panel) { border: 0; border-radius: 0; padding: 28px 0; background: transparent; box-shadow: none; }
+  .desktop :global(.auth-title) { font-size: clamp(2.5rem, 4vw, 4rem); line-height: 1.08; }
+  .desktop :global(.auth-card) { border-radius: 16px; border: 1px solid var(--border); padding: 36px; box-shadow: var(--shadow-md); }
+  .desktop :global(.auth-benefits) { gap: 12px; }
+
+  .desktop :global(.info-shell) { width: min(1240px, calc(100% - 80px)); margin-inline: auto; }
+  .desktop :global(.info-hero) { padding-block: 64px; border-bottom: 1px solid var(--border); }
+  .desktop :global(.info-hero) h1 { font-size: clamp(2.6rem, 4.5vw, 4.5rem); line-height: 1.08; }
+  .desktop :global(.info-story-card) { padding: 28px 0; border: 0; border-top: 1px solid var(--border); border-radius: 0; background: transparent; box-shadow: none; }
+  .desktop :global(.info-editorial-grid) { gap: 36px; }
+  .desktop :global(.info-hero-note),
+  .desktop :global(.info-cta-band) { border-radius: 12px; box-shadow: none; }
+
+  .desktop :global(.site-atmosphere),
+  .desktop :global(.landing-frame),
+  .desktop :global(.landing-desktop-primary) { background: var(--background); background-image: none; }
+  .desktop :global(.landing-desktop-primary)::before,
+  .desktop :global(.landing-desktop-primary)::after { display: none; }
+}
+
+@media (min-width: 1024px) {
+  .desktop :global(.renter-dashboard-card) { border: 0; border-radius: 0; padding: 0; background: transparent; box-shadow: none; }
+  .desktop :global(.dashboard-next-action) { border-radius: 12px; padding: 28px; background: #123d30; box-shadow: none; }
+  .desktop :global(.dashboard-next-action)::after { display: none; }
+  .desktop :global(.dashboard-next-copy) h2 { font-size: 1.7rem; line-height: 1.25; }
+  .desktop :global(.dashboard-metric-grid) { gap: 0; border-block: 1px solid var(--border); }
+  .desktop :global(.dashboard-metric-card) { border: 0; border-radius: 0; box-shadow: none; background: transparent; padding: 24px; }
+  .desktop :global(.dashboard-metric-card) + :global(.dashboard-metric-card) { border-left: 1px solid var(--border); }
+  .desktop :global(.renter-journey-card),
+  .desktop :global(.owner-dashboard-action-card) { border-radius: 10px; background: var(--surface-solid); box-shadow: none; }
+  .desktop :global(.messages-page),
+  .desktop :global(.saved-page) { background: var(--background); }
+  .desktop :global(.messages-workspace-shell) { gap: 0; border: 1px solid var(--border); padding: 0; overflow: clip; }
+  .desktop :global(.messages-workspace-inbox),
+  .desktop :global(.messages-workspace-empty),
+  .desktop :global(.messages-thread-pane) { border: 0; border-radius: 0; box-shadow: none; background: var(--surface-solid); }
+  .desktop :global(.messages-workspace-inbox) { border-right: 1px solid var(--border); }
+  .desktop :global(.saved-hero) { max-width: none; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .desktop :global(.saved-hero) h1 { font-size: 2.8rem; line-height: 1.15; }
+
+  .desktop :global(.auth-shell) { background: var(--background); }
+  .desktop :global(.auth-shell)::after { display: none; }
+  .desktop :global(.auth-card) { animation: none; }
+}

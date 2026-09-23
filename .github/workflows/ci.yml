@@ -207,6 +207,10 @@ jobs:
           done
           cat /tmp/nearbasha-next.log
           exit 1
+      - name: Desktop redesign browser QA
+        run: npm run desktopbrowserqa
+        env:
+          DESKTOP_QA_URL: http://127.0.0.1:3000
       - name: Rendered theme QA
         run: npm run themebrowser
       - name: Release hardening browser QA
@@ -227,5 +231,6 @@ jobs:
           path: |
             artifacts/theme-browser
             artifacts/release-hardening
+            artifacts/desktop
           if-no-files-found: ignore
           retention-days: 14

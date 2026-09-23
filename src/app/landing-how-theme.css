@@ -176,3 +176,17 @@ html[data-resolved-theme="dark"] main.landing-shell .landing-step-cards::before 
     background: linear-gradient(180deg, transparent, var(--journey-line) 7%, var(--journey-line) 93%, transparent);
   }
 }
+
+@media (min-width: 1024px) {
+  .landing-shell .landing-how-tabs-shell { border-radius: 12px; background: var(--surface-solid); box-shadow: none; }
+  .landing-shell .landing-how-controls { background: transparent; }
+  .landing-shell .landing-how-panel { border-radius: 0; }
+  .landing-shell .landing-step-cards { gap: 0; }
+  .landing-shell .landing-step-cards > li { padding: 24px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .landing-shell .landing-step-cards > li + li { border-left: 1px solid var(--border); }
+}
+
+@media (min-width: 1024px) {
+  main.landing-shell .landing-how-tabs-shell { background: var(--surface-solid); box-shadow: none; }
+  main.landing-shell .landing-how-panel { background: var(--surface-solid); }
+}

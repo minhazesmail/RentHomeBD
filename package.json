@@ -48,7 +48,8 @@
     "mobilemoderatorqa": "node scripts/check-mobile-moderator.mjs",
     "mobilefinalqa": "node scripts/check-mobile-release-hardening.mjs",
     "releasebrowserqa": "node scripts/check-mobile-release-browser.mjs",
-    "mapareasearchbrowser": "node scripts/check-map-area-search-browser.mjs"
+    "mapareasearchbrowser": "node scripts/check-map-area-search-browser.mjs",
+    "desktopbrowserqa": "node scripts/check-desktop-browser.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.5",

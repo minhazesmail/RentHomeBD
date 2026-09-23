@@ -289,8 +289,11 @@ function validateLandingSurfaceRoles(snapshot, label, failures) {
 
 function validateHomesSurfaceRoles(snapshot, label, failures, viewport) {
   if (snapshot.resolved === "dark") {
-    if (snapshot.mapTileSrc && !snapshot.mapTileSrc.includes("cartocdn.com/dark_all")) {
-      failures.push(`${label}: Dark homes map is not using the dark CARTO basemap`);
+    const expectedProvider = process.env.NEXT_PUBLIC_CARTO_BASEMAP_KEY?.trim()
+      ? "basemaps.cartocdn.com/rastertiles/dark_all/"
+      : "tile.openstreetmap.org/";
+    if (snapshot.mapTileSrc && !snapshot.mapTileSrc.includes(expectedProvider)) {
+      failures.push(`${label}: Dark homes map is not using the configured basemap (${expectedProvider})`);
     }
     const sidebarLum = luminanceFromCss(snapshot.surfaces.homesSidebar?.backgroundColor);
     if (sidebarLum != null && sidebarLum > 0.22) failures.push(`${label}: renter sidebar is still a light surface in Dark mode`);
@@ -357,7 +360,7 @@ async function main() {
               await page.waitForSelector(".renter-map-canvas", { timeout: 8_000 });
               await page.waitForSelector(".renter-map-canvas .leaflet-tile", { timeout: 8_000 }).catch(() => {});
             }
-            if (route.name === "landing") {
+            if (route.name === "landing" && !mobileReplacesCritical) {
               await page.locator(".landing-faq-editorial").scrollIntoViewIfNeeded().catch(() => {});
             }
             await page.waitForTimeout(180);

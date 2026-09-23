@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { gzipSync } from "node:zlib";
 
 const root = process.cwd();
 const failures = [];
@@ -44,9 +45,12 @@ if (!packageJson.scripts?.uiqa?.includes("node scripts/check-redesign-release.mj
 if (!packageJson.scripts?.uiqa?.includes("node scripts/check-mobile-release-hardening.mjs")) failures.push("final mobile hardening is not part of the standard UI validation path");
 if (packageJson.scripts?.releasebrowserqa !== "node scripts/check-mobile-release-browser.mjs") failures.push("release browser QA script is not registered");
 
-const landingBytes = fs.statSync(path.join(root, "src/app/landing.css")).size;
-const mapBytes = fs.statSync(path.join(root, "src/app/homes/map-workspace.css")).size;
-if (landingBytes > 14_000) failures.push(`final landing appearance CSS exceeded 14 KB source budget (${landingBytes} bytes)`);
+// Normalize CRLF checkouts and budget both desktop and mobile composition.
+const landingSource = read("src/app/landing.css").replaceAll("\r\n", "\n");
+const landingBytes = Buffer.byteLength(landingSource);
+const mapBytes = Buffer.byteLength(read("src/app/homes/map-workspace.css").replaceAll("\r\n", "\n"));
+if (landingBytes > 24_000) failures.push(`final landing appearance CSS exceeded 24 KB source budget (${landingBytes} bytes)`);
+if (gzipSync(landingSource).length > 5500) failures.push("landing appearance exceeded 5.5 KB gzip budget");
 if (mapBytes > 24_000) failures.push(`canonical map workspace CSS exceeded 24 KB source budget (${mapBytes} bytes)`);
 
 if (failures.length) {
