@@ -107,7 +107,7 @@ requireText(areaSearchBrowserQa, "successful map-area search URL did not change 
 requireText(areaSearchBrowserQa, "failed map-area search should remain retryable", "map error recovery regression coverage");
 requireText(browserQa, 'name: "reported-desktop", width: 1272, height: 638', "reported desktop viewport coverage");
 requireText(browserQa, 'const scenarios = ["light", "dark"]', "light/dark geometry coverage");
-requireText(browserQa, "toolbar does not span the full renter search shell", "toolbar full-span rendered assertion");
+requireText(browserQa, "toolbar does not span the inset search content", "toolbar content-span rendered assertion");
 requireText(browserQa, 'toolbar.gridRowStart !== "1"', "toolbar rendered grid-row assertion");
 requireText(browserQa, 'workspace.gridRowStart !== "2"', "workspace rendered grid-row assertion");
 requireText(browserQa, "The toolbar is sticky", "sticky geometry regression rationale");
