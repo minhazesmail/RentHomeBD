@@ -2,6 +2,12 @@
    This is intentionally one final scoped layer while legacy landing generations
    remain underneath during the staged migration. Do not add new landing fix files. */
 
+.landing-desktop-primary { display: contents; }
+
+@media (max-width: 820px) {
+  .landing-frame > :not([data-mobile-concept-landing]) { display: none !important; }
+}
+
 .landing-shell {
   --landing-v2-primary: #0b4f3c;
   --landing-v2-primary-strong: #073d2f;

@@ -2,15 +2,7 @@
   display: none;
 }
 
-:global(.landing-desktop-primary) {
-  display: contents;
-}
-
 @media (max-width: 820px) {
-  :global(.landing-frame) > :not([data-mobile-concept-landing]) {
-    display: none !important;
-  }
-
   .root {
     --app-bg: #f2f5f1;
     --app-surface: #ffffff;

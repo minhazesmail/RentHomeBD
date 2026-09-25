@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import styles from "./global-shell.module.css";
+import { GlassAtmosphere } from "./glass-atmosphere";
+import glass from "./glass-atmosphere.module.css";
 
 type ShellKind = "marketing" | "renter" | "owner" | "auth" | "neutral";
 
@@ -51,7 +53,8 @@ export function GlobalShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className={`nb-global-shell nb-global-shell--${shell} ${styles.desktop}`} data-shell={shell} data-route={pathname} onClickCapture={handleShellClick}>
+    <div className={`nb-global-shell nb-global-shell--${shell} ${styles.desktop} ${glass.glass}`} data-shell={shell} data-route={pathname} onClickCapture={handleShellClick}>
+      <GlassAtmosphere />
       <div className="nb-shell-atmosphere" aria-hidden="true" />
       <div className="nb-shell-grid" aria-hidden="true" />
       <div className="nb-shell-content">
