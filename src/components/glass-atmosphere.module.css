@@ -1,0 +1,156 @@
+/* Local concept: a shared glass material, with motion confined to one canvas. */
+.glass.glass {
+  --glass-panel: rgba(255, 255, 255, .65);
+  --glass-border: rgba(255, 255, 255, .86);
+  --glass-shadow: 0 16px 48px rgba(28, 69, 54, .07), inset 0 1px 0 rgba(255, 255, 255, .85);
+  --glass-canvas: #edf1e9;
+  --glass-jade: #a6cbbb;
+  --glass-amber: #ead3af;
+  --glass-line: rgba(56, 115, 88, .14);
+  --surface-solid: rgba(255, 255, 255, .78);
+  --surface-soft: rgba(255, 255, 255, .48);
+  --surface-elevated: rgba(255, 255, 255, .96);
+  --muted: #52665b;
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-canvas);
+}
+
+:global(html[data-resolved-theme="dark"]) .glass.glass {
+  --glass-panel: rgba(17, 39, 32, .7);
+  --glass-border: rgba(192, 228, 210, .16);
+  --glass-shadow: 0 18px 52px rgba(0, 12, 8, .23), inset 0 1px 0 rgba(219, 245, 229, .08);
+  --glass-canvas: #091b17;
+  --glass-jade: #235c4c;
+  --glass-amber: #514833;
+  --glass-line: rgba(157, 208, 179, .15);
+  --surface-solid: rgba(19, 43, 35, .84);
+  --surface-soft: rgba(25, 54, 43, .55);
+  --surface-elevated: rgba(17, 36, 29, .98);
+  --muted: #b5c8be;
+}
+
+.canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--glass-canvas);
+  contain: strict;
+}
+
+.jade, .amber, .arc { position: absolute; display: block; pointer-events: none; will-change: transform; }
+.jade {
+  width: 90vw; height: 100vh; left: -25vw; top: -20vh;
+  border-radius: 42% 58% 69% 31% / 42% 45% 55% 58%;
+  background: radial-gradient(ellipse at 55% 40%, var(--glass-jade), transparent 70%);
+  transform: translate3d(var(--glass-drift-x, 0px), var(--glass-drift-y, 0px), 0) rotate(var(--glass-turn, 0deg));
+}
+.amber {
+  width: 90vw; height: 110vh; right: -35vw; top: 26vh;
+  border-radius: 60% 40% 30% 70%;
+  background: radial-gradient(ellipse at 40% 50%, var(--glass-amber), transparent 65%);
+  transform: translate3d(calc(var(--glass-drift-x, 0px) * -.7), calc(var(--glass-drift-y, 0px) * -.7), 0);
+}
+.arc {
+  width: 80vw; height: 100vw; top: -40vw; right: -35vw;
+  border: 1px solid var(--glass-line); border-radius: 50%;
+  box-shadow: 0 0 0 60px var(--glass-line), 0 0 0 120px color-mix(in srgb, var(--glass-line) 30%, transparent);
+  opacity: .42;
+  transform: translate3d(calc(var(--glass-drift-x, 0px) * -.4), var(--glass-drift-y, 0px), 0) rotate(-30deg);
+}
+
+.glass.glass :global(.nb-shell-content) { position: relative; z-index: 1; }
+.glass.glass :global(.nb-shell-atmosphere),
+.glass.glass :global(.nb-shell-grid),
+.glass.glass :global(.site-atmosphere) { display: none; }
+
+.glass.glass :is(:global(.landing-shell), :global(.landing-frame), :global(.landing-desktop-primary),
+  :global(.homes-page), :global(.info-page), :global(.information-frame), :global(.auth-shell),
+  :global(.dashboard-page), :global(.owner-page), :global(.saved-page), :global(.messages-page),
+  :global(.listing-page), :global(.moderation-page), :global(.property-detail-page)) {
+  background: transparent;
+  background-image: none;
+}
+.glass.glass :global(main.landing-shell) {
+  --landing-content-background: transparent;
+  --landing-trust-background: transparent;
+  --landing-faq-background: transparent;
+  --muted: #52665b;
+}
+:global(html[data-resolved-theme="dark"]) .glass.glass :global(main.landing-shell) { --muted: #b5c8be; }
+
+/* A consistent material on navigation, work surfaces, forms and account panels. */
+.glass.glass :is(:global([data-marketing-navigation]), :global([data-product-navigation]),
+  :global(.landing-search-console), :global(.landing-map-preview), :global(.landing-how-panel),
+  :global(.landing-faq-editorial), :global(.landing-featured-empty),
+  :global(.renter-search-toolbar), :global(.renter-search-sidebar), :global(.renter-results-header),
+  :global(.property-detail-section), :global(.property-contact-card),
+  :global(.owner-property-card), :global(.owner-attention-workbench), :global(.listing-section),
+  :global(.auth-card), :global(.info-story-card), :global(.info-hero-note), :global(.info-cta-band),
+  :global(.messages-workspace-shell), :global(.moderation-queue-context),
+  :global(.renter-journey-card), :global(.owner-dashboard-action-card)) {
+  background: var(--glass-panel);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+.glass.glass :global(.landing-nav) {
+  padding-inline: 22px; border-radius: 16px; margin-block: 18px 0;
+  position: relative; top: auto;
+}
+.glass.glass :global(.landing-search-console) { border-radius: 18px; }
+.glass.glass :global(.landing-map-preview) { border-radius: 22px; }
+.glass.glass :global(.landing-how-panel) { border-radius: 20px; overflow: hidden; }
+.glass.glass :global(.landing-faq-editorial) { padding: 36px; border-radius: 20px; }
+.glass.glass :global(.landing-trust-section) { border-color: var(--glass-border); }
+.glass.glass :global(.landing-trust-card) { background: transparent; }
+.glass.glass :global(.landing-map-rail),
+.glass.glass :global(.landing-persona-tabs),
+.glass.glass :global(.landing-how-toolbar) { background: transparent; }
+.glass.glass :global(.renter-search-shell) { background: transparent; }
+.glass.glass :global(.messages-workspace-inbox),
+.glass.glass :global(.messages-workspace-empty),
+.glass.glass :global(.messages-thread-pane) { background: transparent; }
+
+.glass.glass :global(.info-story-card) { padding: 28px; border-radius: 16px; }
+.glass.glass :global(.info-cta-band) { color: var(--foreground); }
+.glass.glass :global(.info-cta-band) :global(.eyebrow) { color: var(--muted); }
+@media (min-width: 1024px) {
+  .glass.glass :global([data-marketing-navigation]) { padding-inline: 22px; border-radius: 16px; }
+}
+
+@media (max-width: 820px) {
+  .glass.glass :global([data-mobile-concept-landing]) { background: transparent; }
+  .glass.glass :global([data-mobile-concept-landing]) > header,
+  .glass.glass :global([data-mobile-entry-search]),
+  .glass.glass :global([data-mobile-primary-tabs]) {
+    background: var(--glass-panel);
+    border-color: var(--glass-border);
+    backdrop-filter: blur(18px) saturate(125%);
+    -webkit-backdrop-filter: blur(18px) saturate(125%);
+  }
+  .glass.glass :global(#mobile-app-heading) { color: #f1faf5; }
+  .glass.glass :global(.landing-faq-editorial) { padding: 20px; }
+  .jade { width: 160vw; left: -65vw; }
+  .amber { width: 160vw; right: -80vw; }
+  .arc { width: 150vw; height: 190vw; right: -90vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jade, .amber, .arc { transform: none; will-change: auto; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass.glass { --glass-panel: var(--background); --surface-solid: var(--background); }
+  .canvas { display: none; }
+}
+@media (forced-colors: active) {
+  .canvas { display: none; }
+  .glass.glass { --glass-panel: Canvas; --glass-border: CanvasText; }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .glass.glass { --glass-panel: var(--background); }
+}
