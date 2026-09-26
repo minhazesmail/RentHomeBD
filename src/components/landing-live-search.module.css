@@ -1,0 +1,34 @@
+.root { position: relative; width: 100%; margin: 24px 0; color: var(--ink); text-align: left; }
+@media (min-width: 1024px) { .root { grid-column: 1; grid-row: 4; margin: 0 0 24px; } }
+.label { display: block; margin-bottom: 9px; font-size: .8rem; font-weight: 750; color: inherit; }
+.inputRow { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 14px; border: 1px solid var(--border-strong); border-radius: 15px; background: var(--surface-elevated); color: var(--ink); }
+.inputRow:focus-within { outline: 2px solid var(--accent-contrast); outline-offset: 3px; }
+.inputRow input { flex: 1; min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-size: .9rem; padding: 15px 0; box-shadow: none; }
+.inputRow input::placeholder { color: var(--muted); opacity: 1; }
+.inputRow input:focus-visible { outline: none; }
+.inputRow input::-webkit-search-cancel-button { display: none; }
+.clear { display: grid; place-items: center; flex-shrink: 0; min-width: 36px; min-height: 40px; padding: 0; background: transparent; border: 0; color: inherit; cursor: pointer; }
+.root .help { margin: 8px 0 0; font-size: .73rem; line-height: 1.5; color: inherit; opacity: .85; }
+.panel { margin-top: 12px; border: 1px solid var(--border-strong); border-radius: 15px; background: var(--surface-elevated); color: var(--ink); overflow: hidden; }
+.suggestions { list-style: none; padding: 6px; margin: 0; }
+.suggestions li { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px; border-radius: 8px; font-size: .85rem; cursor: pointer; }
+.suggestions li span { flex: 1; }
+.suggestions li:hover, .suggestions li[aria-selected="true"] { background: var(--surface-muted); }
+.results { border-top: 1px solid var(--border-strong); padding: 14px; }
+.caption { font-size: .75rem; font-weight: 750; }
+.root .message { margin: 8px 0; padding: 0 8px; font-size: .79rem; color: var(--muted); line-height: 1.5; }
+.results .message { padding: 0; }
+.rental { display: flex; justify-content: space-between; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--border-strong); color: inherit; text-decoration: none; }
+.rental > span { min-width: 0; }
+.rental strong { display: block; font-size: .86rem; line-height: 1.4; overflow-wrap: anywhere; }
+.rental small { display: block; margin-top: 4px; color: var(--muted); font-size: .73rem; overflow-wrap: anywhere; }
+.rental b { display: flex; align-items: center; gap: 6px; flex-shrink: 0; font-size: .82rem; }
+.rental:hover strong { text-decoration: underline; }
+.mapLink { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 44px; margin-top: 8px; color: var(--accent-contrast); font-size: .8rem; font-weight: 750; }
+.retry { min-height: 44px; padding: 8px 14px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface-muted); color: var(--ink); cursor: pointer; }
+.root a:focus-visible, .root button:focus-visible { outline: 2px solid var(--accent-contrast); outline-offset: 2px; }
+@media (max-width: 820px) {
+  .root { color: inherit; margin: 20px 0 0; }
+  .inputRow input { font-size: 16px; }
+  .rental { flex-wrap: wrap; gap: 7px; }
+}

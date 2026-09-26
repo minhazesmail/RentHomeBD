@@ -207,6 +207,10 @@ jobs:
           done
           cat /tmp/nearbasha-next.log
           exit 1
+      - name: Landing live search browser QA
+        env:
+          LIVE_SEARCH_QA_URL: http://127.0.0.1:3000
+        run: node scripts/check-landing-live-search-browser.mjs
       - name: Desktop redesign browser QA
         run: npm run desktopbrowserqa
         env:
