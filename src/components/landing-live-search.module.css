@@ -5,7 +5,9 @@
 .inputRow:focus-within { outline: 2px solid var(--accent-contrast); outline-offset: 3px; }
 .inputRow input { flex: 1; min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-size: .9rem; padding: 15px 0; box-shadow: none; }
 .inputRow input::placeholder { color: var(--muted); opacity: 1; }
-.inputRow input:focus-visible { outline: none; }
+/* The composite field owns the focus ring, including its icon and clear action. */
+.inputRow input:focus-visible { outline: none !important; box-shadow: none !important; }
+@media (forced-colors: active) { .inputRow:focus-within { outline-color: Highlight; } }
 .inputRow input::-webkit-search-cancel-button { display: none; }
 .clear { display: grid; place-items: center; flex-shrink: 0; min-width: 36px; min-height: 40px; padding: 0; background: transparent; border: 0; color: inherit; cursor: pointer; }
 .root .help { margin: 8px 0 0; font-size: .73rem; line-height: 1.5; color: inherit; opacity: .85; }

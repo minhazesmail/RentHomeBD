@@ -85,8 +85,8 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     await page.screenshot({ path: path.join(out, `search-${width}.png`) });
   }
-  await page.context().addCookies([{ name: 'nb_locale', value: 'bn', url: base }]);
-  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: 'Switch to Bangla', exact: true }).filter({ visible: true }).click();
+  await page.waitForFunction(() => document.documentElement.lang === 'bn');
   await input.fill('ধান');
   await root.getByRole('option', { name: /ধানমন্ডি/ }).waitFor();
   await root.getByRole('link', { name: /QA rental/ }).waitFor();
