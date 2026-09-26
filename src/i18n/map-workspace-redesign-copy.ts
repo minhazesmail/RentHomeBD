@@ -4,7 +4,7 @@ const enMapWorkspaceRedesignCopy = {
   toolbar: {
     aria: "Rental map search filters",
     area: "Area",
-    areaPlaceholder: "Choose Dhaka area",
+    areaPlaceholder: "Choose an area",
     tenant: "Tenant type",
     tenantRequired: "Choose tenant type",
     budget: "Max budget",
@@ -58,7 +58,7 @@ const enMapWorkspaceRedesignCopy = {
     expandResults: "Expand results sheet",
     applyFilters: "Apply filters",
     resetFilters: "Reset",
-    summaryFallback: "Dhaka map search",
+    summaryFallback: "Map search",
   },
 } as const;
 
@@ -66,7 +66,7 @@ const bnMapWorkspaceRedesignCopy = {
   toolbar: {
     aria: "ভাড়া বাসার ম্যাপ সার্চ ফিল্টার",
     area: "এলাকা",
-    areaPlaceholder: "ঢাকার এলাকা বাছুন",
+    areaPlaceholder: "এলাকা বাছুন",
     tenant: "ভাড়াটিয়ার ধরন",
     tenantRequired: "ভাড়াটিয়ার ধরন বেছে নিন",
     budget: "সর্বোচ্চ বাজেট",
@@ -120,7 +120,7 @@ const bnMapWorkspaceRedesignCopy = {
     expandResults: "ফলাফলের শিট বড় করুন",
     applyFilters: "ফিল্টার প্রয়োগ করুন",
     resetFilters: "রিসেট",
-    summaryFallback: "ঢাকা ম্যাপ সার্চ",
+    summaryFallback: "ম্যাপ সার্চ",
   },
 } as const;
 
