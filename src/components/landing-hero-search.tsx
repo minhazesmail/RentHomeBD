@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LandingMascot } from "./landing-mascot";
+import { LandingLiveSearch } from "./landing-live-search";
 import mascotStyles from "./landing-mascot.module.css";
 import { ArrowRight, Banknote, BedDouble, Map, MapPin, Search, ShieldCheck, SlidersHorizontal, Users } from "lucide-react";
 import type { ReactNode } from "react";
@@ -121,6 +122,7 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
         <div className="landing-live-kicker"><span aria-hidden="true" />{copy.kicker}</div>
         <h1 className={mascotStyles.headline}>{copy.title}<LandingMascot /></h1>
         <p className="intro">{copy.description}</p>
+        <LandingLiveSearch />
 
         <div className="landing-mobile-quick-signals" aria-label={copy.mobileSignalsAria}>
           <div>

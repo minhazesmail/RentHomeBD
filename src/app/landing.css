@@ -550,7 +550,7 @@
   .landing-shell .landing-hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: auto auto auto 1fr auto auto;
+    grid-template-rows: auto auto auto auto 1fr auto auto;
     align-items: start;
     gap: 0 64px;
     min-height: 0;
@@ -599,7 +599,7 @@
   }
   .landing-shell .landing-confidence-row {
     grid-column: 1;
-    grid-row: 4;
+    grid-row: 5;
     align-self: start;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -613,7 +613,7 @@
   .landing-shell .landing-confidence-row span { color: var(--muted); font-size: .72rem; line-height: 1.5; }
   .landing-shell .landing-visual {
     grid-column: 2;
-    grid-row: 1 / 5;
+    grid-row: 1 / 6;
     min-width: 0;
     min-height: 0;
     width: 100%;
@@ -630,7 +630,7 @@
   .landing-shell .landing-map-caption { display: none; }
   .landing-shell .landing-search-console {
     grid-column: 1 / -1;
-    grid-row: 5;
+    grid-row: 6;
     width: 100%;
     margin-top: 24px;
     padding: 24px;
@@ -655,7 +655,7 @@
   .landing-shell .landing-search-more summary { min-height: 36px; }
   .landing-shell .landing-search-more-panel { max-width: 680px; }
   .landing-shell .landing-search-help { margin: 4px 0 0; font-size: .72rem; color: var(--muted); }
-  .landing-shell .landing-popular-searches { grid-column: 1 / -1; grid-row: 6; display: flex; align-items: center; gap: 20px; margin-top: 18px; }
+  .landing-shell .landing-popular-searches { grid-column: 1 / -1; grid-row: 7; display: flex; align-items: center; gap: 20px; margin-top: 18px; }
   .landing-shell .landing-popular-heading > small { display: none; }
   .landing-shell .landing-popular-heading > span { color: var(--muted); font-weight: 500; }
   .landing-shell .landing-popular-actions { display: flex; flex-wrap: wrap; gap: 8px; }
