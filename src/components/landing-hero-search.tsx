@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { LandingMascot } from "./landing-mascot";
+import mascotStyles from "./landing-mascot.module.css";
 import { ArrowRight, Banknote, BedDouble, Map, MapPin, Search, ShieldCheck, SlidersHorizontal, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { useMemo, useRef, useState } from "react";
@@ -117,7 +119,7 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
     <section className="landing-hero landing-hero-reference" data-scroll-theme="hero">
       <div className="landing-copy">
         <div className="landing-live-kicker"><span aria-hidden="true" />{copy.kicker}</div>
-        <h1>{copy.title}</h1>
+        <h1 className={mascotStyles.headline}>{copy.title}<LandingMascot /></h1>
         <p className="intro">{copy.description}</p>
 
         <div className="landing-mobile-quick-signals" aria-label={copy.mobileSignalsAria}>
