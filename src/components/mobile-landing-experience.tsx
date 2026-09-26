@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { LandingMascot } from "./landing-mascot";
+import mascotStyles from "./landing-mascot.module.css";
 import {
   ArrowRight,
   Banknote,
@@ -188,9 +190,10 @@ export function MobileLandingExperience() {
           <div className={styles.heroGlow} aria-hidden="true" />
           <div className={styles.heroBadge}><span aria-hidden="true" />{copy.kicker}</div>
           <div className={styles.heroText}>
-            <h1 id="mobile-app-heading">
+            <h1 id="mobile-app-heading" className={mascotStyles.headline}>
               <span>{copy.mobileTitleLead}</span>
-              <strong>{copy.mobileTitleAccent}</strong>
+                <strong>{copy.mobileTitleAccent}</strong>
+                <LandingMascot />
             </h1>
             <p>{copy.description}</p>
           </div>
