@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { LandingMascot } from "./landing-mascot";
+import { LandingLiveSearch } from "./landing-live-search";
 import mascotStyles from "./landing-mascot.module.css";
 import {
   ArrowRight,
@@ -196,6 +197,7 @@ export function MobileLandingExperience() {
                 <LandingMascot />
             </h1>
             <p>{copy.description}</p>
+            <LandingLiveSearch />
           </div>
           <div className={styles.heroSignals} aria-label={copy.mobileSignalsAria}>
             <span><MapPin aria-hidden="true" />{copy.mobileDhakaFocused}</span>
