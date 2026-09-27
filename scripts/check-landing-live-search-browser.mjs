@@ -32,7 +32,7 @@ try {
     }
     await page.goto(base, { waitUntil: 'domcontentloaded' });
     await input.waitFor();
-    await page.locator('.leaflet-container:visible').waitFor({ timeout: 60000 });
+    if (page.viewportSize().width > 820) await page.locator('.leaflet-container:visible').waitFor({ timeout: 60000 });
   }
   await input.waitFor();
   await page.locator('.leaflet-container:visible').waitFor({ timeout: 60000 });
