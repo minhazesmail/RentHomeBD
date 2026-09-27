@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s | NearBasha",
   },
   applicationName: "NearBasha",
-  description: "Search moderated rental homes on a live map across Dhaka, Narayanganj, Narsingdi and Gazipur with NearBasha.",
+  description: "Search moderated rental homes on a live map across Bangladesh with NearBasha.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,

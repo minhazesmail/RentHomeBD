@@ -74,7 +74,7 @@ export function LandingLiveSearch() {
       <div className={styles.inputRow}>
         <Search aria-hidden="true" size={19} />
         <input ref={input} id={id} type="search" role="combobox" autoComplete="off" maxLength={100}
-          placeholder={bn ? "এলাকা বা ল্যান্ডমার্ক খুঁজুন…" : "Search an area or landmark…"}
+          placeholder={bn ? "জেলা, উপজেলা বা এলাকা খুঁজুন…" : "Search a district, upazila or area…"}
           value={query} aria-expanded={open && suggestions.length > 0} aria-autocomplete="list"
           aria-controls={open && normalized.length >= 2 ? `${id}-options` : undefined} aria-describedby={`${id}-help`}
           aria-activedescendant={open && active >= 0 && suggestions[active] ? `${id}-option-${active}` : undefined}
@@ -91,7 +91,7 @@ export function LandingLiveSearch() {
         {query && <button type="button" className={styles.clear} aria-label={bn ? "খোঁজা মুছুন" : "Clear search"}
           onClick={() => { setQuery(""); setActive(-1); input.current?.focus(); }}><X size={17} aria-hidden="true" /></button>}
       </div>
-      <p className={styles.help} id={`${id}-help`}>{bn ? "লিখলেই এলাকার পরামর্শ ও কাছের ভাড়ার বাসা দেখুন।" : "Area suggestions and nearby rentals, as you type."}</p>
+      <p className={styles.help} id={`${id}-help`}>{bn ? "সকল ৬৪ জেলা। উপজেলা বা কাছের ল্যান্ডমার্ক খুঁজুন।" : "All 64 districts. Search an upazila or nearby landmark."}</p>
       {open && normalized.length >= 2 && <div className={styles.panel}>
         <ul className={styles.suggestions} id={`${id}-options`} role="listbox" aria-label={bn ? "এলাকার পরামর্শ" : "Suggested areas"}>
           {suggestions.map((preset, index) => <li key={preset.label} id={`${id}-option-${index}`} role="option" aria-selected={active === index}
@@ -99,7 +99,7 @@ export function LandingLiveSearch() {
             <MapPin size={16} aria-hidden="true" /><span>{label(preset)}</span><ArrowUpRight size={15} aria-hidden="true" />
           </li>)}
         </ul>
-        {!area && <p className={styles.message}>{bn ? "এই এলাকা পাওয়া যায়নি। ঢাকা, নারায়ণগঞ্জ, নরসিংদী বা গাজীপুর লিখুন।" : "No supported area found. Try Dhaka, Narayanganj, Narsingdi or Gazipur."}</p>}
+        {!area && <p className={styles.message}>{bn ? "এই এলাকা পাওয়া যায়নি। জেলা বা উপজেলার নাম লিখুন।" : "No area found. Try a district or upazila name."}</p>}
         {area && <div className={styles.results}>
           <div className={styles.caption}>{bn ? `${label(area)}-এর কাছে · ৫ কিমি` : `Near ${label(area)} · 5 km`}</div>
           <p role="status" className={styles.message}>{searching ? (bn ? "বাসা খোঁজা হচ্ছে…" : "Finding nearby rentals…")
