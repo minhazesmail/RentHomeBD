@@ -171,6 +171,8 @@ jobs:
         run: npm run mapsearchqa
       - name: Smart search ordering QA
         run: npm run smartsearchqa
+      - name: Location coverage and resolution QA
+        run: npm run locationqa
       - name: Map return and saved-search validation QA
         run: npm run navigationqa
       - name: Message realtime and read-receipt QA

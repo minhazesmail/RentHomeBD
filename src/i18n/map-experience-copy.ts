@@ -2,8 +2,8 @@ import type { Locale } from "@/i18n/config";
 
 const en = {
   eyebrow: "A neighborhood first. A home next.",
-  title: "Find your corner of Dhaka",
-  mapLabel: "Interactive Dhaka neighborhood map",
+  title: "Find your neighborhood",
+  mapLabel: "Interactive service-region map",
   loading: "Loading the neighborhood map…",
   areas: "Explore neighborhoods",
   selectedArea: "Your starting point",
@@ -26,8 +26,8 @@ const en = {
 type Copy = { [K in keyof typeof en]: string };
 const bn: Copy = {
   eyebrow: "আগে পছন্দের এলাকা। তারপর বাসা।",
-  title: "ঢাকায় আপনার পছন্দের ঠিকানা",
-  mapLabel: "ঢাকার এলাকার ইন্টারঅ্যাকটিভ ম্যাপ",
+  title: "খুঁজে নিন আপনার পছন্দের এলাকা",
+  mapLabel: "সেবা অঞ্চলের ইন্টারঅ্যাকটিভ ম্যাপ",
   loading: "এলাকার ম্যাপ লোড হচ্ছে…",
   areas: "এলাকা ঘুরে দেখুন",
   selectedArea: "এখান থেকে শুরু করুন",

@@ -12,7 +12,7 @@ import { getMapExperienceCopy } from "@/i18n/map-experience-copy";
 import { LOCATION_PRESETS } from "@/lib/location-presets";
 
 const NeighborhoodMap = dynamic(() => import("@/components/landing-neighborhood-map"), { ssr: false });
-const areas = LOCATION_PRESETS.filter((area) => ["Dhanmondi, Dhaka", "Banani, Dhaka", "Uttara, Dhaka"].includes(area.label));
+const areas = LOCATION_PRESETS.filter((area) => ["Dhanmondi, Dhaka", "Banani, Dhaka", "Uttara, Dhaka", "Narayanganj", "Narsingdi", "Gazipur"].includes(area.label));
 
 export type LandingMapListing = {
   id: string;

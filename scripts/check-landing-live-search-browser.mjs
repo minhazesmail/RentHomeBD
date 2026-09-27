@@ -26,6 +26,17 @@ try {
     await page.screenshot({ path: path.join(out, 'desktop-live.png') });
   }
 
+  if (process.env.LIVE_SEARCH_QA_REAL === '1') {
+    for (const city of ['Narayanganj', 'Narsingdi', 'Gazipur']) {
+      const pending = page.waitForResponse(r => r.url().includes('/rpc/search_available_properties'));
+      await input.fill(city);
+      const response = await pending;
+      assert.equal(response.status(), 200, city);
+      assert.ok(Array.isArray(await response.json()));
+    }
+    console.log('PASS real public search in all new regions');
+  }
+
   let mode = 'success';
   let calls = 0;
   await page.route('**/rest/v1/rpc/search_available_properties**', async route => {
@@ -37,6 +48,23 @@ try {
     if (requestMode === 'slow') await new Promise(resolve => setTimeout(resolve, 900));
     await route.fulfill({ status: requestMode === 'error' ? 503 : 200, contentType: 'application/json', body: JSON.stringify(requestMode === 'error' ? { message: 'Unavailable' } : requestMode === 'empty' ? [] : [{ id: '11111111-1111-4111-8111-111111111111', title: requestMode === 'slow' ? 'Stale rental' : 'QA rental', address_text: 'Test address', rent_bdt: 25000, total_matches: 1 }]) }).catch(() => {});
   });
+  for (const [query, label, lat, lng] of [
+    ['নারায়ণগঞ্জ', 'Narayanganj', 23.613516, 90.502977],
+    ['নরসিংদী', 'Narsingdi', 23.922976, 90.717676],
+    ['গাজীপুর', 'Gazipur', 23.99844, 90.422344],
+    ['board baz', 'Board Bazar, Gazipur', 23.9451941, 90.3827771],
+    ['panchdona', 'Panchdona, Narsingdi', 23.8933608, 90.6646944],
+  ]) {
+    const pending = page.waitForRequest(r => r.url().includes('/rpc/search_available_properties'));
+    await input.fill(query);
+    const body = (await pending).postDataJSON();
+    assert.equal(body.center_lat, lat);
+    assert.equal(body.center_long, lng);
+    await root.getByRole('link', { name: /QA rental/ }).waitFor();
+    const link = await root.getByRole('link', { name: /Explore and filter/ }).getAttribute('href');
+    assert.equal(new URL(link, base).searchParams.get('area'), label);
+  }
+  console.log('PASS regional aliases, backend coordinates and map links');
   await input.fill('Ban');
   await root.getByRole('link', { name: /QA rental/ }).waitFor();
   await page.screenshot({ path: path.join(out, 'desktop-results.png') });

@@ -6,7 +6,7 @@ import { ArrowUpRight, MapPin, Search, X } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useLocale } from "@/i18n/use-locale";
 import { localizeLocationLabel } from "@/i18n/presentation";
-import { LOCATION_PRESETS, type LocationPreset } from "@/lib/location-presets";
+import { LOCATION_PRESETS, searchLocationPresets, type LocationPreset } from "@/lib/location-presets";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./landing-live-search.module.css";
 
@@ -27,9 +27,7 @@ export function LandingLiveSearch() {
   const supabase = useMemo(() => createClient() as unknown as SupabaseClient, []);
   const normalized = query.trim().toLocaleLowerCase().replace(/\s+/g, " ");
   const label = (area: LocationPreset) => localizeLocationLabel(area.label, dictionary);
-  const suggestions = normalized.length < 2 ? [] : LOCATION_PRESETS.filter(area =>
-    [area.label, label(area), ...(area.aliases ?? [])].some(value => value.toLocaleLowerCase().includes(normalized)),
-  ).slice(0, 4);
+  const suggestions = normalized.length < 2 ? [] : searchLocationPresets(normalized, 4);
   const area = suggestions[Math.max(0, active)];
   const areaLabel = area?.label ?? "";
   const key = `${areaLabel}:${normalized}:${retry}`;
@@ -76,7 +74,7 @@ export function LandingLiveSearch() {
       <div className={styles.inputRow}>
         <Search aria-hidden="true" size={19} />
         <input ref={input} id={id} type="search" role="combobox" autoComplete="off" maxLength={100}
-          placeholder={bn ? "এলাকা বা বিশ্ববিদ্যালয় খুঁজুন…" : "Search an area or university…"}
+          placeholder={bn ? "এলাকা বা ল্যান্ডমার্ক খুঁজুন…" : "Search an area or landmark…"}
           value={query} aria-expanded={open && suggestions.length > 0} aria-autocomplete="list"
           aria-controls={open && normalized.length >= 2 ? `${id}-options` : undefined} aria-describedby={`${id}-help`}
           aria-activedescendant={open && active >= 0 && suggestions[active] ? `${id}-option-${active}` : undefined}
@@ -101,7 +99,7 @@ export function LandingLiveSearch() {
             <MapPin size={16} aria-hidden="true" /><span>{label(preset)}</span><ArrowUpRight size={15} aria-hidden="true" />
           </li>)}
         </ul>
-        {!area && <p className={styles.message}>{bn ? "এই এলাকা পাওয়া যায়নি। ধানমন্ডি, বনানী বা উত্তরা লিখুন।" : "No supported area found. Try Dhanmondi, Banani or Uttara."}</p>}
+        {!area && <p className={styles.message}>{bn ? "এই এলাকা পাওয়া যায়নি। ঢাকা, নারায়ণগঞ্জ, নরসিংদী বা গাজীপুর লিখুন।" : "No supported area found. Try Dhaka, Narayanganj, Narsingdi or Gazipur."}</p>}
         {area && <div className={styles.results}>
           <div className={styles.caption}>{bn ? `${label(area)}-এর কাছে · ৫ কিমি` : `Near ${label(area)} · 5 km`}</div>
           <p role="status" className={styles.message}>{searching ? (bn ? "বাসা খোঁজা হচ্ছে…" : "Finding nearby rentals…")
