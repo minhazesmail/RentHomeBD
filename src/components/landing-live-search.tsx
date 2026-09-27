@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, MapPin, Search, X } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -15,6 +16,7 @@ type Result = { key: string; rows: Rental[]; error: boolean };
 const RADIUS = 5;
 
 export function LandingLiveSearch() {
+  const router = useRouter();
   const { locale, dictionary, formatCurrency } = useLocale();
   const bn = locale === "bn";
   const id = useId();
@@ -63,7 +65,8 @@ export function LandingLiveSearch() {
   function choose(preset: LocationPreset) {
     setQuery(label(preset));
     setActive(-1);
-    input.current?.focus();
+    setOpen(false);
+    router.push(`/homes?${new URLSearchParams({ area: preset.label, radius: String(RADIUS) })}`);
   }
 
   return (
@@ -86,7 +89,7 @@ export function LandingLiveSearch() {
               event.preventDefault(); setOpen(true);
               setActive(index => (index + (event.key === "ArrowDown" ? 1 : -1) + suggestions.length) % suggestions.length);
             }
-            if (event.key === "Enter" && area) { event.preventDefault(); choose(area); setOpen(true); }
+            if (event.key === "Enter" && area) { event.preventDefault(); choose(area); }
           }} />
         {query && <button type="button" className={styles.clear} aria-label={bn ? "খোঁজা মুছুন" : "Clear search"}
           onClick={() => { setQuery(""); setActive(-1); input.current?.focus(); }}><X size={17} aria-hidden="true" /></button>}

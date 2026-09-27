@@ -13,6 +13,27 @@ try {
   await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 180000 });
   const root = page.locator('[data-live-search]:visible');
   const input = root.getByRole('combobox');
+  async function expectMapAndReturn(label, verifyCenter = false) {
+    await page.waitForURL(url => url.pathname === '/homes' && url.searchParams.get('area') === label);
+    assert.equal(new URL(page.url()).searchParams.get('radius'), '5');
+    const selected = page.locator('.renter-toolbar-area select');
+    await selected.waitFor({ state: 'attached', timeout: 60000 });
+    assert.equal(await selected.inputValue(), label, 'Destination map must retain the chosen location');
+    if (verifyCenter) {
+      const pending = page.waitForRequest(request => request.url().includes('/rpc/search_available_properties'));
+      await page.locator('.renter-toolbar-tenant select').selectOption('family');
+      await page.locator('.renter-toolbar-apply').click();
+      const body = (await pending).postDataJSON();
+      const location = nationalLocations.find(item => item.label === label);
+      assert.equal(body.center_lat, location.latitude);
+      assert.equal(body.center_long, location.longitude);
+      assert.equal(body.renter_tenant_type, 'family');
+      await page.screenshot({ path: path.join(out, 'araihazar-map.png') });
+    }
+    await page.goto(base, { waitUntil: 'domcontentloaded' });
+    await input.waitFor();
+    await page.locator('.leaflet-container:visible').waitFor({ timeout: 60000 });
+  }
   await input.waitFor();
   await page.locator('.leaflet-container:visible').waitFor({ timeout: 60000 });
   await page.waitForTimeout(2000);
@@ -44,10 +65,10 @@ try {
     calls++;
     const body = route.request().postDataJSON();
     assert.equal(body.radius_km, 5);
-    assert.equal(body.renter_tenant_type, null);
+    assert.ok(body.renter_tenant_type === null || body.renter_tenant_type === 'family');
     const requestMode = mode;
     if (requestMode === 'slow') await new Promise(resolve => setTimeout(resolve, 900));
-    await route.fulfill({ status: requestMode === 'error' ? 503 : 200, contentType: 'application/json', body: JSON.stringify(requestMode === 'error' ? { message: 'Unavailable' } : requestMode === 'empty' ? [] : [{ id: '11111111-1111-4111-8111-111111111111', title: requestMode === 'slow' ? 'Stale rental' : 'QA rental', address_text: 'Test address', rent_bdt: 25000, total_matches: 1 }]) }).catch(() => {});
+    await route.fulfill({ status: requestMode === 'error' ? 503 : 200, contentType: 'application/json', body: JSON.stringify(requestMode === 'error' ? { message: 'Unavailable' } : requestMode === 'empty' || body.renter_tenant_type === 'family' ? [] : [{ id: '11111111-1111-4111-8111-111111111111', title: requestMode === 'slow' ? 'Stale rental' : 'QA rental', address_text: 'Test address', rent_bdt: 25000, total_matches: 1 }]) }).catch(() => {});
   });
   for (const [query, label, lat, lng] of [
     ['নারায়ণগঞ্জ', 'Narayanganj', 23.613516, 90.502977],
@@ -80,7 +101,8 @@ try {
   await input.fill('Kaliganj');
   assert.ok(await root.getByRole('option').count() > 1);
   await root.getByRole('option', { name: 'Kaliganj, Satkhira', exact: true }).click();
-  assert.equal(await input.inputValue(), 'Kaliganj, Satkhira');
+  await expectMapAndReturn('Kaliganj, Satkhira');
+  await input.fill('Kaliganj, Satkhira');
   await root.getByRole('link', { name: /QA rental/ }).waitFor();
   await page.screenshot({ path: path.join(out, 'national-search.png') });
   console.log('PASS national Bangla aliases, approved upazilas, duplicate names and backend coordinates');
@@ -95,14 +117,20 @@ try {
   await input.press('ArrowDown');
   assert.ok(await input.getAttribute('aria-activedescendant'));
   await input.press('Enter');
-  assert.equal(await input.inputValue(), 'Banani, Dhaka');
+  await expectMapAndReturn('Banani, Dhaka');
+  await input.fill('Ban');
   await input.press('Escape');
   assert.equal(await input.getAttribute('aria-expanded'), 'false');
   await input.fill('Utt');
   await root.getByRole('option', { name: /Uttara/ }).click();
-  assert.equal(await input.inputValue(), 'Uttara, Dhaka');
+  await expectMapAndReturn('Uttara, Dhaka');
+  await input.fill('Uttara');
   await root.getByRole('link', { name: /QA rental/ }).waitFor();
   console.log('PASS suggestions, keyboard and rental links');
+  await input.fill('Araihazar');
+  await root.getByRole('option', { name: 'Araihazar, Narayanganj', exact: true }).click();
+  await expectMapAndReturn('Araihazar, Narayanganj', true);
+  console.log('PASS Araihazar suggestion opens its NearBasha map');
 
   mode = 'empty'; await input.fill('Mir');
   await root.getByRole('status').filter({ hasText: 'No available rentals' }).waitFor();
@@ -140,5 +168,8 @@ try {
   await input.fill('টেকনাফ');
   await root.getByRole('option', { name: /টেকনাফ/ }).first().waitFor();
   await page.screenshot({ path: path.join(out, 'bangla-mobile.png') });
+  await input.fill('আড়াইহাজার');
+  await root.getByRole('option', { name: /আড়াইহাজার|আড়াইহাজার/ }).click();
+  await expectMapAndReturn('Araihazar, Narayanganj');
   console.log('PASS responsive and Bangla suggestions');
 } finally { await browser.close(); }
