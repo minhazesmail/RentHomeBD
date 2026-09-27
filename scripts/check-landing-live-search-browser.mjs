@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { chromium } from 'playwright';
+import nationalLocations from '../src/lib/bangladesh-locations.json' with { type: 'json' };
 
 const base = process.env.LIVE_SEARCH_QA_URL ?? 'http://localhost:3003';
 const out = path.resolve(process.env.LIVE_SEARCH_QA_OUTPUT ?? 'artifacts/live-search');
@@ -27,7 +28,7 @@ try {
   }
 
   if (process.env.LIVE_SEARCH_QA_REAL === '1') {
-    for (const city of ['Narayanganj', 'Narsingdi', 'Gazipur']) {
+    for (const city of ['Narayanganj', 'Narsingdi', 'Gazipur', 'Chattogram', 'Rajshahi', 'Khulna', 'Barishal', 'Sylhet', 'Rangpur', 'Mymensingh']) {
       const pending = page.waitForResponse(r => r.url().includes('/rpc/search_available_properties'));
       await input.fill(city);
       const response = await pending;
@@ -65,6 +66,24 @@ try {
     assert.equal(new URL(link, base).searchParams.get('area'), label);
   }
   console.log('PASS regional aliases, backend coordinates and map links');
+  for (const location of nationalLocations.filter(item => item.id.startsWith('approved-2026-') ||
+    ['Teknaf, Cox\'s Bazar', 'Kaliganj, Satkhira', 'Nababganj, Dinajpur', 'Sreemangal, Moulvibazar'].includes(item.label))) {
+    const pending = page.waitForRequest(r => r.url().includes('/rpc/search_available_properties'));
+    await input.fill(location.labelBn);
+    const body = (await pending).postDataJSON();
+    assert.equal(body.center_lat, location.latitude, location.label);
+    assert.equal(body.center_long, location.longitude, location.label);
+    await root.getByRole('link', { name: /QA rental/ }).waitFor();
+    const link = await root.getByRole('link', { name: /Explore and filter/ }).getAttribute('href');
+    assert.equal(new URL(link, base).searchParams.get('area'), location.label);
+  }
+  await input.fill('Kaliganj');
+  assert.ok(await root.getByRole('option').count() > 1);
+  await root.getByRole('option', { name: 'Kaliganj, Satkhira', exact: true }).click();
+  assert.equal(await input.inputValue(), 'Kaliganj, Satkhira');
+  await root.getByRole('link', { name: /QA rental/ }).waitFor();
+  await page.screenshot({ path: path.join(out, 'national-search.png') });
+  console.log('PASS national Bangla aliases, approved upazilas, duplicate names and backend coordinates');
   await input.fill('Ban');
   await root.getByRole('link', { name: /QA rental/ }).waitFor();
   await page.screenshot({ path: path.join(out, 'desktop-results.png') });
@@ -118,6 +137,8 @@ try {
   await input.fill('ধান');
   await root.getByRole('option', { name: /ধানমন্ডি/ }).waitFor();
   await root.getByRole('link', { name: /QA rental/ }).waitFor();
+  await input.fill('টেকনাফ');
+  await root.getByRole('option', { name: /টেকনাফ/ }).first().waitFor();
   await page.screenshot({ path: path.join(out, 'bangla-mobile.png') });
   console.log('PASS responsive and Bangla suggestions');
 } finally { await browser.close(); }

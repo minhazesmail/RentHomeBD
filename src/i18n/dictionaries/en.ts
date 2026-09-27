@@ -1,5 +1,6 @@
 export const en = {
   common: {
+    locale: "en",
     language: "Language",
     english: "English",
     bangla: "বাংলা",
@@ -84,7 +85,7 @@ export const en = {
   },
   landing: {
     hero: {
-      kicker: "Dhaka · Narayanganj · Narsingdi · Gazipur",
+      kicker: "Across Bangladesh · All 64 districts",
       title: "Find a home close to the life you already live.",
       description: "Search our service regions around the streets, campuses, offices, and neighborhoods that matter to you. Compare location and renter fit before you visit.",
       searchKicker: "Start your neighborhood search",
@@ -100,7 +101,7 @@ export const en = {
       bedroomOne: "1+ bedroom",
       bedroomMany: "{count}+ bedrooms",
       searchMap: "Search map",
-      areaHelp: "Current location search supports areas and landmarks across Dhaka, Narayanganj, Narsingdi and Gazipur listed here. Searches start within {radius} km; refine the radius or move the full map manually.",
+      areaHelp: "Search every district and upazila in Bangladesh, plus listed neighborhoods and landmarks. Searches start within {radius} km; refine the radius or move the full map manually.",
       popular: "Popular in Dhaka:",
       nearBuet: "Near BUET",
       safeguardsAria: "NearBasha marketplace safeguards",
@@ -251,7 +252,7 @@ export const en = {
       helpTitle: "Get the context you need before your next move.",
       aboutNearBasha: "About NearBasha",
       q1: "Where is NearBasha available?",
-      a1: "NearBasha supports rental discovery across Dhaka, Narayanganj, Narsingdi and Gazipur. Search the listed areas and landmarks, then adjust the map and radius. Results depend on available, moderated homes near your selected location.",
+      a1: "NearBasha supports rental discovery across Bangladesh. Search the listed areas and landmarks, then adjust the map and radius. Results depend on available, moderated homes near your selected location.",
       q2: "How does NearBasha reduce scams or fake listings?",
       a2: "NearBasha combines phone OTP, listing moderation, reporting tools, and freshness controls to reduce obvious abuse and stale inventory. These safeguards lower risk, but renters should still inspect the property, verify who they are dealing with, and avoid sending money before they are satisfied with the listing and the person behind it.",
       q2Badge1: "Phone OTP",
@@ -277,7 +278,7 @@ export const en = {
       listProperty: "List a property",
     },
     footer: {
-      tagline: "Rental discovery across Dhaka, Narayanganj, Narsingdi and Gazipur.",
+      tagline: "Rental discovery across Bangladesh.",
       product: "Product",
       browseHomes: "Browse homes",
       listProperty: "List a property",

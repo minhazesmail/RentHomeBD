@@ -38,7 +38,7 @@ export default async function HomesPage({
         </div>
         {unsupportedArea && (
           <div className="auth-message compact-message" role="status">
-            “{params.area}” is not one of the supported quick-search locations yet. The map opened at the default Dhaka center instead. Move the map manually to the area you want, then choose Search map.
+            “{params.area}” could not be matched to a unique location. Choose an upazila with its district name, or move the map manually. The map currently shows the default Dhaka center.
           </div>
         )}
       </HomesSearchExperience>

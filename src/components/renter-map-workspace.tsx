@@ -10,6 +10,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { useMobileMapModel } from "@/components/mobile-map-model";
 import { SaveHomeButton } from "@/components/save-home-button";
+import { LocationPresetSelect } from "@/components/location-preset-select";
 import { SearchRecoveryState } from "@/components/search-recovery-state";
 import type { MapListing, UserMapLocation } from "@/components/leaflet-map";
 import { RenterResultsList } from "@/components/renter-results-list";
@@ -751,13 +752,8 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
         </div>
 
         <div className="renter-primary-filters">
-          <label className="field renter-toolbar-area">
-            {workspaceCopy.toolbar.area}
-            <select value={locationPreset} onChange={(event) => choosePresetLocation(event.target.value)} disabled={busy}>
-              <option value="">{workspaceCopy.toolbar.areaPlaceholder}</option>
-              {LOCATION_PRESETS.map((location) => <option key={location.label} value={location.label}>{localizeLocationLabel(location.label, dictionary)}</option>)}
-            </select>
-          </label>
+          <LocationPresetSelect value={locationPreset} onChange={choosePresetLocation} disabled={busy}
+            label={workspaceCopy.toolbar.area} placeholder={workspaceCopy.toolbar.areaPlaceholder} />
 
           <label className="field renter-toolbar-tenant">
             {workspaceCopy.toolbar.tenant}

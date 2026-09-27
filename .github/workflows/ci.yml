@@ -213,6 +213,10 @@ jobs:
         env:
           LIVE_SEARCH_QA_URL: http://127.0.0.1:3000
         run: node scripts/check-landing-live-search-browser.mjs
+      - name: Nationwide area picker browser QA
+        run: node scripts/check-national-area-browser.mjs
+        env:
+          LIVE_SEARCH_QA_URL: http://127.0.0.1:3000
       - name: Desktop redesign browser QA
         run: npm run desktopbrowserqa
         env:

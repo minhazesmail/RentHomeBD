@@ -46,6 +46,19 @@ export default async function AboutPage() {
           </article>
         </section>
 
+        <section id="location-data" className="info-story-card">
+          <h2>{locale === "bn" ? "সারা বাংলাদেশে খুঁজুন" : "Search across Bangladesh"}</h2>
+          <p>{locale === "bn"
+            ? "৬৪ জেলার সব উপজেলা খুঁজতে পারবেন। নির্বাচিত স্থানের কাছাকাছি বাসা দেখানো হয়; পুরো জেলার সীমানা নয়। ম্যাপে ব্যাসার্ধ বদলান। ফলাফল উপলব্ধ বাসার ওপর নির্ভর করে।"
+            : "Find every district and upazila across all 64 districts. Results show homes near the selected search center, not administrative boundaries. Adjust the radius on the map. Availability depends on listed homes."}</p>
+          <p>{locale === "bn" ? "লোকেশন তথ্য: " : "Location data: "}
+            <a href="https://github.com/open-admin-data/bangladesh-administrative-divisions">Bangladesh Administrative Divisions — jakkrapongt</a>{", "}
+            <a href="https://www.geonames.org/">GeoNames</a>{" ("}<a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>{"). "}
+            <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>{". "}
+            {locale === "bn" ? "NearBasha-তে নাম, বানান ও সম্প্রতি অনুমোদিত উপজেলার তথ্য যোগ করা হয়েছে।" : "Adapted by NearBasha with spelling aliases and recently approved upazilas."}
+          </p>
+        </section>
+
         <section className="info-cta-band">
           <div>
             <p className="eyebrow">{copy.ctaEyebrow}</p>

@@ -1,3 +1,4 @@
+import { LOCATION_BY_LABEL } from "@/lib/location-presets";
 import type { TenantType } from "@/lib/tenant-match";
 import type { Dictionary } from "./dictionaries/en";
 
@@ -53,7 +54,7 @@ export function interpolate(template: string, values: Record<string, string | nu
 
 export function localizeLocationLabel(value: string, dictionary: Dictionary) {
   const key = locationKeyByCanonical[value];
-  return key ? dictionary.common.locations[key] : value;
+  return key ? dictionary.common.locations[key] : dictionary.common.locale === "bn" ? (LOCATION_BY_LABEL.get(value)?.labelBn ?? value) : value;
 }
 
 export function localizeTenantType(type: TenantType, dictionary: Dictionary) {

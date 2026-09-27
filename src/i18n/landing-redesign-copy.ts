@@ -2,13 +2,13 @@ import type { Locale } from "@/i18n/config";
 
 const enLandingRedesignCopy = {
   hero: {
-    kicker: "Dhaka · Narayanganj · Narsingdi · Gazipur",
+    kicker: "Across Bangladesh · All 64 districts",
     title: "Find a home that fits.",
     mobileTitleLead: "Find a home",
     mobileTitleAccent: "that fits.",
-    description: "Explore rentals across Dhaka, Narayanganj, Narsingdi and Gazipur by location, budget, and tenant type—so you know a home fits before you spend time on it.",
+    description: "Explore rentals across Bangladesh by location, budget, and tenant type—so you know a home fits before you spend time on it.",
     mobileSignalsAria: "NearBasha launch focus",
-    mobileDhakaFocused: "Four service regions",
+    mobileDhakaFocused: "All 64 districts",
     mobileTenantAware: "Tenant aware",
     searchKicker: "Tenant-aware search",
     searchTitle: "Start with what actually fits.",
@@ -61,13 +61,13 @@ const enLandingRedesignCopy = {
 
 const bnLandingRedesignCopy = {
   hero: {
-    kicker: "ঢাকা · নারায়ণগঞ্জ · নরসিংদী · গাজীপুর",
+    kicker: "সারা বাংলাদেশ · ৬৪ জেলা",
     title: "আপনার জন্য মানানসই বাসা খুঁজুন।",
     mobileTitleLead: "আপনার জন্য মানানসই",
     mobileTitleAccent: "বাসা খুঁজুন।",
-    description: "লোকেশন, বাজেট ও ভাড়াটিয়ার ধরন মিলিয়ে ঢাকা, নারায়ণগঞ্জ, নরসিংদী ও গাজীপুরের ভাড়া বাসা খুঁজুন—সময় দেওয়ার আগেই বুঝুন বাসাটি আপনার জন্য মানানসই কি না।",
+    description: "লোকেশন, বাজেট ও ভাড়াটিয়ার ধরন মিলিয়ে সারা বাংলাদেশের ভাড়া বাসা খুঁজুন—সময় দেওয়ার আগেই বুঝুন বাসাটি আপনার জন্য মানানসই কি না।",
     mobileSignalsAria: "NearBasha লঞ্চ ফোকাস",
-    mobileDhakaFocused: "চারটি সেবা অঞ্চল",
+    mobileDhakaFocused: "সকল ৬৪ জেলা",
     mobileTenantAware: "ভাড়াটিয়া-সচেতন",
     searchKicker: "টেন্যান্ট-ম্যাচিং সার্চ",
     searchTitle: "যে বাসা সত্যিই মানায়, সেখান থেকেই শুরু করুন।",

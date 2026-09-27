@@ -1,11 +1,18 @@
+import administrativeLocations from "./bangladesh-locations.json" with { type: "json" };
+
 export type LocationPreset = {
   label: string;
+  labelBn?: string;
+  id?: string;
+  kind?: string;
+  district?: string;
+  division?: string;
   latitude: number;
   longitude: number;
   aliases?: string[];
 };
 
-export const LOCATION_PRESETS: LocationPreset[] = [
+const CURATED_LOCATIONS: LocationPreset[] = [
   { label: "Dhanmondi, Dhaka", latitude: 23.7465, longitude: 90.376, aliases: ["dhanmondi", "dhanmondi road 8", "road 8 dhanmondi", "ধানমন্ডি, ঢাকা", "ধানমন্ডি"] },
   { label: "Banani, Dhaka", latitude: 23.7937, longitude: 90.4066, aliases: ["banani", "banani 11", "banani road 11", "বনানী, ঢাকা", "বনানী"] },
   { label: "Gulshan, Dhaka", latitude: 23.7925, longitude: 90.4078, aliases: ["gulshan", "gulshan 1", "gulshan 2", "গুলশান, ঢাকা", "গুলশান"] },
@@ -42,9 +49,28 @@ export const LOCATION_PRESETS: LocationPreset[] = [
   { label: "Madhabdi, Narsingdi", latitude: 23.8517, longitude: 90.6737, aliases: ["madhabdi", "মাধবদী", "মাধবদী, নরসিংদী"] },
 ];
 
-function normalize(value: string) {
+export function normalizeLocationQuery(value: string) {
   return value.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ");
 }
+
+const normalize = normalizeLocationQuery;
+const administrativeByLabel = new Map(administrativeLocations.map(location => [location.label, location]));
+const curatedLabels = new Set(CURATED_LOCATIONS.map(location => location.label));
+export const LOCATION_PRESETS: LocationPreset[] = [
+  ...CURATED_LOCATIONS.map(location => {
+    const administrative = administrativeByLabel.get(location.label);
+    return { ...administrative, ...location,
+      aliases: [...new Set([...(administrative?.aliases ?? []), ...(location.aliases ?? [])])] };
+  }),
+  ...administrativeLocations.filter(location => !curatedLabels.has(location.label)),
+];
+export const LOCATION_BY_LABEL = new Map(LOCATION_PRESETS.map(location => [location.label, location]));
+
+// Build this once, not for every keystroke. Qualified names stay visible when names repeat.
+const SEARCH_INDEX = LOCATION_PRESETS.map(preset => ({ preset,
+  canonical: normalize(preset.label),
+  candidates: [...new Set([preset.label, preset.labelBn ?? "", ...(preset.aliases ?? [])].filter(Boolean).map(normalize))],
+}));
 
 function distanceKm(latitude: number, longitude: number, preset: LocationPreset) {
   const earthRadiusKm = 6371;
@@ -57,17 +83,13 @@ function distanceKm(latitude: number, longitude: number, preset: LocationPreset)
   return earthRadiusKm * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
 }
 
-function candidates(preset: LocationPreset) {
-  return [preset.label, ...(preset.aliases ?? [])].map(normalize);
-}
-
 export function searchLocationPresets(value: string, limit = 6) {
   const query = normalize(value);
   if (!query) return [];
   const tokens = query.split(" ");
-  return LOCATION_PRESETS.map((preset, index) => {
-    const score = Math.min(...candidates(preset).map(candidate => {
-      if (candidate === query) return 0;
+  return SEARCH_INDEX.map(({ preset, canonical, candidates }, index) => {
+    const score = Math.min(...candidates.map(candidate => {
+      if (candidate === query) return canonical === query ? -1 : 0;
       if (candidate.startsWith(query)) return 1;
       if (tokens.every(token => candidate.split(" ").some(word => word.startsWith(token)))) return 2;
       return Infinity;
@@ -78,19 +100,32 @@ export function searchLocationPresets(value: string, limit = 6) {
     .slice(0, limit).map(item => item.preset);
 }
 
+export function resolveExactLocationPreset(value: string) {
+  const query = normalize(value);
+  if (!query) return undefined;
+  const canonical = SEARCH_INDEX.find(item => item.canonical === query || (item.preset.labelBn && normalize(item.preset.labelBn) === query));
+  if (canonical) return canonical.preset;
+  const matches = SEARCH_INDEX.filter(item => item.candidates.includes(query));
+  return matches.length === 1 ? matches[0].preset : undefined;
+}
+
 export function resolveLocationPreset(value?: string) {
   const query = normalize(value ?? "");
   if (!query) return undefined;
-  const exact = LOCATION_PRESETS.find(preset => candidates(preset).includes(query));
-  if (exact) return exact;
-  const partial = searchLocationPresets(query, 1)[0];
-  if (partial) return partial;
+  const resolved = resolveExactLocationPreset(query);
+  if (resolved) return resolved;
+  const exact = SEARCH_INDEX.filter(item => item.candidates.includes(query));
+  if (exact.length) return exact.length === 1 ? exact[0].preset : undefined;
+  const partial = searchLocationPresets(query, 2);
+  if (partial.length) return partial.length === 1 ? partial[0] : undefined;
   // Prefer the most specific whole phrase in an address, never a short acronym inside a word.
-  const addressMatches = LOCATION_PRESETS.flatMap(preset => candidates(preset)
+  const addressMatches = SEARCH_INDEX.flatMap(({ preset, candidates }) => candidates
     .filter(candidate => candidate.length > 2 && (" " + query + " ").includes(" " + candidate + " "))
     .map(candidate => ({ preset, length: candidate.length })));
   addressMatches.sort((a, b) => b.length - a.length);
-  return addressMatches[0]?.preset;
+  const longest = addressMatches[0]?.length;
+  const best = new Set(addressMatches.filter(match => match.length === longest).map(match => match.preset));
+  return best.size === 1 ? best.values().next().value : undefined;
 }
 
 export function describeMapCenter(latitude: number, longitude: number) {

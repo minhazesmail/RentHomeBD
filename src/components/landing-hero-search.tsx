@@ -12,7 +12,7 @@ import { formatCurrency, formatNumber } from "@/i18n/format";
 import { getLandingRedesignCopy } from "@/i18n/landing-redesign-copy";
 import { interpolate, localizeLocationLabel } from "@/i18n/presentation";
 import { useLocale } from "@/i18n/use-locale";
-import { LOCATION_PRESETS } from "@/lib/location-presets";
+import { LOCATION_PRESETS, resolveExactLocationPreset } from "@/lib/location-presets";
 import { DEFAULT_RENTER_SEARCH_RADIUS } from "@/lib/search-defaults";
 import type { TenantType } from "@/lib/tenant-match";
 
@@ -28,9 +28,6 @@ const MAX_CUSTOM_BUDGET = 10_000_000;
 const CUSTOM_BUDGET_STEP = 500;
 const RADIUS_OPTIONS = ["2", "5", "10", "15", "25"] as const;
 
-function normalizeAreaValue(value: string) {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
-}
 
 function buildHomesHref({
   area,
@@ -67,17 +64,7 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
   const [radius, setRadius] = useState(String(DEFAULT_RENTER_SEARCH_RADIUS));
 
   function findSupportedArea(value: string) {
-    const query = normalizeAreaValue(value);
-    if (!query) return undefined;
-
-    return LOCATION_PRESETS.find((location) => {
-      const candidates = [
-        location.label,
-        localizeLocationLabel(location.label, dictionary),
-        ...(location.aliases ?? []),
-      ];
-      return candidates.some((candidate) => normalizeAreaValue(candidate) === query);
-    });
+    return resolveExactLocationPreset(value);
   }
 
   function handleAreaChange(value: string, input: HTMLInputElement) {
