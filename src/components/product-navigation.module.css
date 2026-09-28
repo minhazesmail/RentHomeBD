@@ -311,3 +311,41 @@
   .productNavAccountLink,
   .productNavAccountActive { border-radius: 7px; font-weight: 600; }
 }
+
+/* The map workspace uses a green masthead in both themes. Keep utility
+   controls on their own surfaces so menus retain their normal contrast. */
+:global(.homes-page) .productNavShell {
+  --glass-panel: #09543f;
+  --nav-background: #09543f;
+  background: #09543f;
+}
+
+:global(.homes-page) .productNavShell .productNavBrand img {
+  filter: brightness(0) invert(1);
+}
+
+:global(.homes-page) .productNavShell .productNavLinks,
+:global(.homes-page) .productNavShell .productNavBrand:hover {
+  background: transparent;
+}
+
+:global(.homes-page) .productNavShell .productNavLink,
+:global(.homes-page) .productNavShell .productNavLinkActive {
+  color: #f4fff9;
+  background: transparent;
+}
+
+:global(.homes-page) .productNavShell .productNavLinkActive {
+  border-color: #a5edca;
+}
+
+:global(.homes-page) .productNavShell .productNavLink:hover,
+:global(.homes-page) .productNavShell .productNavLinkActive:hover {
+  background: rgb(255 255 255 / 12%);
+}
+
+:global(.homes-page) .productNavShell .productNavLink:focus-visible,
+:global(.homes-page) .productNavShell .productNavLinkActive:focus-visible,
+:global(.homes-page) .productNavShell .productNavBrand:focus-visible {
+  outline-color: #a5edca;
+}
