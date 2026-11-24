@@ -47,13 +47,12 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
   const copy = getMapWorkspaceRedesignCopy(locale).mobile;
   const [view, setView] = useState<MobileView>("map");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [sheet, setSheet] = useState<SheetState>("partial");
+  const [sheet, setSheet] = useState<SheetState>("collapsed");
   const sheetDragStartY = useRef<number | null>(null);
 
   function showView(nextView: MobileView) {
     setFiltersOpen(false);
     setView(nextView);
-    if (nextView === "map" && sheet === "collapsed") setSheet("partial");
     window.setTimeout(() => focusSelector(nextView === "map" ? ".renter-map-panel" : ".renter-results-pane"), 0);
   }
 
@@ -91,7 +90,7 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
     if (!target.closest(".renter-result-map-button")) return;
     setFiltersOpen(false);
     setView("map");
-    setSheet("partial");
+    setSheet("collapsed");
     window.setTimeout(() => focusSelector(".renter-map-panel"), 0);
   }
 

@@ -580,6 +580,18 @@
   background: #0a211a;
 }
 
+@media (min-width: 961px) {
+  .nb-global-shell--renter .renter-map-panel {
+    padding: 0;
+  }
+
+  .nb-global-shell--renter .renter-map-canvas {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
 @media (max-width: 1180px) and (min-width: 961px) {
   .nb-global-shell--renter .renter-search-toolbar {
     grid-template-columns: 1fr;
@@ -598,7 +610,7 @@
   }
 
   .nb-global-shell--renter .renter-workspace {
-    grid-template-columns: 420px minmax(0, 1fr);
+    grid-template-columns: 304px minmax(0, 1fr);
   }
 }
 

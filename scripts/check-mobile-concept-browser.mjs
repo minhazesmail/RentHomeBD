@@ -159,6 +159,10 @@ try {
     summary: Boolean(document.querySelector(".mobile-search-summary")),
     overflow: document.documentElement.scrollWidth - window.innerWidth,
   }));
+  const sheet = homesPage.locator("[data-mobile-sheet]");
+  if (await sheet.getAttribute("data-mobile-sheet") !== "collapsed") failures.push("homes: results cover the map on entry");
+  const resultsBox = await homesPage.locator(".renter-search-sidebar").boundingBox();
+  if (!resultsBox || resultsBox.height > 100) failures.push("homes: collapsed mobile results exceed 100px");
   if (!homesSnapshot.productNav) failures.push("homes: product navigation is missing");
   if (homesSnapshot.mobileTabsEnabled !== "true") failures.push("homes: top-level primary tabs are not enabled");
   if (homesSnapshot.primaryTabs.length !== 4) failures.push("homes: expected 4 primary tabs, found " + homesSnapshot.primaryTabs.length);
