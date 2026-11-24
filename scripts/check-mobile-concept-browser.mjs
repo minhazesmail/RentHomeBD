@@ -68,6 +68,14 @@ function validateLanding(snapshot, label) {
   }
 }
 
+async function stubMapTiles(context) {
+  await context.route(/https:\/\/[^/]+\.tile\.openstreetmap\.org\/.*\.png/, (route) => route.fulfill({
+    status: 200,
+    contentType: "image/png",
+    body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6Gf8AAAAASUVORK5CYII=", "base64"),
+  }));
+}
+
 async function openSettled(page, url, settleMs = 650) {
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(settleMs);
@@ -149,7 +157,9 @@ try {
   await darkContext.close();
 
   const homesContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  await stubMapTiles(homesContext);
   const homesPage = await homesContext.newPage();
+  await homesPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
   await openSettled(homesPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 1200);
   const homesSnapshot = await homesPage.evaluate(() => ({
     productNav: Boolean(document.querySelector("[data-product-navigation]")),
@@ -184,6 +194,7 @@ try {
   await homesContext.close();
 
   const recoveryContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  await stubMapTiles(recoveryContext);
   const recoveryPage = await recoveryContext.newPage();
   await recoveryPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({
     status: 500,
@@ -192,10 +203,12 @@ try {
   }));
   await openSettled(recoveryPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 500);
   await recoveryPage.locator('[data-search-recovery="error"]').waitFor({ state: "visible" });
+  if (await recoveryPage.locator("[data-mobile-sheet]").getAttribute("data-mobile-sheet") === "collapsed") failures.push("recovery: error actions remained hidden in the collapsed drawer");
   await recoveryPage.screenshot({ path: path.join(artifactRoot, "homes-search-error-390x844.png"), fullPage: true });
   await recoveryContext.close();
 
   const emptyContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  await stubMapTiles(emptyContext);
   const emptyPage = await emptyContext.newPage();
   await emptyPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({
     status: 200,
@@ -203,6 +216,8 @@ try {
     body: "[]",
   }));
   await openSettled(emptyPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 500);
+  if (await emptyPage.locator("[data-mobile-sheet]").getAttribute("data-mobile-sheet") !== "collapsed") failures.push("empty: map-first layout expanded without a user action");
+  await emptyPage.locator('[aria-label="Show partial results sheet"]').click();
   await emptyPage.locator('[data-search-recovery="empty"]').waitFor({ state: "visible" });
   await emptyContext.close();
 
