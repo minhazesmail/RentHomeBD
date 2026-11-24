@@ -109,10 +109,10 @@ function validate(snapshot, viewport, scenario) {
     failures.push(`${label}: results/map workspace is not pinned to desktop grid row 2 (${workspace.gridRowStart})`);
   }
 
-  if (sidebar.width < 303 || sidebar.width > 361) {
+  if (sidebar.width < 271 || sidebar.width > 321) {
     failures.push(`${label}: desktop results pane width drifted to ${sidebar.width.toFixed(1)}px`);
   }
-  if (mapPanel.left < sidebar.right - 2 || mapPanel.width < workspace.width * 0.68) {
+  if (mapPanel.left < sidebar.right - 2 || mapPanel.width < workspace.width * 0.72) {
     failures.push(`${label}: map panel no longer sits to the right of the results pane`);
   }
 
@@ -163,6 +163,17 @@ async function main() {
 
         const snapshot = await inspect(page);
         failures.push(...validate(snapshot, viewport, scenario));
+        const focus = page.locator("[data-desktop-map-focus]");
+        await focus.click();
+        await page.waitForFunction(() => document.querySelector("[data-map-focus]")?.getAttribute("data-map-focus") === "true");
+        const expanded = await inspect(page);
+        if (!expanded.mapPanel || !expanded.workspace || !approxEqual(expanded.mapPanel.width, expanded.workspace.width) || expanded.sidebar?.display !== "none") failures.push(`${scenario}/${viewport.name}: expanded map does not fill the workspace`);
+        if (await focus.getAttribute("aria-pressed") !== "true") failures.push(`${scenario}/${viewport.name}: map focus state is not accessible`);
+        if (expanded.canvas && expanded.mapPanel && !approxEqual(expanded.canvas.width, expanded.mapPanel.width)) failures.push(`${scenario}/${viewport.name}: expanded Leaflet canvas width drifted`);
+        await focus.click();
+        await page.waitForFunction(() => document.querySelector("[data-map-focus]")?.getAttribute("data-map-focus") === "false");
+        const restored = await inspect(page);
+        if (!restored.mapPanel || !snapshot.mapPanel || !approxEqual(restored.mapPanel.width, snapshot.mapPanel.width)) failures.push(`${scenario}/${viewport.name}: restoring results did not restore map size`);
         await context.close();
       }
     }

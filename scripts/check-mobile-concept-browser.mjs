@@ -68,6 +68,14 @@ function validateLanding(snapshot, label) {
   }
 }
 
+async function stubMapTiles(context) {
+  await context.route(/https:\/\/[^/]+\.tile\.openstreetmap\.org\/.*\.png/, (route) => route.fulfill({
+    status: 200,
+    contentType: "image/png",
+    body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6Gf8AAAAASUVORK5CYII=", "base64"),
+  }));
+}
+
 async function openSettled(page, url, settleMs = 650) {
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(settleMs);
@@ -149,7 +157,9 @@ try {
   await darkContext.close();
 
   const homesContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  await stubMapTiles(homesContext);
   const homesPage = await homesContext.newPage();
+  await homesPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
   await openSettled(homesPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 1200);
   const homesSnapshot = await homesPage.evaluate(() => ({
     productNav: Boolean(document.querySelector("[data-product-navigation]")),
@@ -162,17 +172,35 @@ try {
   const sheet = homesPage.locator("[data-mobile-sheet]");
   if (await sheet.getAttribute("data-mobile-sheet") !== "collapsed") failures.push("homes: results cover the map on entry");
   const resultsBox = await homesPage.locator(".renter-search-sidebar").boundingBox();
-  if (!resultsBox || resultsBox.height > 100) failures.push("homes: collapsed mobile results exceed 100px");
+  if (!resultsBox || resultsBox.height > 60) failures.push("homes: collapsed mobile results exceed 60px");
   if (!homesSnapshot.productNav) failures.push("homes: product navigation is missing");
   if (homesSnapshot.mobileTabsEnabled !== "true") failures.push("homes: top-level primary tabs are not enabled");
   if (homesSnapshot.primaryTabs.length !== 4) failures.push("homes: expected 4 primary tabs, found " + homesSnapshot.primaryTabs.length);
   if (!homesSnapshot.mapPanel) failures.push("homes: map panel is missing");
+  const mobileFocus = homesPage.locator("[data-mobile-map-focus]");
+  await mobileFocus.click();
+  if (await sheet.getAttribute("data-map-focus") !== "true" || await homesPage.locator(".renter-search-sidebar").isVisible()) failures.push("homes: mobile focus does not hide results");
+  await mobileFocus.click();
+  if (await sheet.getAttribute("data-map-focus") !== "false" || !(await homesPage.locator(".renter-search-sidebar").isVisible())) failures.push("homes: mobile focus does not restore results");
+  await homesPage.locator('[aria-label="Show partial results sheet"]').click();
+  if (await sheet.getAttribute("data-mobile-sheet") !== "partial") failures.push("homes: compact drawer cannot open");
+  await homesPage.locator('[aria-label="Expand results sheet"]').click();
+  if (await sheet.getAttribute("data-mobile-sheet") !== "expanded") failures.push("homes: partial drawer cannot expand");
+  await homesPage.locator('[aria-label="Collapse results sheet"]').click();
+  if (await sheet.getAttribute("data-mobile-sheet") !== "collapsed") failures.push("homes: expanded drawer cannot collapse");
+  await homesPage.getByRole("button", { name: "List", exact: true }).click();
+  if (await sheet.getAttribute("data-mobile-view") !== "list") failures.push("homes: list view did not activate");
+  await homesPage.locator('[data-search-recovery="empty"]').waitFor({ state: "visible" });
+  await homesPage.getByRole("button", { name: "Map", exact: true }).click();
+  if (await sheet.getAttribute("data-mobile-view") !== "map" || await sheet.getAttribute("data-mobile-sheet") !== "collapsed") failures.push("homes: returning to map did not preserve collapsed results");
+  if (await homesPage.locator(".renter-results-pane").isVisible()) failures.push("homes: collapsed map drawer did not hide its results pane");
   if (!homesSnapshot.summary) failures.push("homes: mobile search summary is missing");
   if (homesSnapshot.overflow > 2) failures.push(`homes: horizontal overflow ${homesSnapshot.overflow}px`);
   await homesPage.screenshot({ path: path.join(artifactRoot, "homes-light-390x844.png"), fullPage: true });
   await homesContext.close();
 
   const recoveryContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  await stubMapTiles(recoveryContext);
   const recoveryPage = await recoveryContext.newPage();
   await recoveryPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({
     status: 500,
@@ -181,10 +209,12 @@ try {
   }));
   await openSettled(recoveryPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 500);
   await recoveryPage.locator('[data-search-recovery="error"]').waitFor({ state: "visible" });
+  if (await recoveryPage.locator("[data-mobile-sheet]").getAttribute("data-mobile-sheet") === "collapsed") failures.push("recovery: error actions remained hidden in the collapsed drawer");
   await recoveryPage.screenshot({ path: path.join(artifactRoot, "homes-search-error-390x844.png"), fullPage: true });
   await recoveryContext.close();
 
   const emptyContext = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: "light" });
+  await stubMapTiles(emptyContext);
   const emptyPage = await emptyContext.newPage();
   await emptyPage.route("**/rest/v1/rpc/search_available_properties", (route) => route.fulfill({
     status: 200,
@@ -192,6 +222,8 @@ try {
     body: "[]",
   }));
   await openSettled(emptyPage, `${baseURL}/homes?area=Dhanmondi%2C%20Dhaka&tenant=family&radius=15`, 500);
+  if (await emptyPage.locator("[data-mobile-sheet]").getAttribute("data-mobile-sheet") !== "collapsed") failures.push("empty: map-first layout expanded without a user action");
+  await emptyPage.locator('[aria-label="Show partial results sheet"]').click();
   await emptyPage.locator('[data-search-recovery="empty"]').waitFor({ state: "visible" });
   await emptyContext.close();
 

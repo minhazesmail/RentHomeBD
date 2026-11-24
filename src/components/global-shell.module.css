@@ -78,7 +78,7 @@
   .desktop :global(.homes-page) { background: var(--background); }
   .desktop :global(.renter-search-shell) { width: 100%; max-width: none; padding: 0; }
   .desktop :global(.renter-search-toolbar) {
-    padding: 10px 16px;
+    padding: 6px 12px;
     border: 0;
     border-bottom: 1px solid var(--border);
     border-radius: 0;
@@ -86,14 +86,14 @@
     box-shadow: none;
   }
   .desktop :global(.renter-workspace) {
-    grid-template-columns: clamp(304px, 24vw, 360px) minmax(0, 1fr);
+    grid-template-columns: clamp(272px, 20vw, 320px) minmax(0, 1fr);
     gap: 0;
     border: 0;
     border-radius: 0;
     overflow: hidden;
   }
   .desktop :global(.renter-search-sidebar) { border: 0; border-right: 1px solid var(--border); border-radius: 0; box-shadow: none; }
-  .desktop :global(.renter-results-header) { padding: 20px; background: var(--surface-solid); }
+  .desktop :global(.renter-results-header) { padding: 12px; background: var(--surface-solid); }
   .desktop :global(.renter-map-panel) { padding: 0; border: 0; border-radius: 0; box-shadow: none; }
   .desktop :global(.renter-map-intro) { margin: 20px; border-radius: 10px; box-shadow: none; }
 

@@ -125,16 +125,29 @@ function ResponsiveMapSize() {
   useEffect(() => {
     const host = document.querySelector<HTMLElement>("[data-mobile-sheet]");
     let delayed: number | null = null;
+    let frame: number | null = null;
     const refresh = () => {
-      window.requestAnimationFrame(() => map.invalidateSize({ pan: false }));
+      if (frame !== null) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        const container = map.getContainer();
+        if (container.clientWidth && container.clientHeight) map.invalidateSize({ pan: false });
+      });
       if (delayed !== null) window.clearTimeout(delayed);
-      delayed = window.setTimeout(() => map.invalidateSize({ pan: false }), 240);
+      delayed = window.setTimeout(() => {
+        const container = map.getContainer();
+        if (container.clientWidth && container.clientHeight) map.invalidateSize({ pan: false });
+      }, 240);
     };
     const observer = host ? new MutationObserver(refresh) : null;
     if (host && observer) observer.observe(host, { attributes: true, attributeFilter: ["data-mobile-sheet", "data-mobile-view", "data-mobile-filters"] });
+    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(refresh);
+    resizeObserver?.observe(map.getContainer());
     window.addEventListener("resize", refresh);
     return () => {
       observer?.disconnect();
+      resizeObserver?.disconnect();
+      if (frame !== null) window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", refresh);
       if (delayed !== null) window.clearTimeout(delayed);
     };

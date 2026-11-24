@@ -1,9 +1,9 @@
 "use client";
 
-import { ChevronDown, ChevronUp, List, Map, Minus, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, ChevronUp, List, Map, Maximize2, Minimize2, Minus, SlidersHorizontal } from "lucide-react";
 import { createContext, useContext } from "react";
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { getMapWorkspaceRedesignCopy } from "@/i18n/map-workspace-redesign-copy";
 import { useLocale } from "@/i18n/use-locale";
@@ -19,11 +19,17 @@ const SHEET_SWIPE_THRESHOLD = 44;
 type MobileMapModelContextValue = {
   showList: () => void;
   showMap: () => void;
+  mapFocus: boolean;
+  toggleMapFocus: () => void;
+  revealResults: () => void;
 };
 
 const MobileMapModelContext = createContext<MobileMapModelContextValue>({
   showList: () => {},
   showMap: () => {},
+  mapFocus: false,
+  toggleMapFocus: () => {},
+  revealResults: () => {},
 });
 
 export function useMobileMapModel() {
@@ -48,12 +54,29 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
   const [view, setView] = useState<MobileView>("map");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [sheet, setSheet] = useState<SheetState>("collapsed");
+  const [mapFocus, setMapFocus] = useState(false);
   const sheetDragStartY = useRef<number | null>(null);
 
   function showView(nextView: MobileView) {
     setFiltersOpen(false);
     setView(nextView);
+    if (nextView === "list") setMapFocus(false);
     window.setTimeout(() => focusSelector(nextView === "map" ? ".renter-map-panel" : ".renter-results-pane"), 0);
+  }
+
+  // Recovery actions must remain reachable even when map focus hides the results.
+  const revealResults = useCallback(() => {
+    setMapFocus(false);
+    if (mobileViewport()) {
+      setFiltersOpen(false);
+      setSheet((current) => current === "collapsed" ? "partial" : current);
+    }
+  }, []);
+
+  function toggleMapFocus() {
+    setMapFocus((focused) => !focused);
+    setView("map");
+    setFiltersOpen(false);
   }
 
   function toggleFilters() {
@@ -100,6 +123,7 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
       data-mobile-view={view}
       data-mobile-filters={filtersOpen ? "open" : "closed"}
       data-mobile-sheet={sheet}
+      data-map-focus={mapFocus ? "true" : "false"}
       onClickCapture={handleClickCapture}
     >
       {filtersOpen && (
@@ -138,8 +162,8 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
             aria-pressed={sheet === "partial"}
             onClick={() => setSheet("partial")}
           >
-            <Minus size={16} aria-hidden="true" />
-            <span>{copy.partial}</span>
+            {sheet === "collapsed" ? <ChevronUp size={16} aria-hidden="true" /> : <Minus size={16} aria-hidden="true" />}
+            <span>{sheet === "collapsed" ? copy.results : copy.partial}</span>
           </button>
           <button
             className={sheet === "expanded" ? styles.sheetActive : undefined}
@@ -182,8 +206,13 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
           <SlidersHorizontal size={18} aria-hidden="true" />
           <span>{filtersOpen ? copy.done : copy.filters}</span>
         </button>
+        {view === "map" && !filtersOpen && (
+          <button className={styles.focusButton} type="button" data-mobile-map-focus aria-label={mapFocus ? copy.restoreResults : copy.focusMap} aria-pressed={mapFocus} onClick={toggleMapFocus}>
+            {mapFocus ? <Minimize2 size={19} aria-hidden="true" /> : <Maximize2 size={19} aria-hidden="true" />}
+          </button>
+        )}
       </nav>
-      <MobileMapModelContext.Provider value={{ showList: () => showView("list"), showMap: () => showView("map") }}>
+      <MobileMapModelContext.Provider value={{ showList: () => showView("list"), showMap: () => showView("map"), mapFocus, toggleMapFocus, revealResults }}>
         {children}
       </MobileMapModelContext.Provider>
     </div>
