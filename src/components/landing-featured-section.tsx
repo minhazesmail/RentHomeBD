@@ -74,7 +74,7 @@ export async function LandingFeaturedSection() {
         <div className="landing-launch-discovery" role="status">
           <div className="landing-launch-copy">
             <Link className="primary-button link-button" href="/homes">{copy.exploreLiveMap}</Link>
-            <a className="secondary-button link-button" href="/">{locale === "bn" ? "আবার চেষ্টা করুন" : "Try again"}</a>
+            <form action="/" method="get"><button className="secondary-button" type="submit">{locale === "bn" ? "আবার চেষ্টা করুন" : "Try again"}</button></form>
           </div>
         </div>
       ) : (
