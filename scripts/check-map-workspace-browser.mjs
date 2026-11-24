@@ -42,6 +42,7 @@ async function inspect(page) {
 
     return {
       shell: rect(".renter-search-shell"),
+      canvas: rect(".renter-map-canvas"),
       zoom: rect(".renter-map-panel .leaflet-control-zoom"),
       resultsHeader: rect(".renter-results-header"),
       toolbar: rect(".renter-search-toolbar"),
@@ -71,9 +72,8 @@ function validate(snapshot, viewport, scenario) {
     failures.push(`${label}: renter-search-shell still resolves to ${columnTracks.length} desktop columns (${snapshot.shellGridColumns})`);
   }
 
-  // The desktop redesign uses a deliberate 28px inset inside the full-width shell.
-  const contentLeft = shell.left + 28;
-  const contentRight = shell.right - 28;
+  const contentLeft = shell.left;
+  const contentRight = shell.right;
   if (!approxEqual(toolbar.left, contentLeft) || !approxEqual(toolbar.right, contentRight)) {
     failures.push(`${label}: toolbar does not span the inset search content`);
   }
@@ -83,18 +83,22 @@ function validate(snapshot, viewport, scenario) {
 
   /* The toolbar is sticky in the legacy implementation. Grid-row assertions
      alone missed its visual displacement over the workspace. Check both. */
-  if (!approxEqual(toolbar.top, shell.top + 20)) {
+  if (!approxEqual(toolbar.top, shell.top)) {
     failures.push(`${label}: toolbar is displaced below the search shell`);
   }
   if (!approxEqual(toolbar.bottom, workspace.top)) {
     failures.push(`${label}: toolbar overlaps or leaves a gap above the workspace`);
   }
-  if (!approxEqual(workspace.bottom, shell.bottom - 28)) {
+  if (!approxEqual(workspace.bottom, shell.bottom)) {
     failures.push(`${label}: workspace does not fill the remaining shell height`);
   }
   if (!snapshot.resultsHeader || snapshot.resultsHeader.top < toolbar.bottom - 2) {
     failures.push(`${label}: results header is hidden behind the toolbar`);
   }
+  if (!snapshot.canvas || !approxEqual(snapshot.canvas.width, mapPanel.width) || !approxEqual(snapshot.canvas.height, mapPanel.height)) {
+    failures.push(`${label}: Leaflet does not fill the map panel`);
+  }
+  console.log(`${label}: map ${Math.round(mapPanel.width)} × ${Math.round(mapPanel.height)} px`);
   if (!snapshot.zoom || snapshot.zoom.top < mapPanel.top || snapshot.zoom.bottom > mapPanel.bottom) {
     failures.push(`${label}: map zoom controls escape the map panel`);
   }
@@ -105,10 +109,10 @@ function validate(snapshot, viewport, scenario) {
     failures.push(`${label}: results/map workspace is not pinned to desktop grid row 2 (${workspace.gridRowStart})`);
   }
 
-  if (sidebar.width < 340 || sidebar.width > 391) {
+  if (sidebar.width < 303 || sidebar.width > 361) {
     failures.push(`${label}: desktop results pane width drifted to ${sidebar.width.toFixed(1)}px`);
   }
-  if (mapPanel.left < sidebar.right - 2 || mapPanel.width < 300) {
+  if (mapPanel.left < sidebar.right - 2 || mapPanel.width < workspace.width * 0.68) {
     failures.push(`${label}: map panel no longer sits to the right of the results pane`);
   }
 
@@ -118,8 +122,8 @@ function validate(snapshot, viewport, scenario) {
   if (Number.parseFloat(toolbar.marginTop) > 0.5) {
     failures.push(`${label}: legacy filter-card top margin leaked into the toolbar (${toolbar.marginTop})`);
   }
-  if (toolbar.borderRadius !== "12px 12px 0px 0px") {
-    failures.push(`${label}: toolbar must round only the top of the joined workspace (${toolbar.borderRadius})`);
+  if (toolbar.borderRadius !== "0px") {
+    failures.push(`${label}: toolbar should meet the edge of the workspace (${toolbar.borderRadius})`);
   }
   if (snapshot.documentOverflow > 2) {
     failures.push(`${label}: document has ${snapshot.documentOverflow}px horizontal overflow`);

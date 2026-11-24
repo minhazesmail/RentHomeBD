@@ -54,6 +54,8 @@ jobs:
           done
           cat /tmp/nearbasha-mobile-concept.log
           exit 1
+      - name: Verify desktop map dimensions
+        run: npm run mapworkspacebrowser
       - name: Capture and validate mobile concept
         run: npm run mobileconceptqa
       - name: Validate release breakpoint and accessibility matrix
