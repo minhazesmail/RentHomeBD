@@ -17,10 +17,6 @@ function requireText(source, text, label) {
   if (!source.includes(text)) failures.push(`missing ${label}`);
 }
 
-function requirePattern(source, pattern, label) {
-  if (!pattern.test(source)) failures.push(`missing ${label}`);
-}
-
 const manifest = read("src/app/homes/styles.css");
 const workspaceCss = read("src/app/homes/map-workspace.css");
 const packageJson = read("package.json");

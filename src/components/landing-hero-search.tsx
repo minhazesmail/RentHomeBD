@@ -27,7 +27,7 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
   const copy = getLandingRedesignCopy(locale).hero;
   const areaInputRef = useRef<HTMLInputElement>(null);
   const { areaQuery, area, tenant, setTenant, budgetChoice, setBudgetChoice, customBudget, setCustomBudget,
-    bedrooms, setBedrooms, radius, setRadius, changeArea, chooseArea, maxRent, customBudgetReady, mapReady, mapHref, tenantOptions } = useLandingSearch(areaInputRef);
+    bedrooms, setBedrooms, radius, setRadius, changeArea, chooseArea, maxRent, mapReady, mapHref, tenantOptions } = useLandingSearch(areaInputRef);
 
   const popularAreas = [
     { value: "Dhanmondi, Dhaka", label: dictionary.common.locations.dhanmondi },
