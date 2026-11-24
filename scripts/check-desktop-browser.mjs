@@ -45,6 +45,13 @@ try {
     await budget.fill('30000');
     await page.locator('.landing-search-more summary').click();
     await page.locator('.landing-search-more select[name=bedrooms]').selectOption('4');
+    // Both responsive presentations share one draft, including optional criteria.
+    await page.setViewportSize({width:390,height:844});
+    const mobileSearch = page.locator('[data-mobile-entry-search]');
+    await mobileSearch.waitFor({state:'visible'});
+    assert.equal(await mobileSearch.locator('select[name=tenant]').inputValue(),'family');
+    assert.equal(await mobileSearch.locator('select[name=bedrooms]').inputValue(),'4');
+    await page.setViewportSize({width:1440,height:1000});
     await page.locator('.landing-search-more select[name=radius]').selectOption('10');
     await page.locator('.landing-search-submit').click();
     await page.waitForURL('**/homes?**',{timeout:120000});

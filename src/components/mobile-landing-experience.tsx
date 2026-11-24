@@ -29,103 +29,33 @@ import { formatCurrency, formatNumber } from "@/i18n/format";
 import { getLandingRedesignCopy } from "@/i18n/landing-redesign-copy";
 import { localizeLocationLabel } from "@/i18n/presentation";
 import { useLocale } from "@/i18n/use-locale";
-import { LOCATION_PRESETS, resolveExactLocationPreset } from "@/lib/location-presets";
-import { DEFAULT_RENTER_SEARCH_RADIUS, LANDING_ADDITIONAL_BEDROOM_OPTIONS } from "@/lib/search-defaults";
-import type { TenantType } from "@/lib/tenant-match";
+import { LOCATION_PRESETS } from "@/lib/location-presets";
+import { LANDING_ADDITIONAL_BEDROOM_OPTIONS } from "@/lib/search-defaults";
+import { BUDGET_PRESETS, MIN_CUSTOM_BUDGET, MAX_CUSTOM_BUDGET, CUSTOM_BUDGET_STEP, RADIUS_OPTIONS, type SearchTenantType } from "@/lib/landing-search";
+import { useLandingSearch } from "@/components/landing-search-provider";
 import styles from "./mobile-landing-experience.module.css";
 
-type SearchTenantType = Exclude<TenantType, "everyone">;
 
 const LIST_PROPERTY_HREF = "/login?intent=list-property&next=%2Fowner%2Fproperties%2Fnew";
-const BUDGET_PRESETS = [15_000, 25_000, 40_000, 60_000] as const;
-const MIN_CUSTOM_BUDGET = 1_000;
-const MAX_CUSTOM_BUDGET = 10_000_000;
-const CUSTOM_BUDGET_STEP = 500;
-const RADIUS_OPTIONS = ["2", "5", "10", "15", "25"] as const;
-
-
-function buildHomesHref({
-  area,
-  tenant,
-  maxRent,
-  bedrooms,
-  radius,
-}: {
-  area: string;
-  tenant: SearchTenantType | "";
-  maxRent: string;
-  bedrooms: string;
-  radius: string;
-}) {
-  const params = new URLSearchParams();
-  if (area) params.set("area", area);
-  if (tenant) params.set("tenant", tenant);
-  if (maxRent) params.set("maxRent", maxRent);
-  if (bedrooms) params.set("bedrooms", bedrooms);
-  if (radius) params.set("radius", radius);
-  return `/homes?${params.toString()}`;
-}
-
 export function MobileLandingExperience() {
   const { locale, dictionary, setLocale } = useLocale();
   const copy = getLandingRedesignCopy(locale).hero;
   const areaInputRef = useRef<HTMLInputElement>(null);
   const tenantSelectRef = useRef<HTMLSelectElement>(null);
 
-  const [areaQuery, setAreaQuery] = useState("");
-  const [area, setArea] = useState("");
-  const [tenant, setTenant] = useState<SearchTenantType | "">("");
-  const [budgetChoice, setBudgetChoice] = useState("");
-  const [customBudget, setCustomBudget] = useState("");
-  const [bedrooms, setBedrooms] = useState("");
-  const [radius, setRadius] = useState(String(DEFAULT_RENTER_SEARCH_RADIUS));
+  const { areaQuery, area, tenant, setTenant, budgetChoice, setBudgetChoice, customBudget, setCustomBudget,
+    bedrooms, setBedrooms, radius, setRadius, changeArea, chooseArea, maxRent, customBudgetReady, mapHref, tenantOptions } = useLandingSearch(areaInputRef);
   const [searchError, setSearchError] = useState("");
-
-  const tenantOptions: { value: SearchTenantType; label: string }[] = [
-    { value: "family", label: dictionary.common.tenant.family },
-    { value: "bachelor", label: dictionary.common.tenant.bachelor },
-    { value: "student", label: dictionary.common.tenant.student },
-    { value: "job_holder", label: dictionary.common.tenant.jobHolder },
-  ];
-
   const popularLocations = LOCATION_PRESETS.slice(0, 6);
 
-  function findSupportedArea(value: string) {
-    return resolveExactLocationPreset(value);
-  }
-
-  function handleAreaChange(value: string, input: HTMLInputElement) {
-    const match = findSupportedArea(value);
-    setAreaQuery(value);
-    setArea(match?.label ?? "");
-    setSearchError("");
-    input.setCustomValidity(value.trim() && !match ? copy.unsupportedArea : "");
-  }
-
   function choosePopularArea(label: string) {
-    const localized = localizeLocationLabel(label, dictionary);
-    setArea(label);
-    setAreaQuery(localized);
+    chooseArea(label, localizeLocationLabel(label, dictionary));
     setSearchError("");
-    areaInputRef.current?.setCustomValidity("");
   }
-
-  const maxRent = budgetChoice === "custom" ? customBudget.trim() : budgetChoice;
-  const customBudgetNumber = Number(customBudget);
-  const customBudgetReady = budgetChoice !== "custom" || (
-    customBudget.trim().length > 0
-    && Number.isFinite(customBudgetNumber)
-    && customBudgetNumber >= MIN_CUSTOM_BUDGET
-    && customBudgetNumber <= MAX_CUSTOM_BUDGET
-    && (customBudgetNumber - MIN_CUSTOM_BUDGET) % CUSTOM_BUDGET_STEP === 0
-  );
-  const mapHref = buildHomesHref({ area, tenant, maxRent: customBudgetReady ? maxRent : "", bedrooms, radius });
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const input = areaInputRef.current;
-    const match = findSupportedArea(areaQuery);
-
-    if (!areaQuery.trim() || !match) {
+    if (!areaQuery.trim() || !area) {
       event.preventDefault();
       if (input) {
         input.setCustomValidity(areaQuery.trim() ? copy.unsupportedArea : copy.chooseLocation);
@@ -211,7 +141,7 @@ export function MobileLandingExperience() {
                   ref={areaInputRef}
                   type="search"
                   value={areaQuery}
-                  onChange={(event) => handleAreaChange(event.target.value, event.currentTarget)}
+                  onChange={(event) => { changeArea(event.target.value); setSearchError(""); }}
                   list="mobile-app-location-options"
                   placeholder={copy.mobileLocationPlaceholder}
                   autoComplete="off"

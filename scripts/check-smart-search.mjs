@@ -5,11 +5,11 @@ import ts from "typescript";
 
 // Execute the actual browser sorting function with deliberately conflicting
 // server recommendation, distance and price orders.
-const source = fs.readFileSync(new URL("../src/components/renter-map-workspace.tsx", import.meta.url), "utf8");
+const source = fs.readFileSync(new URL("../src/lib/map-search-geometry.ts", import.meta.url), "utf8");
 const ast = ts.createSourceFile("workspace.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 const declaration = ast.statements.find((node) => ts.isFunctionDeclaration(node) && node.name?.text === "sortedResults");
 assert.ok(declaration, "Search result ordering must be testable");
-const javascript = ts.transpileModule(declaration.getText(ast), {
+const javascript = ts.transpileModule(declaration.getText(ast).replace(/^export\s+/, ""), {
   compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
 }).outputText;
 const sort = vm.runInNewContext(`${javascript}\nsortedResults`);

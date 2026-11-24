@@ -225,7 +225,7 @@
 
 .nb-global-shell--renter .renter-workspace {
   display: grid;
-  grid-template-columns: clamp(420px, 31vw, 480px) minmax(0, 1fr);
+  grid-template-columns: clamp(272px, 20vw, 320px) minmax(0, 1fr);
   min-height: 0;
   /* Fill the remaining grid track, including when translated filters wrap. */
   height: 100%;
@@ -581,7 +581,17 @@
 }
 
 @media (min-width: 961px) {
-  .nb-global-shell--renter .renter-search-toolbar { gap: 4px; padding: 6px 12px; }
+  .nb-global-shell--renter .renter-search-shell {
+    grid-template-columns: minmax(0, 1fr); grid-auto-flow: row; width: 100%; min-width: 0;
+  }
+  .nb-global-shell--renter .renter-search-toolbar, .nb-global-shell--renter .renter-workspace {
+    grid-column: 1 / -1; width: 100%; min-width: 0;
+  }
+  .nb-global-shell--renter .renter-search-toolbar {
+    grid-row: 1; margin: 0; gap: 4px; padding: 6px 12px;
+    border: 0; border-bottom: 1px solid var(--map-v2-border); border-radius: 0;
+  }
+  .nb-global-shell--renter .renter-workspace { grid-row: 2; }
   .nb-global-shell--renter .renter-toolbar-heading { display: none; }
   .nb-global-shell--renter .renter-results-header { padding: 12px; gap: 6px; grid-template-columns: minmax(0, 1fr); }
   .nb-global-shell--renter .renter-result-card { grid-template-columns: 78px minmax(0, 1fr); gap: 8px; }
@@ -593,9 +603,6 @@
     grid-template-columns: minmax(135px, 1.2fr) minmax(130px, 1fr) minmax(112px, .8fr) 100px auto auto auto;
   }
 
-  .nb-global-shell--renter .renter-workspace {
-    grid-template-columns: 272px minmax(0, 1fr);
-  }
 }
 
 @media (max-width: 960px) {

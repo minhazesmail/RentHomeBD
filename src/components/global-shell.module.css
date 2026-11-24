@@ -86,7 +86,6 @@
     box-shadow: none;
   }
   .desktop :global(.renter-workspace) {
-    grid-template-columns: clamp(272px, 20vw, 320px) minmax(0, 1fr);
     gap: 0;
     border: 0;
     border-radius: 0;

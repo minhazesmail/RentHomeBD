@@ -5,6 +5,7 @@ import { HowItWorksTabs } from "@/components/how-it-works-tabs";
 import { LandingFaqSection } from "@/components/landing-faq-section";
 import { LandingFeaturedSection } from "@/components/landing-featured-section";
 import { LandingHeroSearch } from "@/components/landing-hero-search";
+import { LandingSearchProvider } from "@/components/landing-search-provider";
 import { LandingMapPreview } from "@/components/landing-map-preview";
 import { LandingScrollAtmosphere } from "@/components/landing-scroll-atmosphere";
 import { MarketingNavigation } from "@/components/marketing-navigation";
@@ -38,14 +39,15 @@ export default async function HomePage() {
     <main className="landing-shell" data-landing-theme="hero" data-atmosphere="hero" data-scroll-direction="down">
       <LandingScrollAtmosphere />
       <div className="landing-frame">
-        <MobileLandingExperience />
-
-        <div className="landing-desktop-primary">
-          <MarketingNavigation variant="landing" />
-          <LandingHeroSearch>
-            <LandingMapPreview />
-          </LandingHeroSearch>
-        </div>
+        <LandingSearchProvider>
+          <MobileLandingExperience />
+          <div className="landing-desktop-primary">
+            <MarketingNavigation variant="landing" />
+            <LandingHeroSearch>
+              <LandingMapPreview />
+            </LandingHeroSearch>
+          </div>
+        </LandingSearchProvider>
 
         <section className="landing-trust-section" data-scroll-theme="trust" aria-labelledby="trust-heading">
           <div className="landing-trust-heading">

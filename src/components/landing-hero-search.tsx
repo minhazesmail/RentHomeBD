@@ -6,95 +6,28 @@ import { LandingLiveSearch } from "./landing-live-search";
 import mascotStyles from "./landing-mascot.module.css";
 import { ArrowRight, Banknote, BedDouble, Map, MapPin, Search, ShieldCheck, SlidersHorizontal, Users } from "lucide-react";
 import type { ReactNode } from "react";
-import { useMemo, useRef, useState } from "react";
+import { useRef } from "react";
 
 import { formatCurrency, formatNumber } from "@/i18n/format";
 import { getLandingRedesignCopy } from "@/i18n/landing-redesign-copy";
 import { interpolate, localizeLocationLabel } from "@/i18n/presentation";
 import { useLocale } from "@/i18n/use-locale";
-import { LOCATION_PRESETS, resolveExactLocationPreset } from "@/lib/location-presets";
-import { DEFAULT_RENTER_SEARCH_RADIUS, LANDING_ADDITIONAL_BEDROOM_OPTIONS } from "@/lib/search-defaults";
-import type { TenantType } from "@/lib/tenant-match";
+import { LOCATION_PRESETS } from "@/lib/location-presets";
+import { LANDING_ADDITIONAL_BEDROOM_OPTIONS } from "@/lib/search-defaults";
+import { BUDGET_PRESETS, MIN_CUSTOM_BUDGET, MAX_CUSTOM_BUDGET, CUSTOM_BUDGET_STEP, RADIUS_OPTIONS, type SearchTenantType } from "@/lib/landing-search";
+import { useLandingSearch } from "@/components/landing-search-provider";
 
-type SearchTenantType = Exclude<TenantType, "everyone">;
 
 type LandingHeroSearchProps = {
   children: ReactNode;
 };
 
-const BUDGET_PRESETS = [15_000, 25_000, 40_000, 60_000] as const;
-const MIN_CUSTOM_BUDGET = 1_000;
-const MAX_CUSTOM_BUDGET = 10_000_000;
-const CUSTOM_BUDGET_STEP = 500;
-const RADIUS_OPTIONS = ["2", "5", "10", "15", "25"] as const;
-
-
-function buildHomesHref({
-  area,
-  tenant,
-  maxRent,
-  bedrooms,
-  radius,
-}: {
-  area: string;
-  tenant: SearchTenantType | "";
-  maxRent: string;
-  bedrooms: string;
-  radius: string;
-}) {
-  const params = new URLSearchParams();
-  if (area) params.set("area", area);
-  if (tenant) params.set("tenant", tenant);
-  if (maxRent) params.set("maxRent", maxRent);
-  if (bedrooms) params.set("bedrooms", bedrooms);
-  if (radius) params.set("radius", radius);
-  return `/homes?${params.toString()}`;
-}
-
 export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
   const { locale, dictionary } = useLocale();
   const copy = getLandingRedesignCopy(locale).hero;
   const areaInputRef = useRef<HTMLInputElement>(null);
-  const [areaQuery, setAreaQuery] = useState("");
-  const [area, setArea] = useState("");
-  const [tenant, setTenant] = useState<SearchTenantType | "">("");
-  const [budgetChoice, setBudgetChoice] = useState("");
-  const [customBudget, setCustomBudget] = useState("");
-  const [bedrooms, setBedrooms] = useState("");
-  const [radius, setRadius] = useState(String(DEFAULT_RENTER_SEARCH_RADIUS));
-
-  function findSupportedArea(value: string) {
-    return resolveExactLocationPreset(value);
-  }
-
-  function handleAreaChange(value: string, input: HTMLInputElement) {
-    const match = findSupportedArea(value);
-    setAreaQuery(value);
-    setArea(match?.label ?? "");
-    input.setCustomValidity(value.trim() && !match ? copy.unsupportedArea : "");
-  }
-
-  const maxRent = budgetChoice === "custom" ? customBudget.trim() : budgetChoice;
-  const customBudgetNumber = Number(customBudget);
-  const customBudgetReady = budgetChoice !== "custom" || (
-    customBudget.trim().length > 0
-    && Number.isFinite(customBudgetNumber)
-    && customBudgetNumber >= MIN_CUSTOM_BUDGET
-    && customBudgetNumber <= MAX_CUSTOM_BUDGET
-    && (customBudgetNumber - MIN_CUSTOM_BUDGET) % CUSTOM_BUDGET_STEP === 0
-  );
-  const mapReady = Boolean(area && tenant && customBudgetReady);
-  const mapHref = useMemo(
-    () => buildHomesHref({ area, tenant, maxRent, bedrooms, radius }),
-    [area, bedrooms, maxRent, radius, tenant],
-  );
-
-  const tenantOptions: { value: SearchTenantType; label: string }[] = [
-    { value: "family", label: dictionary.common.tenant.family },
-    { value: "bachelor", label: dictionary.common.tenant.bachelor },
-    { value: "student", label: dictionary.common.tenant.student },
-    { value: "job_holder", label: dictionary.common.tenant.jobHolder },
-  ];
+  const { areaQuery, area, tenant, setTenant, budgetChoice, setBudgetChoice, customBudget, setCustomBudget,
+    bedrooms, setBedrooms, radius, setRadius, changeArea, chooseArea, maxRent, customBudgetReady, mapReady, mapHref, tenantOptions } = useLandingSearch(areaInputRef);
 
   const popularAreas = [
     { value: "Dhanmondi, Dhaka", label: dictionary.common.locations.dhanmondi },
@@ -136,7 +69,7 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
                 ref={areaInputRef}
                 type="search"
                 value={areaQuery}
-                onChange={(event) => handleAreaChange(event.target.value, event.currentTarget)}
+                onChange={(event) => changeArea(event.target.value)}
                 list="landing-location-options"
                 placeholder={copy.chooseLocation}
                 autoComplete="off"
@@ -249,9 +182,7 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
                 className={area === popularArea.value ? "is-selected" : undefined}
                 aria-pressed={area === popularArea.value}
                 onClick={() => {
-                  setArea(popularArea.value);
-                  setAreaQuery(popularArea.label);
-                  areaInputRef.current?.setCustomValidity("");
+                  chooseArea(popularArea.value, popularArea.label);
                 }}
               >
                 {popularArea.label}
