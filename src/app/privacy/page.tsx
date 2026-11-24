@@ -47,6 +47,8 @@ export default async function PrivacyPage() {
         </div>
 
         <footer className="info-legal-footer">
+          <Link className="primary-button link-button" href="/contact?category=data_export#support-request">{locale === "bn" ? "তথ্যের কপি চাই" : "Request a copy of my data"}</Link>
+          <Link className="secondary-button link-button" href="/contact?category=account_deletion#support-request">{locale === "bn" ? "অ্যাকাউন্ট মুছে দেওয়ার অনুরোধ" : "Request account deletion"}</Link>
           <Link className="secondary-button link-button" href="/terms">
             {common.readTerms}
           </Link>

@@ -114,8 +114,59 @@ try {
       await page.screenshot({path:path.join(out,`${route.slice(1)}.png`)});
     });
   }
-  await check('Protected destination keeps sign-in boundary',async()=>{
-    await open('/saved'); assert.ok(new URL(page.url()).pathname==='/login');
+  await check('Public SEO metadata, canonical URLs and sitemap',async()=>{
+    const titles = new Set();
+    for (const route of ['/','/homes','/about','/contact','/privacy','/terms']) {
+      await open(route);
+      const title = await page.title();
+      assert.match(title, /NearBasha/);
+      assert.ok(!titles.has(title), 'duplicate title '+title);
+      titles.add(title);
+      assert.equal(new URL(await page.locator('link[rel=canonical]').getAttribute('href')).href,new URL(route,'https://rent-home-bd.vercel.app').href);
+      assert.ok((await page.locator('meta[name=description]').getAttribute('content')).length>20);
+    }
+    const robots = await context.request.get(base+'/robots.txt');
+    assert.equal(robots.status(),200);
+    assert.match(await robots.text(),/Sitemap: https:\/\/rent-home-bd\.vercel\.app\/sitemap\.xml/);
+    const sitemap = await context.request.get(base+'/sitemap.xml');
+    assert.equal(sitemap.status(),200);
+    const xml = await sitemap.text();
+    const locations = Array.from(xml.matchAll(/<loc>([^<]+)<\/loc>/g), match => new URL(match[1]).href);
+    const expected = ['/','/homes','/about','/contact','/privacy','/terms'].map(route => new URL(route,'https://rent-home-bd.vercel.app').href);
+    assert.deepEqual(locations.sort(),expected.sort(),'sitemap must contain exactly the six canonical public URLs');
+    await open('/homes?area=Banani%2C%20Dhaka&area=Uttara%2C%20Dhaka');
+    assert.match(await page.locator('meta[name=robots]').getAttribute('content'),/noindex/);
+    assert.equal(await page.locator('link[rel=canonical]').getAttribute('href'),'https://rent-home-bd.vercel.app/homes');
+    const bad = await context.request.get(base+'/homes/not-a-uuid');
+    assert.equal(bad.status(),404);
+  });
+  await check('Privacy request links select the correct support category',async()=>{
+    await open('/privacy');
+    await page.getByRole('link',{name:'Request account deletion',exact:true}).click();
+    assert.equal(await page.locator('.support-request-form select').inputValue(),'account_deletion');
+    await page.route('**/rest/v1/rpc/submit_support_request**',route=>route.fulfill({status:503,contentType:'application/json',body:'{"message":"QA internal failure"}'}));
+    const form=page.locator('.support-request-form');
+    await form.locator('input[type=email]').fill('qa@example.invalid');
+    await form.locator('input:not([type=email])').fill('QA support request');
+    await form.locator('textarea').fill('This is an isolated browser test.');
+    await form.locator('button[type=submit]').click();
+    await form.locator('[role=alert]').waitFor();
+    assert.ok(!await form.locator('button[type=submit]').isDisabled());
+    assert.ok(!(await form.locator('[role=alert]').textContent()).includes('QA internal failure'));
+    await page.unroute('**/rest/v1/rpc/submit_support_request**');
+    await page.route('**/rest/v1/rpc/submit_support_request**',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify('11111111-1111-4111-8111-111111111111')}));
+    await form.locator('button[type=submit]').click();
+    await form.locator('[role=status]').waitFor();
+    assert.match(await form.locator('[role=status]').textContent(),/11111111-1111-4111-8111-111111111111/);
+    await page.unroute('**/rest/v1/rpc/submit_support_request**');
+  });
+  await check('Protected destinations keep sign-in boundary',async()=>{
+    for(const route of ['/saved','/messages','/dashboard','/owner','/owner/properties/new','/account/phone','/moderation']) {
+      await open(route);
+      assert.equal(new URL(page.url()).pathname,'/login',route);
+      assert.equal(new URL(page.url()).searchParams.get('next'),route,route);
+      assert.match(await page.locator('meta[name=robots]').getAttribute('content'),/noindex/);
+    }
   });
   await check('No uncaught browser exceptions',async()=>assert.deepEqual(pageErrors,[]));
   await context.close();

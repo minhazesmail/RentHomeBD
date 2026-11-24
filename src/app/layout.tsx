@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "./styles.css";
 
 import { GlobalShell } from "@/components/global-shell";
+import { SITE_ORIGIN, isPreviewDeployment } from "@/lib/site-metadata";
 import { LocalizedSkipLink } from "@/components/localized-skip-link";
 import { getLocale } from "@/i18n/get-locale";
 import { LocaleProvider } from "@/i18n/locale-provider";
@@ -29,6 +30,8 @@ export const metadata: Metadata = {
     default: "NearBasha",
     template: "%s | NearBasha",
   },
+  metadataBase: new URL(SITE_ORIGIN),
+  robots: { index: !isPreviewDeployment(), follow: !isPreviewDeployment() },
   applicationName: "NearBasha",
   description: "Search moderated rental homes on a live map across Bangladesh with NearBasha.",
   manifest: "/manifest.webmanifest",

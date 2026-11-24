@@ -81,4 +81,7 @@ const authForm = fs.readFileSync(authFormPath, "utf8");
 assert.match(authForm, /const resetDestination = `\/auth\/reset\?next=\$\{encodeURIComponent\(safeNext\)\}`/);
 assert.match(authForm, /next=\$\{encodeURIComponent\(resetDestination\)\}/);
 
+const loginPage = fs.readFileSync(path.join(root, "src", "app", "login", "page.tsx"), "utf8");
+assert.match(loginPage, /return safeRelativePath\(candidate\)/);
+
 console.log("Auth redirect QA passed: nested path/query/hash destinations stay same-origin and Vercel previews use only platform-controlled origin fallback.");

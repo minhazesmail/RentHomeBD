@@ -1,6 +1,7 @@
 import { isRoomAmenity, privateRoomCopy } from "@/i18n/private-room-copy";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { privateMetadata } from "@/lib/site-metadata";
 import { ArrowLeft, Bath, BedDouble, Building2, CircleAlert, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -35,6 +36,8 @@ type PublicProperty = {
 const PUBLIC_MEDIA_TTL_SECONDS = 300;
 
 export const dynamic = "force-dynamic";
+// Defer listing indexing until populated inventory and expiry are verified.
+export const metadata = privateMetadata("Rental details");
 
 function displayValue(value: string | null | undefined, values: Record<string, string>) {
   if (!value) return "—";
@@ -85,6 +88,7 @@ export default async function PublicPropertyPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [{ id }, query, locale] = await Promise.all([params, searchParams, getLocale()]);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) notFound();
   const dictionary = getDictionary(locale);
   const copy = getPropertyDetailCopy(locale);
   const returnTo = safeHomesReturnPath(typeof query.returnTo === "string" ? query.returnTo : null);

@@ -31,22 +31,27 @@ export function SupportRequestForm({
     setBusy(true);
     setMessage(null);
     setReference(null);
-    const supabase = createClient() as unknown as SupabaseClient;
-    const { data, error } = await supabase.rpc("submit_support_request", {
-      request_email: email.trim(),
-      request_category: category,
-      request_subject: subject.trim(),
-      request_details: details.trim(),
-      request_context: context,
-    });
-    if (error) {
-      setMessage(error.message || copy.error);
-    } else {
-      setReference(String(data));
-      setSubject("");
-      setDetails("");
+    try {
+      const supabase = createClient() as unknown as SupabaseClient;
+      const { data, error } = await supabase.rpc("submit_support_request", {
+        request_email: email.trim(),
+        request_category: category,
+        request_subject: subject.trim(),
+        request_details: details.trim(),
+        request_context: context,
+      });
+      if (error || typeof data !== "string" || !data) {
+        setMessage(copy.error);
+      } else {
+        setReference(data);
+        setSubject("");
+        setDetails("");
+      }
+    } catch {
+      setMessage(copy.error);
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
   }
 
   return (

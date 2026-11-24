@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { publicMetadata } from "@/lib/site-metadata";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { HowItWorksTabs } from "@/components/how-it-works-tabs";
@@ -22,6 +23,10 @@ function TrustIcon({ type }: { type: string }) {
   if (type === "shield") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 4.5-2.8 8.1-7 10-4.2-1.9-7-5.5-7-10V6l7-3Z"/><path d="m9.2 12 1.8 1.8 3.9-4"/></svg>;
   if (type === "pin") return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>;
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M18.3 15.6A7.5 7.5 0 1 1 19 8l1 4"/><path d="m9.5 12 1.7 1.7 3.5-3.7"/></svg>;
+}
+
+export async function generateMetadata() {
+  return publicMetadata("/", await getLocale());
 }
 
 export default async function HomePage() {
