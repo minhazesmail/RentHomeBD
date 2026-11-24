@@ -131,8 +131,9 @@ try {
     const sitemap = await context.request.get(base+'/sitemap.xml');
     assert.equal(sitemap.status(),200);
     const xml = await sitemap.text();
-    assert.equal((xml.match(/<loc>/g)||[]).length,6);
-    assert.ok(!xml.includes('/login')&&!xml.includes('/saved')&&!xml.includes('?'));
+    const locations = Array.from(xml.matchAll(/<loc>([^<]+)<\/loc>/g), match => new URL(match[1]).href);
+    const expected = ['/','/homes','/about','/contact','/privacy','/terms'].map(route => new URL(route,'https://rent-home-bd.vercel.app').href);
+    assert.deepEqual(locations.sort(),expected.sort(),'sitemap must contain exactly the six canonical public URLs');
     await open('/homes?area=Banani%2C%20Dhaka&area=Uttara%2C%20Dhaka');
     assert.match(await page.locator('meta[name=robots]').getAttribute('content'),/noindex/);
     assert.equal(await page.locator('link[rel=canonical]').getAttribute('href'),'https://rent-home-bd.vercel.app/homes');
