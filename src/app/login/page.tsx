@@ -1,4 +1,5 @@
 import { ShieldCheck } from "lucide-react";
+import { safeRelativePath } from "@/lib/safe-redirect";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -9,7 +10,7 @@ import { AuthForm } from "./auth-form";
 
 function safeNext(value: string | string[] | undefined) {
   const candidate = Array.isArray(value) ? value[0] : value;
-  return candidate?.startsWith("/") && !candidate.startsWith("//") ? candidate : "/dashboard";
+  return safeRelativePath(candidate);
 }
 
 function authIntent(value: string | string[] | undefined) {
