@@ -187,6 +187,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const workspaceCopy = getMapWorkspaceRedesignCopy(locale);
   const resultsCopy = getRenterResultsCopy(locale);
   const mobileMapModel = useMobileMapModel();
+  const { revealResults } = mobileMapModel;
   const tenantLabels = useMemo<TenantLabels>(() => ({
     family: dictionary.common.tenant.family,
     bachelor: dictionary.common.tenant.bachelor,
@@ -371,6 +372,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (error) {
       searchAbortRef.current = null;
       setSearchError(friendlySearchError(error, copy));
+      revealResults();
       if (announceMapResult) setMapSearchNotice(null);
       setSlowSearch(false);
       setBusy(false);
@@ -452,6 +454,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     maxRent,
     minRent,
     radiusKm,
+    revealResults,
     setAppliedQuery,
     setBusy,
     setListings,
@@ -555,6 +558,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   function startLiveLocation() {
     if (!navigator.geolocation) {
       setLocationRecovery({ message: copy.locationUnsupported, retryable: false });
+      revealResults();
       setMessage(null);
       return;
     }
@@ -630,6 +634,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
         message: error.code === error.PERMISSION_DENIED ? copy.permissionDenied : copy.locationTrackingError,
         retryable: true,
       });
+      revealResults();
       setMessage(null);
       setLocationStatus(null);
     }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
