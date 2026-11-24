@@ -23,6 +23,9 @@ try {
     await open('/');
     await page.locator('.leaflet-container').waitFor({timeout:60000});
     assert.ok(await page.locator('.landing-copy h1').isVisible());
+    assert.match(await page.locator('.landing-copy h1').innerText(), /Find a rental home near you/);
+    assert.equal(await page.locator('main').count(),1,'one main landmark');
+    assert.equal(await page.locator('.landing-search-console-heading svg').count(),0,'search form must not imply verification');
     const boxes=await page.locator('.landing-search-console-fields > *').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().top));
     assert.ok(Math.max(...boxes)-Math.min(...boxes)<2,'primary fields must share a row');
     await noOverflow();

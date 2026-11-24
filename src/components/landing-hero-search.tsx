@@ -4,7 +4,7 @@ import Link from "next/link";
 import { LandingMascot } from "./landing-mascot";
 import { LandingLiveSearch } from "./landing-live-search";
 import mascotStyles from "./landing-mascot.module.css";
-import { ArrowRight, Banknote, BedDouble, Map, MapPin, Search, ShieldCheck, SlidersHorizontal, Users } from "lucide-react";
+import { ArrowRight, Banknote, BedDouble, Map, MapPin, Search, SlidersHorizontal, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { useRef } from "react";
 
@@ -44,21 +44,9 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
         <p className="intro">{copy.description}</p>
         <LandingLiveSearch />
 
-        <div className="landing-mobile-quick-signals" aria-label={copy.mobileSignalsAria}>
-          <div>
-            <span aria-hidden="true"><MapPin /></span>
-            <strong>{copy.mobileDhakaFocused}</strong>
-          </div>
-          <div>
-            <span aria-hidden="true"><ShieldCheck /></span>
-            <strong>{copy.mobileTenantAware}</strong>
-          </div>
-        </div>
-
         <form className="landing-search-console" action="/homes" method="get" role="search">
           <div className="landing-search-console-heading">
             <div><span>{copy.searchKicker}</span><strong>{copy.searchTitle}</strong></div>
-            <ShieldCheck aria-label={copy.moderatedListings} />
           </div>
 
           <div className="landing-search-console-fields">

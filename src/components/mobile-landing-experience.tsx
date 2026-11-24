@@ -17,7 +17,6 @@ import {
   Search,
   ShieldCheck,
   SlidersHorizontal,
-  Sparkles,
   UserRound,
   Users,
 } from "lucide-react";
@@ -103,7 +102,7 @@ export function MobileLandingExperience() {
         </div>
       </header>
 
-      <main className={styles.appMain}>
+      <div className={styles.appMain}>
         <section className={styles.heroPanel} aria-labelledby="mobile-app-heading">
           <div className={styles.heroGlow} aria-hidden="true" />
           <div className={styles.heroBadge}><span aria-hidden="true" />{copy.kicker}</div>
@@ -116,10 +115,6 @@ export function MobileLandingExperience() {
             <p>{copy.description}</p>
             <LandingLiveSearch />
           </div>
-          <div className={styles.heroSignals} aria-label={copy.mobileSignalsAria}>
-            <span><MapPin aria-hidden="true" />{copy.mobileDhakaFocused}</span>
-            <span><ShieldCheck aria-hidden="true" />{copy.mobileTenantAware}</span>
-          </div>
         </section>
 
         <form className={styles.searchCard} action="/homes" method="get" role="search" data-mobile-entry-search onSubmit={handleSubmit}>
@@ -129,7 +124,6 @@ export function MobileLandingExperience() {
               <h2>{copy.searchTitle}</h2>
               <p>{copy.mobileSearchSubtitle}</p>
             </div>
-            <div className={styles.verifiedBadge} title={copy.moderatedListings}><ShieldCheck aria-hidden="true" /></div>
           </div>
 
           <div className={styles.primaryFields}>
@@ -269,7 +263,7 @@ export function MobileLandingExperience() {
 
         <section className={styles.popularSection} aria-labelledby="mobile-popular-heading">
           <div className={styles.sectionHeading}>
-            <div><span>{copy.popular}</span><h2 id="mobile-popular-heading">{copy.popular}</h2></div>
+            <div><h2 id="mobile-popular-heading">{copy.popular}</h2></div>
             <small>{copy.popularHint}</small>
           </div>
           <div className={styles.locationScroller}>
@@ -292,10 +286,8 @@ export function MobileLandingExperience() {
         <section className={styles.featureSection} aria-label={copy.safeguardsAria}>
           <div className={styles.sectionHeadingRow}>
             <div>
-              <span>{copy.safeguardsAria}</span>
-              <h2>{locale === "bn" ? "কম খুঁজুন, ভালোভাবে বাছুন" : "Less hunting. Better matches."}</h2>
+              <h2>{locale === "bn" ? "বাসা খোঁজার সময় যা দেখবেন" : "What to check when renting"}</h2>
             </div>
-            <Sparkles aria-hidden="true" />
           </div>
           <div className={styles.featureGrid}>
             <article>
@@ -319,15 +311,14 @@ export function MobileLandingExperience() {
         <section className={styles.mapCta}>
           <div className={styles.mapCtaIcon}><Map aria-hidden="true" /></div>
           <div>
-            <span>{copy.mapTitle}</span>
-            <h2>{locale === "bn" ? "ম্যাপে পুরো এলাকা দেখুন" : "See the neighborhood, not just the listing."}</h2>
+            <h2>{locale === "bn" ? "ম্যাপে পুরো এলাকা দেখুন" : "Browse the rental map"}</h2>
             <p>{copy.mapDescription}</p>
           </div>
           <Link href={mapHref} data-mobile-explore-map>
             {copy.exploreArea}<ArrowRight aria-hidden="true" />
           </Link>
         </section>
-      </main>
+      </div>
 
       <nav className={styles.bottomNav} aria-label={dictionary.navigation.productNavigationAria} data-mobile-primary-tabs>
         <Link href="/homes" aria-current="page"><Compass aria-hidden="true" /><span>{dictionary.navigation.explore}</span></Link>

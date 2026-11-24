@@ -1,12 +1,12 @@
 import type { Locale } from "@/i18n/config";
 
 const en = {
-  eyebrow: "A neighborhood first. A home next.",
-  title: "Find your neighborhood",
-  mapLabel: "Interactive service-region map",
+  eyebrow: "Search by area",
+  title: "Choose an area",
+  mapLabel: "Rental area map",
   loading: "Loading the neighborhood map…",
   areas: "Explore neighborhoods",
-  selectedArea: "Your starting point",
+  selectedArea: "Selected area",
   explore: "Search this neighborhood",
   hint: "Choose your tenant type in the full map to find matching homes.",
   inventory: "Nearby rentals within 5 km",
@@ -15,7 +15,7 @@ const en = {
   inventoryEmpty: "No available rentals within 5 km.",
   retryInventory: "Try again",
   tenantHint: "Choose who is moving in to see matching homes.",
-  searchTitle: "Your next home starts here",
+  searchTitle: "Search rental homes",
   searchHint: "Choose an area and tenant type, then explore the map.",
   pickerLabel: "Exact property location picker",
   pickerArea: "Map centered near the typed area",
@@ -29,12 +29,12 @@ const en = {
 
 type Copy = { [K in keyof typeof en]: string };
 const bn: Copy = {
-  eyebrow: "আগে পছন্দের এলাকা। তারপর বাসা।",
-  title: "খুঁজে নিন আপনার পছন্দের এলাকা",
-  mapLabel: "সেবা অঞ্চলের ইন্টারঅ্যাকটিভ ম্যাপ",
+  eyebrow: "এলাকা অনুযায়ী খুঁজুন",
+  title: "এলাকা বেছে নিন",
+  mapLabel: "ভাড়ার বাসার এলাকার ম্যাপ",
   loading: "এলাকার ম্যাপ লোড হচ্ছে…",
   areas: "এলাকা ঘুরে দেখুন",
-  selectedArea: "এখান থেকে শুরু করুন",
+  selectedArea: "বাছাই করা এলাকা",
   explore: "এই এলাকায় বাসা খুঁজুন",
   hint: "মানানসই বাসা খুঁজতে পূর্ণ ম্যাপে ভাড়াটিয়ার ধরন বেছে নিন।",
   inventory: "৫ কিমির মধ্যে ভাড়ার বাসা",
@@ -43,7 +43,7 @@ const bn: Copy = {
   inventoryEmpty: "৫ কিমির মধ্যে এখন কোনো ভাড়ার বাসা নেই।",
   retryInventory: "আবার চেষ্টা করুন",
   tenantHint: "মানানসই বাসা দেখতে ভাড়াটিয়ার ধরন বেছে নিন।",
-  searchTitle: "নতুন বাসার খোঁজ শুরু এখানেই",
+  searchTitle: "ভাড়ার বাসা খুঁজুন",
   searchHint: "এলাকা ও ভাড়াটিয়ার ধরন বেছে ম্যাপে খুঁজুন।",
   pickerLabel: "বাসার সঠিক লোকেশন বাছাই",
   pickerArea: "লেখা এলাকার কাছে ম্যাপ দেখানো হচ্ছে",
