@@ -1,5 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
+import assert from "node:assert/strict";
+import ts from "typescript";
 
 const root = process.cwd();
 const failures = [];
@@ -94,6 +96,45 @@ requireText(css, '[data-resolved-theme="dark"] .landing-shell', "dark appearance
 requireText(css, "@media (prefers-reduced-motion: reduce)", "reduced-motion contract");
 requireText(manifest, '@import "./landing.css" layer(component-appearance);', "canonical final landing style layer");
 requireText(baseline, "Tenant type is therefore a primary search input", "documented tenant-first product rule");
+
+
+const inventorySource = read("src/lib/landing-inventory.ts");
+const compiledInventory = ts.transpileModule(inventorySource, {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText;
+async function runInventoryCase(countResult, propertyResult) {
+  const module = { exports: {} };
+  const mockClient = {
+    from: table => {
+      if (table !== "properties") throw new Error("Unexpected query: " + table);
+      return { select: () => ({ eq: () => Promise.resolve(countResult) }) };
+    },
+    rpc: () => Promise.resolve(propertyResult),
+  };
+  const imports = {
+    react: { cache: fn => fn },
+    "@supabase/supabase-js": { createClient: () => mockClient },
+    "@/lib/supabase/config": { SUPABASE_URL: "https://example.invalid", SUPABASE_PUBLISHABLE_KEY: "test" },
+    "@/lib/tenant-match": { tenantSummary: () => "" },
+  };
+  new Function("require", "module", "exports", compiledInventory)(name => {
+    if (!(name in imports)) throw new Error("Unexpected import: " + name);
+    return imports[name];
+  }, module, module.exports);
+  return module.exports.getLandingInventory();
+}
+const empty = await runInventoryCase({ count: 0, error: null }, { data: [], error: null });
+assert.deepEqual(empty, { availableCount: 0, status: "ready", featuredListings: [] });
+for (const [count, rows] of [
+  [{ count: null, error: { message: "count failed" } }, { data: [], error: null }],
+  [{ count: 0, error: null }, { data: null, error: { message: "inventory failed" } }],
+  [{ count: 3, error: null }, { data: [], error: null }],
+  [{ count: 0, error: null }, { data: null, error: null }],
+]) {
+  const unavailable = await runInventoryCase(count, rows);
+  assert.deepEqual(unavailable, { availableCount: null, status: "unavailable", featuredListings: [] });
+}
+console.log("Landing inventory QA passed: confirmed empty, count failure, inventory failure, and inconsistent snapshots remain distinct.");
 
 if (failures.length) {
   console.error("Landing redesign QA failed:\n" + failures.map((failure) => `- ${failure}`).join("\n"));

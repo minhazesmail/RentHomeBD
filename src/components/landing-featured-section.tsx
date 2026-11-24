@@ -26,7 +26,7 @@ export async function LandingFeaturedSection() {
   const { availableCount, featuredListings, status } = await getLandingInventory();
   const inventoryUnavailable = status === "unavailable";
   const unavailableCopy = locale === "bn" ? "ভাড়ার বাসার তালিকা এখন লোড করা যাচ্ছে না। পরে আবার চেষ্টা করুন।" : "Rental inventory could not load. Please try again.";
-  const countText = availableCount === null ? unavailableCopy : interpolate(availableCount === 1 ? copy.countOne : copy.countMany, { count: formatNumber(availableCount, locale, { useGrouping: true }) });
+  const countText = availableCount === null ? (featuredListings.length ? (locale === "bn" ? "মোট বাসার সংখ্যা এখন জানা যাচ্ছে না।" : "Total rental count is currently unavailable.") : unavailableCopy) : interpolate(availableCount === 1 ? copy.countOne : copy.countMany, { count: formatNumber(availableCount, locale, { useGrouping: true }) });
   const bedroomText = (value: number) => value === 1
     ? copy.bedroomOne
     : interpolate(copy.bedroomMany, { count: formatNumber(value, locale, { useGrouping: false }) });
@@ -74,7 +74,7 @@ export async function LandingFeaturedSection() {
         <div className="landing-launch-discovery" role="status">
           <div className="landing-launch-copy">
             <Link className="primary-button link-button" href="/homes">{copy.exploreLiveMap}</Link>
-            <Link className="secondary-button link-button" href="/">{locale === "bn" ? "আবার চেষ্টা করুন" : "Try again"}</Link>
+            <a className="secondary-button link-button" href="/">{locale === "bn" ? "আবার চেষ্টা করুন" : "Try again"}</a>
           </div>
         </div>
       ) : (

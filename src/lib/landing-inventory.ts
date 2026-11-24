@@ -49,14 +49,14 @@ export const getLandingInventory = cache(async (): Promise<LandingInventory> => 
   ]);
 
   if (countError) console.error("Could not count landing inventory", countError.message);
-  if (propertyError) {
-    console.error("Could not load landing inventory", propertyError.message);
+  if (propertyError || !Array.isArray(propertyData)) {
+    console.error("Could not load landing inventory", propertyError?.message ?? "Unexpected inventory response");
     return { availableCount: null, status: "unavailable", featuredListings: [] };
   }
 
-  const properties = (propertyData ?? []) as PropertyRow[];
+  const properties = propertyData as PropertyRow[];
   // A failed count or inconsistent snapshot must not be reported as empty.
-  const availableCount = countError || count == null || (count === 0) !== (properties.length === 0) ? null : count;
+  const availableCount = countError || count == null || count < properties.length || (count === 0) !== (properties.length === 0) ? null : count;
   const status = availableCount === null ? "unavailable" : "ready";
   if (!properties.length) return { availableCount, status, featuredListings: [] };
 

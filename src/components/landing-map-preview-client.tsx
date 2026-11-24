@@ -26,7 +26,11 @@ export function LandingMapPreviewClient({ initialInventory }: { initialInventory
   const [inventory, setInventory] = useState<{ area: string; value: NeighborhoodInventory }>({ area: areas[0].label, value: initialInventory });
   const [loading, setLoading] = useState(false);
   const requestRef = useRef<AbortController | null>(null);
-  useEffect(() => () => requestRef.current?.abort(), []);
+  useEffect(() => () => {
+    const request = requestRef.current;
+    requestRef.current = null;
+    request?.abort();
+  }, []);
 
   async function selectArea(label: string) {
     const area = areas.find(item => item.label === label);

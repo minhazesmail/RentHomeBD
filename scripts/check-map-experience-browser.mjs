@@ -19,9 +19,18 @@ try {
       const label = `${viewport.width}-${theme}-${locale}`;
 
       if (viewport.width > 820) {
+        let previewMode = "success";
         await page.route("**/rest/v1/rpc/search_available_properties**", async route => {
           const query = route.request().postDataJSON();
-          const title = query.center_lat > 23.78 ? "QA Banani rental" : "QA other rental";
+          if (query.renter_tenant_type || previewMode === "empty") {
+            await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+            return;
+          }
+          if (previewMode === "error") {
+            await route.fulfill({ status: 503, contentType: "application/json", body: '{"message":"QA preview unavailable"}' });
+            return;
+          }
+          const title = "QA rental at " + query.center_lat;
           await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{
             id: "11111111-1111-4111-8111-111111111111", title, address_text: "QA address",
             rent_bdt: 12000, bedrooms: 1, latitude: query.center_lat, longitude: query.center_long
@@ -37,8 +46,20 @@ try {
         const query = (await neighborhoodRequest).postDataJSON();
         if (query.radius_km !== 5 || query.renter_tenant_type !== null) failures.push(`${label}: preview search did not use its neighborhood radius`);
         await preview.locator(`[data-neighborhood-inventory="ready"]`).waitFor();
-        if (await preview.getByText(query.center_lat > 23.78 ? "QA Banani rental" : "QA other rental", { exact: true }).count() !== 1) failures.push(`${label}: preview did not render the selected neighborhood response`);
+        if (await preview.getByText("QA rental at " + query.center_lat, { exact: true }).count() !== 1) failures.push(`${label}: preview did not render the selected neighborhood response`);
         if (await active.getAttribute("aria-pressed") !== "true") failures.push(`${label}: neighborhood selection not reflected`);
+        // A new selection must replace the previous area's listings; failure and confirmed empty remain distinct.
+        previewMode = "error";
+        await preview.locator("button[aria-pressed]").nth(0).click();
+        await preview.locator('[data-neighborhood-inventory="unavailable"]').waitFor();
+        if (await preview.getByText("QA rental at " + query.center_lat, { exact: true }).count()) failures.push(`${label}: stale neighborhood rental remained visible`);
+        previewMode = "empty";
+        await preview.getByRole("button", { name: locale === "bn" ? "আবার চেষ্টা করুন" : "Try again", exact: true }).click();
+        await preview.locator('[data-neighborhood-inventory="ready"]').waitFor();
+        if (await preview.locator('a[href^="/homes/"]').count()) failures.push(`${label}: empty neighborhood still contains rental links`);
+        previewMode = "success";
+        await active.click();
+        await preview.locator('[data-neighborhood-inventory="ready"]').waitFor();
         const link = preview.locator('a[href^="/homes?"]');
         const href = new URL(await link.getAttribute("href"), baseURL);
         if (href.searchParams.get("area") !== "Banani, Dhaka" || href.searchParams.get("radius") !== "5") failures.push(`${label}: selected neighborhood handoff lost`);
