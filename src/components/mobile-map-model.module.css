@@ -445,3 +445,36 @@
   .mobileMapNavigator button { padding-inline: 4px; gap: 3px; font-size: .69rem; }
   .mobileMapNavigator button svg { flex-shrink: 0; }
 }
+
+/* Map-first focus control: the existing Leaflet instance stays mounted. */
+@media (min-width: 961px) {
+  .mobileMapLayout :global(.renter-map-actions > .renter-map-focus-toggle) { min-height: 44px; }
+  .mobileMapLayout[data-map-focus="true"] :global(.renter-map-panel .mobile-map-sheet) {
+    position: absolute;
+    left: 16px;
+    bottom: 32px;
+    z-index: 720;
+    display: grid;
+    gap: 12px;
+    width: min(420px, calc(100% - 32px));
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-elevated);
+    color: var(--ink);
+    box-shadow: var(--shadow-md);
+  }
+  .mobileMapLayout[data-map-focus="true"] :global(.mobile-map-sheet-content) { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; }
+  .mobileMapLayout[data-map-focus="true"] :global(.mobile-map-sheet-image) { position: relative; min-height: 96px; overflow: hidden; border-radius: 6px; background: var(--surface-muted); }
+  .mobileMapLayout[data-map-focus="true"] :global(.mobile-map-sheet-image img) { object-fit: cover; }
+  .mobileMapLayout[data-map-focus="true"] :global(.mobile-map-sheet-copy) { min-width: 0; padding-right: 34px; }
+  .mobileMapLayout[data-map-focus="true"] :global(.mobile-map-sheet-copy h2) { margin: 4px 0; font-size: 1rem; overflow-wrap: anywhere; }
+  .mobileMapLayout[data-map-focus="true"] :global(.mobile-map-sheet-copy p) { margin: 4px 0; font-size: .8rem; overflow-wrap: anywhere; }
+  .mobileMapLayout[data-map-focus="true"] :global(.mobile-map-sheet-meta) { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .mobileMapLayout[data-map-focus="true"] :global(.mobile-map-sheet-actions) { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+  .mobileMapLayout[data-map-focus="true"] :global(.mobile-map-sheet-close) { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border: 0; border-radius: 8px; background: var(--surface-muted); color: var(--ink); font-size: 1.4rem; cursor: pointer; }
+}
+@media (max-width: 960px) {
+  .mobileMapLayout :global(.renter-map-actions > .renter-map-focus-toggle) { display: none; }
+  .mobileMapLayout :global(.renter-map-actions) { right: 68px; }
+}
