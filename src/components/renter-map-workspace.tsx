@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Briefcase, CircleCheck, GraduationCap, LocateFixed, MapPinned, Search, SlidersHorizontal, User, Users } from "lucide-react";
+import { Briefcase, CircleCheck, GraduationCap, LocateFixed, MapPinned, Maximize2, Minimize2, Search, SlidersHorizontal, User, Users } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -946,6 +946,10 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
           />
 
           <div className="renter-map-actions" aria-label={copy.title}>
+            <button className="secondary-button renter-map-focus-toggle" type="button" data-desktop-map-focus aria-pressed={mobileMapModel.mapFocus} onClick={mobileMapModel.toggleMapFocus}>
+              {mobileMapModel.mapFocus ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
+              {mobileMapModel.mapFocus ? workspaceCopy.mobile.restoreResults : workspaceCopy.mobile.focusMap}
+            </button>
             {mapDirty && <button className="primary-button renter-search-this-area" type="button" onClick={() => void runSearch(pendingMapCenter ?? center, sortOption, customAreaActive ? customArea : null, true)} disabled={busy || !tenantType}>{busy ? copy.searching : workspaceCopy.map.searchThisArea}</button>}
             {liveTracking ? (
               <button className="secondary-button" type="button" onClick={stopLiveLocation}>{workspaceCopy.map.stopLocation}</button>
