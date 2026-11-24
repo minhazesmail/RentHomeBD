@@ -103,7 +103,7 @@ const compiledInventory = ts.transpileModule(inventorySource, {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
 }).outputText;
 async function runInventoryCase(countResult, propertyResult) {
-  const module = { exports: {} };
+  const compiledModule = { exports: {} };
   const mockClient = {
     from: table => {
       if (table !== "properties") throw new Error("Unexpected query: " + table);
@@ -120,8 +120,8 @@ async function runInventoryCase(countResult, propertyResult) {
   new Function("require", "module", "exports", compiledInventory)(name => {
     if (!(name in imports)) throw new Error("Unexpected import: " + name);
     return imports[name];
-  }, module, module.exports);
-  return module.exports.getLandingInventory();
+  }, compiledModule, compiledModule.exports);
+  return compiledModule.exports.getLandingInventory();
 }
 const empty = await runInventoryCase({ count: 0, error: null }, { data: [], error: null });
 assert.deepEqual(empty, { availableCount: 0, status: "ready", featuredListings: [] });
