@@ -19,12 +19,25 @@ try {
       const label = `${viewport.width}-${theme}-${locale}`;
 
       if (viewport.width > 820) {
+        await page.route("**/rest/v1/rpc/search_available_properties**", async route => {
+          const query = route.request().postDataJSON();
+          const title = query.center_lat > 23.78 ? "QA Banani rental" : "QA other rental";
+          await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([{
+            id: "11111111-1111-4111-8111-111111111111", title, address_text: "QA address",
+            rent_bdt: 12000, bedrooms: 1, latitude: query.center_lat, longitude: query.center_long
+          }]) });
+        });
         await page.goto(baseURL, { waitUntil: "domcontentloaded" });
         const preview = page.locator(".landing-map-preview");
         await preview.scrollIntoViewIfNeeded();
         await preview.locator(".leaflet-control-zoom").waitFor();
         const active = preview.locator("button[aria-pressed]").nth(1);
+        const neighborhoodRequest = page.waitForRequest(request => request.url().includes("/rpc/search_available_properties"));
         await active.click();
+        const query = (await neighborhoodRequest).postDataJSON();
+        if (query.radius_km !== 5 || query.renter_tenant_type !== null) failures.push(`${label}: preview search did not use its neighborhood radius`);
+        await preview.locator(`[data-neighborhood-inventory="ready"]`).waitFor();
+        if (await preview.getByText(query.center_lat > 23.78 ? "QA Banani rental" : "QA other rental", { exact: true }).count() !== 1) failures.push(`${label}: preview did not render the selected neighborhood response`);
         if (await active.getAttribute("aria-pressed") !== "true") failures.push(`${label}: neighborhood selection not reflected`);
         const link = preview.locator('a[href^="/homes?"]');
         const href = new URL(await link.getAttribute("href"), baseURL);
@@ -65,6 +78,12 @@ try {
         await page.getByRole("button", { name: locale === "bn" ? "ফিল্টার" : "Filters", exact: true }).click();
         await page.locator(".renter-toolbar-tenant select").waitFor({ state: "visible" });
       }
+      const status = page.locator(".renter-results-context strong");
+      if (await status.textContent() !== (locale === "bn" ? "সার্চ হয়নি" : "Not searched")) failures.push(`${label}: initial search falsely reported a result count`);
+      const rentalType = page.locator(".renter-primary-filters .renter-toolbar-rental-type select");
+      if (!await rentalType.isVisible()) failures.push(`${label}: rental type is not a primary filter`);
+      await rentalType.selectOption("private_room");
+      if (await rentalType.inputValue() !== "private_room") failures.push(`${label}: private room filter cannot be selected`);
       await page.screenshot({ path: `${output}/search-${label}.png` });
       await context.close();
     }

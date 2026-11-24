@@ -1,22 +1,12 @@
-import { LandingMapPreviewClient, type LandingMapListing } from "@/components/landing-map-preview-client";
-import { getLandingInventory } from "@/lib/landing-inventory";
+import { createClient } from "@supabase/supabase-js";
+import { LandingMapPreviewClient } from "@/components/landing-map-preview-client";
+import { LANDING_PREVIEW_AREAS, loadNeighborhoodInventory } from "@/lib/landing-neighborhood-inventory";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 export async function LandingMapPreview() {
-  const { featuredListings } = await getLandingInventory();
-
-  const listings: LandingMapListing[] = featuredListings.flatMap((listing) => {
-    if (listing.latitude == null || listing.longitude == null) return [];
-    return [{
-      id: listing.id,
-      title: listing.title,
-      address_text: listing.address_text,
-      rent_bdt: listing.rent_bdt,
-      bedrooms: listing.bedrooms,
-      latitude: listing.latitude,
-      longitude: listing.longitude,
-      cover_url: listing.imageUrl,
-    }];
+  const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
-
-  return <LandingMapPreviewClient listings={listings} />;
+  const initialInventory = await loadNeighborhoodInventory(client, LANDING_PREVIEW_AREAS[0], AbortSignal.timeout(8000));
+  return <LandingMapPreviewClient initialInventory={initialInventory} />;
 }

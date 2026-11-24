@@ -4,3 +4,5 @@ export const MIN_RENTER_SEARCH_RADIUS_KM = 0.5;
 export const MAX_RENTER_SEARCH_RADIUS_KM = 100;
 export const MAX_RENTER_SEARCH_BEDROOMS = 20;
 export const MAX_RENTER_SEARCH_RENT_BDT = 10_000_000;
+
+export const LANDING_ADDITIONAL_BEDROOM_OPTIONS = [2, 3, 4] as const;
