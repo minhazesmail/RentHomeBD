@@ -33,7 +33,7 @@ export function GlobalShell({ children }: { children: ReactNode }) {
   const shell = resolveShell(pathname);
   return (
     <div className={`nb-global-shell nb-global-shell--${shell} ${styles.desktop} ${glass.glass}`} data-shell={shell} data-route={pathname}>
-      <GlassAtmosphere />
+      {shell === "marketing" && <GlassAtmosphere />}
       <div className="nb-shell-atmosphere" aria-hidden="true" />
       <div className="nb-shell-grid" aria-hidden="true" />
       <div className="nb-shell-content">

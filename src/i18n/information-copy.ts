@@ -79,20 +79,20 @@ const en: InformationCopy = {
   },
   about: {
     eyebrow: "About NearBasha",
-    title: "A clearer way to find and list homes in Bangladesh.",
+    title: "About NearBasha",
     intro:
       "NearBasha is a map-first rental marketplace designed to help renters discover homes by real location and help owners publish clearer, more compatible listings.",
     principlesAria: "Product principles",
-    locationTitle: "Location first",
+    locationTitle: "Search by location",
     locationBody:
       "Exact map pins, useful local context, and search that starts from where a renter actually wants to live.",
-    compatibilityTitle: "Compatibility, not noise.",
+    compatibilityTitle: "Accepted tenant types",
     compatibilityBody:
       "Tenant-fit details make expectations clearer before a renter spends time on a property that was never suitable for them.",
-    freshnessTitle: "Freshness built in.",
+    freshnessTitle: "Availability checks",
     freshnessBody:
       "Listings are moderated, refreshed, and time-bounded so the product can prioritize homes that are more likely to still be relevant.",
-    privateTitle: "Private contact.",
+    privateTitle: "Private messaging",
     privateBody:
       "Messaging keeps renter–owner conversations inside NearBasha while trust and safety controls remain connected to the listing.",
     ctaEyebrow: "Start with the map",
@@ -202,20 +202,20 @@ const bn: InformationCopy = {
   },
   about: {
     eyebrow: "NearBasha সম্পর্কে",
-    title: "বাংলাদেশে বাসা খোঁজা ও তালিকাভুক্ত করার আরও পরিষ্কার উপায়।",
+    title: "NearBasha সম্পর্কে",
     intro:
       "NearBasha একটি ম্যাপ-প্রথম ভাড়াবাজার, যেখানে ভাড়াটিয়ারা আসল অবস্থান দেখে বাসা খুঁজে পান এবং মালিকরা আরও পরিষ্কার ও মানানসই লিস্টিং প্রকাশ করতে পারেন।",
     principlesAria: "প্রোডাক্ট নীতি",
-    locationTitle: "লোকেশন আগে",
+    locationTitle: "এলাকা অনুযায়ী খোঁজ",
     locationBody:
       "সঠিক ম্যাপ পিন, উপযোগী স্থানীয় প্রসঙ্গ এবং যেখানে ভাড়াটিয়া সত্যিই থাকতে চান সেখান থেকেই শুরু হওয়া সার্চ।",
-    compatibilityTitle: "মানানসই, অপ্রয়োজনীয় নয়।",
+    compatibilityTitle: "কাদের ভাড়া দেওয়া হয়",
     compatibilityBody:
       "ভাড়াটিয়া-উপযোগিতার বিবরণ আগেই প্রত্যাশা পরিষ্কার করে, যাতে অনুপযোগী বাসায় সময় নষ্ট না হয়।",
-    freshnessTitle: "ফ্রেশনেস অন্তর্ভুক্ত।",
+    freshnessTitle: "বাসা খালি থাকার তথ্য",
     freshnessBody:
       "লিস্টিং মডারেট, রিফ্রেশ ও সময়সীমাবদ্ধ রাখা হয়, যাতে প্রাসঙ্গিক থাকার সম্ভাবনা বেশি এমন বাসাগুলোকে অগ্রাধিকার দেওয়া যায়।",
-    privateTitle: "ব্যক্তিগত যোগাযোগ।",
+    privateTitle: "ব্যক্তিগত মেসেজ",
     privateBody:
       "মেসেজিং NearBasha-র ভিতরে ভাড়াটিয়া–মালিকের কথোপকথন রাখে, আর আস্থা ও নিরাপত্তা নিয়ন্ত্রণ লিস্টিংয়ের সঙ্গেই যুক্ত থাকে।",
     ctaEyebrow: "ম্যাপ দিয়ে শুরু করুন",

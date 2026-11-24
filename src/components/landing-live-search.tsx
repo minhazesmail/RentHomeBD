@@ -73,7 +73,7 @@ export function LandingLiveSearch() {
     <div className={styles.root} data-live-search onBlur={event => {
       if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
     }}>
-      <label className={styles.label} htmlFor={id}>{bn ? "এলাকা লিখুন, বাসা খুঁজুন" : "Your next home starts here"}</label>
+      <label className={styles.label} htmlFor={id}>{bn ? "এলাকা লিখে খুঁজুন" : "Search by area"}</label>
       <div className={styles.inputRow}>
         <Search aria-hidden="true" size={19} />
         <input ref={input} id={id} type="search" role="combobox" autoComplete="off" maxLength={100}

@@ -104,8 +104,8 @@ requireText(mobileCss, "@media (prefers-reduced-motion: reduce)", "mobile concep
 
 requireText(copy, "const enLandingRedesignCopy", "English redesign copy");
 requireText(copy, "const bnLandingRedesignCopy", "Bangla redesign copy");
-requireText(copy, "Find a home that fits.", "planned hero message");
-requireText(copy, "আপনার জন্য মানানসই বাসা খুঁজুন।", "localized planned hero message");
+requireText(copy, "Find a rental home near you.", "direct rental-search heading");
+requireText(copy, "কাছাকাছি ভাড়ার বাসা খুঁজুন।", "localized rental-search heading");
 requireText(copy, "mobileSearchHomes", "localized mobile search CTA");
 requireText(copy, "unsupportedArea", "localized supported-area validation copy");
 

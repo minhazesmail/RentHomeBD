@@ -40,7 +40,7 @@
   contain: strict;
 }
 
-.jade, .amber, .arc { position: absolute; display: block; pointer-events: none; will-change: transform; }
+.jade, .amber, .arc { position: absolute; display: block; pointer-events: none; }
 .jade {
   width: 90vw; height: 100vh; left: -25vw; top: -20vh;
   border-radius: 42% 58% 69% 31% / 42% 45% 55% 58%;
@@ -153,4 +153,17 @@
 }
 @supports not (backdrop-filter: blur(1px)) {
   .glass.glass { --glass-panel: var(--background); }
+}
+
+/* Functional workspaces use opaque surfaces rather than a decorative canvas. */
+.glass.glass:not([data-shell="marketing"]) {
+  --glass-canvas: var(--background);
+  --glass-panel: var(--background);
+  --glass-border: var(--border);
+  --glass-shadow: var(--shadow-sm);
+  --surface-solid: var(--background);
+}
+.glass.glass:not([data-shell="marketing"]) :is(:global([data-product-navigation]), :global(.renter-search-toolbar), :global(.renter-search-sidebar), :global(.renter-results-header), :global(.property-detail-section), :global(.property-contact-card), :global(.owner-property-card), :global(.owner-attention-workbench), :global(.listing-section), :global(.auth-card), :global(.messages-workspace-shell), :global(.moderation-queue-context), :global(.renter-journey-card), :global(.owner-dashboard-action-card)) {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

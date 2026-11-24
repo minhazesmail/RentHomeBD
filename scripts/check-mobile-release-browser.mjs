@@ -218,10 +218,12 @@ try {
   const reduced = await reducedPage.evaluate(() => ({
     scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior,
     atmosphereAnimation: getComputedStyle(document.querySelector(".nb-shell-atmosphere")).animationName,
+    decorativeCanvasCount: document.querySelectorAll("[data-glass-atmosphere]").length,
     tabTransition: getComputedStyle(document.querySelector("[data-mobile-primary-tabs] a")).transitionDuration,
   }));
   if (reduced.scrollBehavior !== "auto") failures.push("reduced-motion: root scroll behavior is not auto");
   if (reduced.atmosphereAnimation !== "none") failures.push("reduced-motion: shell atmosphere still animates");
+  if (reduced.decorativeCanvasCount !== 0) failures.push("functional map workspace renders unnecessary decorative canvas");
   await reducedContext.close();
 
   const forcedContext = await browser.newContext({
