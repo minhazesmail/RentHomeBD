@@ -188,6 +188,12 @@ try {
   if (await sheet.getAttribute("data-mobile-sheet") !== "expanded") failures.push("homes: partial drawer cannot expand");
   await homesPage.locator('[aria-label="Collapse results sheet"]').click();
   if (await sheet.getAttribute("data-mobile-sheet") !== "collapsed") failures.push("homes: expanded drawer cannot collapse");
+  await homesPage.getByRole("button", { name: "List", exact: true }).click();
+  if (await sheet.getAttribute("data-mobile-view") !== "list") failures.push("homes: list view did not activate");
+  await homesPage.locator('[data-search-recovery="empty"]').waitFor({ state: "visible" });
+  await homesPage.getByRole("button", { name: "Map", exact: true }).click();
+  if (await sheet.getAttribute("data-mobile-view") !== "map" || await sheet.getAttribute("data-mobile-sheet") !== "collapsed") failures.push("homes: returning to map did not preserve collapsed results");
+  if (await homesPage.locator(".renter-results-pane").isVisible()) failures.push("homes: collapsed map drawer did not hide its results pane");
   if (!homesSnapshot.summary) failures.push("homes: mobile search summary is missing");
   if (homesSnapshot.overflow > 2) failures.push(`homes: horizontal overflow ${homesSnapshot.overflow}px`);
   await homesPage.screenshot({ path: path.join(artifactRoot, "homes-light-390x844.png"), fullPage: true });
