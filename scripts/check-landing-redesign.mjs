@@ -24,6 +24,8 @@ function forbidText(source, text, label) {
 
 const page = read("src/app/page.tsx");
 const hero = read("src/components/landing-hero-search.tsx");
+const searchProvider = read("src/components/landing-search-provider.tsx");
+const searchModel = read("src/lib/landing-search.ts");
 const mobileHero = read("src/components/mobile-landing-experience.tsx");
 const mobileCss = read("src/components/mobile-landing-experience.module.css");
 const copy = read("src/i18n/landing-redesign-copy.ts");
@@ -41,22 +43,41 @@ forbidText(page, 'name="bedrooms"', "bedrooms must not remain a primary landing-
 requirePattern(hero, /<input[\s\S]*?type="search"[\s\S]*?list="landing-location-options"[\s\S]*?required/, "required searchable area input");
 requireText(hero, '<datalist id="landing-location-options">', "supported location suggestions");
 requireText(hero, 'name="area" value={area}', "canonical area URL handoff");
-requireText(hero, "setCustomValidity", "unsupported-area native validation");
+requireText(searchProvider, "setCustomValidity", "shared unsupported-area native validation");
+requireText(page, "<LandingSearchProvider>", "one shared responsive search provider");
+requireText(hero, "useLandingSearch(areaInputRef)", "desktop shared search");
+requireText(mobileHero, "useLandingSearch(areaInputRef)", "mobile shared search");
 requirePattern(hero, /<select[\s\S]*?name="tenant"[\s\S]*?required/, "required tenant selector");
-requireText(hero, '{ value: "family"', "family renter option");
-requireText(hero, '{ value: "bachelor"', "bachelor renter option");
-requireText(hero, '{ value: "student"', "student renter option");
-requireText(hero, '{ value: "job_holder"', "job-holder renter option");
+requireText(searchProvider, '{ value: "family"', "family renter option");
+requireText(searchProvider, '{ value: "bachelor"', "bachelor renter option");
+requireText(searchProvider, '{ value: "student"', "student renter option");
+requireText(searchProvider, '{ value: "job_holder"', "job-holder renter option");
 requireText(hero, '<details className="landing-search-more">', "secondary More filters disclosure");
 requireText(hero, 'name="bedrooms"', "bedrooms secondary filter");
-requireText(hero, 'params.set("tenant", tenant)', "tenant URL handoff");
-requireText(hero, 'params.set("maxRent", maxRent)', "budget URL handoff");
-requireText(hero, 'params.set("bedrooms", bedrooms)', "bedroom URL handoff");
-requireText(hero, 'params.set("radius", radius)', "selected radius URL handoff");
+requireText(searchModel, 'params.set("tenant", tenant)', "tenant URL handoff");
+requireText(searchModel, 'params.set("maxRent", maxRent)', "budget URL handoff");
+requireText(searchModel, 'params.set("bedrooms", bedrooms)', "bedroom URL handoff");
+requireText(searchModel, 'params.set("radius", radius)', "selected radius URL handoff");
 requireText(hero, 'name="radius"', "radius secondary filter");
 requireText(hero, 'type="button"', "criteria-preserving popular-area controls");
-requireText(hero, "customBudgetReady", "custom-budget validity gate");
-requireText(hero, "const mapReady = Boolean(area && tenant && customBudgetReady)", "shared form/map minimum-criteria gate");
+// Exercise the shared implementation rather than require a discarded local variable.
+const compiledSearch = { exports: {} };
+new Function("exports", ts.transpileModule(searchModel, {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+}).outputText)(compiledSearch.exports);
+const { isCustomBudgetReady, buildHomesHref } = compiledSearch.exports;
+for (const budget of ["", "999", "1250", "10000500", "Infinity", "not a number"]) {
+  assert.equal(isCustomBudgetReady("custom", budget), false, "Invalid custom budget: " + budget);
+}
+for (const budget of ["1000", "1500", "30000", "10000000"]) {
+  assert.equal(isCustomBudgetReady("custom", budget), true, "Valid custom budget: " + budget);
+}
+assert.equal(isCustomBudgetReady("15000", ""), true);
+assert.deepEqual(Object.fromEntries(new URL(buildHomesHref({ area: "Banani, Dhaka", tenant: "family", maxRent: "30000", bedrooms: "4", radius: "10" }), "https://example.invalid").searchParams), {
+  area: "Banani, Dhaka", tenant: "family", maxRent: "30000", bedrooms: "4", radius: "10",
+});
+assert.equal(buildHomesHref({ area: "", tenant: "", maxRent: "", bedrooms: "", radius: "15" }), "/homes?radius=15");
+requireText(searchProvider, "const mapReady = Boolean(area && tenant && customBudgetReady)", "shared form/map minimum-criteria gate");
 
 requireText(mobileHero, "mobileTitleLead", "mobile editorial headline lead");
 requireText(mobileHero, "mobileTitleAccent", "mobile editorial italic headline accent");

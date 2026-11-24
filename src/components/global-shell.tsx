@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import styles from "./global-shell.module.css";
 import { GlassAtmosphere } from "./glass-atmosphere";
 import glass from "./glass-atmosphere.module.css";
@@ -28,32 +28,11 @@ function resolveShell(pathname: string): ShellKind {
   return "neutral";
 }
 
-function safeReturnTo(value: string | null) {
-  if (!value || !value.startsWith("/homes") || value.startsWith("//")) return null;
-  return value;
-}
-
 export function GlobalShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const shell = resolveShell(pathname);
-  const isPropertyDetail = /^\/homes\/[^/]+$/.test(pathname);
-
-  function handleShellClick(event: ReactMouseEvent<HTMLDivElement>) {
-    if (!isPropertyDetail) return;
-    const target = event.target as HTMLElement;
-    const anchor = target.closest("a");
-    if (!anchor) return;
-    if (anchor.getAttribute("href") !== "/homes" || !anchor.textContent?.includes("Back to map")) return;
-
-    const returnTo = safeReturnTo(new URLSearchParams(window.location.search).get("returnTo"));
-    if (!returnTo) return;
-
-    event.preventDefault();
-    window.location.assign(returnTo);
-  }
-
   return (
-    <div className={`nb-global-shell nb-global-shell--${shell} ${styles.desktop} ${glass.glass}`} data-shell={shell} data-route={pathname} onClickCapture={handleShellClick}>
+    <div className={`nb-global-shell nb-global-shell--${shell} ${styles.desktop} ${glass.glass}`} data-shell={shell} data-route={pathname}>
       <GlassAtmosphere />
       <div className="nb-shell-atmosphere" aria-hidden="true" />
       <div className="nb-shell-grid" aria-hidden="true" />

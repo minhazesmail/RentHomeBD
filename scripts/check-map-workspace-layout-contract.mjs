@@ -17,77 +17,18 @@ function requireText(source, text, label) {
   if (!source.includes(text)) failures.push(`missing ${label}`);
 }
 
-function requirePattern(source, pattern, label) {
-  if (!pattern.test(source)) failures.push(`missing ${label}`);
-}
-
 const manifest = read("src/app/homes/styles.css");
-const baseCss = read("src/app/homes/homes.css");
 const workspaceCss = read("src/app/homes/map-workspace.css");
-const fixesCss = read("src/app/homes/map-workspace-layout-fixes.css");
 const packageJson = read("package.json");
 const ci = read(".github/workflows/ci.yml");
 const browserQa = read("scripts/check-map-workspace-browser.mjs");
 const areaSearchBrowserQa = read("scripts/check-map-area-search-browser.mjs");
 
-// This guard exists because the route-base stylesheet still contains the old
-// side-by-side search shell. The redesigned workspace must explicitly collapse
-// that inherited column before laying out toolbar -> results/map vertically.
-requirePattern(
-  baseCss,
-  /\.renter-search-shell\s*\{[^}]*grid-template-columns:\s*minmax\([^;]+\)\s+1fr/s,
-  "legacy route-base two-column search shell fixture",
-);
-requireText(
-  workspaceCss,
-  "grid-template-rows: auto minmax(0, 1fr);",
-  "redesigned workspace vertical row contract",
-);
-requireText(
-  fixesCss,
-  "grid-template-columns: minmax(0, 1fr);",
-  "desktop shell column reset",
-);
-requireText(fixesCss, "grid-column: 1 / -1;", "toolbar/workspace full-span guard");
-requireText(fixesCss, "grid-auto-flow: row;", "desktop row flow guard");
-requirePattern(
-  fixesCss,
-  /\.nb-global-shell--renter \.renter-search-toolbar\s*\{[^}]*grid-row:\s*1;/s,
-  "toolbar explicit desktop grid row",
-);
-requirePattern(
-  fixesCss,
-  /\.nb-global-shell--renter \.renter-workspace\s*\{[^}]*grid-row:\s*2;/s,
-  "workspace explicit desktop grid row",
-);
-
-// The toolbar currently carries the historic renter-filter-panel class for
-// shared form styling. These geometry resets must remain explicit so the old
-// rounded-card margin/border does not reappear on desktop.
-requirePattern(
-  baseCss,
-  /\.renter-filter-panel\s*\{[^}]*margin-top:\s*\d+px;[^}]*border-radius:/s,
-  "legacy filter-card geometry fixture",
-);
-requirePattern(
-  fixesCss,
-  /\.nb-global-shell--renter \.renter-search-toolbar\s*\{[^}]*margin:\s*0;[^}]*border:\s*0;[^}]*border-bottom:[^;]+;[^}]*border-radius:\s*0;/s,
-  "toolbar legacy-card geometry reset",
-);
-
-// The guard belongs to route-fixes: later than the legacy route-base declarations
-// it neutralizes, but earlier than the canonical component-appearance stylesheet.
-// This avoids duplicate component ownership while preserving the intended cascade.
-requireText(
-  manifest,
-  '@import "./property-detail-spacing-fixes.css" layer(route-fixes);\n@import "./map-workspace-layout-fixes.css" layer(route-fixes);',
-  "map workspace residual guard route-fixes ownership",
-);
-requireText(
-  manifest,
-  '@import "./map-workspace.css" layer(component-appearance);',
-  "canonical map workspace component-appearance ownership",
-);
+// Geometry must be validated in the rendered browser, rather than preserving
+// historical stylesheet declarations that happen to be overridden.
+requireText(workspaceCss, "grid-template-rows: auto minmax(0, 1fr);", "workspace row contract");
+requireText(manifest, '@import "./map-workspace.css" layer(component-appearance);', "canonical workspace stylesheet");
+if (manifest.includes("map-workspace-layout-fixes.css")) failures.push("retired layout guard is still loaded");
 
 // Keep a rendered geometry check in CI. Static selector checks alone cannot catch
 // this regression because all individual declarations can exist while the final
@@ -117,4 +58,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log("Map workspace layout contract QA passed: legacy grid/card geometry is neutralized and rendered coverage is wired into CI.");
+console.log("Map workspace layout contract QA passed: rendered geometry coverage is wired into CI.");
