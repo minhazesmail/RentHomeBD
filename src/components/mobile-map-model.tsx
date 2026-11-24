@@ -3,7 +3,7 @@
 import { ChevronDown, ChevronUp, List, Map, Maximize2, Minimize2, Minus, SlidersHorizontal } from "lucide-react";
 import { createContext, useContext } from "react";
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { getMapWorkspaceRedesignCopy } from "@/i18n/map-workspace-redesign-copy";
 import { useLocale } from "@/i18n/use-locale";
@@ -21,6 +21,7 @@ type MobileMapModelContextValue = {
   showMap: () => void;
   mapFocus: boolean;
   toggleMapFocus: () => void;
+  revealResults: () => void;
 };
 
 const MobileMapModelContext = createContext<MobileMapModelContextValue>({
@@ -28,6 +29,7 @@ const MobileMapModelContext = createContext<MobileMapModelContextValue>({
   showMap: () => {},
   mapFocus: false,
   toggleMapFocus: () => {},
+  revealResults: () => {},
 });
 
 export function useMobileMapModel() {
@@ -61,6 +63,15 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
     if (nextView === "list") setMapFocus(false);
     window.setTimeout(() => focusSelector(nextView === "map" ? ".renter-map-panel" : ".renter-results-pane"), 0);
   }
+
+  // Recovery actions must remain reachable even when map focus hides the results.
+  const revealResults = useCallback(() => {
+    setMapFocus(false);
+    if (mobileViewport()) {
+      setFiltersOpen(false);
+      setSheet((current) => current === "collapsed" ? "partial" : current);
+    }
+  }, []);
 
   function toggleMapFocus() {
     setMapFocus((focused) => !focused);
@@ -201,7 +212,7 @@ export function MobileMapModel({ children }: { children: ReactNode }) {
           </button>
         )}
       </nav>
-      <MobileMapModelContext.Provider value={{ showList: () => showView("list"), showMap: () => showView("map"), mapFocus, toggleMapFocus }}>
+      <MobileMapModelContext.Provider value={{ showList: () => showView("list"), showMap: () => showView("map"), mapFocus, toggleMapFocus, revealResults }}>
         {children}
       </MobileMapModelContext.Provider>
     </div>
