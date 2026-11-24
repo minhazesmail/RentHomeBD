@@ -19,6 +19,7 @@ type InitialSearch = {
   maxRent?: string;
   tenantType?: string;
   bedrooms?: string;
+  privateRoomsOnly?: boolean;
   selectedId?: string;
   sort?: string;
 };

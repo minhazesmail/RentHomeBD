@@ -1,3 +1,4 @@
+import { privateRoomCopy } from "@/i18n/private-room-copy";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -54,6 +55,7 @@ export async function LandingFeaturedSection() {
                   <div className="landing-listing-kicker"><span>{localizeTenantSummary(listing.tenantTypes, dictionary)}</span><span>{copy.freshListing}</span></div>
                   <div className="landing-listing-title-row">
                     <div><h3>{title}</h3><p>{listing.address_text || copy.exactLocationOnMap}</p></div>
+                    {listing.property_type === "private_room" && <span>{privateRoomCopy[locale].label}</span>}
                     <strong>{listing.rent_bdt != null ? formatCurrency(listing.rent_bdt, locale) : copy.rentOnRequest}{listing.rent_bdt != null ? <small>{copy.perMonth}</small> : null}</strong>
                   </div>
                   <div className="demo-meta">

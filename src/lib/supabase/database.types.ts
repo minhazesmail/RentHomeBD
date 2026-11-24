@@ -307,6 +307,7 @@ export type Database = {
           created_at: string;
           id: string;
           max_rent: number | null;
+          private_rooms_only: boolean;
           min_bedrooms: number | null;
           min_rent: number | null;
           name: string;
@@ -321,6 +322,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           max_rent?: number | null;
+          private_rooms_only?: boolean;
           min_bedrooms?: number | null;
           min_rent?: number | null;
           name: string;
@@ -335,6 +337,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           max_rent?: number | null;
+          private_rooms_only?: boolean;
           min_bedrooms?: number | null;
           min_rent?: number | null;
           name?: string;
@@ -381,6 +384,7 @@ export type Database = {
       property_type:
         | "apartment"
         | "house"
+        | "private_room"
         | "room_share"
         | "sublet"
         | "hostel_seat";
@@ -430,6 +434,7 @@ export const Constants = {
       property_type: [
         "apartment",
         "house",
+        "private_room",
         "room_share",
         "sublet",
         "hostel_seat",

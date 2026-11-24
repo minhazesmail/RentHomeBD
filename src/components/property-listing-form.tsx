@@ -1,5 +1,6 @@
 "use client";
 
+import { isRoomAmenity, privateRoomCopy } from "@/i18n/private-room-copy";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -19,7 +20,7 @@ type ExistingProperty = {
   title: string | null;
   description: string | null;
   address_text: string | null;
-  property_type: "apartment" | "house" | "room_share" | "sublet" | "hostel_seat" | null;
+  property_type: "apartment" | "house" | "private_room" | "room_share" | "sublet" | "hostel_seat" | null;
   rent_bdt: number | null;
   deposit_bdt: number;
   utilities_included: string[];
@@ -453,7 +454,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
         property_uuid: propertyId,
         property_payload: payload,
         tenant_types: tenantTypes,
-        amenity_slugs: selectedAmenities,
+        amenity_slugs: selectedAmenities.filter((slug) => propertyType === "private_room" || !isRoomAmenity(slug)),
         media_items: mediaItems,
       } as never);
       if (saved.error) throw saved.error;
@@ -490,9 +491,10 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
         <div className="section-heading"><span>1</span><div><h2>{copy.basicsTitle}</h2><p>{copy.basicsHint}</p></div></div>
         <div className="form-grid two-col">
           <label className="field full">{copy.listingTitle}<input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={copy.listingTitlePlaceholder} maxLength={140} disabled={locked} /></label>
-          <label className="field">{copy.propertyType}<select value={propertyType} onChange={(e) => setPropertyType(e.target.value)} disabled={locked}><option value="">{copy.chooseType}</option><option value="apartment">{copy.apartment}</option><option value="house">{copy.house}</option><option value="room_share">{copy.roomShare}</option><option value="sublet">{copy.sublet}</option><option value="hostel_seat">{copy.hostelSeat}</option></select></label>
+          <label className="field">{copy.propertyType}<select value={propertyType} onChange={(e) => setPropertyType(e.target.value)} disabled={locked}><option value="">{copy.chooseType}</option><option value="apartment">{copy.apartment}</option><option value="house">{copy.house}</option><option value="private_room">{privateRoomCopy[locale].label}</option><option value="room_share">{copy.roomShare}</option><option value="sublet">{copy.sublet}</option><option value="hostel_seat">{copy.hostelSeat}</option></select></label>
           <label className="field">{copy.availableFrom}<input type="date" value={availableFrom} onChange={(e) => setAvailableFrom(e.target.value)} disabled={locked} /></label>
-          <label className="field">{copy.monthlyRent}<input inputMode="numeric" value={rent} onChange={(e) => setRent(e.target.value)} placeholder="25000" disabled={locked} /></label>
+          {propertyType === "private_room" && <p className="form-hint">{privateRoomCopy[locale].arrangement}</p>}
+          <label className="field">{propertyType === "private_room" ? privateRoomCopy[locale].rent : copy.monthlyRent}<input inputMode="numeric" value={rent} onChange={(e) => setRent(e.target.value)} placeholder="25000" disabled={locked} /></label>
           <label className="field">{copy.securityDeposit}<input inputMode="numeric" value={deposit} onChange={(e) => setDeposit(e.target.value)} placeholder="0" disabled={locked} /></label>
           <label className="field full">{copy.description}<textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={5} maxLength={5000} placeholder={copy.descriptionPlaceholder} disabled={locked} /></label>
         </div>
@@ -510,7 +512,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
           <label className="field">{copy.genderPreference}<select value={genderPreference} onChange={(e) => setGenderPreference(e.target.value as typeof genderPreference)} disabled={locked}><option value="any">{copy.any}</option><option value="male">{copy.male}</option><option value="female">{copy.female}</option></select></label>
         </div>
         <fieldset className="choice-group" disabled={locked}><legend>{copy.utilitiesIncluded}</legend><div className="choice-grid">{utilityOptions.map(([value, label]) => <label className="choice-chip" key={value}><input type="checkbox" checked={utilities.includes(value)} onChange={() => toggle(value, utilities, setUtilities)} />{label}</label>)}</div></fieldset>
-        <fieldset className="choice-group" disabled={locked}><legend>{copy.amenities}</legend><div className="choice-grid">{amenities.map((amenity) => <label className="choice-chip" key={amenity.slug}><input type="checkbox" checked={selectedAmenities.includes(amenity.slug)} onChange={() => toggle(amenity.slug, selectedAmenities, setSelectedAmenities)} />{amenity.name}</label>)}</div></fieldset>
+        <fieldset className="choice-group" disabled={locked}><legend>{copy.amenities}</legend><div className="choice-grid">{amenities.filter(({ slug }) => propertyType === "private_room" || !isRoomAmenity(slug)).map((amenity) => <label className="choice-chip" key={amenity.slug}><input type="checkbox" checked={selectedAmenities.includes(amenity.slug)} onChange={() => toggle(amenity.slug, selectedAmenities, setSelectedAmenities)} />{isRoomAmenity(amenity.slug) ? privateRoomCopy[locale].amenities[amenity.slug] : amenity.name}</label>)}</div></fieldset>
       </section>
 
       <section className="listing-section">

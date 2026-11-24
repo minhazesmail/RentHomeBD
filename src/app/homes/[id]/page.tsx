@@ -1,3 +1,4 @@
+import { isRoomAmenity, privateRoomCopy } from "@/i18n/private-room-copy";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Bath, BedDouble, Building2, CircleAlert, CircleCheck, Clock, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Sparkles, Users, Zap } from "lucide-react";
@@ -151,6 +152,7 @@ export default async function PublicPropertyPage({
   const ownerPhoneVerified = Boolean(property.owner_phone_verified_at);
   const viewerPhoneVerified = Boolean(viewerProfile?.phone_verified_at);
   const ownerRoleLabel = displayValue(property.owner_role, copy.values);
+  const room = property.property_type === "private_room" ? privateRoomCopy[locale] : null;
   const rentLabel = property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.common.rentOnRequest;
   const depositLabel = property.deposit_bdt > 0 ? formatCurrency(property.deposit_bdt, locale) : null;
   const showCompatibilityReturn = Boolean(searchTenantType && renterFit !== "match");
@@ -185,14 +187,15 @@ export default async function PublicPropertyPage({
         <section className="property-detail-hero">
           <div className="property-detail-hero-main">
             <div className="property-detail-hero-kicker">
-              {property.property_type && <p className="eyebrow">{displayValue(property.property_type, copy.values)}</p>}
+              {room && <p>{room.arrangement}</p>}
+              {property.property_type && <p className="eyebrow">{room?.label ?? displayValue(property.property_type, copy.values)}</p>}
               <span className="property-detail-availability"><CircleCheck size={13} aria-hidden="true" />{availability}</span>
             </div>
             <h1>{property.title || copy.common.rentalProperty}</h1>
             <p className="property-detail-address"><MapPin size={17} aria-hidden="true" />{property.address_text || copy.common.exactLocationFallback}</p>
           </div>
           <div className="property-detail-price">
-            <span className="property-detail-price-label">{copy.common.monthlyRent}</span>
+            <span className="property-detail-price-label">{room?.rent ?? copy.common.monthlyRent}</span>
             <strong>{rentLabel}</strong>
             <span>{copy.common.perMonth}</span>
             <small>{depositLabel ? `${copy.common.deposit} ${depositLabel}` : copy.common.noDepositListed}</small>
@@ -235,7 +238,7 @@ export default async function PublicPropertyPage({
             <section className="property-detail-section property-costs-section">
               <div className="property-section-heading"><div><h2>{copy.costs.heading}</h2><p className="section-copy">{copy.costs.description}</p></div></div>
               <dl className="property-costs">
-                <div><dt>{copy.costs.monthlyRent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.costs.notProvided}</dd></div>
+                <div><dt>{room?.rent ?? copy.costs.monthlyRent}</dt><dd>{property.rent_bdt ? formatCurrency(property.rent_bdt, locale) : copy.costs.notProvided}</dd></div>
                 <div><dt>{copy.costs.deposit}</dt><dd>{depositLabel || copy.costs.notProvided}</dd></div>
               </dl>
             </section>
@@ -243,7 +246,7 @@ export default async function PublicPropertyPage({
             <section className="property-detail-section">
               <div className="property-section-heading"><div><h2>{copy.amenities.heading}</h2><p className="section-copy">{copy.amenities.description}</p></div></div>
               <div className="property-tag-groups">
-                <div><h3>{copy.amenities.amenities}</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} aria-hidden="true" />{amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} aria-hidden="true" />{copy.amenities.noneListed}</span>}</div></div>
+                <div><h3>{copy.amenities.amenities}</h3><div className="amenity-grid">{property.amenities.length ? property.amenities.map((amenity) => <span className="amenity-item" key={amenity.slug}><Sparkles size={15} aria-hidden="true" />{isRoomAmenity(amenity.slug) ? privateRoomCopy[locale].amenities[amenity.slug] : amenity.name}</span>) : <span className="amenity-item"><Sparkles size={15} aria-hidden="true" />{copy.amenities.noneListed}</span>}</div></div>
                 <div><h3>{copy.amenities.utilities}</h3><div className="amenity-grid utility-grid">{property.utilities_included.length ? property.utilities_included.map((utility) => <span className="amenity-item" key={utility}><Zap size={15} aria-hidden="true" />{displayValue(utility, copy.values)}</span>) : <span className="amenity-item"><Zap size={15} aria-hidden="true" />{copy.amenities.noneListed}</span>}</div></div>
               </div>
             </section>
@@ -252,7 +255,7 @@ export default async function PublicPropertyPage({
               <div className="property-section-heading"><div><h2>{copy.about.heading}</h2><p className="section-copy">{copy.about.description}</p></div><Sparkles size={20} aria-hidden="true" /></div>
               <p className="property-description">{property.description || copy.about.noDescription}</p>
               <dl className="property-facts">
-                {property.property_type && <div><dt>{copy.about.propertyType}</dt><dd>{displayValue(property.property_type, copy.values)}</dd></div>}
+                {property.property_type && <div><dt>{copy.about.propertyType}</dt><dd>{room?.label ?? displayValue(property.property_type, copy.values)}</dd></div>}
                 {property.furnishing && <div><dt>{copy.about.furnishing}</dt><dd>{displayValue(property.furnishing, copy.values)}</dd></div>}
                 {property.available_from && <div><dt>{copy.about.availableFrom}</dt><dd>{formatPropertyDate(property.available_from, locale)}</dd></div>}
                 {property.gender_preference && <div><dt>{copy.about.genderPreference}</dt><dd>{displayValue(property.gender_preference, copy.values)}</dd></div>}
@@ -281,7 +284,7 @@ export default async function PublicPropertyPage({
           </div>
 
           <aside className="property-contact-card" id="contact">
-            <div className="contact-price-summary"><span>{copy.common.monthlyRent}</span><strong>{rentLabel}</strong><small>{depositLabel ? `${copy.common.deposit} ${depositLabel}` : copy.common.depositNotListed}</small></div>
+            <div className="contact-price-summary"><span>{room?.rent ?? copy.common.monthlyRent}</span><strong>{rentLabel}</strong><small>{depositLabel ? `${copy.common.deposit} ${depositLabel}` : copy.common.depositNotListed}</small></div>
             <div className="property-contact-secondary-actions">
               <SaveHomeButton propertyId={property.id} userId={auth?.userId ?? null} initialSaved={Boolean(savedRow)} signInHref={saveSignInHref} />
               <PropertyShareButton title={property.title || copy.common.rentalProperty} />

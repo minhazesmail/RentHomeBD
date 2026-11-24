@@ -1,5 +1,6 @@
 "use client";
 
+import { privateRoomCopy } from "@/i18n/private-room-copy";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -51,6 +52,7 @@ type InitialSearch = {
   maxRent?: string;
   tenantType?: string;
   bedrooms?: string;
+  privateRoomsOnly?: boolean;
   selectedId?: string;
   sort?: string;
   listScroll?: string;
@@ -63,6 +65,7 @@ type AppliedQuery = {
   maxRent: string;
   tenantType: SearchTenantType | "";
   bedrooms: string;
+  privateRoomsOnly: boolean;
   sort: SortOption;
   areaLabel: string;
 };
@@ -210,6 +213,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const [minRent, setMinRent] = useState(initialSearch.minRent ?? "");
   const [maxRent, setMaxRent] = useState(initialSearch.maxRent ?? "");
   const [tenantType, setTenantType] = useState<SearchTenantType | "">(initialTenantType);
+  const [privateRoomsOnly, setPrivateRoomsOnly] = useState(initialSearch.privateRoomsOnly ?? false);
   const [bedrooms, setBedrooms] = useState(initialSearch.bedrooms ?? "");
   const [sortOption, setSortOption] = useState<SortOption>(initialSort(initialSearch.sort));
   const [searchName, setSearchName] = useState("");
@@ -237,6 +241,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     minRent: initialSearch.minRent ?? "",
     maxRent: initialSearch.maxRent ?? "",
     tenantType: initialTenantType,
+    privateRoomsOnly: initialSearch.privateRoomsOnly ?? false,
     bedrooms: initialSearch.bedrooms ?? "",
     sort: initialSort(initialSearch.sort),
     areaLabel: initialAreaLabel,
@@ -271,6 +276,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const currentAreaLabel = locationPreset ? localizeLocationLabel(locationPreset, dictionary) : customAreaActive ? workspaceCopy.results.customArea : workspaceCopy.results.currentArea;
   const searchSummary = [
     appliedQuery.areaLabel,
+    ...(appliedQuery.privateRoomsOnly ? [privateRoomCopy[locale].label] : []),
     appliedQuery.tenantType ? tenantLabels[appliedQuery.tenantType] : workspaceCopy.toolbar.tenantRequired,
     appliedQuery.maxRent ? formatCurrency(Number(appliedQuery.maxRent), locale) : workspaceCopy.toolbar.budgetPlaceholder,
   ].join(" · ");
@@ -309,9 +315,10 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (tenantType) params.set("tenant", tenantType); else params.delete("tenant");
     if (minRent) params.set("minRent", minRent); else params.delete("minRent");
     if (maxRent) params.set("maxRent", maxRent); else params.delete("maxRent");
+    if (privateRoomsOnly) params.set("rental", "private_room"); else params.delete("rental");
     if (bedrooms) params.set("bedrooms", bedrooms); else params.delete("bedrooms");
     window.history.replaceState(window.history.state, "", `/homes?${params.toString()}`);
-  }, [bedrooms, maxRent, minRent, radiusKm, tenantType]);
+  }, [privateRoomsOnly, bedrooms, maxRent, minRent, radiusKm, tenantType]);
 
   const runSearch = useCallback(async (
     searchCenter = center,
@@ -357,6 +364,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       sort_mode: requestedSort,
       preferred_tenant_type: null,
       search_polygon: searchPolygon,
+      private_rooms_only: privateRoomsOnly,
     }).abortSignal(searchController.signal);
 
     if (!isCurrentSearch()) return;
@@ -415,6 +423,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       minRent,
       maxRent,
       tenantType,
+      privateRoomsOnly,
       bedrooms,
       sort: requestedSort,
       areaLabel: areaPoints && areaPoints.length >= 3 ? workspaceCopy.results.customArea : currentAreaLabel,
@@ -433,6 +442,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     setSlowSearch(false);
     setBusy(false);
   }, [
+    privateRoomsOnly,
     bedrooms,
     center,
     copy,
@@ -511,6 +521,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (appliedQuery.minRent) params.set("minRent", appliedQuery.minRent);
     if (appliedQuery.maxRent) params.set("maxRent", appliedQuery.maxRent);
     if (appliedQuery.tenantType) params.set("tenant", appliedQuery.tenantType);
+    if (appliedQuery.privateRoomsOnly) params.set("rental", "private_room");
     if (appliedQuery.bedrooms) params.set("bedrooms", appliedQuery.bedrooms);
     return `/homes?${params.toString()}`;
   }, [appliedQuery, listScroll]);
@@ -670,6 +681,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     cancelActiveSearch();
     setMinRent("");
     setMaxRent("");
+    setPrivateRoomsOnly(false);
     setBedrooms("");
     setRadiusKm("15");
     setCustomArea([]);
@@ -697,6 +709,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
       radius_km: Number(appliedQuery.radiusKm),
       min_rent: appliedQuery.minRent ? Number(appliedQuery.minRent) : null,
       max_rent: appliedQuery.maxRent ? Number(appliedQuery.maxRent) : null,
+      private_rooms_only: appliedQuery.privateRoomsOnly,
       tenant_type: appliedQuery.tenantType,
       min_bedrooms: appliedQuery.bedrooms ? Number(appliedQuery.bedrooms) : null,
     });
@@ -782,6 +795,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
           <details className="renter-more-filters">
             <summary><SlidersHorizontal size={15} aria-hidden="true" />{workspaceCopy.toolbar.moreFilters}</summary>
             <div className="renter-more-filter-grid">
+              <label><input type="checkbox" checked={privateRoomsOnly} onChange={(event) => { cancelActiveSearch(); setPrivateRoomsOnly(event.target.checked); }} /> {privateRoomCopy[locale].filter}</label>
               <label className="field">
                 {workspaceCopy.toolbar.minimumRent}
                 <input inputMode="numeric" value={minRent} onChange={(event) => { cancelActiveSearch(); setMinRent(event.target.value.replace(/\D/g, "")); }} placeholder="10000" />
@@ -954,6 +968,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
                 <div className="mobile-map-sheet-image">{selectedListing.cover_url ? <Image src={selectedListing.cover_url} alt="" fill sizes="118px" /> : <span aria-hidden="true">⌂</span>}</div>
                 <div className="mobile-map-sheet-copy">
                   <TenantBadge types={selectedListing.tenant_types ?? []} preference={activePreference} labels={tenantLabels} />
+                  {selectedListing.property_type === "private_room" && <small>{privateRoomCopy[locale].label}</small>}
                   <h2>{selectedListing.title || copy.rentalProperty}</h2>
                   <p>{selectedListing.address_text || copy.locationOnMap}</p>
                   {tenantCompatibility(selectedListing.tenant_types ?? [], activePreference) === "mismatch" && <small className="tenant-preference-note is-mismatch">{copy.differentRenterPreference}</small>}

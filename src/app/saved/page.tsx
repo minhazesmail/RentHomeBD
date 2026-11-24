@@ -1,3 +1,4 @@
+import { privateRoomCopy } from "@/i18n/private-room-copy";
 import Link from "next/link";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -36,6 +37,7 @@ function searchHref(search: {
   min_rent: number | null;
   max_rent: number | null;
   tenant_type: string | null;
+  private_rooms_only: boolean;
   min_bedrooms: number | null;
 }) {
   const params = new URLSearchParams({ lat: String(search.center_lat), lng: String(search.center_long) });
@@ -44,6 +46,7 @@ function searchHref(search: {
   if (search.max_rent !== null) params.set("maxRent", String(search.max_rent));
   const tenant = savedSearchTenantType(search.tenant_type);
   if (tenant) params.set("tenant", tenant);
+  if (search.private_rooms_only) params.set("rental", "private_room");
   if (search.min_bedrooms !== null) params.set("bedrooms", String(search.min_bedrooms));
   return `/homes?${params.toString()}`;
 }
@@ -107,13 +110,14 @@ function savedSearchFilters(
     min_rent: unknown;
     max_rent: unknown;
     tenant_type: unknown;
+    private_rooms_only: unknown;
     min_bedrooms: unknown;
   },
   copy: SavedCopy,
   locale: Awaited<ReturnType<typeof getLocale>>,
   dictionary: ReturnType<typeof getDictionary>,
 ) {
-  const parts: string[] = [];
+  const parts: string[] = search.private_rooms_only ? [privateRoomCopy[locale].filter] : [];
   const minRent = search.min_rent == null ? null : Number(search.min_rent);
   const maxRent = search.max_rent == null ? null : Number(search.max_rent);
 
@@ -144,7 +148,7 @@ export default async function SavedPage() {
 
   const [{ data: savedRows }, { data: searches }] = await Promise.all([
     supabase.from("saved_properties").select("property_id, created_at").eq("user_id", auth.userId).order("created_at", { ascending: false }),
-    supabase.from("saved_searches").select("id, name, center_lat, center_long, radius_km, min_rent, max_rent, tenant_type, min_bedrooms, updated_at").eq("user_id", auth.userId).order("updated_at", { ascending: false }),
+    supabase.from("saved_searches").select("id, name, center_lat, center_long, radius_km, min_rent, max_rent, tenant_type, min_bedrooms, private_rooms_only, updated_at").eq("user_id", auth.userId).order("updated_at", { ascending: false }),
   ]);
 
   const matchStateEntries = await Promise.all((searches ?? []).map(async (search) => {
@@ -159,6 +163,7 @@ export default async function SavedPage() {
       max_rent: search.max_rent == null ? null : Number(search.max_rent),
       renter_tenant_type: renterTenantType,
       min_bedrooms: search.min_bedrooms == null ? null : Number(search.min_bedrooms),
+      private_rooms_only: search.private_rooms_only,
       changed_since: search.updated_at,
     });
     const row = (data?.[0] ?? null) as SavedSearchMatchRow | null;
@@ -215,7 +220,7 @@ export default async function SavedPage() {
       bedrooms: property.bedrooms == null ? null : Number(property.bedrooms),
       bathrooms: property.bathrooms == null ? null : Number(property.bathrooms),
       sizeSqft: property.size_sqft == null ? null : Number(property.size_sqft),
-      propertyType: propertyLabel(property.property_type, workflow.owner.form) ?? copy.common.notListed,
+      propertyType: property.property_type === "private_room" ? privateRoomCopy[locale].label : propertyLabel(property.property_type, workflow.owner.form) ?? copy.common.notListed,
       furnishing: furnishingLabel(property.furnishing, dictionary),
       renterFit: renterFitByProperty.get(propertyId) ?? [],
       coverUrl: coverUrlByProperty.get(propertyId) ?? null,
@@ -282,6 +287,7 @@ export default async function SavedPage() {
                     min_rent: search.min_rent == null ? null : Number(search.min_rent),
                     max_rent: search.max_rent == null ? null : Number(search.max_rent),
                     tenant_type: normalizeTenantType(search.tenant_type) as TenantType | null,
+                    private_rooms_only: search.private_rooms_only,
                     min_bedrooms: search.min_bedrooms == null ? null : Number(search.min_bedrooms),
                   }}
                 />
