@@ -46,7 +46,7 @@ insert into pg_temp.properties (
   latitude, longitude, status, published_at, last_confirmed_at, expires_at
 )
 values (md5('smart-best')::uuid, md5('smart-owner')::uuid,
-  'Best balanced home', 'Fixture', 'Fixture address', 'private_room', 10000,
+  'Best balanced home', 'Fixture', 'Fixture address', 'apartment', 10000,
   0, 2, 1, 'unfurnished', 'any', current_date,
   23.8163, 90.4125, 'available', now() - interval '2 days', now(), now() + interval '20 days');
 
@@ -54,10 +54,6 @@ insert into pg_temp.property_tenant_types(property_id, tenant_type)
 select id, 'family' from pg_temp.properties;
 
 set local role anon;
-select pg_temp.assert_true(
-  (select count(*) = 1 and bool_and(id = md5('smart-best')::uuid) and min(total_matches) = 1
-   from pg_temp.search_available_properties(23.8103, 90.4125, 10, private_rooms_only => true)),
-  'private rooms must be selected before the distance cap and match count');
 select pg_temp.assert_true(
   (select id = md5('smart-best')::uuid from pg_temp.search_available_properties(
     23.8103, 90.4125, 10, 5000, 35000, 'family', 2::smallint, 'recommended') limit 1),
@@ -96,6 +92,15 @@ select pg_temp.assert_true(
     23.8103, 90.4125, 0.5, 5000, 35000, 'family', null, 'recommended', null,
     '{"type":"Polygon","coordinates":[[[90.40,23.80],[90.43,23.80],[90.43,23.83],[90.40,23.83],[90.40,23.80]]]}'::jsonb) limit 1),
   'polygon searches must rank their full candidate set');
+reset role;
+
+-- The only private bedroom lies beyond the nearest 200 unfiltered matches.
+update pg_temp.properties set property_type = 'private_room', bedrooms = 1 where id = md5('smart-best')::uuid;
+set local role anon;
+select pg_temp.assert_true(
+  (select count(*) = 1 and bool_and(id = md5('smart-best')::uuid) and min(total_matches) = 1
+   from pg_temp.search_available_properties(23.8103, 90.4125, 10, private_rooms_only => true)),
+  'private rooms must be selected before the distance cap and match count');
 reset role;
 
 -- Equal distance and price isolate confirmation freshness, not edit time.

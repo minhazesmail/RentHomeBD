@@ -3,6 +3,10 @@ insert into public.amenities (slug, name) values
   ('attached-balcony', 'Attached balcony')
 on conflict (slug) do nothing;
 
+alter table public.properties
+  add constraint private_room_has_one_bedroom
+  check (property_type is distinct from 'private_room' or bedrooms is not distinct from 1);
+
 alter table public.saved_searches
   add column private_rooms_only boolean not null default false;
 

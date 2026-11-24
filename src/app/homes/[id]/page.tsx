@@ -187,11 +187,11 @@ export default async function PublicPropertyPage({
         <section className="property-detail-hero">
           <div className="property-detail-hero-main">
             <div className="property-detail-hero-kicker">
-              {room && <p>{room.arrangement}</p>}
               {property.property_type && <p className="eyebrow">{room?.label ?? displayValue(property.property_type, copy.values)}</p>}
               <span className="property-detail-availability"><CircleCheck size={13} aria-hidden="true" />{availability}</span>
             </div>
             <h1>{property.title || copy.common.rentalProperty}</h1>
+            {room && <p>{room.arrangement}</p>}
             <p className="property-detail-address"><MapPin size={17} aria-hidden="true" />{property.address_text || copy.common.exactLocationFallback}</p>
           </div>
           <div className="property-detail-price">

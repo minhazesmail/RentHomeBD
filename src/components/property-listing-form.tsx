@@ -284,7 +284,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
     const numericFields = [
       [deposit, copy.invalidDeposit],
       [size, copy.invalidSize],
-      [bedrooms, copy.invalidBedrooms],
+      [propertyType === "private_room" ? "1" : bedrooms, copy.invalidBedrooms],
       [bathrooms, copy.invalidBathrooms],
       [floorNumber, copy.invalidFloor],
       [totalFloors, copy.invalidTotalFloors],
@@ -294,7 +294,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
     if (depositNumber !== null && depositNumber < 0) return copy.depositNonnegative;
     const sizeNumber = optionalNumber(size);
     if (sizeNumber !== null && sizeNumber <= 0) return copy.sizePositive;
-    const bedroomsNumber = optionalNumber(bedrooms);
+    const bedroomsNumber = propertyType === "private_room" ? 1 : optionalNumber(bedrooms);
     if (bedroomsNumber !== null && bedroomsNumber < 0) return copy.bedroomsNonnegative;
     const bathroomsNumber = optionalNumber(bathrooms);
     if (bathroomsNumber !== null && bathroomsNumber < 0) return copy.bathroomsNonnegative;
@@ -439,7 +439,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
         deposit_bdt: optionalNumber(deposit) ?? 0,
         utilities_included: utilities,
         size_sqft: optionalNumber(size),
-        bedrooms: optionalNumber(bedrooms),
+        bedrooms: propertyType === "private_room" ? 1 : optionalNumber(bedrooms),
         bathrooms: optionalNumber(bathrooms),
         floor_number: optionalNumber(floorNumber),
         total_floors: optionalNumber(totalFloors),
@@ -504,7 +504,7 @@ export function PropertyListingForm({ userId, amenities, property, draftId }: Pr
         <div className="section-heading"><span>2</span><div><h2>{copy.detailsTitle}</h2><p>{copy.detailsHint}</p></div></div>
         <div className="form-grid four-col">
           <label className="field">{copy.size}<input inputMode="numeric" value={size} onChange={(e) => setSize(e.target.value)} placeholder="1200" disabled={locked} /></label>
-          <label className="field">{copy.bedrooms}<input inputMode="numeric" value={bedrooms} onChange={(e) => setBedrooms(e.target.value)} placeholder="3" disabled={locked} /></label>
+          <label className="field">{copy.bedrooms}<input inputMode="numeric" value={propertyType === "private_room" ? "1" : bedrooms} onChange={(e) => setBedrooms(e.target.value)} placeholder="3" disabled={locked || propertyType === "private_room"} /></label>
           <label className="field">{copy.bathrooms}<input inputMode="numeric" value={bathrooms} onChange={(e) => setBathrooms(e.target.value)} placeholder="2" disabled={locked} /></label>
           <label className="field">{copy.floor}<input inputMode="numeric" value={floorNumber} onChange={(e) => setFloorNumber(e.target.value)} placeholder="4" disabled={locked} /></label>
           <label className="field">{copy.totalFloors}<input inputMode="numeric" value={totalFloors} onChange={(e) => setTotalFloors(e.target.value)} placeholder="8" disabled={locked} /></label>
