@@ -13,7 +13,7 @@ import { getLandingRedesignCopy } from "@/i18n/landing-redesign-copy";
 import { interpolate, localizeLocationLabel } from "@/i18n/presentation";
 import { useLocale } from "@/i18n/use-locale";
 import { LOCATION_PRESETS, resolveExactLocationPreset } from "@/lib/location-presets";
-import { DEFAULT_RENTER_SEARCH_RADIUS } from "@/lib/search-defaults";
+import { DEFAULT_RENTER_SEARCH_RADIUS, LANDING_ADDITIONAL_BEDROOM_OPTIONS } from "@/lib/search-defaults";
 import type { TenantType } from "@/lib/tenant-match";
 
 type SearchTenantType = Exclude<TenantType, "everyone">;
@@ -214,7 +214,7 @@ export function LandingHeroSearch({ children }: LandingHeroSearchProps) {
                 <select name="bedrooms" value={bedrooms} onChange={(event) => setBedrooms(event.target.value)}>
                   <option value="">{copy.anySize}</option>
                   <option value="1">{copy.bedroomOne}</option>
-                  {[2, 3].map((count) => (
+                  {LANDING_ADDITIONAL_BEDROOM_OPTIONS.map((count) => (
                     <option value={String(count)} key={count}>
                       {interpolate(copy.bedroomMany, { count: formatNumber(count, locale, { useGrouping: false }) })}
                     </option>

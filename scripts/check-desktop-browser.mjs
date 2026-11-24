@@ -44,12 +44,12 @@ try {
     assert.equal(await budget.evaluate(e=>e.checkValidity()),false);
     await budget.fill('30000');
     await page.locator('.landing-search-more summary').click();
-    await page.locator('.landing-search-more select[name=bedrooms]').selectOption('2');
+    await page.locator('.landing-search-more select[name=bedrooms]').selectOption('4');
     await page.locator('.landing-search-more select[name=radius]').selectOption('10');
     await page.locator('.landing-search-submit').click();
     await page.waitForURL('**/homes?**',{timeout:120000});
     const params=new URL(page.url()).searchParams;
-    for(const [key,value] of Object.entries({area:'Banani, Dhaka',tenant:'family',maxRent:'30000',bedrooms:'2',radius:'10'})) assert.equal(params.get(key),value,key);
+    for(const [key,value] of Object.entries({area:'Banani, Dhaka',tenant:'family',maxRent:'30000',bedrooms:'4',radius:'10'})) assert.equal(params.get(key),value,key);
     await page.locator('.renter-map-panel .leaflet-container').waitFor({timeout:60000});
     await page.waitForFunction(()=>!document.querySelector('.renter-toolbar-apply')?.disabled || !document.querySelector('.renter-toolbar-apply')?.textContent?.includes('Searching'),{timeout:60000});
     await noOverflow();

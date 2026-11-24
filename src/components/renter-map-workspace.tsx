@@ -204,6 +204,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const initialAreaLabel = initialLocationPreset ? localizeLocationLabel(initialLocationPreset, dictionary) : workspaceCopy.results.currentArea;
 
   const [listings, setListings] = useState<SearchMapListing[]>([]);
+  const [hasCompletedSearch, setHasCompletedSearch] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(initialSearch.selectedId ?? null);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [mapFocusId, setMapFocusId] = useState<string | null>(null);
@@ -273,7 +274,9 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
   const stableResultCountText = resultsTruncated
     ? formatWorkflowText(copy.showingHomes, { visible: formatNumber(visibleListings.length, locale), total: formatNumber(totalMatches, locale) })
     : formatWorkflowText(visibleListings.length === 1 ? copy.homeCountOne : copy.homeCountMany, { count: formatNumber(visibleListings.length, locale) });
-  const resultCountText = busy && visibleListings.length === 0 ? copy.searching : stableResultCountText;
+  const resultCountText = busy && visibleListings.length === 0 ? copy.searching
+    : !hasCompletedSearch ? (searchError ? workspaceCopy.results.searchUnavailable : workspaceCopy.results.notSearched)
+    : stableResultCountText;
   const currentAreaLabel = locationPreset ? localizeLocationLabel(locationPreset, dictionary) : customAreaActive ? workspaceCopy.results.customArea : workspaceCopy.results.currentArea;
   const searchSummary = [
     appliedQuery.areaLabel,
@@ -418,6 +421,7 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
     if (!isCurrentSearch()) return;
     setSearchError(null);
     setListings(hydrated);
+    setHasCompletedSearch(true);
     setSelectedId((current) => current && hydrated.some((listing) => listing.id === current) ? current : null);
     setAppliedQuery({
       center: searchCenter,
@@ -789,18 +793,24 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
             <input inputMode="numeric" value={maxRent} onChange={(event) => { cancelActiveSearch(); setMaxRent(event.target.value.replace(/\D/g, "")); }} placeholder={workspaceCopy.toolbar.budgetPlaceholder} />
           </label>
 
-          <label className="field renter-toolbar-bedrooms">
-            {workspaceCopy.toolbar.bedrooms}
-            <select value={bedrooms} onChange={(event) => { cancelActiveSearch(); setBedrooms(event.target.value); }}>
-              <option value="">{copy.any}</option>
-              {[1, 2, 3, 4].map((count) => <option value={String(count)} key={count}>{formatNumber(count, locale)}+</option>)}
+          <label className="field renter-toolbar-rental-type">
+            {workspaceCopy.toolbar.rentalType}
+            <select value={privateRoomsOnly ? "private_room" : ""} onChange={(event) => { cancelActiveSearch(); setPrivateRoomsOnly(event.target.value === "private_room"); }}>
+              <option value="">{workspaceCopy.toolbar.anyRental}</option>
+              <option value="private_room">{privateRoomCopy[locale].filter}</option>
             </select>
           </label>
 
           <details className="renter-more-filters">
             <summary><SlidersHorizontal size={15} aria-hidden="true" />{workspaceCopy.toolbar.moreFilters}</summary>
             <div className="renter-more-filter-grid">
-              <label><input type="checkbox" checked={privateRoomsOnly} onChange={(event) => { cancelActiveSearch(); setPrivateRoomsOnly(event.target.checked); }} /> {privateRoomCopy[locale].filter}</label>
+              <label className="field renter-toolbar-bedrooms">
+                {workspaceCopy.toolbar.bedrooms}
+                <select value={bedrooms} onChange={(event) => { cancelActiveSearch(); setBedrooms(event.target.value); }}>
+                  <option value="">{copy.any}</option>
+                  {[1, 2, 3, 4].map((count) => <option value={String(count)} key={count}>{formatNumber(count, locale)}+</option>)}
+                </select>
+              </label>
               <label className="field">
                 {workspaceCopy.toolbar.minimumRent}
                 <input inputMode="numeric" value={minRent} onChange={(event) => { cancelActiveSearch(); setMinRent(event.target.value.replace(/\D/g, "")); }} placeholder="10000" />
@@ -906,11 +916,11 @@ export function RenterMapWorkspace({ userId, initialSearch = {}, preferredTenant
               />
             )}
 
-            {!tenantType ? (
+            {!tenantType || (!hasCompletedSearch && !busy && !searchError) ? (
               <div className="renter-map-intro">
                 <MapPinned size={28} aria-hidden="true" />
-                <strong>{workspaceCopy.toolbar.tenantRequired}</strong>
-                <p>{experienceCopy.tenantHint}</p>
+                <strong>{tenantType ? workspaceCopy.results.notSearched : workspaceCopy.toolbar.tenantRequired}</strong>
+                <p>{tenantType ? workspaceCopy.results.applyToSearch : experienceCopy.tenantHint}</p>
               </div>
             ) : <RenterResultsList
               listings={visibleListings}

@@ -118,20 +118,20 @@ try {
   await entryPage.locator('[data-mobile-search-field="tenant"] select').selectOption("family");
   await entryPage.locator('[data-mobile-search-field="budget"] select').selectOption("25000");
   await entryPage.locator("[data-mobile-more-filters] summary").click();
-  await entryPage.locator('[data-mobile-more-filters] select[name="bedrooms"]').selectOption("2");
+  await entryPage.locator('[data-mobile-more-filters] select[name="bedrooms"]').selectOption("4");
   await entryPage.locator('[data-mobile-more-filters] select[name="radius"]').selectOption("10");
 
   await entryPage.locator('button[data-mobile-popular-area="Banani, Dhaka"]').click();
   const popularHrefValue = await entryPage.locator("[data-mobile-explore-map]").getAttribute("href");
   const popularHref = new URL(popularHrefValue ?? "/homes", baseURL);
-  for (const [key, expected] of [["area", "Banani, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "2"], ["radius", "10"]]) {
+  for (const [key, expected] of [["area", "Banani, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "4"], ["radius", "10"]]) {
     if (popularHref.searchParams.get(key) !== expected) failures.push(`entry-search: popular area action lost ${key}=${expected}`);
   }
 
   await entryPage.locator('button[data-mobile-popular-area="Dhanmondi, Dhaka"]').click();
   const mapHrefValue = await entryPage.locator("[data-mobile-explore-map]").getAttribute("href");
   const mapHref = new URL(mapHrefValue ?? "/homes", baseURL);
-  for (const [key, expected] of [["area", "Dhanmondi, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "2"], ["radius", "10"]]) {
+  for (const [key, expected] of [["area", "Dhanmondi, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "4"], ["radius", "10"]]) {
     if (mapHref.searchParams.get(key) !== expected) failures.push(`entry-search: map CTA lost ${key}=${expected}`);
   }
 
@@ -140,7 +140,7 @@ try {
     entryPage.locator("[data-mobile-entry-search] button[type='submit']").click(),
   ]);
   const submitted = new URL(entryPage.url());
-  for (const [key, expected] of [["area", "Dhanmondi, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "2"], ["radius", "10"]]) {
+  for (const [key, expected] of [["area", "Dhanmondi, Dhaka"], ["tenant", "family"], ["maxRent", "25000"], ["bedrooms", "4"], ["radius", "10"]]) {
     if (submitted.searchParams.get(key) !== expected) failures.push(`entry-search: submitted URL lost ${key}=${expected}`);
   }
   await entryContext.close();

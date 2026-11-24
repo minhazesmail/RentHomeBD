@@ -30,7 +30,8 @@ type LandingFeaturedListing = PropertyRow & {
 };
 
 export type LandingInventory = {
-  availableCount: number;
+  availableCount: number | null;
+  status: "ready" | "unavailable";
   featuredListings: LandingFeaturedListing[];
 };
 
@@ -42,18 +43,22 @@ export const getLandingInventory = cache(async (): Promise<LandingInventory> => 
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   }) as unknown as SupabaseClient;
 
-  const [{ count }, { data: propertyData, error: propertyError }] = await Promise.all([
+  const [{ count, error: countError }, { data: propertyData, error: propertyError }] = await Promise.all([
     supabase.from("properties").select("id", { count: "exact", head: true }).eq("status", "available"),
     supabase.rpc("get_public_landing_inventory", { p_limit: FEATURED_LIMIT }),
   ]);
 
-  if (propertyError) {
-    console.error("Could not load landing inventory", propertyError.message);
-    return { availableCount: count ?? 0, featuredListings: [] };
+  if (countError) console.error("Could not count landing inventory", countError.message);
+  if (propertyError || !Array.isArray(propertyData)) {
+    console.error("Could not load landing inventory", propertyError?.message ?? "Unexpected inventory response");
+    return { availableCount: null, status: "unavailable", featuredListings: [] };
   }
 
-  const properties = (propertyData ?? []) as PropertyRow[];
-  if (!properties.length) return { availableCount: count ?? 0, featuredListings: [] };
+  const properties = propertyData as PropertyRow[];
+  // A failed count or inconsistent snapshot must not be reported as empty.
+  const availableCount = countError || count == null || count < properties.length || (count === 0) !== (properties.length === 0) ? null : count;
+  const status = availableCount === null ? "unavailable" : "ready";
+  if (!properties.length) return { availableCount, status, featuredListings: [] };
 
   const propertyIds = properties.map((property) => property.id);
   const [{ data: tenantData }, { data: mediaData }] = await Promise.all([
@@ -106,5 +111,5 @@ export const getLandingInventory = cache(async (): Promise<LandingInventory> => 
     };
   });
 
-  return { availableCount: count ?? featuredListings.length, featuredListings };
+  return { availableCount, status, featuredListings };
 });

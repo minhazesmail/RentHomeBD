@@ -23,9 +23,10 @@ export async function LandingFeaturedSection() {
   const locale = await getLocale();
   const dictionary = getDictionary(locale);
   const copy = dictionary.landing.featured;
-  const { availableCount, featuredListings } = await getLandingInventory();
-  const count = formatNumber(availableCount, locale, { useGrouping: true });
-  const countText = interpolate(availableCount === 1 ? copy.countOne : copy.countMany, { count });
+  const { availableCount, featuredListings, status } = await getLandingInventory();
+  const inventoryUnavailable = status === "unavailable";
+  const unavailableCopy = locale === "bn" ? "ভাড়ার বাসার তালিকা এখন লোড করা যাচ্ছে না। পরে আবার চেষ্টা করুন।" : "Rental inventory could not load. Please try again.";
+  const countText = availableCount === null ? (featuredListings.length ? (locale === "bn" ? "মোট বাসার সংখ্যা এখন জানা যাচ্ছে না।" : "Total rental count is currently unavailable.") : unavailableCopy) : interpolate(availableCount === 1 ? copy.countOne : copy.countMany, { count: formatNumber(availableCount, locale, { useGrouping: true }) });
   const bedroomText = (value: number) => value === 1
     ? copy.bedroomOne
     : interpolate(copy.bedroomMany, { count: formatNumber(value, locale, { useGrouping: false }) });
@@ -37,7 +38,7 @@ export async function LandingFeaturedSection() {
     <section className="landing-content-section landing-featured" data-scroll-theme="homes" aria-labelledby="featured-heading">
       <div className="landing-section-intro landing-section-intro-row">
         <div><p className="eyebrow">{copy.eyebrow}</p><h2 id="featured-heading">{copy.title}</h2></div>
-        <p>{countText} {availableCount > 0 ? copy.inventoryReal : copy.inventoryEmpty}</p>
+        <p data-landing-inventory-status={status}>{countText}{availableCount !== null && (availableCount > 0 ? ` ${copy.inventoryReal}` : ` ${copy.inventoryEmpty}`)}</p>
       </div>
 
       {featuredListings.length ? (
@@ -68,6 +69,13 @@ export async function LandingFeaturedSection() {
               </article>
             );
           })}
+        </div>
+      ) : inventoryUnavailable ? (
+        <div className="landing-launch-discovery" role="status">
+          <div className="landing-launch-copy">
+            <Link className="primary-button link-button" href="/homes">{copy.exploreLiveMap}</Link>
+            <form action="/" method="get"><button className="secondary-button" type="submit">{locale === "bn" ? "আবার চেষ্টা করুন" : "Try again"}</button></form>
+          </div>
         </div>
       ) : (
         <div className="landing-launch-discovery">
