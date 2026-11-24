@@ -9,7 +9,7 @@ create temporary table property_media (like public.property_media including defa
 do $$
 declare definition text;
 begin
-  select pg_get_functiondef('public.search_available_properties(double precision,double precision,double precision,integer,integer,public.tenant_type,smallint,text,public.tenant_type,jsonb)'::regprocedure)
+  select pg_get_functiondef('public.search_available_properties(double precision,double precision,double precision,integer,integer,public.tenant_type,smallint,text,public.tenant_type,jsonb,boolean)'::regprocedure)
     into definition;
   definition := replace(definition, 'public.search_available_properties', 'pg_temp.search_available_properties');
   definition := replace(definition, 'public.properties', 'pg_temp.properties');
@@ -92,6 +92,15 @@ select pg_temp.assert_true(
     23.8103, 90.4125, 0.5, 5000, 35000, 'family', null, 'recommended', null,
     '{"type":"Polygon","coordinates":[[[90.40,23.80],[90.43,23.80],[90.43,23.83],[90.40,23.83],[90.40,23.80]]]}'::jsonb) limit 1),
   'polygon searches must rank their full candidate set');
+reset role;
+
+-- The only private bedroom lies beyond the nearest 200 unfiltered matches.
+update pg_temp.properties set property_type = 'private_room', bedrooms = 1 where id = md5('smart-best')::uuid;
+set local role anon;
+select pg_temp.assert_true(
+  (select count(*) = 1 and bool_and(id = md5('smart-best')::uuid) and min(total_matches) = 1
+   from pg_temp.search_available_properties(23.8103, 90.4125, 10, private_rooms_only => true)),
+  'private rooms must be selected before the distance cap and match count');
 reset role;
 
 -- Equal distance and price isolate confirmation freshness, not edit time.

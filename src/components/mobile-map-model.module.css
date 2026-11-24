@@ -273,7 +273,7 @@
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-filters="open"] :global(.renter-more-filters > summary) {
-    display: none;
+    display: flex;
   }
 
   .mobileMapModel.mobileMapLayout[data-mobile-filters="open"] :global(.renter-more-filter-grid) {

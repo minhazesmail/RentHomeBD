@@ -24,6 +24,7 @@ export default async function HomesPage({
     maxRent: params.maxRent,
     tenantType: params.tenant,
     bedrooms: params.bedrooms,
+    privateRoomsOnly: params.rental === "private_room",
     selectedId: params.selected,
     sort: params.sort,
     listScroll: params.listScroll,

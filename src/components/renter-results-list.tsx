@@ -1,5 +1,6 @@
 "use client";
 
+import { privateRoomCopy } from "@/i18n/private-room-copy";
 import { Briefcase, CircleCheck, GraduationCap, User, Users } from "lucide-react";
 import { memo, useMemo } from "react";
 
@@ -54,6 +55,7 @@ const RenterResultCard = memo(function RenterResultCard({ listing, selected, pre
   const compatibility = tenantCompatibility(listing.tenant_types ?? [], preference);
   const rent = listing.rent_bdt ? formatCurrency(listing.rent_bdt, locale) : copy.rentOnRequest;
   const facts = [
+    listing.property_type === "private_room" ? privateRoomCopy[locale].label : null,
     listing.bedrooms == null ? null : `${formatNumber(listing.bedrooms, locale)} ${copy.bed}`,
     listing.bathrooms == null ? null : `${formatNumber(listing.bathrooms, locale)} ${copy.bath}`,
   ].filter((value): value is string => Boolean(value));

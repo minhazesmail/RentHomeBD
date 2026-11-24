@@ -1,5 +1,6 @@
 "use client";
 
+import { privateRoomCopy } from "@/i18n/private-room-copy";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -30,6 +31,7 @@ type SavedSearchRecord = {
   min_rent: number | null;
   max_rent: number | null;
   tenant_type: TenantType | null;
+  private_rooms_only: boolean;
   min_bedrooms: number | null;
 };
 
@@ -76,6 +78,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
   const [minRent, setMinRent] = useState(search.min_rent == null ? "" : String(search.min_rent));
   const [maxRent, setMaxRent] = useState(search.max_rent == null ? "" : String(search.max_rent));
   const [tenantType, setTenantType] = useState<SearchTenantType | "">(validSearchTenant(search.tenant_type) ? search.tenant_type : "");
+  const [privateRoomsOnly, setPrivateRoomsOnly] = useState(search.private_rooms_only);
   const [bedrooms, setBedrooms] = useState(search.min_bedrooms == null ? "" : String(search.min_bedrooms));
   const hasNewMatches = (matchState?.newCount ?? 0) > 0;
   const requiresTenantType = !validSearchTenant(search.tenant_type);
@@ -86,6 +89,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
     setMinRent(search.min_rent == null ? "" : String(search.min_rent));
     setMaxRent(search.max_rent == null ? "" : String(search.max_rent));
     setTenantType(validSearchTenant(search.tenant_type) ? search.tenant_type : "");
+    setPrivateRoomsOnly(search.private_rooms_only);
     setBedrooms(search.min_bedrooms == null ? "" : String(search.min_bedrooms));
     setStatus(null);
   }
@@ -115,6 +119,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
     const { error } = await supabase.from("saved_searches").update({
       name: name.trim(), radius_km: Number(radiusKm), min_rent: minRent === "" ? null : Number(minRent),
       max_rent: maxRent === "" ? null : Number(maxRent), tenant_type: tenantType,
+      private_rooms_only: privateRoomsOnly,
       min_bedrooms: bedrooms === "" ? null : Number(bedrooms),
     }).eq("id", search.id).eq("user_id", userId);
     if (error) { setStatus(copy.updateError); setBusyAction(null); return; }
@@ -126,6 +131,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
     const { error } = await supabase.from("saved_searches").insert({
       user_id: userId, name: duplicateName(search.name, copy.savedSearch, copy.copySuffix), center_lat: search.center_lat,
       center_long: search.center_long, radius_km: search.radius_km, min_rent: search.min_rent, max_rent: search.max_rent,
+      private_rooms_only: search.private_rooms_only,
       tenant_type: validSearchTenant(search.tenant_type) ? search.tenant_type : null, min_bedrooms: search.min_bedrooms,
     });
     if (error) { setStatus(error.message.toLowerCase().includes("saved search limit reached") ? copy.limitError : copy.duplicateError); setBusyAction(null); return; }
@@ -168,6 +174,7 @@ export function SavedSearchCard({ search, userId, runHref, displayTitle, display
             <label className="saved-search-edit-field"><span>{copy.minimumRent}</span><input type="number" min="0" max={MAX_RENTER_SEARCH_RENT_BDT} step="500" value={minRent} onChange={(event) => setMinRent(event.target.value)} placeholder={copy.any} /></label>
             <label className="saved-search-edit-field"><span>{copy.maximumRent}</span><input type="number" min="0" max={MAX_RENTER_SEARCH_RENT_BDT} step="500" value={maxRent} onChange={(event) => setMaxRent(event.target.value)} placeholder={copy.any} /></label>
             <label className="saved-search-edit-field"><span>{copy.renterType}</span><select value={tenantType} onChange={(event) => setTenantType(event.target.value as SearchTenantType | "")} required><option value="" disabled>{decisionCopy.chooseTenant}</option>{SEARCH_TENANT_TYPES.map((value) => <option key={value} value={value}>{tenantLabels[value]}</option>)}</select></label>
+            <label><input type="checkbox" checked={privateRoomsOnly} onChange={(event) => setPrivateRoomsOnly(event.target.checked)} /> {privateRoomCopy[locale].filter}</label>
             <label className="saved-search-edit-field"><span>{copy.minimumBedrooms}</span><input type="number" min="0" max={MAX_RENTER_SEARCH_BEDROOMS} step="1" value={bedrooms} onChange={(event) => setBedrooms(event.target.value)} placeholder={copy.any} /></label>
           </div>
           <p className="form-hint">{requiresTenantType ? decisionCopy.requiredTenantHint : copy.editHint}</p>
