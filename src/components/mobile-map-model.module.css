@@ -202,7 +202,7 @@
     transition: height 220ms cubic-bezier(.2,.8,.2,1), max-height 220ms cubic-bezier(.2,.8,.2,1);
   }
 
-  .mobileMapModel.mobileMapLayout[data-mobile-sheet="collapsed"] :global(.renter-results-pane) {
+  .mobileMapModel.mobileMapLayout[data-mobile-view="map"][data-mobile-sheet="collapsed"] :global(.renter-results-pane) {
     overflow: hidden;
     visibility: hidden;
     pointer-events: none;
