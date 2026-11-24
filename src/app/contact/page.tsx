@@ -5,6 +5,12 @@ import { SupportRequestForm } from "@/components/support-request-form";
 import { getInformationCopy } from "@/i18n/information-copy";
 import { getLocale } from "@/i18n/get-locale";
 import type { SupportCategory } from "@/i18n/support-copy";
+import { publicMetadata } from "@/lib/site-metadata";
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams;
+  return publicMetadata("/contact", await getLocale(), Object.keys(params).length === 0);
+}
 
 const SUPPORT_CATEGORIES = new Set<SupportCategory>([
   "account_recovery",

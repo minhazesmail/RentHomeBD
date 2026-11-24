@@ -122,7 +122,7 @@ try {
       assert.match(title, /NearBasha/);
       assert.ok(!titles.has(title), 'duplicate title '+title);
       titles.add(title);
-      assert.equal(await page.locator('link[rel=canonical]').getAttribute('href'),new URL(route,'https://rent-home-bd.vercel.app').href);
+      assert.equal(new URL(await page.locator('link[rel=canonical]').getAttribute('href')).href,new URL(route,'https://rent-home-bd.vercel.app').href);
       assert.ok((await page.locator('meta[name=description]').getAttribute('content')).length>20);
     }
     const robots = await context.request.get(base+'/robots.txt');

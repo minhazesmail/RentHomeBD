@@ -39,7 +39,8 @@ export function publicMetadata(path: PublicPath, locale: Locale, index = true): 
   const canonical = new URL(path, SITE_ORIGIN).href;
   const allowIndex = index && !isPreviewDeployment();
   return {
-    title, description, alternates: { canonical },
+    title: path === "/" ? { absolute: `${title} | NearBasha` } : title,
+    description, alternates: { canonical },
     robots: { index: allowIndex, follow: allowIndex },
     openGraph: { type: "website", siteName: "NearBasha", title: `${title} | NearBasha`, description, url: canonical, locale: locale === "bn" ? "bn_BD" : "en_BD" },
     twitter: { card: "summary", title: `${title} | NearBasha`, description },
