@@ -1,5 +1,18 @@
 import { HomesSearchExperience } from "@/components/homes-search-experience";
 import { resolveLocationPreset } from "@/lib/location-presets";
+import { publicMetadata } from "@/lib/site-metadata";
+import { getLocale } from "@/i18n/get-locale";
+
+type Query = Record<string, string | string[] | undefined>;
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<Query> }) {
+  const params = await searchParams;
+  return publicMetadata("/homes", await getLocale(), Object.keys(params).length === 0);
+}
+
+function first(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
 
 function numberParam(value: string | undefined) {
   if (!value) return undefined;
@@ -10,9 +23,10 @@ function numberParam(value: string | undefined) {
 export default async function HomesPage({
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | undefined>>;
+  searchParams: Promise<Query>;
 }) {
-  const params = await searchParams;
+  const rawParams = await searchParams;
+  const params = Object.fromEntries(Object.entries(rawParams).map(([key, value]) => [key, first(value)]));
   const areaPreset = resolveLocationPreset(params.area);
   const unsupportedArea = Boolean(params.area && !areaPreset && numberParam(params.lat) === undefined && numberParam(params.lng) === undefined);
 
